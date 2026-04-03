@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <!-- Lucide icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-bg: #005e40;
+      --sidebar-width: 64px;
+      --accent: #00d18c;
+      --bg: #111312;
+      --surface: #1a1f1d;
+      --text: #e8f0ed;
+      --text-muted: #7a9e8e;
+      --border: #1f2e28;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Custom title bar */
+    #titlebar {
+      height: 36px;
+      background: #003d2a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      -webkit-app-region: drag;
+      flex-shrink: 0;
+      border-bottom: 1px solid #004d34;
+    }
+
+    #titlebar-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #a0c9b8;
+      letter-spacing: 0.5px;
+    }
+
+    #titlebar-controls {
+      display: flex;
+      gap: 8px;
+      -webkit-app-region: no-drag;
+    }
+
+    .tb-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+
+    #tb-close { background: #ff5f57; }
+    #tb-min   { background: #febc2e; }
+    #tb-max   { background: #28c840; }
+
+    .tb-btn:hover { filter: brightness(1.2); }
+
+    /* Main layout */
+    #app {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .nav-divider {
+      width: 36px;
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+      margin: 8px 0;
+    }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+    }
+
+    .nav-btn.active {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+    }
+
+    .nav-btn.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 3px;
+      height: 24px;
+      background: #fff;
+      border-radius: 0 3px 3px 0;
+    }
+
+    /* Tooltip */
+    .nav-btn[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 54px;
+      background: #1a2e25;
+      color: #fff;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    /* Apps grid section — 4 squares */
+    #apps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 2px 6px;
+    }
+
+    .app-square {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.25);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover .app-square,
+    .nav-btn.active .app-square {
+      background: rgba(255,255,255,0.8);
+    }
+
+    /* Content area */
+    #content {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page {
+      display: none;
+      flex: 1;
+      padding: 32px 36px;
+      overflow-y: auto;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .page.active { display: flex; flex-direction: column; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Page headers */
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .card h3 {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card .sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Planner */
+    .task-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .task-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .task-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-item label {
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .task-item input[type="checkbox"]:checked + label {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(0, 209, 140, 0.15);
+      color: var(--accent);
+    }
+
+    .add-task-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .add-task-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .add-task-row input:focus { border-color: var(--accent); }
+
+    .add-task-row button {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: #003d2a;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Apps page */
+    .apps-page-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 16px;
+    }
+
+    .app-tile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+
+    .app-tile:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .app-tile .app-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .app-tile span {
+      font-size: 13px;
+      color: var(--text);
+      text-align: center;
+    }
+
+    /* Security */
+    .security-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .security-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .security-icon.green { background: rgba(0,209,140,0.15); color: var(--accent); }
+    .security-icon.yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
+    .security-icon.red { background: rgba(255,95,87,0.15); color: #ff5f57; }
+
+    .security-info { flex: 1; }
+    .security-info h4 { font-size: 14px; font-weight: 600; color: var(--text); }
+    .security-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .security-badge {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .badge-green { background: rgba(0,209,140,0.15); color: var(--accent); }
+    .badge-yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
+    .badge-red { background: rgba(255,95,87,0.15); color: #ff5f57; }
+  </style>
+</head>
+<body>
+
+  <!-- Title bar -->
+  <div id="titlebar">
+    <span id="titlebar-title">Dashboard</span>
+    <div id="titlebar-controls">
+      <button class="tb-btn" id="tb-min"   onclick="minWin()"></button>
+      <button class="tb-btn" id="tb-max"   onclick="maxWin()"></button>
+      <button class="tb-btn" id="tb-close" onclick="closeWin()"></button>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <div class="nav-group">
+        <!-- Home -->
+        <button class="nav-btn active" data-page="home" data-tip="Home" onclick="navigate('home', this)">
+          <i data-lucide="house" width="22" height="22"></i>
+        </button>
+
+        <!-- Planner -->
+        <button class="nav-btn" data-page="planner" data-tip="Planner" onclick="navigate('planner', this)">
+          <i data-lucide="file-text" width="22" height="22"></i>
+        </button>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <!-- Apps (4 squares) -->
+      <button class="nav-btn" data-page="apps" data-tip="Apps" onclick="navigate('apps', this)">
+        <div id="apps-grid">
+          <div class="app-square"></div>
+          <div class="app-square"></div>
+          <div class="app-square"></div>
+          <div class="app-square"></div>
+        </div>
+      </button>
+
+      <div class="nav-spacer"></div>
+
+      <!-- Security -->
+      <button class="nav-btn" data-page="security" data-tip="Security" onclick="navigate('security', this)">
+        <i data-lucide="shield" width="22" height="22"></i>
+      </button>
+    </nav>
+
+    <!-- Content -->
+    <div id="content">
+
+      <!-- Home -->
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <h1>Good morning 👋</h1>
+          <p id="home-date">Today is Friday, April 3</p>
+        </div>
+        <div class="card-grid">
+          <div class="card">
+            <h3>Tasks Today</h3>
+            <div class="value" id="tasks-count">0</div>
+            <div class="sub">Open tasks in planner</div>
+          </div>
+          <div class="card">
+            <h3>Apps</h3>
+            <div class="value">4</div>
+            <div class="sub">Installed apps</div>
+          </div>
+          <div class="card">
+            <h3>Security</h3>
+            <div class="value" style="color: #00d18c;">Good</div>
+            <div class="sub">No issues found</div>
+          </div>
+          <div class="card">
+            <h3>Time</h3>
+            <div class="value" id="home-time">--:--</div>
+            <div class="sub" id="home-tz">Local time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Planner -->
+      <div class="page" id="page-planner">
+        <div class="page-header">
+          <h1>Planner</h1>
+          <p>Your tasks for today</p>
+        </div>
+        <div class="add-task-row">
+          <input id="task-input" type="text" placeholder="Add a new task…" onkeydown="if(event.key==='Enter') addTask()" />
+          <button onclick="addTask()">Add</button>
+        </div>
+        <div class="task-list" id="task-list"></div>
+      </div>
+
+      <!-- Apps -->
+      <div class="page" id="page-apps">
+        <div class="page-header">
+          <h1>Apps</h1>
+          <p>Your installed apps</p>
+        </div>
+        <div class="apps-page-grid">
+          <div class="app-tile">
+            <div class="app-icon" style="background:#1a2e25;">📝</div>
+            <span>Notes</span>
+          </div>
+          <div class="app-tile">
+            <div class="app-icon" style="background:#1a1a2e;">♟️</div>
+            <span>Chess</span>
+          </div>
+          <div class="app-tile">
+            <div class="app-icon" style="background:#2e1a1a;">🎹</div>
+            <span>Piano</span>
+          </div>
+          <div class="app-tile">
+            <div class="app-icon" style="background:#2a1a2e;">🇪🇸</div>
+            <span>Spanish</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="page" id="page-security">
+        <div class="page-header">
+          <h1>Security</h1>
+          <p>System security overview</p>
+        </div>
+        <div class="security-item">
+          <div class="security-icon green"><i data-lucide="shield-check" width="20" height="20"></i></div>
+          <div class="security-info">
+            <h4>Firewall</h4>
+            <p>Windows Defender Firewall is active</p>
+          </div>
+          <span class="security-badge badge-green">Active</span>
+        </div>
+        <div class="security-item">
+          <div class="security-icon green"><i data-lucide="lock" width="20" height="20"></i></div>
+          <div class="security-info">
+            <h4>App Permissions</h4>
+            <p>No suspicious permissions detected</p>
+          </div>
+          <span class="security-badge badge-green">Clear</span>
+        </div>
+        <div class="security-item">
+          <div class="security-icon yellow"><i data-lucide="alert-triangle" width="20" height="20"></i></div>
+          <div class="security-info">
+            <h4>System Updates</h4>
+            <p>Check for pending OS updates</p>
+          </div>
+          <span class="security-badge badge-yellow">Check</span>
+        </div>
+        <div class="security-item">
+          <div class="security-icon green"><i data-lucide="eye-off" width="20" height="20"></i></div>
+          <div class="security-info">
+            <h4>Privacy</h4>
+            <p>No data is sent externally by this app</p>
+          </div>
+          <span class="security-badge badge-green">Private</span>
+        </div>
+      </div>
+
+    </div><!-- end #content -->
+  </div><!-- end #app -->
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    const { BrowserWindow } = require('@electron/remote') || {};
+
+    // Title bar controls
+    function closeWin() { require('electron').ipcRenderer.send('window-close'); }
+    function minWin()   { require('electron').ipcRenderer.send('window-min'); }
+    function maxWin()   { require('electron').ipcRenderer.send('window-max'); }
+
+    // Navigation
+    function navigate(page, btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('page-' + page).classList.add('active');
+    }
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const el = document.getElementById('home-time');
+      if (el) el.textContent = h + ':' + m;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Date
+    const dateEl = document.getElementById('home-date');
+    if (dateEl) {
+      const d = new Date();
+      dateEl.textContent = 'Today is ' + d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    // Greeting
+    const h1 = document.querySelector('#page-home h1');
+    const hr = new Date().getHours();
+    if (h1) {
+      if (hr < 12)      h1.textContent = 'Good morning 👋';
+      else if (hr < 17) h1.textContent = 'Good afternoon 👋';
+      else              h1.textContent = 'Good evening 👋';
+    }
+
+    // Planner (localStorage)
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+    function renderTasks() {
+      const list = document.getElementById('task-list');
+      list.innerHTML = '';
+      const open = tasks.filter(t => !t.done).length;
+      const ct = document.getElementById('tasks-count');
+      if (ct) ct.textContent = open;
+
+      tasks.forEach((task, i) => {
+        const id = 'task-' + i;
+        const div = document.createElement('div');
+        div.className = 'task-item';
+        div.innerHTML = `
+          <input type="checkbox" id="${id}" ${task.done ? 'checked' : ''} onchange="toggleTask(${i})"/>
+          <label for="${id}">${escHtml(task.text)}</label>
+          <span class="task-tag">${task.tag || 'Today'}</span>
+          <button onclick="removeTask(${i})" style="background:none;border:none;color:#666;cursor:pointer;font-size:16px;">×</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function addTask() {
+      const input = document.getElementById('task-input');
+      const text = input.value.trim();
+      if (!text) return;
+      tasks.unshift({ text, done: false, tag: 'Today' });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      input.value = '';
+      renderTasks();
+    }
+
+    function toggleTask(i) {
+      tasks[i].done = !tasks[i].done;
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      renderTasks();
+    }
+
+    function removeTask(i) {
+      tasks.splice(i, 1);
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      renderTasks();
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    renderTasks();
+
+    // Init Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
