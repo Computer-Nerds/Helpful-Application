@@ -32,7 +32,6 @@ function RichEditor({ projectId, value, onChange }) {
   const ref = useRef(null);
   const loadedFor = useRef(null);
 
-  // Reload content whenever the project switches
   useEffect(() => {
     if (ref.current && loadedFor.current !== projectId) {
       ref.current.innerHTML = value || "";
@@ -45,10 +44,42 @@ function RichEditor({ projectId, value, onChange }) {
     document.execCommand(cmd, false, val);
   };
 
-  const ToolBtn = ({ label, title, cmd, val }) => (
+  // Insert a real bullet list using innerHTML manipulation as fallback
+  const insertBulletList = (e) => {
+    e.preventDefault();
+    ref.current.focus();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    // Try native first
+    const success = document.execCommand("insertUnorderedList", false, null);
+    if (!success) {
+      // Fallback: insert a UL manually
+      const ul = document.createElement("ul");
+      const li = document.createElement("li");
+      li.innerHTML = "<br>";
+      ul.appendChild(li);
+      range.deleteContents();
+      range.insertNode(ul);
+      range.setStart(li, 0);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    onChange(ref.current.innerHTML);
+  };
+
+  const insertNumberedList = (e) => {
+    e.preventDefault();
+    ref.current.focus();
+    document.execCommand("insertOrderedList", false, null);
+    onChange(ref.current.innerHTML);
+  };
+
+  const ToolBtn = ({ label, title, onMD }) => (
     <button
       title={title || label}
-      onMouseDown={e => { e.preventDefault(); exec(cmd, val); }}
+      onMouseDown={onMD}
       style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 8px", borderRadius: 4, fontSize: 13, fontWeight: 600, minWidth: 28 }}
     >{label}</button>
   );
@@ -59,29 +90,41 @@ function RichEditor({ projectId, value, onChange }) {
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
       {/* Toolbar */}
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2, padding: "6px 12px", background: "#141917", borderBottom: "1px solid #1f2e28", flexShrink: 0 }}>
-        <ToolBtn label="B" title="Bold" cmd="bold" />
-        <ToolBtn label="I" title="Italic" cmd="italic" />
-        <ToolBtn label="U" title="Underline" cmd="underline" />
-        <ToolBtn label="S̶" title="Strikethrough" cmd="strikeThrough" />
+        <ToolBtn label="B" title="Bold" onMD={e => { e.preventDefault(); exec("bold"); }} />
+        <ToolBtn label="I" title="Italic" onMD={e => { e.preventDefault(); exec("italic"); }} />
+        <ToolBtn label="U" title="Underline" onMD={e => { e.preventDefault(); exec("underline"); }} />
+        <ToolBtn label="S̶" title="Strikethrough" onMD={e => { e.preventDefault(); exec("strikeThrough"); }} />
         <Divider />
-        <ToolBtn label="H1" title="Heading 1" cmd="fontSize" val="6" />
-        <ToolBtn label="H2" title="Heading 2" cmd="fontSize" val="4" />
-        <ToolBtn label="H3" title="Heading 3" cmd="fontSize" val="3" />
+        <ToolBtn label="H1" title="Heading 1" onMD={e => { e.preventDefault(); exec("formatBlock", "<h1>"); }} />
+        <ToolBtn label="H2" title="Heading 2" onMD={e => { e.preventDefault(); exec("formatBlock", "<h2>"); }} />
+        <ToolBtn label="H3" title="Heading 3" onMD={e => { e.preventDefault(); exec("formatBlock", "<h3>"); }} />
+        <ToolBtn label="¶" title="Normal text" onMD={e => { e.preventDefault(); exec("formatBlock", "<p>"); }} />
         <Divider />
-        <ToolBtn label="•" title="Bullet list" cmd="insertUnorderedList" />
-        <ToolBtn label="1." title="Numbered list" cmd="insertOrderedList" />
+        <ToolBtn label="•" title="Bullet list" onMD={insertBulletList} />
+        <ToolBtn label="1." title="Numbered list" onMD={insertNumberedList} />
         <Divider />
-        <ToolBtn label="⬅" title="Align left" cmd="justifyLeft" />
-        <ToolBtn label="⬛" title="Align center" cmd="justifyCenter" />
-        <ToolBtn label="➡" title="Align right" cmd="justifyRight" />
+        <ToolBtn label="⬅" title="Align left" onMD={e => { e.preventDefault(); exec("justifyLeft"); }} />
+        <ToolBtn label="⬛" title="Align center" onMD={e => { e.preventDefault(); exec("justifyCenter"); }} />
+        <ToolBtn label="➡" title="Align right" onMD={e => { e.preventDefault(); exec("justifyRight"); }} />
         <Divider />
-        <ToolBtn label="—" title="Horizontal rule" cmd="insertHorizontalRule" />
+        <ToolBtn label="—" title="Horizontal rule" onMD={e => { e.preventDefault(); exec("insertHorizontalRule"); }} />
       </div>
-      {/* Editor */}
+      {/* Editor area with list styles injected */}
+      <style>{`
+        .rich-editor ul { list-style-type: disc; padding-left: 24px; margin: 4px 0; }
+        .rich-editor ol { list-style-type: decimal; padding-left: 24px; margin: 4px 0; }
+        .rich-editor li { margin: 2px 0; }
+        .rich-editor h1 { font-size: 2em; font-weight: 800; margin: 8px 0 4px; color: #e8f0ed; }
+        .rich-editor h2 { font-size: 1.5em; font-weight: 700; margin: 8px 0 4px; color: #e8f0ed; }
+        .rich-editor h3 { font-size: 1.2em; font-weight: 700; margin: 6px 0 4px; color: #e8f0ed; }
+        .rich-editor p  { margin: 4px 0; }
+        .rich-editor hr { border: none; border-top: 1px solid #1f2e28; margin: 12px 0; }
+      `}</style>
       <div
         ref={ref}
         contentEditable
         suppressContentEditableWarning
+        className="rich-editor"
         onInput={() => { if (ref.current) onChange(ref.current.innerHTML); }}
         style={{
           flex: 1, padding: "20px 28px", outline: "none", overflowY: "auto",
@@ -104,13 +147,9 @@ function CalendarView({ events, setEvents }) {
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
   const monthName = new Date(viewYear, viewMonth).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
-  const dateKey = (d) => `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const dateKey = (d) => `${viewYear}-${String(viewMonth + 1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
   const eventsForDate = (d) => events.filter(e => e.date === dateKey(d));
-
-  const openAdd = (d) => {
-    setForm({ title: "", time: "", color: "#00d18c" });
-    setModal({ date: dateKey(d) });
-  };
+  const isToday = (d) => d === now.getDate() && viewMonth === now.getMonth() && viewYear === now.getFullYear();
 
   const saveEvent = () => {
     if (!form.title.trim()) return;
@@ -118,42 +157,30 @@ function CalendarView({ events, setEvents }) {
     setModal(null);
   };
 
-  const deleteEvent = (id, e) => { e.stopPropagation(); setEvents(prev => prev.filter(ev => ev.id !== id)); };
-
-  const isToday = (d) => d === now.getDate() && viewMonth === now.getMonth() && viewYear === now.getFullYear();
-
-  const colors = ["#00d18c", "#4e8ef7", "#f7a94e", "#f74e4e", "#c44ef7", "#4ef7e8"];
+  const colors = ["#00d18c","#4e8ef7","#f7a94e","#f74e4e","#c44ef7","#4ef7e8"];
 
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-  // pad to complete last row
   while (cells.length % 7 !== 0) cells.push(null);
-
   const weeks = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, padding: "20px 24px" }}>
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16, flexShrink: 0 }}>
-        <button onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); } else setViewMonth(m => m - 1); }}
+        <button onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y=>y-1); } else setViewMonth(m=>m-1); }}
           style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#e8f0ed", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 16 }}>‹</button>
         <span style={{ fontSize: 18, fontWeight: 700, flex: 1, textAlign: "center" }}>{monthName}</span>
-        <button onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); } else setViewMonth(m => m + 1); }}
+        <button onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y=>y+1); } else setViewMonth(m=>m+1); }}
           style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#e8f0ed", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 16 }}>›</button>
       </div>
-
-      {/* Grid */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-        {/* Day headers */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 4, flexShrink: 0 }}>
           {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => (
             <div key={d} style={{ textAlign: "center", fontSize: 11, color: "#7a9e8e", fontWeight: 700, padding: "4px 0" }}>{d}</div>
           ))}
         </div>
-
-        {/* Weeks — take up all remaining space */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, minHeight: 0 }}>
           {weeks.map((week, wi) => (
             <div key={wi} style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, flex: 1 }}>
@@ -161,22 +188,18 @@ function CalendarView({ events, setEvents }) {
                 if (!d) return <div key={di} style={{ background: "#0e1512", borderRadius: 8 }} />;
                 const dayEvs = eventsForDate(d);
                 return (
-                  <div key={d} onClick={() => openAdd(d)} style={{
-                    background: isToday(d) ? "rgba(0,209,140,0.1)" : "#1a1f1d",
-                    border: isToday(d) ? "1px solid #00d18c" : "1px solid #1f2e28",
-                    borderRadius: 8, padding: "8px 10px", cursor: "pointer",
-                    display: "flex", flexDirection: "column", overflow: "hidden",
-                  }}>
+                  <div key={d} onClick={() => { setForm({ title:"", time:"", color:"#00d18c" }); setModal({ date: dateKey(d) }); }}
+                    style={{ background: isToday(d) ? "rgba(0,209,140,0.1)" : "#1a1f1d", border: isToday(d) ? "1px solid #00d18c" : "1px solid #1f2e28", borderRadius: 8, padding: "8px 10px", cursor: "pointer", display: "flex", flexDirection: "column", overflow: "hidden" }}>
                     <div style={{ fontSize: 13, fontWeight: isToday(d) ? 800 : 500, color: isToday(d) ? "#00d18c" : "#e8f0ed", marginBottom: 4, flexShrink: 0 }}>{d}</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 3, overflowY: "auto", flex: 1 }}>
                       {dayEvs.map(ev => (
                         <div key={ev.id} onClick={e => e.stopPropagation()}
-                          style={{ display: "flex", alignItems: "center", gap: 4, background: ev.color + "25", borderRadius: 4, padding: "2px 6px" }}>
+                          style={{ display: "flex", alignItems: "center", gap: 4, background: ev.color+"25", borderRadius: 4, padding: "2px 6px" }}>
                           <span style={{ fontSize: 10, color: ev.color, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {ev.time ? `${ev.time} ` : ""}{ev.title}
                           </span>
-                          <button onClick={e => deleteEvent(ev.id, e)}
-                            style={{ background: "none", border: "none", color: ev.color, cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1, flexShrink: 0, opacity: 0.7 }}>✕</button>
+                          <button onClick={e => { e.stopPropagation(); setEvents(prev => prev.filter(x => x.id !== ev.id)); }}
+                            style={{ background: "none", border: "none", color: ev.color, cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1, flexShrink: 0, opacity: 0.8 }}>✕</button>
                         </div>
                       ))}
                     </div>
@@ -187,23 +210,21 @@ function CalendarView({ events, setEvents }) {
           ))}
         </div>
       </div>
-
-      {/* Add Event Modal */}
       {modal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
           <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 28, minWidth: 320, display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ fontSize: 16, fontWeight: 700 }}>Add Event — {modal.date}</div>
-            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="Event title" autoFocus onKeyDown={e => e.key === "Enter" && saveEvent()}
+            <input value={form.title} onChange={e => setForm(f=>({...f,title:e.target.value}))}
+              placeholder="Event title" autoFocus onKeyDown={e => e.key==="Enter" && saveEvent()}
               style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #1f2e28", background: "#111312", color: "#e8f0ed", fontSize: 14, outline: "none" }} />
-            <input value={form.time} onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
+            <input value={form.time} onChange={e => setForm(f=>({...f,time:e.target.value}))}
               placeholder="Time (e.g. 3:00 PM)"
               style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #1f2e28", background: "#111312", color: "#e8f0ed", fontSize: 14, outline: "none" }} />
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ fontSize: 12, color: "#7a9e8e" }}>Color:</span>
               {colors.map(c => (
-                <div key={c} onClick={() => setForm(f => ({ ...f, color: c }))}
-                  style={{ width: 20, height: 20, borderRadius: "50%", background: c, cursor: "pointer", border: form.color === c ? "2px solid #fff" : "2px solid transparent" }} />
+                <div key={c} onClick={() => setForm(f=>({...f,color:c}))}
+                  style={{ width: 20, height: 20, borderRadius: "50%", background: c, cursor: "pointer", border: form.color===c ? "2px solid #fff" : "2px solid transparent" }} />
               ))}
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
@@ -224,11 +245,11 @@ function ProjectView({ project, onUpdate }) {
 
   const getHealth = (p) => {
     const total = p.tasks?.length || 0;
-    if (total === 0) return { label: "No Tasks", color: "#7a9e8e", bg: "rgba(122,158,142,0.15)" };
-    const pct = p.tasks.filter(t => t.done).length / total;
-    if (pct >= 0.7) return { label: "On Track", color: "#00d18c", bg: "rgba(0,209,140,0.15)" };
-    if (pct >= 0.3) return { label: "At Risk", color: "#f7a94e", bg: "rgba(247,169,78,0.15)" };
-    return { label: "Off Track", color: "#f74e4e", bg: "rgba(247,78,78,0.15)" };
+    if (total === 0) return { label: "Pending", color: "#7a9e8e", bg: "rgba(122,158,142,0.15)" };
+    const done = p.tasks.filter(t => t.done).length;
+    if (done === total) return { label: "Finished", color: "#00d18c", bg: "rgba(0,209,140,0.15)" };
+    if (done > 0) return { label: "In Progress", color: "#f7a94e", bg: "rgba(247,169,78,0.15)" };
+    return { label: "Pending", color: "#7a9e8e", bg: "rgba(122,158,142,0.15)" };
   };
 
   const h = getHealth(project);
@@ -246,7 +267,6 @@ function ProjectView({ project, onUpdate }) {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-      {/* Header */}
       <div style={{ padding: "18px 28px 0", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
           <div style={{ fontSize: 20, fontWeight: 800 }}>{project.name}</div>
@@ -272,11 +292,7 @@ function ProjectView({ project, onUpdate }) {
       </div>
 
       {tab === "notes" && (
-        <RichEditor
-          projectId={project.id}
-          value={project.notes || ""}
-          onChange={html => onUpdate({ ...project, notes: html })}
-        />
+        <RichEditor projectId={project.id} value={project.notes || ""} onChange={html => onUpdate({ ...project, notes: html })} />
       )}
 
       {tab === "tasks" && (
@@ -380,11 +396,11 @@ export default function Dashboard() {
 
   const getHealth = (p) => {
     const total = p.tasks?.length || 0;
-    if (total === 0) return { label: "No Tasks", color: "#7a9e8e" };
-    const pct = p.tasks.filter(t => t.done).length / total;
-    if (pct >= 0.7) return { label: "On Track", color: "#00d18c" };
-    if (pct >= 0.3) return { label: "At Risk", color: "#f7a94e" };
-    return { label: "Off Track", color: "#f74e4e" };
+    if (total === 0) return { label: "Pending", color: "#7a9e8e" };
+    const done = p.tasks.filter(t => t.done).length;
+    if (done === total) return { label: "Finished", color: "#00d18c" };
+    if (done > 0) return { label: "In Progress", color: "#f7a94e" };
+    return { label: "Pending", color: "#7a9e8e" };
   };
 
   const createProject = () => {
@@ -398,7 +414,6 @@ export default function Dashboard() {
 
   const updateProject = (updated) => setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
   const deleteProject = (id) => { setProjects(prev => prev.filter(p => p.id !== id)); if (selectedProjectId === id) setSelectedProjectId(null); };
-
   const currentProject = projects.find(p => p.id === selectedProjectId);
 
   const navBtnStyle = (active) => ({
@@ -437,7 +452,6 @@ export default function Dashboard() {
             <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
               <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>{greeting}</div>
               <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>{date}</div>
-
               {projects.length === 0 ? (
                 <div style={{ color: "#4a7060", fontSize: 14 }}>No projects yet. Head to the Planner to create one!</div>
               ) : (
@@ -452,15 +466,15 @@ export default function Dashboard() {
                       <div key={p.id} onClick={() => { setPage("planner"); setPlannerSection("projects"); setSelectedProjectId(p.id); }}
                         style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{p.name}</div>
-                          {total > 0 && (
-                            <div style={{ height: 3, background: "#1f2e28", borderRadius: 2, width: "100%", overflow: "hidden" }}>
+                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: pct !== null ? 6 : 0 }}>{p.name}</div>
+                          {pct !== null && (
+                            <div style={{ height: 3, background: "#1f2e28", borderRadius: 2, overflow: "hidden" }}>
                               <div style={{ height: "100%", width: `${pct}%`, background: h.color, borderRadius: 2 }} />
                             </div>
                           )}
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: h.color + "25", color: h.color }}>{h.label}</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: h.color+"25", color: h.color }}>{h.label}</span>
                           {pct !== null && <span style={{ fontSize: 11, color: "#4a7060" }}>{pct}%</span>}
                         </div>
                       </div>
@@ -474,7 +488,6 @@ export default function Dashboard() {
           {/* ── PLANNER ── */}
           {page === "planner" && (
             <>
-              {/* Planner Sub-sidebar */}
               <div style={{ width: 220, background: "#0e1512", borderRight: "1px solid #1a2e24", display: "flex", flexDirection: "column", flexShrink: 0 }}>
                 <button onClick={() => { setPlannerSection("calendar"); setSelectedProjectId(null); }}
                   style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: plannerSection === "calendar" ? "rgba(0,209,140,0.1)" : "none", border: "none", borderLeft: plannerSection === "calendar" ? "3px solid #00d18c" : "3px solid transparent", color: plannerSection === "calendar" ? "#00d18c" : "#7a9e8e", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
@@ -517,7 +530,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Planner Main Area */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
                 {plannerSection === "calendar" && <CalendarView events={calEvents} setEvents={setCalEvents} />}
                 {plannerSection === "projects" && !currentProject && (
@@ -540,7 +552,7 @@ export default function Dashboard() {
               <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Apps</div>
               <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>Your apps live here</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 16 }}>
-                {[{ icon: "📝", label: "Notes", bg: "#1a2e25" }, { icon: "♟️", label: "Chess", bg: "#1a1a2e" }, { icon: "🎹", label: "Piano", bg: "#2e1a1a" }, { icon: "🇪🇸", label: "Spanish", bg: "#2a1a2e" }].map(app => (
+                {[{ icon: "📝", label: "Notes", bg: "#1a2e25" },{ icon: "♟️", label: "Chess", bg: "#1a1a2e" },{ icon: "🎹", label: "Piano", bg: "#2e1a1a" },{ icon: "🇪🇸", label: "Spanish", bg: "#2a1a2e" }].map(app => (
                   <div key={app.label} style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 16, padding: "24px 16px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
                     <div style={{ width: 48, height: 48, borderRadius: 12, background: app.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{app.icon}</div>
                     <span style={{ fontSize: 13 }}>{app.label}</span>
