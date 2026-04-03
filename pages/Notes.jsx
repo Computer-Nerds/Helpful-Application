@@ -1,292 +1,206 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Note } from "@/api/entities";
+import { useState, useEffect } from "react";
 
-const FONT_SIZES = [10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
-
-export default function Notes() {
-  const [notes, setNotes] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [title, setTitle] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [search, setSearch] = useState("");
-  const [activeFontSize, setActiveFontSize] = useState(16);
-  const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false, underline: false });
-  const editorRef = useRef(null);
-  const saveTimer = useRef(null);
+export default function Dashboard() {
+  const [page, setPage] = useState("home");
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
+  const [greeting, setGreeting] = useState("");
+  const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem("tasks") || "[]"));
+  const [taskInput, setTaskInput] = useState("");
 
   useEffect(() => {
-    loadNotes();
+    const tick = () => {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      setTime(`${h}:${m}`);
+      setDate(now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }));
+      const hr = now.getHours();
+      setGreeting(hr < 12 ? "Good morning 👋" : hr < 17 ? "Good afternoon 👋" : "Good evening 👋");
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
   }, []);
 
-  async function loadNotes() {
-    const data = await Note.list("-updated_date");
-    setNotes(data);
+  function saveTasks(t) {
+    setTasks(t);
+    localStorage.setItem("tasks", JSON.stringify(t));
   }
 
-  function selectNote(note) {
-    setSelected(note);
-    setTitle(note.title || "");
-    setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.innerHTML = note.content || "<p><br></p>";
-      }
-    }, 0);
+  function addTask() {
+    if (!taskInput.trim()) return;
+    saveTasks([{ text: taskInput.trim(), done: false }, ...tasks]);
+    setTaskInput("");
   }
 
-  async function newNote() {
-    const note = await Note.create({ title: "Untitled", content: "<p><br></p>" });
-    await loadNotes();
-    selectNote(note);
-    setTimeout(() => editorRef.current?.focus(), 100);
+  function toggleTask(i) {
+    const t = [...tasks];
+    t[i].done = !t[i].done;
+    saveTasks(t);
   }
 
-  async function saveNote(noteId, noteTitle, content) {
-    setSaving(true);
-    await Note.update(noteId, { title: noteTitle, content });
-    await loadNotes();
-    setSaving(false);
+  function removeTask(i) {
+    saveTasks(tasks.filter((_, idx) => idx !== i));
   }
 
-  function triggerSave() {
-    if (!selected) return;
-    clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      const content = editorRef.current?.innerHTML || "";
-      saveNote(selected.id, title, content);
-    }, 800);
-  }
+  const openCount = tasks.filter(t => !t.done).length;
 
-  async function deleteNote() {
-    if (!selected) return;
-    await Note.delete(selected.id);
-    setSelected(null);
-    await loadNotes();
-  }
+  const sidebarItems = [
+    { id: "home",     icon: "🏠", label: "Home" },
+    { id: "planner",  icon: "📄", label: "Planner" },
+    { id: "apps",     icon: "⊞",  label: "Apps" },
+    { id: "security", icon: "🛡", label: "Security" },
+  ];
 
-  function exec(command, value = null) {
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-    updateActiveFormats();
-    triggerSave();
-  }
-
-  function updateActiveFormats() {
-    setActiveFormats({
-      bold: document.queryCommandState("bold"),
-      italic: document.queryCommandState("italic"),
-      underline: document.queryCommandState("underline"),
-    });
-  }
-
-  function handleFontSize(size) {
-    setActiveFontSize(size);
-    // execCommand fontSize only supports 1-7, so we use a workaround
-    document.execCommand("styleWithCSS", false, true);
-    document.execCommand("fontSize", false, "7");
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const spans = editorRef.current?.querySelectorAll('font[size="7"]');
-      spans?.forEach(span => {
-        span.removeAttribute("size");
-        span.style.fontSize = size + "px";
-      });
-    }
-    editorRef.current?.focus();
-    triggerSave();
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      exec("insertText", "\t");
-    }
-  }
-
-  function filtered() {
-    return notes.filter(n =>
-      (n.title || "").toLowerCase().includes(search.toLowerCase()) ||
-      (n.content || "").replace(/<[^>]+>/g, "").toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
-  function formatDate(dateStr) {
-    if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  }
-
-  function stripHtml(html) {
-    return (html || "").replace(/<[^>]+>/g, "").slice(0, 50);
-  }
-
-  const btnStyle = (active) => ({
-    padding: "5px 10px",
-    borderRadius: 6,
-    border: "1px solid #e0e0e0",
-    background: active ? "#1c1c1e" : "#fff",
-    color: active ? "#fff" : "#333",
-    cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 600,
-    transition: "all 0.15s",
-  });
+  const styles = {
+    root: { display: "flex", height: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#111312", color: "#e8f0ed" },
+    sidebar: { width: 64, background: "#005e40", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0", gap: 4, flexShrink: 0 },
+    navBtn: (active) => ({
+      width: 44, height: 44, borderRadius: 12, border: "none",
+      background: active ? "rgba(255,255,255,0.18)" : "transparent",
+      color: active ? "#fff" : "rgba(255,255,255,0.55)",
+      cursor: "pointer", fontSize: active === "apps" ? 20 : 22,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      position: "relative",
+      borderLeft: active ? "3px solid #fff" : "3px solid transparent",
+      transition: "all 0.15s",
+    }),
+    divider: { width: 36, height: 1, background: "rgba(255,255,255,0.12)", margin: "8px 0" },
+    spacer: { flex: 1 },
+    content: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" },
+    page: { flex: 1, padding: "32px 36px", overflowY: "auto" },
+    pageTitle: { fontSize: 26, fontWeight: 700, marginBottom: 4 },
+    pageSubtitle: { fontSize: 14, color: "#7a9e8e", marginBottom: 28 },
+    card: { background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20, marginBottom: 0 },
+    cardGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 28 },
+    cardLabel: { fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 },
+    cardValue: { fontSize: 28, fontWeight: 700 },
+    cardSub: { fontSize: 12, color: "#7a9e8e", marginTop: 4 },
+  };
 
   return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "'Inter', sans-serif", background: "#f0f0f0" }}>
+    <div style={styles.root}>
       {/* Sidebar */}
-      <div style={{ width: 250, background: "#1c1c1e", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-        <div style={{ padding: "20px 16px 12px" }}>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 12 }}>📝 Docs</div>
-          <input
-            placeholder="Search..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{
-              width: "100%", padding: "7px 10px", borderRadius: 8, border: "none",
-              background: "#2c2c2e", color: "#fff", fontSize: 13, outline: "none", boxSizing: "border-box"
-            }}
-          />
-        </div>
-        <div style={{ flex: 1, overflowY: "auto" }}>
-          {filtered().length === 0 && (
-            <div style={{ color: "#555", fontSize: 13, textAlign: "center", marginTop: 32 }}>No docs yet</div>
-          )}
-          {filtered().map(note => (
-            <div
-              key={note.id}
-              onClick={() => selectNote(note)}
-              style={{
-                padding: "10px 16px",
-                cursor: "pointer",
-                background: selected?.id === note.id ? "#2c2c2e" : "transparent",
-                borderLeft: selected?.id === note.id ? "3px solid #f5a623" : "3px solid transparent",
-              }}
-            >
-              <div style={{ color: "#fff", fontSize: 14, fontWeight: 500, marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {note.title || "Untitled"}
-              </div>
-              <div style={{ color: "#888", fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {stripHtml(note.content) || "No content"}
-              </div>
-              <div style={{ color: "#555", fontSize: 11, marginTop: 3 }}>{formatDate(note.updated_date)}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ padding: "12px 16px", borderTop: "1px solid #2c2c2e" }}>
-          <button onClick={newNote} style={{
-            width: "100%", padding: "10px 0", borderRadius: 8, border: "none",
-            background: "#f5a623", color: "#1c1c1e", fontWeight: 700, fontSize: 14, cursor: "pointer"
-          }}>
-            + New Doc
+      <nav style={styles.sidebar}>
+        {sidebarItems.slice(0, 2).map(item => (
+          <button key={item.id} style={styles.navBtn(page === item.id)} onClick={() => setPage(item.id)} title={item.label}>
+            <span style={{ fontSize: 20 }}>{item.icon}</span>
           </button>
-        </div>
-      </div>
+        ))}
 
-      {/* Editor Area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {selected ? (
-          <>
-            {/* Toolbar */}
-            <div style={{
-              background: "#fff", borderBottom: "1px solid #e0e0e0",
-              padding: "8px 20px", display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap"
-            }}>
-              {/* Font Size */}
-              <select
-                value={activeFontSize}
-                onChange={e => handleFontSize(Number(e.target.value))}
-                style={{
-                  padding: "5px 8px", borderRadius: 6, border: "1px solid #e0e0e0",
-                  fontSize: 13, cursor: "pointer", outline: "none", background: "#fff"
-                }}
-              >
-                {FONT_SIZES.map(s => <option key={s} value={s}>{s}px</option>)}
-              </select>
+        <div style={styles.divider} />
 
-              <div style={{ width: 1, height: 24, background: "#e0e0e0", margin: "0 4px" }} />
+        {/* Apps — 4 squares */}
+        <button style={styles.navBtn(page === "apps")} onClick={() => setPage("apps")} title="Apps">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
+            {[0,1,2,3].map(i => (
+              <div key={i} style={{ width: 9, height: 9, borderRadius: 2, background: page === "apps" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }} />
+            ))}
+          </div>
+        </button>
 
-              {/* Bold */}
-              <button style={btnStyle(activeFormats.bold)} onClick={() => exec("bold")} title="Bold">B</button>
-              {/* Italic */}
-              <button style={{ ...btnStyle(activeFormats.italic), fontStyle: "italic" }} onClick={() => exec("italic")} title="Italic">I</button>
-              {/* Underline */}
-              <button style={{ ...btnStyle(activeFormats.underline), textDecoration: "underline" }} onClick={() => exec("underline")} title="Underline">U</button>
+        <div style={styles.spacer} />
 
-              <div style={{ width: 1, height: 24, background: "#e0e0e0", margin: "0 4px" }} />
+        {/* Security */}
+        <button style={styles.navBtn(page === "security")} onClick={() => setPage("security")} title="Security">
+          <span style={{ fontSize: 20 }}>🛡️</span>
+        </button>
+      </nav>
 
-              {/* Headings */}
-              <button style={btnStyle(false)} onClick={() => exec("formatBlock", "h1")} title="Heading 1">H1</button>
-              <button style={btnStyle(false)} onClick={() => exec("formatBlock", "h2")} title="Heading 2">H2</button>
-              <button style={btnStyle(false)} onClick={() => exec("formatBlock", "p")} title="Paragraph">¶</button>
+      {/* Content */}
+      <div style={styles.content}>
 
-              <div style={{ width: 1, height: 24, background: "#e0e0e0", margin: "0 4px" }} />
-
-              {/* Lists */}
-              <button style={btnStyle(false)} onClick={() => exec("insertUnorderedList")} title="Bullet List">• List</button>
-              <button style={btnStyle(false)} onClick={() => exec("insertOrderedList")} title="Numbered List">1. List</button>
-
-              <div style={{ width: 1, height: 24, background: "#e0e0e0", margin: "0 4px" }} />
-
-              {/* Alignment */}
-              <button style={btnStyle(false)} onClick={() => exec("justifyLeft")} title="Align Left">⬅</button>
-              <button style={btnStyle(false)} onClick={() => exec("justifyCenter")} title="Center">↔</button>
-              <button style={btnStyle(false)} onClick={() => exec("justifyRight")} title="Align Right">➡</button>
-
-              <div style={{ flex: 1 }} />
-              <span style={{ color: "#aaa", fontSize: 12 }}>{saving ? "Saving…" : "Saved ✓"}</span>
-              <button onClick={deleteNote} style={{
-                background: "none", border: "1px solid #e0e0e0", color: "#cc4444",
-                borderRadius: 7, padding: "5px 12px", cursor: "pointer", fontSize: 13
-              }}>Delete</button>
-            </div>
-
-            {/* Title */}
-            <div style={{ background: "#f0f0f0", paddingTop: 40, paddingBottom: 0, display: "flex", justifyContent: "center" }}>
-              <div style={{ width: 816, maxWidth: "100%" }}>
-                <input
-                  value={title}
-                  onChange={e => { setTitle(e.target.value); triggerSave(); }}
-                  placeholder="Untitled document"
-                  style={{
-                    width: "100%", fontSize: 28, fontWeight: 700, border: "none", outline: "none",
-                    background: "transparent", color: "#1c1c1e", padding: "0 60px", boxSizing: "border-box"
-                  }}
-                />
+        {/* HOME */}
+        {page === "home" && (
+          <div style={styles.page}>
+            <div style={styles.pageTitle}>{greeting}</div>
+            <div style={styles.pageSubtitle}>{date}</div>
+            <div style={styles.cardGrid}>
+              <div style={styles.card}>
+                <div style={styles.cardLabel}>Tasks Today</div>
+                <div style={styles.cardValue}>{openCount}</div>
+                <div style={styles.cardSub}>Open tasks in planner</div>
+              </div>
+              <div style={styles.card}>
+                <div style={styles.cardLabel}>Time</div>
+                <div style={styles.cardValue}>{time}</div>
+                <div style={styles.cardSub}>Local time</div>
               </div>
             </div>
-
-            {/* Page */}
-            <div style={{ flex: 1, overflowY: "auto", background: "#f0f0f0", padding: "20px 0 60px" }}>
-              <div style={{ margin: "0 auto", width: 816, maxWidth: "100%", background: "#fff", minHeight: 1056, boxShadow: "0 1px 4px rgba(0,0,0,0.12)", padding: "60px" }}>
-                <div
-                  ref={editorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onInput={triggerSave}
-                  onKeyDown={handleKeyDown}
-                  onKeyUp={updateActiveFormats}
-                  onMouseUp={updateActiveFormats}
-                  style={{
-                    outline: "none", minHeight: 900, fontSize: activeFontSize + "px",
-                    lineHeight: 1.7, color: "#1c1c1e", wordBreak: "break-word"
-                  }}
-                />
-              </div>
-            </div>
-          </>
-        ) : (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#aaa" }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>📄</div>
-            <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, color: "#555" }}>No document open</div>
-            <div style={{ fontSize: 14, marginBottom: 28 }}>Select a doc from the sidebar or start a new one</div>
-            <button onClick={newNote} style={{
-              padding: "12px 28px", borderRadius: 8, border: "none",
-              background: "#f5a623", color: "#1c1c1e", fontWeight: 700, fontSize: 15, cursor: "pointer"
-            }}>
-              + New Doc
-            </button>
           </div>
         )}
+
+        {/* PLANNER */}
+        {page === "planner" && (
+          <div style={styles.page}>
+            <div style={styles.pageTitle}>Planner</div>
+            <div style={styles.pageSubtitle}>Your tasks for today</div>
+            <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+              <input
+                value={taskInput}
+                onChange={e => setTaskInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addTask()}
+                placeholder="Add a new task…"
+                style={{
+                  flex: 1, padding: "10px 14px", borderRadius: 10,
+                  border: "1px solid #1f2e28", background: "#1a1f1d",
+                  color: "#e8f0ed", fontSize: 14, outline: "none"
+                }}
+              />
+              <button onClick={addTask} style={{
+                padding: "10px 18px", borderRadius: 10, border: "none",
+                background: "#00d18c", color: "#003d2a", fontWeight: 700, fontSize: 14, cursor: "pointer"
+              }}>Add</button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {tasks.length === 0 && <div style={{ color: "#7a9e8e", fontSize: 14 }}>No tasks yet — add one above!</div>}
+              {tasks.map((task, i) => (
+                <div key={i} style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 10, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+                  <input type="checkbox" checked={task.done} onChange={() => toggleTask(i)} style={{ width: 18, height: 18, accentColor: "#00d18c", cursor: "pointer", flexShrink: 0 }} />
+                  <span style={{ flex: 1, fontSize: 14, color: task.done ? "#7a9e8e" : "#e8f0ed", textDecoration: task.done ? "line-through" : "none" }}>{task.text}</span>
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, background: "rgba(0,209,140,0.15)", color: "#00d18c" }}>Today</span>
+                  <button onClick={() => removeTask(i)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 18, lineHeight: 1 }}>×</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* APPS */}
+        {page === "apps" && (
+          <div style={styles.page}>
+            <div style={styles.pageTitle}>Apps</div>
+            <div style={styles.pageSubtitle}>Your apps live here</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 16 }}>
+              {[
+                { icon: "📝", label: "Notes",   bg: "#1a2e25" },
+                { icon: "♟️", label: "Chess",   bg: "#1a1a2e" },
+                { icon: "🎹", label: "Piano",   bg: "#2e1a1a" },
+                { icon: "🇪🇸", label: "Spanish", bg: "#2a1a2e" },
+              ].map(app => (
+                <div key={app.label} style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 16, padding: "24px 16px 16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: app.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24 }}>{app.icon}</div>
+                  <span style={{ fontSize: 13 }}>{app.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECURITY */}
+        {page === "security" && (
+          <div style={styles.page}>
+            <div style={styles.pageTitle}>Security</div>
+            <div style={styles.pageSubtitle}>Camera feeds will live here</div>
+            <div style={{ background: "#1a1f1d", border: "2px dashed #1f2e28", borderRadius: 16, padding: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#7a9e8e" }}>
+              <span style={{ fontSize: 48, marginBottom: 16 }}>📷</span>
+              <span style={{ fontSize: 16, fontWeight: 600 }}>Camera feed coming soon</span>
+              <span style={{ fontSize: 13, marginTop: 8 }}>Connect a camera to see a live feed here</span>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
