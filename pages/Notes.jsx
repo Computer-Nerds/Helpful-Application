@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem("tasks") || "[]"));
   const [taskInput, setTaskInput] = useState("");
   const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState([]);
 
   useEffect(() => {
     const tick = () => {
@@ -30,27 +31,49 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchWeather() {
       try {
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`
-        );
-        const data = await res.json();
-        if (data.cod === 200 || data.cod === undefined) {
-          setWeather({
-            temp: Math.round(data.main.temp),
-            feels: Math.round(data.main.feels_like),
-            desc: data.weather[0].description,
-            icon: data.weather[0].id,
-            humidity: data.main.humidity,
-            wind: Math.round(data.wind.speed),
-            city: data.name,
-          });
-        }
+        // Current weather
+        const cur = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
+        const curData = await cur.json();
+        setWeather({
+          temp: Math.round(curData.main.temp),
+          desc: curData.weather[0].description,
+          icon: curData.weather[0].id,
+        });
+
+        // 5-day forecast (3-hour intervals, we group by day)
+        const fore = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
+        const foreData = await fore.json();
+
+        // Group by day
+        const days = {};
+        foreData.list.forEach(item => {
+          const d = new Date(item.dt * 1000);
+          const key = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+          const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+          if (!days[key]) days[key] = { dayName, temps: [], icons: [] };
+          days[key].temps.push(item.main.temp);
+          days[key].icons.push(item.weather[0].id);
+        });
+
+        // Take next 5 days (skip today)
+        const today = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+        const result = Object.entries(days)
+          .filter(([key]) => key !== today)
+          .slice(0, 5)
+          .map(([_, v]) => ({
+            day: v.dayName,
+            low: Math.round(Math.min(...v.temps)),
+            high: Math.round(Math.max(...v.temps)),
+            icon: Math.round(v.icons.reduce((a, b) => a + b, 0) / v.icons.length),
+          }));
+
+        setForecast(result);
       } catch (e) {
         console.error("Weather fetch failed", e);
       }
     }
     fetchWeather();
-    const id = setInterval(fetchWeather, 10 * 60 * 1000); // refresh every 10 min
+    const id = setInterval(fetchWeather, 10 * 60 * 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -68,101 +91,52 @@ export default function Dashboard() {
     return "🌡️";
   }
 
-  function saveTasks(t) {
-    setTasks(t);
-    localStorage.setItem("tasks", JSON.stringify(t));
-  }
-
-  function addTask() {
-    if (!taskInput.trim()) return;
-    saveTasks([{ text: taskInput.trim(), done: false }, ...tasks]);
-    setTaskInput("");
-  }
-
-  function toggleTask(i) {
-    const t = [...tasks];
-    t[i].done = !t[i].done;
-    saveTasks(t);
-  }
-
-  function removeTask(i) {
-    saveTasks(tasks.filter((_, idx) => idx !== i));
-  }
+  function saveTasks(t) { setTasks(t); localStorage.setItem("tasks", JSON.stringify(t)); }
+  function addTask() { if (!taskInput.trim()) return; saveTasks([{ text: taskInput.trim(), done: false }, ...tasks]); setTaskInput(""); }
+  function toggleTask(i) { const t = [...tasks]; t[i].done = !t[i].done; saveTasks(t); }
+  function removeTask(i) { saveTasks(tasks.filter((_, idx) => idx !== i)); }
 
   const openCount = tasks.filter(t => !t.done).length;
 
-  const styles = {
-    root: { display: "flex", flexDirection: "column", height: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#111312", color: "#e8f0ed" },
-    body: { display: "flex", flex: 1, overflow: "hidden" },
-    sidebar: { width: 64, background: "#005e40", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0", gap: 4, flexShrink: 0 },
-    navBtn: (active) => ({
-      width: 44, height: 44, borderRadius: 12, border: "none",
-      background: active ? "rgba(255,255,255,0.18)" : "transparent",
-      color: active ? "#fff" : "rgba(255,255,255,0.55)",
-      cursor: "pointer",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      position: "relative",
-      borderLeft: active ? "3px solid #fff" : "3px solid transparent",
-      transition: "all 0.15s",
-    }),
-    divider: { width: 36, height: 1, background: "rgba(255,255,255,0.12)", margin: "8px 0" },
-    spacer: { flex: 1 },
-    content: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" },
-    page: { flex: 1, padding: "32px 36px", overflowY: "auto" },
-    pageTitle: { fontSize: 26, fontWeight: 700, marginBottom: 4 },
-    pageSubtitle: { fontSize: 14, color: "#7a9e8e", marginBottom: 28 },
-    card: { background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20 },
-    cardGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 28 },
-    cardLabel: { fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 },
-    cardValue: { fontSize: 28, fontWeight: 700 },
-    cardSub: { fontSize: 12, color: "#7a9e8e", marginTop: 4 },
-
-    // Bottom bar
-    bottomBar: {
-      height: 42,
-      background: "#0a0f0d",
-      borderTop: "1px solid #1a2e24",
-      display: "flex",
-      alignItems: "center",
-      padding: "0 20px",
-      gap: 24,
-      flexShrink: 0,
-    },
-    weatherSection: {
-      display: "flex", alignItems: "center", gap: 20, flex: 1,
-    },
-    weatherChip: {
-      display: "flex", alignItems: "center", gap: 6,
-      fontSize: 13, color: "#a0c9b8",
-    },
-    weatherLabel: {
-      fontSize: 11, color: "#4a7060", textTransform: "uppercase", letterSpacing: "0.5px", marginRight: 2,
-    },
-    timeDateSection: {
-      display: "flex", alignItems: "center", gap: 16, flexShrink: 0,
-    },
-    timeText: { fontSize: 14, fontWeight: 700, color: "#e8f0ed", letterSpacing: "1px" },
-    dateText: { fontSize: 12, color: "#7a9e8e" },
-    dot: { width: 4, height: 4, borderRadius: "50%", background: "#1f4033" },
-  };
-
   return (
-    <div style={styles.root}>
-      <div style={styles.body}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#111312", color: "#e8f0ed" }}>
+
+      {/* Top Bar */}
+      <div style={{
+        height: 44, background: "#d8ddd9", display: "flex", alignItems: "center",
+        padding: "0 20px", flexShrink: 0, borderBottom: "1px solid #b0b8b4"
+      }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e25", letterSpacing: "0.3px" }}>Helpful App</span>
+      </div>
+
+      {/* Body */}
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+
         {/* Sidebar */}
-        <nav style={styles.sidebar}>
+        <nav style={{ width: 64, background: "#005e40", display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0", gap: 4, flexShrink: 0 }}>
           {[
             { id: "home",    icon: "🏠", label: "Home" },
             { id: "planner", icon: "📄", label: "Planner" },
           ].map(item => (
-            <button key={item.id} style={styles.navBtn(page === item.id)} onClick={() => setPage(item.id)} title={item.label}>
+            <button key={item.id} onClick={() => setPage(item.id)} title={item.label} style={{
+              width: 44, height: 44, borderRadius: 12, border: "none",
+              background: page === item.id ? "rgba(255,255,255,0.18)" : "transparent",
+              color: page === item.id ? "#fff" : "rgba(255,255,255,0.55)",
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              borderLeft: page === item.id ? "3px solid #fff" : "3px solid transparent", transition: "all 0.15s",
+            }}>
               <span style={{ fontSize: 20 }}>{item.icon}</span>
             </button>
           ))}
 
-          <div style={styles.divider} />
+          <div style={{ width: 36, height: 1, background: "rgba(255,255,255,0.12)", margin: "8px 0" }} />
 
-          <button style={styles.navBtn(page === "apps")} onClick={() => setPage("apps")} title="Apps">
+          <button onClick={() => setPage("apps")} title="Apps" style={{
+            width: 44, height: 44, borderRadius: 12, border: "none",
+            background: page === "apps" ? "rgba(255,255,255,0.18)" : "transparent",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            borderLeft: page === "apps" ? "3px solid #fff" : "3px solid transparent", transition: "all 0.15s",
+          }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
               {[0,1,2,3].map(i => (
                 <div key={i} style={{ width: 9, height: 9, borderRadius: 2, background: page === "apps" ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.4)" }} />
@@ -170,35 +144,42 @@ export default function Dashboard() {
             </div>
           </button>
 
-          <div style={styles.spacer} />
+          <div style={{ flex: 1 }} />
 
-          <button style={styles.navBtn(page === "security")} onClick={() => setPage("security")} title="Security">
+          <button onClick={() => setPage("security")} title="Security" style={{
+            width: 44, height: 44, borderRadius: 12, border: "none",
+            background: page === "security" ? "rgba(255,255,255,0.18)" : "transparent",
+            color: page === "security" ? "#fff" : "rgba(255,255,255,0.55)",
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            borderLeft: page === "security" ? "3px solid #fff" : "3px solid transparent", transition: "all 0.15s",
+          }}>
             <span style={{ fontSize: 20 }}>🛡️</span>
           </button>
         </nav>
 
         {/* Content */}
-        <div style={styles.content}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
           {page === "home" && (
-            <div style={styles.page}>
-              <div style={styles.pageTitle}>{greeting}</div>
-              <div style={styles.pageSubtitle}>{date}</div>
-              <div style={styles.cardGrid}>
-                <div style={styles.card}>
-                  <div style={styles.cardLabel}>Tasks Today</div>
-                  <div style={styles.cardValue}>{openCount}</div>
-                  <div style={styles.cardSub}>Open tasks in planner</div>
+            <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
+              <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>{greeting}</div>
+              <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>{date}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+                <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20 }}>
+                  <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Tasks Today</div>
+                  <div style={{ fontSize: 28, fontWeight: 700 }}>{openCount}</div>
+                  <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 4 }}>Open tasks in planner</div>
                 </div>
-                <div style={styles.card}>
-                  <div style={styles.cardLabel}>Time</div>
-                  <div style={styles.cardValue}>{time}</div>
-                  <div style={styles.cardSub}>Local time</div>
+                <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20 }}>
+                  <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Time</div>
+                  <div style={{ fontSize: 28, fontWeight: 700 }}>{time}</div>
+                  <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 4 }}>Local time</div>
                 </div>
                 {weather && (
-                  <div style={styles.card}>
-                    <div style={styles.cardLabel}>Weather</div>
-                    <div style={styles.cardValue}>{getWeatherEmoji(weather.icon)} {weather.temp}°F</div>
-                    <div style={styles.cardSub} style={{ textTransform: "capitalize" }}>{weather.desc}</div>
+                  <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20 }}>
+                    <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Weather</div>
+                    <div style={{ fontSize: 28, fontWeight: 700 }}>{getWeatherEmoji(weather.icon)} {weather.temp}°F</div>
+                    <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 4, textTransform: "capitalize" }}>{weather.desc}</div>
                   </div>
                 )}
               </div>
@@ -206,17 +187,12 @@ export default function Dashboard() {
           )}
 
           {page === "planner" && (
-            <div style={styles.page}>
-              <div style={styles.pageTitle}>Planner</div>
-              <div style={styles.pageSubtitle}>Your tasks for today</div>
+            <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
+              <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Planner</div>
+              <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>Your tasks for today</div>
               <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-                <input
-                  value={taskInput}
-                  onChange={e => setTaskInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && addTask()}
-                  placeholder="Add a new task…"
-                  style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #1f2e28", background: "#1a1f1d", color: "#e8f0ed", fontSize: 14, outline: "none" }}
-                />
+                <input value={taskInput} onChange={e => setTaskInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addTask()} placeholder="Add a new task…"
+                  style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #1f2e28", background: "#1a1f1d", color: "#e8f0ed", fontSize: 14, outline: "none" }} />
                 <button onClick={addTask} style={{ padding: "10px 18px", borderRadius: 10, border: "none", background: "#00d18c", color: "#003d2a", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Add</button>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -234,9 +210,9 @@ export default function Dashboard() {
           )}
 
           {page === "apps" && (
-            <div style={styles.page}>
-              <div style={styles.pageTitle}>Apps</div>
-              <div style={styles.pageSubtitle}>Your apps live here</div>
+            <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
+              <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Apps</div>
+              <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>Your apps live here</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: 16 }}>
                 {[
                   { icon: "📝", label: "Notes",   bg: "#1a2e25" },
@@ -254,9 +230,9 @@ export default function Dashboard() {
           )}
 
           {page === "security" && (
-            <div style={styles.page}>
-              <div style={styles.pageTitle}>Security</div>
-              <div style={styles.pageSubtitle}>Camera feeds will live here</div>
+            <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
+              <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Security</div>
+              <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>Camera feeds will live here</div>
               <div style={{ background: "#1a1f1d", border: "2px dashed #1f2e28", borderRadius: 16, padding: 60, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#7a9e8e" }}>
                 <span style={{ fontSize: 48, marginBottom: 16 }}>📷</span>
                 <span style={{ fontSize: 16, fontWeight: 600 }}>Camera feed coming soon</span>
@@ -264,52 +240,39 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
         </div>
       </div>
 
-      {/* Bottom Weather Bar */}
-      <div style={styles.bottomBar}>
-        <div style={styles.weatherSection}>
-          {weather ? (
-            <>
-              <div style={styles.weatherChip}>
-                <span style={{ fontSize: 16 }}>{getWeatherEmoji(weather.icon)}</span>
-                <span style={{ fontWeight: 700, color: "#e8f0ed" }}>{weather.temp}°F</span>
-                <span style={{ color: "#7a9e8e", textTransform: "capitalize" }}>{weather.desc}</span>
-              </div>
-              <div style={styles.dot} />
-              <div style={styles.weatherChip}>
-                <span style={styles.weatherLabel}>Feels like</span>
-                <span>{weather.feels}°F</span>
-              </div>
-              <div style={styles.dot} />
-              <div style={styles.weatherChip}>
-                <span style={styles.weatherLabel}>Humidity</span>
-                <span>{weather.humidity}%</span>
-              </div>
-              <div style={styles.dot} />
-              <div style={styles.weatherChip}>
-                <span style={styles.weatherLabel}>Wind</span>
-                <span>{weather.wind} mph</span>
-              </div>
-              <div style={styles.dot} />
-              <div style={styles.weatherChip}>
-                <span style={{ fontSize: 11, color: "#4a7060" }}>📍 {weather.city}</span>
-              </div>
-            </>
-          ) : (
-            <div style={{ fontSize: 12, color: "#4a7060" }}>Loading weather…</div>
-          )}
+      {/* Bottom Bar */}
+      <div style={{
+        height: 52, background: "#0a0f0d", borderTop: "1px solid #1a2e24",
+        display: "flex", alignItems: "center", padding: "0 20px", gap: 0, flexShrink: 0,
+      }}>
+        {/* 5-day forecast */}
+        <div style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
+          {forecast.length === 0 && <span style={{ fontSize: 12, color: "#4a7060" }}>Loading forecast…</span>}
+          {forecast.map((day, i) => (
+            <div key={i} style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "4px 14px", borderRight: i < forecast.length - 1 ? "1px solid #1a2e24" : "none"
+            }}>
+              <span style={{ fontSize: 12, color: "#7a9e8e", fontWeight: 600, minWidth: 28 }}>{day.day}</span>
+              <span style={{ fontSize: 16 }}>{getWeatherEmoji(day.icon)}</span>
+              <span style={{ fontSize: 12, color: "#e8f0ed", fontWeight: 600 }}>{day.high}°</span>
+              <span style={{ fontSize: 12, color: "#4a7060" }}>{day.low}°</span>
+            </div>
+          ))}
         </div>
 
-        {/* Time & Date — bottom right */}
-        <div style={styles.timeDateSection}>
-          <div style={styles.dot} />
-          <div style={styles.dateText}>{date}</div>
-          <div style={styles.dot} />
-          <div style={styles.timeText}>{time}</div>
+        {/* Time & Date right */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <span style={{ fontSize: 12, color: "#7a9e8e" }}>{date}</span>
+          <div style={{ width: 1, height: 16, background: "#1a2e24" }} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#e8f0ed", letterSpacing: "1px" }}>{time}</span>
         </div>
       </div>
+
     </div>
   );
 }
