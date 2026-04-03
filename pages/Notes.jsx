@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem("tasks") || "[]"));
   const [taskInput, setTaskInput] = useState("");
   const [forecast, setForecast] = useState([]);
+  const [today, setToday] = useState(null);
 
   useEffect(() => {
     const tick = () => {
@@ -28,8 +29,20 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    async function fetchForecast() {
+    async function fetchWeather() {
       try {
+        // Current weather
+        const curRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
+        const curData = await curRes.json();
+        setToday({
+          temp: Math.round(curData.main.temp),
+          high: Math.round(curData.main.temp_max),
+          low: Math.round(curData.main.temp_min),
+          icon: curData.weather[0].id,
+          desc: curData.weather[0].description,
+        });
+
+        // 5-day forecast
         const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
         const data = await res.json();
 
@@ -43,32 +56,32 @@ export default function Dashboard() {
           days[key].conditions.push({ id: item.weather[0].id, desc: item.weather[0].description });
         });
 
-        const today = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-
+        const todayKey = new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
         const result = Object.entries(days)
-          .filter(([key]) => key !== today)
+          .filter(([key]) => key !== todayKey)
           .slice(0, 5)
           .map(([_, v]) => {
-            // Pick the most common condition of the day
             const freq = {};
-            v.conditions.forEach(c => { freq[c.id] = (freq[c.id] || { count: 0, desc: c.desc, id: c.id }); freq[c.id].count++; });
+            v.conditions.forEach(c => {
+              if (!freq[c.id]) freq[c.id] = { count: 0, desc: c.desc, id: c.id };
+              freq[c.id].count++;
+            });
             const dominant = Object.values(freq).sort((a, b) => b.count - a.count)[0];
             return {
               day: v.dayName,
               low: Math.round(Math.min(...v.temps)),
               high: Math.round(Math.max(...v.temps)),
               icon: dominant.id,
-              desc: dominant.desc,
             };
           });
 
         setForecast(result);
       } catch (e) {
-        console.error("Forecast fetch failed", e);
+        console.error("Weather fetch failed", e);
       }
     }
-    fetchForecast();
-    const id = setInterval(fetchForecast, 10 * 60 * 1000);
+    fetchWeather();
+    const id = setInterval(fetchWeather, 10 * 60 * 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -120,9 +133,9 @@ export default function Dashboard() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#111312", color: "#e8f0ed" }}>
 
-      {/* Top Bar */}
-      <div style={{ height: 44, background: "#d8ddd9", display: "flex", alignItems: "center", padding: "0 20px", flexShrink: 0, borderBottom: "1px solid #b0b8b4" }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: "#1a2e25", letterSpacing: "0.3px" }}>Helpful App</span>
+      {/* Top Bar — taller */}
+      <div style={{ height: 54, background: "#d8ddd9", display: "flex", alignItems: "center", padding: "0 24px", flexShrink: 0, borderBottom: "1px solid #b0b8b4" }}>
+        <span style={{ fontSize: 16, fontWeight: 700, color: "#1a2e25", letterSpacing: "0.3px" }}>Helpful App</span>
       </div>
 
       {/* Body */}
@@ -135,9 +148,7 @@ export default function Dashboard() {
               <span style={{ fontSize: 20 }}>{item.icon}</span>
             </button>
           ))}
-
           <div style={{ width: 36, height: 1, background: "rgba(255,255,255,0.12)", margin: "8px 0" }} />
-
           <button onClick={() => setPage("apps")} title="Apps" style={navBtnStyle(page === "apps")}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
               {[0,1,2,3].map(i => (
@@ -145,9 +156,7 @@ export default function Dashboard() {
               ))}
             </div>
           </button>
-
           <div style={{ flex: 1 }} />
-
           <button onClick={() => setPage("security")} title="Security" style={navBtnStyle(page === "security")}>
             <span style={{ fontSize: 20 }}>🛡️</span>
           </button>
@@ -228,21 +237,45 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
-      <div style={{ height: 56, background: "#0a0f0d", borderTop: "1px solid #1a2e24", display: "flex", alignItems: "center", padding: "0 20px", flexShrink: 0 }}>
+      {/* Bottom Bar — taller */}
+      <div style={{ height: 68, background: "#0a0f0d", borderTop: "1px solid #1a2e24", display: "flex", alignItems: "center", padding: "0 16px", flexShrink: 0, gap: 0 }}>
+
+        {/* TODAY — highlighted block */}
+        {today && (
+          <div style={{
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            padding: "0 20px 0 12px",
+            borderRight: "1px solid #1a2e24",
+            marginRight: 8,
+            gap: 2,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{
+                fontSize: 10, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase",
+                background: "#00d18c", color: "#003d2a", borderRadius: 4, padding: "1px 6px",
+              }}>Today</span>
+              <span style={{ fontSize: 22 }}>{getWeatherEmoji(today.icon)}</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              <span style={{ fontSize: 20, fontWeight: 800, color: "#e8f0ed" }}>{today.temp}°F</span>
+              <span style={{ fontSize: 11, color: "#7a9e8e" }}>{today.high}° / {today.low}°</span>
+            </div>
+            <div style={{ fontSize: 10, color: "#7a9e8e", textTransform: "capitalize" }}>{getWeatherLabel(today.icon)}</div>
+          </div>
+        )}
 
         {/* 5-day forecast */}
-        <div style={{ display: "flex", alignItems: "center", gap: 0, flex: 1 }}>
-          {forecast.length === 0 && <span style={{ fontSize: 12, color: "#4a7060" }}>Loading forecast…</span>}
+        <div style={{ display: "flex", alignItems: "center", flex: 1, gap: 0 }}>
+          {forecast.length === 0 && <span style={{ fontSize: 12, color: "#4a7060", paddingLeft: 8 }}>Loading forecast…</span>}
           {forecast.map((day, i) => (
             <div key={i} style={{
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              padding: "0 16px", borderRight: i < forecast.length - 1 ? "1px solid #1a2e24" : "none",
+              padding: "0 14px", borderRight: i < forecast.length - 1 ? "1px solid #1a2e24" : "none",
               gap: 1,
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ fontSize: 11, color: "#7a9e8e", fontWeight: 700 }}>{day.day.toUpperCase()}</span>
-                <span style={{ fontSize: 18 }}>{getWeatherEmoji(day.icon)}</span>
+                <span style={{ fontSize: 16 }}>{getWeatherEmoji(day.icon)}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <span style={{ fontSize: 12, color: "#e8f0ed", fontWeight: 600 }}>{day.high}°</span>
@@ -254,10 +287,10 @@ export default function Dashboard() {
         </div>
 
         {/* Time & Date */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0, paddingLeft: 16, borderLeft: "1px solid #1a2e24" }}>
           <span style={{ fontSize: 12, color: "#7a9e8e" }}>{date}</span>
           <div style={{ width: 1, height: 16, background: "#1a2e24" }} />
-          <span style={{ fontSize: 14, fontWeight: 700, color: "#e8f0ed", letterSpacing: "1px" }}>{time}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "#e8f0ed", letterSpacing: "1px" }}>{time}</span>
         </div>
       </div>
 
