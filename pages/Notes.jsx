@@ -27,46 +27,65 @@ const IconShield = ({ active }) => (
   </svg>
 );
 
-// ── Rich Text Editor (Google Docs style) ───────────────────
-function RichEditor({ value, onChange }) {
+// ── Rich Text Editor ───────────────────────────────────────
+function RichEditor({ projectId, value, onChange }) {
   const ref = useRef(null);
-  const lastHTML = useRef(value || "");
+  const loadedFor = useRef(null);
 
+  // Reload content whenever the project switches
   useEffect(() => {
-    if (ref.current && ref.current.innerHTML !== (value || "")) {
+    if (ref.current && loadedFor.current !== projectId) {
       ref.current.innerHTML = value || "";
-      lastHTML.current = value || "";
+      loadedFor.current = projectId;
     }
-  }, []);
+  }, [projectId, value]);
 
-  const exec = (cmd, val = null) => { document.execCommand(cmd, false, val); ref.current.focus(); };
+  const exec = (cmd, val = null) => {
+    ref.current.focus();
+    document.execCommand(cmd, false, val);
+  };
 
-  const toolBtn = (label, cmd, val) => (
-    <button key={label} onMouseDown={e => { e.preventDefault(); exec(cmd, val); }}
-      style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 7px", borderRadius: 4, fontSize: 13, fontWeight: 600 }}>
-      {label}
-    </button>
+  const ToolBtn = ({ label, title, cmd, val }) => (
+    <button
+      title={title || label}
+      onMouseDown={e => { e.preventDefault(); exec(cmd, val); }}
+      style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 8px", borderRadius: 4, fontSize: 13, fontWeight: 600, minWidth: 28 }}
+    >{label}</button>
   );
+
+  const Divider = () => <div style={{ width: 1, height: 18, background: "#1f2e28", margin: "0 4px" }} />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 2, padding: "6px 10px", background: "#141917", borderBottom: "1px solid #1f2e28", flexShrink: 0 }}>
-        {toolBtn("B", "bold")}
-        {toolBtn("I", "italic")}
-        {toolBtn("U", "underline")}
-        {toolBtn("S", "strikeThrough")}
-        {toolBtn("H1", "formatBlock", "h1")}
-        {toolBtn("H2", "formatBlock", "h2")}
-        {toolBtn("• List", "insertUnorderedList")}
-        {toolBtn("1. List", "insertOrderedList")}
-        {toolBtn("——", "insertHorizontalRule")}
+      {/* Toolbar */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2, padding: "6px 12px", background: "#141917", borderBottom: "1px solid #1f2e28", flexShrink: 0 }}>
+        <ToolBtn label="B" title="Bold" cmd="bold" />
+        <ToolBtn label="I" title="Italic" cmd="italic" />
+        <ToolBtn label="U" title="Underline" cmd="underline" />
+        <ToolBtn label="S̶" title="Strikethrough" cmd="strikeThrough" />
+        <Divider />
+        <ToolBtn label="H1" title="Heading 1" cmd="fontSize" val="6" />
+        <ToolBtn label="H2" title="Heading 2" cmd="fontSize" val="4" />
+        <ToolBtn label="H3" title="Heading 3" cmd="fontSize" val="3" />
+        <Divider />
+        <ToolBtn label="•" title="Bullet list" cmd="insertUnorderedList" />
+        <ToolBtn label="1." title="Numbered list" cmd="insertOrderedList" />
+        <Divider />
+        <ToolBtn label="⬅" title="Align left" cmd="justifyLeft" />
+        <ToolBtn label="⬛" title="Align center" cmd="justifyCenter" />
+        <ToolBtn label="➡" title="Align right" cmd="justifyRight" />
+        <Divider />
+        <ToolBtn label="—" title="Horizontal rule" cmd="insertHorizontalRule" />
       </div>
-      <div ref={ref} contentEditable suppressContentEditableWarning
-        onInput={() => { const h = ref.current.innerHTML; if (h !== lastHTML.current) { lastHTML.current = h; onChange(h); } }}
+      {/* Editor */}
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={() => { if (ref.current) onChange(ref.current.innerHTML); }}
         style={{
-          flex: 1, padding: "20px 24px", outline: "none", overflowY: "auto",
-          fontSize: 14, lineHeight: 1.7, color: "#e8f0ed",
-          caretColor: "#00d18c",
+          flex: 1, padding: "20px 28px", outline: "none", overflowY: "auto",
+          fontSize: 14, lineHeight: 1.8, color: "#e8f0ed", caretColor: "#00d18c",
         }}
       />
     </div>
@@ -75,81 +94,98 @@ function RichEditor({ value, onChange }) {
 
 // ── Calendar ───────────────────────────────────────────────
 function CalendarView({ events, setEvents }) {
-  const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [selected, setSelected] = useState(null);
-  const [modal, setModal] = useState(null); // { date, event? }
+  const now = new Date();
+  const [viewYear, setViewYear] = useState(now.getFullYear());
+  const [viewMonth, setViewMonth] = useState(now.getMonth());
+  const [modal, setModal] = useState(null);
   const [form, setForm] = useState({ title: "", time: "", color: "#00d18c" });
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
   const monthName = new Date(viewYear, viewMonth).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
-  const eventsForDate = (d) => {
-    const key = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    return events.filter(e => e.date === key);
-  };
+  const dateKey = (d) => `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const eventsForDate = (d) => events.filter(e => e.date === dateKey(d));
 
   const openAdd = (d) => {
-    const key = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     setForm({ title: "", time: "", color: "#00d18c" });
-    setModal({ type: "add", date: key });
+    setModal({ date: dateKey(d) });
   };
 
   const saveEvent = () => {
     if (!form.title.trim()) return;
-    const ev = { id: Date.now(), date: modal.date, title: form.title.trim(), time: form.time, color: form.color };
-    setEvents(prev => [...prev, ev]);
+    setEvents(prev => [...prev, { id: Date.now(), date: modal.date, title: form.title.trim(), time: form.time, color: form.color }]);
     setModal(null);
   };
 
-  const deleteEvent = (id) => setEvents(prev => prev.filter(e => e.id !== id));
+  const deleteEvent = (id, e) => { e.stopPropagation(); setEvents(prev => prev.filter(ev => ev.id !== id)); };
+
+  const isToday = (d) => d === now.getDate() && viewMonth === now.getMonth() && viewYear === now.getFullYear();
 
   const colors = ["#00d18c", "#4e8ef7", "#f7a94e", "#f74e4e", "#c44ef7", "#4ef7e8"];
 
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  // pad to complete last row
+  while (cells.length % 7 !== 0) cells.push(null);
 
-  const isToday = (d) => d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   return (
-    <div style={{ flex: 1, padding: "24px 28px", overflowY: "auto", display: "flex", flexDirection: "column", gap: 20 }}>
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, padding: "20px 24px" }}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16, flexShrink: 0 }}>
         <button onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); } else setViewMonth(m => m - 1); }}
-          style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#e8f0ed", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 16 }}>‹</button>
+          style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#e8f0ed", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 16 }}>‹</button>
         <span style={{ fontSize: 18, fontWeight: 700, flex: 1, textAlign: "center" }}>{monthName}</span>
         <button onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); } else setViewMonth(m => m + 1); }}
-          style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#e8f0ed", borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 16 }}>›</button>
+          style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#e8f0ed", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 16 }}>›</button>
       </div>
 
-      {/* Day headers */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
-        {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => (
-          <div key={d} style={{ textAlign: "center", fontSize: 11, color: "#7a9e8e", fontWeight: 700, padding: "4px 0" }}>{d}</div>
-        ))}
-        {cells.map((d, i) => {
-          if (!d) return <div key={`e${i}`} />;
-          const dayEvents = eventsForDate(d);
-          return (
-            <div key={d} onClick={() => openAdd(d)}
-              style={{ minHeight: 72, background: isToday(d) ? "rgba(0,209,140,0.12)" : "#1a1f1d", border: isToday(d) ? "1px solid #00d18c" : "1px solid #1f2e28", borderRadius: 8, padding: "6px 8px", cursor: "pointer", position: "relative" }}>
-              <div style={{ fontSize: 12, fontWeight: isToday(d) ? 800 : 500, color: isToday(d) ? "#00d18c" : "#e8f0ed", marginBottom: 4 }}>{d}</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {dayEvents.slice(0, 2).map(ev => (
-                  <div key={ev.id} onClick={e => { e.stopPropagation(); deleteEvent(ev.id); }}
-                    style={{ fontSize: 10, background: ev.color + "30", color: ev.color, borderRadius: 3, padding: "1px 5px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-                    title={`${ev.title}${ev.time ? " · " + ev.time : ""} — click to delete`}>
-                    {ev.time ? `${ev.time} ` : ""}{ev.title}
+      {/* Grid */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        {/* Day headers */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 4, flexShrink: 0 }}>
+          {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => (
+            <div key={d} style={{ textAlign: "center", fontSize: 11, color: "#7a9e8e", fontWeight: 700, padding: "4px 0" }}>{d}</div>
+          ))}
+        </div>
+
+        {/* Weeks — take up all remaining space */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, minHeight: 0 }}>
+          {weeks.map((week, wi) => (
+            <div key={wi} style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, flex: 1 }}>
+              {week.map((d, di) => {
+                if (!d) return <div key={di} style={{ background: "#0e1512", borderRadius: 8 }} />;
+                const dayEvs = eventsForDate(d);
+                return (
+                  <div key={d} onClick={() => openAdd(d)} style={{
+                    background: isToday(d) ? "rgba(0,209,140,0.1)" : "#1a1f1d",
+                    border: isToday(d) ? "1px solid #00d18c" : "1px solid #1f2e28",
+                    borderRadius: 8, padding: "8px 10px", cursor: "pointer",
+                    display: "flex", flexDirection: "column", overflow: "hidden",
+                  }}>
+                    <div style={{ fontSize: 13, fontWeight: isToday(d) ? 800 : 500, color: isToday(d) ? "#00d18c" : "#e8f0ed", marginBottom: 4, flexShrink: 0 }}>{d}</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3, overflowY: "auto", flex: 1 }}>
+                      {dayEvs.map(ev => (
+                        <div key={ev.id} onClick={e => e.stopPropagation()}
+                          style={{ display: "flex", alignItems: "center", gap: 4, background: ev.color + "25", borderRadius: 4, padding: "2px 6px" }}>
+                          <span style={{ fontSize: 10, color: ev.color, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {ev.time ? `${ev.time} ` : ""}{ev.title}
+                          </span>
+                          <button onClick={e => deleteEvent(ev.id, e)}
+                            style={{ background: "none", border: "none", color: ev.color, cursor: "pointer", fontSize: 12, padding: 0, lineHeight: 1, flexShrink: 0, opacity: 0.7 }}>✕</button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-                {dayEvents.length > 2 && <div style={{ fontSize: 10, color: "#7a9e8e" }}>+{dayEvents.length - 2} more</div>}
-              </div>
+                );
+              })}
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
       {/* Add Event Modal */}
@@ -157,10 +193,11 @@ function CalendarView({ events, setEvents }) {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
           <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 28, minWidth: 320, display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ fontSize: 16, fontWeight: 700 }}>Add Event — {modal.date}</div>
-            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Event title"
-              autoFocus onKeyDown={e => e.key === "Enter" && saveEvent()}
+            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              placeholder="Event title" autoFocus onKeyDown={e => e.key === "Enter" && saveEvent()}
               style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #1f2e28", background: "#111312", color: "#e8f0ed", fontSize: 14, outline: "none" }} />
-            <input value={form.time} onChange={e => setForm(f => ({ ...f, time: e.target.value }))} placeholder="Time (e.g. 3:00 PM)" type="text"
+            <input value={form.time} onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
+              placeholder="Time (e.g. 3:00 PM)"
               style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid #1f2e28", background: "#111312", color: "#e8f0ed", fontSize: 14, outline: "none" }} />
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{ fontSize: 12, color: "#7a9e8e" }}>Color:</span>
@@ -185,48 +222,44 @@ function ProjectView({ project, onUpdate }) {
   const [tab, setTab] = useState("notes");
   const [taskInput, setTaskInput] = useState("");
 
-  const health = () => {
-    const total = project.tasks?.length || 0;
+  const getHealth = (p) => {
+    const total = p.tasks?.length || 0;
     if (total === 0) return { label: "No Tasks", color: "#7a9e8e", bg: "rgba(122,158,142,0.15)" };
-    const done = project.tasks.filter(t => t.done).length;
-    const pct = done / total;
+    const pct = p.tasks.filter(t => t.done).length / total;
     if (pct >= 0.7) return { label: "On Track", color: "#00d18c", bg: "rgba(0,209,140,0.15)" };
     if (pct >= 0.3) return { label: "At Risk", color: "#f7a94e", bg: "rgba(247,169,78,0.15)" };
     return { label: "Off Track", color: "#f74e4e", bg: "rgba(247,78,78,0.15)" };
   };
 
-  const h = health();
+  const h = getHealth(project);
+  const total = project.tasks?.length || 0;
+  const done = project.tasks?.filter(t => t.done).length || 0;
+  const donePct = total ? Math.round((done / total) * 100) : 0;
 
   const addTask = () => {
     if (!taskInput.trim()) return;
     onUpdate({ ...project, tasks: [...(project.tasks || []), { id: Date.now(), text: taskInput.trim(), done: false }] });
     setTaskInput("");
   };
-
   const toggleTask = (id) => onUpdate({ ...project, tasks: project.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) });
   const removeTask = (id) => onUpdate({ ...project, tasks: project.tasks.filter(t => t.id !== id) });
 
-  const donePct = project.tasks?.length ? Math.round((project.tasks.filter(t => t.done).length / project.tasks.length) * 100) : 0;
-
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-      {/* Project Header */}
-      <div style={{ padding: "20px 28px 0", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-          <div style={{ fontSize: 22, fontWeight: 800 }}>{project.name}</div>
+      {/* Header */}
+      <div style={{ padding: "18px 28px 0", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+          <div style={{ fontSize: 20, fontWeight: 800 }}>{project.name}</div>
           <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: h.bg, color: h.color }}>{h.label}</span>
-          {project.tasks?.length > 0 && (
-            <span style={{ fontSize: 11, color: "#7a9e8e", marginLeft: "auto" }}>{donePct}% complete</span>
-          )}
+          {total > 0 && <span style={{ fontSize: 11, color: "#7a9e8e", marginLeft: "auto" }}>{donePct}% complete</span>}
         </div>
-        {project.tasks?.length > 0 && (
-          <div style={{ height: 4, background: "#1f2e28", borderRadius: 2, marginBottom: 16, overflow: "hidden" }}>
+        {total > 0 && (
+          <div style={{ height: 4, background: "#1f2e28", borderRadius: 2, marginBottom: 12, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${donePct}%`, background: h.color, borderRadius: 2, transition: "width 0.3s" }} />
           </div>
         )}
-        {/* Tabs */}
         <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #1f2e28" }}>
-          {["notes", "tasks"].map(t => (
+          {["notes","tasks"].map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               padding: "8px 20px", background: "none", border: "none", cursor: "pointer",
               fontSize: 13, fontWeight: 600, textTransform: "capitalize",
@@ -238,9 +271,9 @@ function ProjectView({ project, onUpdate }) {
         </div>
       </div>
 
-      {/* Tab Content */}
       {tab === "notes" && (
         <RichEditor
+          projectId={project.id}
           value={project.notes || ""}
           onChange={html => onUpdate({ ...project, notes: html })}
         />
@@ -249,8 +282,8 @@ function ProjectView({ project, onUpdate }) {
       {tab === "tasks" && (
         <div style={{ flex: 1, padding: "20px 28px", overflowY: "auto" }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-            <input value={taskInput} onChange={e => setTaskInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addTask()}
-              placeholder="Add a task…"
+            <input value={taskInput} onChange={e => setTaskInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && addTask()} placeholder="Add a task…"
               style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: "1px solid #1f2e28", background: "#141917", color: "#e8f0ed", fontSize: 14, outline: "none" }} />
             <button onClick={addTask} style={{ padding: "10px 18px", borderRadius: 10, border: "none", background: "#00d18c", color: "#003d2a", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Add</button>
           </div>
@@ -260,7 +293,7 @@ function ProjectView({ project, onUpdate }) {
               <div key={task.id} style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
                 <input type="checkbox" checked={task.done} onChange={() => toggleTask(task.id)} style={{ width: 17, height: 17, accentColor: "#00d18c", cursor: "pointer", flexShrink: 0 }} />
                 <span style={{ flex: 1, fontSize: 14, color: task.done ? "#7a9e8e" : "#e8f0ed", textDecoration: task.done ? "line-through" : "none" }}>{task.text}</span>
-                <button onClick={() => removeTask(task.id)} style={{ background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: 18 }}>×</button>
+                <button onClick={() => removeTask(task.id)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 18 }}>×</button>
               </div>
             ))}
           </div>
@@ -273,16 +306,15 @@ function ProjectView({ project, onUpdate }) {
 // ── Main Dashboard ─────────────────────────────────────────
 export default function Dashboard() {
   const [page, setPage] = useState("home");
-  const [plannerSection, setPlannerSection] = useState("projects"); // projects | calendar
+  const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
   const [date, setDate] = useState("");
   const [greeting, setGreeting] = useState("");
   const [forecast, setForecast] = useState([]);
-  const [today, setToday] = useState(null);
+  const [todayWeather, setTodayWeather] = useState(null);
 
-  // Planner state
   const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem("projects") || "[]"));
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [newProjectName, setNewProjectName] = useState("");
   const [showNewProject, setShowNewProject] = useState(false);
   const [calEvents, setCalEvents] = useState(() => JSON.parse(localStorage.getItem("calEvents") || "[]"));
@@ -292,10 +324,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     const tick = () => {
-      const now = new Date();
-      setTime(`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`);
-      setDate(now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }));
-      const hr = now.getHours();
+      const n = new Date();
+      setTime(`${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`);
+      setDate(n.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }));
+      const hr = n.getHours();
       setGreeting(hr < 12 ? "Good morning 👋" : hr < 17 ? "Good afternoon 👋" : "Good evening 👋");
     };
     tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
@@ -304,13 +336,13 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchWeather() {
       try {
-        const curRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
-        const curData = await curRes.json();
-        setToday({ temp: Math.round(curData.main.temp), high: Math.round(curData.main.temp_max), low: Math.round(curData.main.temp_min), icon: curData.weather[0].id });
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
-        const data = await res.json();
+        const c = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
+        const cd = await c.json();
+        setTodayWeather({ temp: Math.round(cd.main.temp), high: Math.round(cd.main.temp_max), low: Math.round(cd.main.temp_min), icon: cd.weather[0].id });
+        const f = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
+        const fd = await f.json();
         const days = {};
-        data.list.forEach(item => {
+        fd.list.forEach(item => {
           const d = new Date(item.dt * 1000);
           const key = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
           if (!days[key]) days[key] = { dayName: d.toLocaleDateString("en-US", { weekday: "short" }), temps: [], conditions: [] };
@@ -329,50 +361,52 @@ export default function Dashboard() {
     fetchWeather(); const id = setInterval(fetchWeather, 600000); return () => clearInterval(id);
   }, []);
 
-  function getWeatherEmoji(id) {
+  const getWeatherEmoji = (id) => {
     if (!id) return "🌡️";
     if (id >= 200 && id < 300) return "⛈️"; if (id >= 300 && id < 400) return "🌦️";
     if (id >= 500 && id < 600) return "🌧️"; if (id >= 600 && id < 700) return "❄️";
     if (id >= 700 && id < 800) return "🌫️"; if (id === 800) return "☀️";
     if (id === 801) return "🌤️"; if (id === 802) return "⛅";
     if (id === 803) return "🌥️"; if (id >= 804) return "☁️"; return "🌡️";
-  }
-  function getWeatherLabel(id) {
+  };
+  const getWeatherLabel = (id) => {
     if (!id) return "";
     if (id >= 200 && id < 300) return "Thunderstorm"; if (id >= 300 && id < 400) return "Drizzle";
     if (id >= 500 && id < 600) return "Rain"; if (id >= 600 && id < 700) return "Snow";
     if (id >= 700 && id < 800) return "Foggy"; if (id === 800) return "Sunny";
     if (id === 801) return "Mostly Sunny"; if (id === 802) return "Partly Cloudy";
     if (id === 803) return "Mostly Cloudy"; if (id >= 804) return "Overcast"; return "";
-  }
+  };
+
+  const getHealth = (p) => {
+    const total = p.tasks?.length || 0;
+    if (total === 0) return { label: "No Tasks", color: "#7a9e8e" };
+    const pct = p.tasks.filter(t => t.done).length / total;
+    if (pct >= 0.7) return { label: "On Track", color: "#00d18c" };
+    if (pct >= 0.3) return { label: "At Risk", color: "#f7a94e" };
+    return { label: "Off Track", color: "#f74e4e" };
+  };
 
   const createProject = () => {
     if (!newProjectName.trim()) return;
     const p = { id: Date.now(), name: newProjectName.trim(), notes: "", tasks: [] };
     setProjects(prev => [...prev, p]);
-    setSelectedProject(p.id);
+    setSelectedProjectId(p.id);
+    setPlannerSection("projects");
     setNewProjectName(""); setShowNewProject(false);
   };
 
-  const updateProject = (updated) => {
-    setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
-    setSelectedProject(updated.id);
-  };
+  const updateProject = (updated) => setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+  const deleteProject = (id) => { setProjects(prev => prev.filter(p => p.id !== id)); if (selectedProjectId === id) setSelectedProjectId(null); };
 
-  const deleteProject = (id) => {
-    setProjects(prev => prev.filter(p => p.id !== id));
-    if (selectedProject === id) setSelectedProject(null);
-  };
+  const currentProject = projects.find(p => p.id === selectedProjectId);
 
-  const openCount = projects.reduce((acc, p) => acc + (p.tasks?.filter(t => !t.done).length || 0), 0);
   const navBtnStyle = (active) => ({
     width: 44, height: 44, borderRadius: 12, border: "none",
     background: active ? "rgba(255,255,255,0.18)" : "transparent",
     cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
     borderLeft: active ? "3px solid #fff" : "3px solid transparent", transition: "all 0.15s",
   });
-
-  const currentProject = projects.find(p => p.id === selectedProject);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#111312", color: "#e8f0ed", overflow: "hidden" }}>
@@ -403,18 +437,37 @@ export default function Dashboard() {
             <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
               <div style={{ fontSize: 26, fontWeight: 700, marginBottom: 4 }}>{greeting}</div>
               <div style={{ fontSize: 14, color: "#7a9e8e", marginBottom: 28 }}>{date}</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
-                <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20 }}>
-                  <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Open Tasks</div>
-                  <div style={{ fontSize: 28, fontWeight: 700 }}>{openCount}</div>
-                  <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 4 }}>Across all projects</div>
+
+              {projects.length === 0 ? (
+                <div style={{ color: "#4a7060", fontSize: 14 }}>No projects yet. Head to the Planner to create one!</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 520 }}>
+                  <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4, fontWeight: 700 }}>Projects</div>
+                  {projects.map(p => {
+                    const h = getHealth(p);
+                    const total = p.tasks?.length || 0;
+                    const done = p.tasks?.filter(t => t.done).length || 0;
+                    const pct = total ? Math.round((done / total) * 100) : null;
+                    return (
+                      <div key={p.id} onClick={() => { setPage("planner"); setPlannerSection("projects"); setSelectedProjectId(p.id); }}
+                        style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2 }}>{p.name}</div>
+                          {total > 0 && (
+                            <div style={{ height: 3, background: "#1f2e28", borderRadius: 2, width: "100%", overflow: "hidden" }}>
+                              <div style={{ height: "100%", width: `${pct}%`, background: h.color, borderRadius: 2 }} />
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: h.color + "25", color: h.color }}>{h.label}</span>
+                          {pct !== null && <span style={{ fontSize: 11, color: "#4a7060" }}>{pct}%</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20 }}>
-                  <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>Projects</div>
-                  <div style={{ fontSize: 28, fontWeight: 700 }}>{projects.length}</div>
-                  <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 4 }}>Active projects</div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -423,20 +476,15 @@ export default function Dashboard() {
             <>
               {/* Planner Sub-sidebar */}
               <div style={{ width: 220, background: "#0e1512", borderRight: "1px solid #1a2e24", display: "flex", flexDirection: "column", flexShrink: 0 }}>
-                {/* Calendar link */}
-                <button onClick={() => { setPlannerSection("calendar"); setSelectedProject(null); }}
+                <button onClick={() => { setPlannerSection("calendar"); setSelectedProjectId(null); }}
                   style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: plannerSection === "calendar" ? "rgba(0,209,140,0.1)" : "none", border: "none", borderLeft: plannerSection === "calendar" ? "3px solid #00d18c" : "3px solid transparent", color: plannerSection === "calendar" ? "#00d18c" : "#7a9e8e", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
                   📅 Calendar
                 </button>
-
                 <div style={{ height: 1, background: "#1a2e24", margin: "4px 0" }} />
-
-                {/* Projects section */}
                 <div style={{ padding: "10px 16px 6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 11, color: "#4a7060", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 700 }}>Projects</span>
-                  <button onClick={() => setShowNewProject(true)} style={{ background: "none", border: "none", color: "#00d18c", cursor: "pointer", fontSize: 20, lineHeight: 1, padding: 0 }} title="New project">+</button>
+                  <button onClick={() => setShowNewProject(true)} style={{ background: "none", border: "none", color: "#00d18c", cursor: "pointer", fontSize: 20, lineHeight: 1, padding: 0 }}>+</button>
                 </div>
-
                 {showNewProject && (
                   <div style={{ padding: "0 10px 10px" }}>
                     <input autoFocus value={newProjectName} onChange={e => setNewProjectName(e.target.value)}
@@ -445,25 +493,24 @@ export default function Dashboard() {
                       style={{ width: "100%", padding: "7px 10px", borderRadius: 8, border: "1px solid #1f2e28", background: "#141917", color: "#e8f0ed", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
                 )}
-
                 <div style={{ flex: 1, overflowY: "auto" }}>
                   {projects.length === 0 && !showNewProject && (
                     <div style={{ padding: "8px 16px", fontSize: 12, color: "#4a7060" }}>No projects yet. Hit + to create one.</div>
                   )}
                   {projects.map(p => {
+                    const h = getHealth(p);
                     const total = p.tasks?.length || 0;
                     const done = p.tasks?.filter(t => t.done).length || 0;
                     const pct = total ? Math.round((done / total) * 100) : null;
-                    const healthColor = total === 0 ? "#7a9e8e" : pct >= 70 ? "#00d18c" : pct >= 30 ? "#f7a94e" : "#f74e4e";
-                    const isActive = selectedProject === p.id && plannerSection === "projects";
+                    const isActive = selectedProjectId === p.id && plannerSection === "projects";
                     return (
-                      <div key={p.id} onClick={() => { setSelectedProject(p.id); setPlannerSection("projects"); }}
-                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", cursor: "pointer", background: isActive ? "rgba(0,209,140,0.1)" : "none", borderLeft: isActive ? "3px solid #00d18c" : "3px solid transparent", transition: "all 0.1s" }}>
-                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: healthColor, flexShrink: 0 }} />
+                      <div key={p.id} onClick={() => { setSelectedProjectId(p.id); setPlannerSection("projects"); }}
+                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", cursor: "pointer", background: isActive ? "rgba(0,209,140,0.1)" : "none", borderLeft: isActive ? "3px solid #00d18c" : "3px solid transparent" }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: h.color, flexShrink: 0 }} />
                         <span style={{ flex: 1, fontSize: 13, color: isActive ? "#e8f0ed" : "#a0c9b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
                         {pct !== null && <span style={{ fontSize: 10, color: "#4a7060" }}>{pct}%</span>}
                         <button onClick={e => { e.stopPropagation(); deleteProject(p.id); }}
-                          style={{ background: "none", border: "none", color: "#333", cursor: "pointer", fontSize: 15, padding: 0, flexShrink: 0 }}>×</button>
+                          style={{ background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: 15, padding: 0, flexShrink: 0 }}>×</button>
                       </div>
                     );
                   })}
@@ -472,9 +519,7 @@ export default function Dashboard() {
 
               {/* Planner Main Area */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-                {plannerSection === "calendar" && (
-                  <CalendarView events={calEvents} setEvents={setCalEvents} />
-                )}
+                {plannerSection === "calendar" && <CalendarView events={calEvents} setEvents={setCalEvents} />}
                 {plannerSection === "projects" && !currentProject && (
                   <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#4a7060", gap: 12 }}>
                     <span style={{ fontSize: 40 }}>📁</span>
@@ -483,7 +528,7 @@ export default function Dashboard() {
                   </div>
                 )}
                 {plannerSection === "projects" && currentProject && (
-                  <ProjectView project={currentProject} onUpdate={updateProject} />
+                  <ProjectView key={currentProject.id} project={currentProject} onUpdate={updateProject} />
                 )}
               </div>
             </>
@@ -522,17 +567,17 @@ export default function Dashboard() {
 
       {/* Bottom Bar */}
       <div style={{ height: 68, minHeight: 68, background: "#0a0f0d", borderTop: "1px solid #1a2e24", display: "flex", alignItems: "center", padding: "0 16px", flexShrink: 0 }}>
-        {today && (
+        {todayWeather && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 20px 0 8px", borderRight: "1px solid #1a2e24", marginRight: 8, gap: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase", background: "#00d18c", color: "#003d2a", borderRadius: 4, padding: "1px 6px" }}>Today</span>
-              <span style={{ fontSize: 22 }}>{getWeatherEmoji(today.icon)}</span>
+              <span style={{ fontSize: 22 }}>{getWeatherEmoji(todayWeather.icon)}</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-              <span style={{ fontSize: 20, fontWeight: 800, color: "#e8f0ed" }}>{today.temp}°F</span>
-              <span style={{ fontSize: 11, color: "#7a9e8e" }}>{today.high}° / {today.low}°</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: "#e8f0ed" }}>{todayWeather.temp}°F</span>
+              <span style={{ fontSize: 11, color: "#7a9e8e" }}>{todayWeather.high}° / {todayWeather.low}°</span>
             </div>
-            <div style={{ fontSize: 10, color: "#7a9e8e" }}>{getWeatherLabel(today.icon)}</div>
+            <div style={{ fontSize: 10, color: "#7a9e8e" }}>{getWeatherLabel(todayWeather.icon)}</div>
           </div>
         )}
         <div style={{ display: "flex", alignItems: "center", flex: 1, gap: 0 }}>
