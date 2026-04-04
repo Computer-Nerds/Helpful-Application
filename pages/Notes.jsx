@@ -471,14 +471,15 @@ function TodayCalendarCard({ events, onNavigate }) {
 }
 
 // ── Chess Embed Wrapper ───────────────────────────────────────
-function ChessEmbed() {
-  return <ChessGame />;
+function ChessEmbed({ onTimeUpdate }) {
+  return <ChessGame onTimeUpdate={onTimeUpdate} />;
 }
 
 // ── Main Dashboard ─────────────────────────────────────────
 export default function Dashboard() {
   const [page, setPage] = useState("home");
   const [subPage, setSubPage] = useState(null);
+  const [chessSeconds, setChessSeconds] = useState(() => parseInt(localStorage.getItem('chessSeconds')||'0'));
   const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
   const [greeting, setGreeting] = useState("");
@@ -493,6 +494,7 @@ export default function Dashboard() {
   const [calEvents, setCalEvents] = useState(() => JSON.parse(localStorage.getItem("calEvents") || "[]"));
 
   useEffect(() => { localStorage.setItem("projects", JSON.stringify(projects)); }, [projects]);
+  useEffect(() => { localStorage.setItem("chessSeconds", String(chessSeconds)); }, [chessSeconds]);
   useEffect(() => { localStorage.setItem("calEvents", JSON.stringify(calEvents)); }, [calEvents]);
 
   useEffect(() => {
@@ -611,6 +613,27 @@ export default function Dashboard() {
               <div style={{ fontSize:26, fontWeight:700, marginBottom:24 }}>{greeting}</div>
               <div style={{ display:"flex", gap:16, flexWrap:"wrap", alignItems:"flex-start" }}>
                 <TodayCalendarCard events={calEvents} onNavigate={() => { setPage("planner"); setPlannerSection("calendar"); }} />
+                {/* Dailys Card */}
+                <div style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:14, padding:20, minWidth:200, maxWidth:240 }}>
+                  <div style={{ fontSize:12, color:"#7a9e8e", textTransform:"uppercase", letterSpacing:"0.5px", fontWeight:700, marginBottom:14 }}>Dailys</div>
+                  {/* Chess progress */}
+                  <div style={{ marginBottom:4 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                        <span style={{ fontSize:16 }}>♟️</span>
+                        <span style={{ fontSize:13, fontWeight:600 }}>Chess</span>
+                      </div>
+                      <span style={{ fontSize:11, color: chessSeconds>=1800?"#00d18c":"#7a9e8e" }}>
+                        {Math.floor(chessSeconds/60)}m / 30m
+                      </span>
+                    </div>
+                    <div style={{ height:6, background:"#1f2e28", borderRadius:3, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${Math.min((chessSeconds/1800)*100,100)}%`, background: chessSeconds>=1800?"#00d18c":"#4e8ef7", borderRadius:3, transition:"width 0.5s" }}/>
+                    </div>
+                    {chessSeconds>=1800 && <div style={{ fontSize:10, color:"#00d18c", marginTop:4 }}>✓ Goal complete!</div>}
+                  </div>
+                </div>
+
                 {projects.length > 0 && (
                   <div style={{ flex:1, minWidth:240, display:"flex", flexDirection:"column", gap:10 }}>
                     <div style={{ fontSize:12, color:"#7a9e8e", textTransform:"uppercase", letterSpacing:"0.5px", fontWeight:700, marginBottom:4 }}>Projects</div>
@@ -735,7 +758,7 @@ export default function Dashboard() {
                 <button onClick={() => setSubPage(null)} style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"6px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
                 <span style={{ fontSize:15, fontWeight:700 }}>Chess</span>
               </div>
-              <ChessEmbed />
+              <ChessEmbed onTimeUpdate={(s) => setChessSeconds(s)} />
             </div>
           )}
 
