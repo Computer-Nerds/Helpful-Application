@@ -301,54 +301,89 @@
     }
     .chess-detail { font-size: 12px; color: var(--text-muted); }
 
-    /* ─── Music Player Bar ──────────────────────────────────────────── */
-    #music-player {
-      position: fixed; bottom: 0; left: var(--sidebar-width); right: 0;
-      height: 72px; background: #040806;
-      border-top: 1px solid #004d34;
-      display: flex; align-items: center; gap: 16px;
-      padding: 0 24px; z-index: 100;
+    
+    /* ─── Music Bubble ──────────────────────────────────────────────── */
+    #music-bubble {
+      position: fixed; bottom: 28px; right: 28px; z-index: 200;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
     }
-    #music-player.hidden { display: none; }
-    #mp-art {
-      width: 40px; height: 40px; border-radius: 8px;
-      background: #0a1f16; display: flex; align-items: center; justify-content: center;
-      font-size: 20px; flex-shrink: 0;
+    #music-bubble.hidden { display: none; }
+
+    /* Expanded card */
+    #mb-card {
+      background: #0b1510; border: 1px solid #1a2e24;
+      border-radius: 18px; padding: 14px 16px;
+      width: 260px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      display: none; flex-direction: column; gap: 10px;
+      animation: mbSlideIn 0.18s ease;
     }
-    #mp-info { flex: 1; min-width: 0; }
-    #mp-title { font-size: 13px; font-weight: 600; color: #e8f0ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #mp-artist { font-size: 11px; color: #4a7060; margin-top: 2px; }
-    #mp-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .mp-btn {
-      background: none; border: none; cursor: pointer; color: #7a9e8e;
-      font-size: 16px; padding: 4px 6px; border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
+    #mb-card.open { display: flex; }
+    @keyframes mbSlideIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)   scale(1); }
     }
-    .mp-btn:hover { color: #e8f0ed; background: rgba(255,255,255,0.05); }
-    .mp-btn.active { color: #00d18c; }
-    #mp-play-btn {
-      background: #00d18c; border: none; cursor: pointer; color: #003d2a;
-      font-size: 18px; width: 38px; height: 38px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity 0.15s;
-    }
-    #mp-play-btn:hover { opacity: 0.85; }
-    #mp-seek-wrap { flex: 1; min-width: 80px; max-width: 260px; display: flex; align-items: center; gap: 8px; }
-    #mp-elapsed, #mp-dur { font-size: 11px; color: #3a5548; font-variant-numeric: tabular-nums; width: 34px; flex-shrink: 0; }
-    #mp-dur { text-align: right; }
-    #mp-seek {
-      flex: 1; height: 4px; background: #1a2e24; border-radius: 2px;
+
+    #mb-track-info { min-width: 0; }
+    #mb-title  { font-size: 13px; font-weight: 700; color: #e8f0ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #mb-artist { font-size: 11px; color: #4a7060; margin-top: 2px; }
+
+    /* Seek */
+    #mb-seek-row { display: flex; align-items: center; gap: 6px; }
+    #mb-elapsed, #mb-dur { font-size: 10px; color: #3a5548; font-variant-numeric: tabular-nums; width: 30px; flex-shrink: 0; }
+    #mb-dur { text-align: right; }
+    #mb-seek {
+      flex: 1; height: 3px; background: #1a2e24; border-radius: 2px;
       cursor: pointer; position: relative;
     }
-    #mp-seek-fill { height: 100%; background: #00d18c; border-radius: 2px; width: 0%; transition: width 0.3s linear; }
-    #mp-vol-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    #mp-vol { width: 70px; accent-color: #00d18c; cursor: pointer; }
-    #mp-open-btn {
-      background: none; border: 1px solid #1a2e24; color: #4a7060;
-      border-radius: 7px; padding: 4px 10px; cursor: pointer; font-size: 11px;
-      flex-shrink: 0; transition: color 0.15s, border-color 0.15s;
+    #mb-seek-fill { height: 100%; background: #00d18c; border-radius: 2px; width: 0%; transition: width 0.3s linear; }
+
+    /* Controls row */
+    #mb-controls { display: flex; align-items: center; justify-content: space-between; }
+    .mb-btn {
+      background: none; border: none; cursor: pointer;
+      color: #7a9e8e; font-size: 15px; padding: 4px 6px;
+      border-radius: 6px; transition: color 0.15s;
+      opacity: 0.5;
     }
-    #mp-open-btn:hover { color: #00d18c; border-color: #00d18c; }
+    .mb-btn:hover { color: #e8f0ed; opacity: 1; }
+    .mb-btn.active { color: #00d18c; opacity: 1; }
+    #mb-play {
+      background: #00d18c; border: none; cursor: pointer;
+      color: #003d2a; font-size: 17px;
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s; flex-shrink: 0;
+    }
+    #mb-play:hover { opacity: 0.85; }
+
+    /* Vol */
+    #mb-vol-row { display: flex; align-items: center; gap: 6px; }
+    #mb-vol-row span { font-size: 13px; }
+    #mb-vol { flex: 1; accent-color: #00d18c; cursor: pointer; }
+
+    /* Floating button */
+    #mb-fab {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: #00d18c; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; box-shadow: 0 4px 20px rgba(0,209,140,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative; flex-shrink: 0;
+    }
+    #mb-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,209,140,0.5); }
+    #mb-fab-wave {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: transparent;
+      border: 2px solid rgba(0,209,140,0.4);
+      animation: none;
+    }
+    #mb-fab-wave.pulsing {
+      animation: mbPulse 1.4s ease-out infinite;
+    }
+    @keyframes mbPulse {
+      0%   { transform: scale(1);   opacity: 0.7; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -749,146 +784,153 @@
     lucide.createIcons();
   </script>
 
-  <!-- ── Persistent Music Player Bar ── -->
-  <div id="music-player" class="hidden">
-    <audio id="mp-audio"></audio>
-    <div id="mp-art">🎵</div>
-    <div id="mp-info">
-      <div id="mp-title">No track</div>
-      <div id="mp-artist"></div>
+
+  <!-- ── Music Bubble ── -->
+  <div id="music-bubble" class="hidden">
+    <audio id="mb-audio"></audio>
+
+    <div id="mb-card">
+      <div id="mb-track-info">
+        <div id="mb-title">No track</div>
+        <div id="mb-artist"></div>
+      </div>
+      <div id="mb-seek-row">
+        <span id="mb-elapsed">0:00</span>
+        <div id="mb-seek" onclick="mbSeek(event)"><div id="mb-seek-fill"></div></div>
+        <span id="mb-dur">0:00</span>
+      </div>
+      <div id="mb-controls">
+        <button class="mb-btn" id="mb-shuffle-btn" onclick="mbToggleShuffle()" title="Shuffle">🔀</button>
+        <button class="mb-btn" onclick="mbPrev()" title="Previous">⏮</button>
+        <button id="mb-play" onclick="mbTogglePlay()">▶</button>
+        <button class="mb-btn" onclick="mbNext()" title="Next">⏭</button>
+        <button class="mb-btn" id="mb-repeat-btn" onclick="mbToggleRepeat()" title="Repeat">🔁</button>
+      </div>
+      <div id="mb-vol-row">
+        <span id="mb-vol-icon">🔊</span>
+        <input id="mb-vol" type="range" min="0" max="1" step="0.01" value="0.8" oninput="mbSetVol(this.value)">
+      </div>
     </div>
-    <div id="mp-seek-wrap">
-      <span id="mp-elapsed">0:00</span>
-      <div id="mp-seek" onclick="mpSeek(event)"><div id="mp-seek-fill"></div></div>
-      <span id="mp-dur">0:00</span>
-    </div>
-    <div id="mp-controls">
-      <button class="mp-btn" id="mp-shuffle-btn" onclick="mpToggleShuffle()" title="Shuffle">🔀</button>
-      <button class="mp-btn" onclick="mpPrev()" title="Previous">⏮</button>
-      <button id="mp-play-btn" onclick="mpTogglePlay()" title="Play/Pause">▶</button>
-      <button class="mp-btn" onclick="mpNext()" title="Next">⏭</button>
-      <button class="mp-btn" id="mp-repeat-btn" onclick="mpToggleRepeat()" title="Repeat">🔁</button>
-    </div>
-    <div id="mp-vol-wrap">
-      <span id="mp-vol-icon">🔊</span>
-      <input id="mp-vol" type="range" min="0" max="1" step="0.01" value="0.8" oninput="mpSetVol(this.value)">
-    </div>
-    <button id="mp-open-btn" onclick="openApp('music.html')">Open ↗</button>
+
+    <button id="mb-fab" onclick="mbToggleCard()">
+      <div id="mb-fab-wave"></div>
+      🎵
+    </button>
   </div>
 
   <script>
-    // ─── Music Player Bar ─────────────────────────────────────────────────
-    const MP = {
-      tracks: [], idx: 0, shuffle: false, repeat: false,
-      playing: false, volume: 0.8, loaded: false
-    };
-    const mpAudio = document.getElementById('mp-audio');
-    const mpBar   = document.getElementById('music-player');
+    // ─── Music Bubble ─────────────────────────────────────────────────────
+    const MB = { tracks: [], idx: 0, shuffle: false, repeat: false, playing: false, open: false, volume: 0.8 };
+    const mbAudio = document.getElementById('mb-audio');
 
-    function mpFmt(s) {
+    function mbFmt(s) {
       if (!s || isNaN(s)) return '0:00';
-      const m = Math.floor(s/60), sec = Math.floor(s%60);
-      return m + ':' + String(sec).padStart(2,'0');
+      return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
     }
 
-    async function mpLoadTracks() {
+    async function mbLoadTracks() {
       try {
         const res = await fetch('https://api.base44.com/api/apps/69cf6a85f0ef6a1f0f44476a/entities/Track/list', {
           headers: { 'Content-Type': 'application/json' }
         });
         const data = await res.json();
-        MP.tracks = Array.isArray(data) ? data : (data.items || data.data || []);
-        if (MP.tracks.length > 0) {
-          mpBar.classList.remove('hidden');
-          mpLoadTrack(0, false);
+        MB.tracks = Array.isArray(data) ? data : (data.items || data.data || []);
+        if (MB.tracks.length > 0) {
+          document.getElementById('music-bubble').classList.remove('hidden');
+          mbLoadTrack(0, false);
         }
-      } catch(e) { console.warn('Music player:', e); }
+      } catch(e) { console.warn('Music bubble:', e); }
     }
 
-    function mpLoadTrack(idx, autoplay) {
-      if (!MP.tracks.length) return;
-      MP.idx = ((idx % MP.tracks.length) + MP.tracks.length) % MP.tracks.length;
-      const t = MP.tracks[MP.idx];
-      mpAudio.src = t.file_url;
-      mpAudio.load();
-      mpAudio.volume = MP.volume;
-      document.getElementById('mp-title').textContent  = t.title  || 'Untitled';
-      document.getElementById('mp-artist').textContent = t.artist || '';
-      document.getElementById('mp-seek-fill').style.width = '0%';
-      document.getElementById('mp-elapsed').textContent = '0:00';
-      document.getElementById('mp-dur').textContent = '0:00';
-      if (autoplay) { mpAudio.play().catch(()=>{}); MP.playing = true; }
-      else { MP.playing = false; }
-      mpRenderPlay();
+    function mbLoadTrack(idx, autoplay) {
+      MB.idx = ((idx % MB.tracks.length) + MB.tracks.length) % MB.tracks.length;
+      const t = MB.tracks[MB.idx];
+      mbAudio.src = t.file_url;
+      mbAudio.volume = MB.volume;
+      mbAudio.load();
+      document.getElementById('mb-title').textContent  = t.title  || 'Untitled';
+      document.getElementById('mb-artist').textContent = t.artist || '';
+      document.getElementById('mb-seek-fill').style.width = '0%';
+      document.getElementById('mb-elapsed').textContent = '0:00';
+      document.getElementById('mb-dur').textContent = '0:00';
+      if (autoplay) { mbAudio.play().catch(()=>{}); MB.playing = true; }
+      else MB.playing = false;
+      mbRenderPlay();
     }
 
-    function mpTogglePlay() {
-      if (!MP.tracks.length) return;
-      if (MP.playing) { mpAudio.pause(); MP.playing = false; }
-      else { mpAudio.play().catch(()=>{}); MP.playing = true; }
-      mpRenderPlay();
+    function mbToggleCard() {
+      MB.open = !MB.open;
+      document.getElementById('mb-card').classList.toggle('open', MB.open);
     }
 
-    function mpRenderPlay() {
-      document.getElementById('mp-play-btn').textContent = MP.playing ? '⏸' : '▶';
+    function mbTogglePlay() {
+      if (!MB.tracks.length) return;
+      if (MB.playing) { mbAudio.pause(); MB.playing = false; }
+      else { mbAudio.play().catch(()=>{}); MB.playing = true; }
+      mbRenderPlay();
     }
 
-    function mpNext() {
-      if (!MP.tracks.length) return;
-      if (MP.shuffle) {
-        let ni = MP.idx;
-        if (MP.tracks.length > 1) while (ni === MP.idx) ni = Math.floor(Math.random()*MP.tracks.length);
-        mpLoadTrack(ni, MP.playing);
+    function mbRenderPlay() {
+      document.getElementById('mb-play').textContent = MB.playing ? '⏸' : '▶';
+      document.getElementById('mb-fab-wave').classList.toggle('pulsing', MB.playing);
+    }
+
+    function mbNext() {
+      if (!MB.tracks.length) return;
+      if (MB.shuffle) {
+        let ni = MB.idx;
+        if (MB.tracks.length > 1) while (ni === MB.idx) ni = Math.floor(Math.random() * MB.tracks.length);
+        mbLoadTrack(ni, MB.playing);
       } else {
-        mpLoadTrack(MP.idx + 1, MP.playing);
+        mbLoadTrack(MB.idx + 1, MB.playing);
       }
     }
 
-    function mpPrev() {
-      if (mpAudio.currentTime > 3) { mpAudio.currentTime = 0; return; }
-      mpLoadTrack(MP.idx - 1, MP.playing);
+    function mbPrev() {
+      if (mbAudio.currentTime > 3) { mbAudio.currentTime = 0; return; }
+      mbLoadTrack(MB.idx - 1, MB.playing);
     }
 
-    function mpToggleShuffle() {
-      MP.shuffle = !MP.shuffle;
-      document.getElementById('mp-shuffle-btn').classList.toggle('active', MP.shuffle);
+    function mbToggleShuffle() {
+      MB.shuffle = !MB.shuffle;
+      document.getElementById('mb-shuffle-btn').classList.toggle('active', MB.shuffle);
     }
 
-    function mpToggleRepeat() {
-      MP.repeat = !MP.repeat;
-      document.getElementById('mp-repeat-btn').classList.toggle('active', MP.repeat);
+    function mbToggleRepeat() {
+      MB.repeat = !MB.repeat;
+      document.getElementById('mb-repeat-btn').classList.toggle('active', MB.repeat);
     }
 
-    function mpSetVol(v) {
-      MP.volume = parseFloat(v);
-      mpAudio.volume = MP.volume;
-      document.getElementById('mp-vol-icon').textContent = MP.volume === 0 ? '🔇' : MP.volume < 0.5 ? '🔉' : '🔊';
+    function mbSetVol(v) {
+      MB.volume = parseFloat(v);
+      mbAudio.volume = MB.volume;
+      const icon = MB.volume === 0 ? '🔇' : MB.volume < 0.5 ? '🔉' : '🔊';
+      document.getElementById('mb-vol-icon').textContent = icon;
     }
 
-    function mpSeek(e) {
-      const rect = document.getElementById('mp-seek').getBoundingClientRect();
+    function mbSeek(e) {
+      const rect = document.getElementById('mb-seek').getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      if (mpAudio.duration) mpAudio.currentTime = pct * mpAudio.duration;
+      if (mbAudio.duration) mbAudio.currentTime = pct * mbAudio.duration;
     }
 
-    mpAudio.addEventListener('timeupdate', () => {
-      const e = mpAudio.currentTime, d = mpAudio.duration || 0;
-      document.getElementById('mp-elapsed').textContent = mpFmt(e);
-      document.getElementById('mp-dur').textContent = mpFmt(d);
-      document.getElementById('mp-seek-fill').style.width = d > 0 ? ((e/d)*100) + '%' : '0%';
+    mbAudio.addEventListener('timeupdate', () => {
+      const e = mbAudio.currentTime, d = mbAudio.duration || 0;
+      document.getElementById('mb-elapsed').textContent = mbFmt(e);
+      document.getElementById('mb-dur').textContent     = mbFmt(d);
+      document.getElementById('mb-seek-fill').style.width = d > 0 ? ((e/d)*100)+'%' : '0%';
     });
 
-    mpAudio.addEventListener('loadedmetadata', () => {
-      document.getElementById('mp-dur').textContent = mpFmt(mpAudio.duration);
+    mbAudio.addEventListener('loadedmetadata', () => {
+      document.getElementById('mb-dur').textContent = mbFmt(mbAudio.duration);
     });
 
-    mpAudio.addEventListener('ended', () => {
-      if (MP.repeat) { mpAudio.currentTime = 0; mpAudio.play(); return; }
-      mpNext();
-      if (!MP.playing) { MP.playing = false; mpRenderPlay(); }
+    mbAudio.addEventListener('ended', () => {
+      if (MB.repeat) { mbAudio.currentTime = 0; mbAudio.play(); return; }
+      mbNext();
     });
 
-    mpLoadTracks();
+    mbLoadTracks();
   </script>
 </body>
 </html>
