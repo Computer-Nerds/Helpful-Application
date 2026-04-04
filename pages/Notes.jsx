@@ -471,8 +471,8 @@ function TodayCalendarCard({ events, onNavigate }) {
 }
 
 // ── Chess Embed Wrapper ───────────────────────────────────────
-function ChessEmbed({ onTimeUpdate }) {
-  return <ChessGame onTimeUpdate={onTimeUpdate} />;
+function ChessEmbed({ onTimeUpdate, onBack }) {
+  return <ChessGame onTimeUpdate={onTimeUpdate} onBack={onBack} />;
 }
 
 // ── Main Dashboard ─────────────────────────────────────────
@@ -754,7 +754,7 @@ export default function Dashboard() {
           {/* ── CHESS SUB-PAGE ── */}
           {page==="apps" && subPage==="chess" && (
             <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
-              <ChessEmbed onTimeUpdate={(s) => setChessSeconds(s)} />
+              <ChessEmbed onTimeUpdate={(s) => setChessSeconds(s)} onBack={() => setSubPage(null)} />
             </div>
           )}
 

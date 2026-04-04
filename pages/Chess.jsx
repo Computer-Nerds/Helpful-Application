@@ -164,7 +164,7 @@ function playCapture() {
 const SQUARE_SIZE = 58;
 const initState = () => ({ castle:"KQkq", ep:null, turn:"w" });
 
-export default function ChessApp({ onTimeUpdate }) {
+export default function ChessApp({ onTimeUpdate, onBack }) {
   const [screen, setScreen] = useState("select");
   const [rating, setRating] = useState(null);
   const [board, setBoard] = useState(startBoard());
@@ -310,22 +310,54 @@ export default function ChessApp({ onTimeUpdate }) {
 
   const lightSq="#c8d8c0", darkSq="#4a7060";
 
+  // ── Shared top bar ────────────────────────────────────────
+  const TopBar = () => (
+    <div style={{ width:"100%", background:"#0a0f0d", borderBottom:"1px solid #1a2e24", padding:"0 20px", height:52, display:"flex", alignItems:"center", gap:12, flexShrink:0, boxSizing:"border-box" }}>
+      <button onClick={onBack}
+        style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
+      <div style={{ fontSize:14, fontWeight:700 }}>
+        {screen==="game"
+          ? <>{rating?.label} <span style={{ color:"#7a9e8e", fontWeight:400, fontSize:12 }}>~{rating?.elo} ELO</span></>
+          : <span style={{ color:"#e8f0ed" }}>Chess vs Bot</span>
+        }
+      </div>
+      <div style={{ flex:1 }}/>
+      {/* Timer */}
+      <div style={{ display:"flex", alignItems:"center", gap:8, background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:10, padding:"5px 14px" }}>
+        <span style={{ fontSize:16, fontWeight:800, letterSpacing:"2px", color:elapsed>=1800?"#00d18c":"#e8f0ed", minWidth:54, textAlign:"center", fontVariantNumeric:"tabular-nums" }}>
+          {formatTime(elapsed)}
+        </span>
+        <button onClick={()=>setTimerRunning(v=>!v)}
+          style={{ background:timerRunning?"#f74e4e25":"#00d18c25", border:`1px solid ${timerRunning?"#f74e4e":"#00d18c"}`, borderRadius:6, padding:"3px 12px", cursor:"pointer", fontSize:12, fontWeight:700, color:timerRunning?"#f74e4e":"#00d18c" }}>
+          {timerRunning?"⏸":"▶"}
+        </button>
+      </div>
+      {screen==="game" && (
+        <button onClick={()=>startGame(rating)}
+          style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#00d18c", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>New Game</button>
+      )}
+    </div>
+  );
+
   // ── Rating select ──────────────────────────────────────────
   if (screen==="select") return (
-    <div style={{ minHeight:"100vh", background:"#111312", color:"#e8f0ed", fontFamily:"'Segoe UI',system-ui,sans-serif", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:32 }}>
-      <div style={{ fontSize:40, marginBottom:8 }}>♟️</div>
-      <div style={{ fontSize:24, fontWeight:800, marginBottom:6 }}>Chess vs Bot</div>
-      <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:36 }}>Pick your opponent's strength</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))", gap:12, width:"100%", maxWidth:620 }}>
-        {RATINGS.map(r=>(
-          <button key={r.label} onClick={()=>startGame(r)}
-            style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:14, padding:"20px 16px", cursor:"pointer", textAlign:"left", color:"#e8f0ed", transition:"border-color 0.15s" }}
-            onMouseEnter={e=>e.currentTarget.style.borderColor="#00d18c"}
-            onMouseLeave={e=>e.currentTarget.style.borderColor="#1f2e28"}>
-            <div style={{ fontSize:16, fontWeight:700, marginBottom:4 }}>{r.label}</div>
-            <div style={{ fontSize:13, color:"#00d18c", fontWeight:600 }}>~{r.elo} ELO</div>
-          </button>
-        ))}
+    <div style={{ minHeight:"100vh", background:"#111312", color:"#e8f0ed", fontFamily:"'Segoe UI',system-ui,sans-serif", display:"flex", flexDirection:"column" }}>
+      <TopBar />
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:32 }}>
+        <div style={{ fontSize:40, marginBottom:8 }}>♟️</div>
+        <div style={{ fontSize:24, fontWeight:800, marginBottom:6 }}>Chess vs Bot</div>
+        <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:36 }}>Pick your opponent's strength</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))", gap:12, width:"100%", maxWidth:620 }}>
+          {RATINGS.map(r=>(
+            <button key={r.label} onClick={()=>startGame(r)}
+              style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:14, padding:"20px 16px", cursor:"pointer", textAlign:"left", color:"#e8f0ed", transition:"border-color 0.15s" }}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="#00d18c"}
+              onMouseLeave={e=>e.currentTarget.style.borderColor="#1f2e28"}>
+              <div style={{ fontSize:16, fontWeight:700, marginBottom:4 }}>{r.label}</div>
+              <div style={{ fontSize:13, color:"#00d18c", fontWeight:600 }}>~{r.elo} ELO</div>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -334,26 +366,7 @@ export default function ChessApp({ onTimeUpdate }) {
   return (
     <div style={{ minHeight:"100vh", background:"#111312", color:"#e8f0ed", fontFamily:"'Segoe UI',system-ui,sans-serif", display:"flex", flexDirection:"column", alignItems:"center" }}>
 
-      {/* ── TOP BAR ── */}
-      <div style={{ width:"100%", background:"#0a0f0d", borderBottom:"1px solid #1a2e24", padding:"0 20px", height:52, display:"flex", alignItems:"center", gap:12, flexShrink:0, boxSizing:"border-box" }}>
-        <button onClick={()=>{ setScreen("select"); setTimerRunning(false); }}
-          style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>← Back</button>
-        <div style={{ fontSize:14, fontWeight:700 }}>{rating?.label} <span style={{ color:"#7a9e8e", fontWeight:400, fontSize:12 }}>~{rating?.elo} ELO</span></div>
-        <div style={{ flex:1 }}/>
-        {/* Timer lives in top bar */}
-        <div style={{ display:"flex", alignItems:"center", gap:8, background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:10, padding:"5px 14px" }}>
-          <span style={{ fontSize:16, fontWeight:800, letterSpacing:"2px", color: elapsed>=1800?"#00d18c":"#e8f0ed", minWidth:54, textAlign:"center", fontVariantNumeric:"tabular-nums" }}>
-            {formatTime(elapsed)}
-          </span>
-          <button
-            onClick={()=>setTimerRunning(v=>!v)}
-            style={{ background: timerRunning?"#f74e4e25":"#00d18c25", border:`1px solid ${timerRunning?"#f74e4e":"#00d18c"}`, borderRadius:6, padding:"3px 12px", cursor:"pointer", fontSize:12, fontWeight:700, color: timerRunning?"#f74e4e":"#00d18c" }}>
-            {timerRunning ? "⏸" : "▶"}
-          </button>
-        </div>
-        <button onClick={()=>{ startGame(rating); setElapsed(0); setTimerRunning(false); }}
-          style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#00d18c", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>New</button>
-      </div>
+      <TopBar />
 
       {/* Status */}
       <div style={{ fontSize:13, fontWeight:600, margin:"10px 0 6px", height:18,
