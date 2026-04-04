@@ -21,6 +21,8 @@ const ALL_KEYS  = buildKeys();
 const WHITE_KEYS = ALL_KEYS.filter(k => !k.isBlack);
 const BLACK_KEYS = ALL_KEYS.filter(k =>  k.isBlack);
 const WK_COUNT   = WHITE_KEYS.length;
+const WK_PX      = 38; // fixed fat key width in px
+const PIANO_W    = WK_COUNT * WK_PX; // total scrollable width
 
 const KB_MAP = {
   "a":60,"w":61,"s":62,"e":63,"d":64,"f":65,"t":66,
@@ -112,17 +114,16 @@ export default function PianoApp({ onBack }) {
 
   const getKeyRect = useCallback((midi)=>{
     if (!pianoRef.current) return null;
-    const totalW = pianoRef.current.offsetWidth;
-    const wkW    = totalW / WK_COUNT;
-    const key    = ALL_KEYS.find(k=>k.midi===midi);
+
+    const key = ALL_KEYS.find(k=>k.midi===midi);
     if (!key) return null;
     if (!key.isBlack) {
       const idx = WHITE_KEYS.findIndex(k=>k.midi===midi);
-      return { left: idx * wkW, width: wkW };
+      return { left: idx * WK_PX, width: WK_PX };
     } else {
       const prev = WHITE_KEYS.filter(k=>k.midi<midi).length;
-      const bkW  = wkW * 0.6;
-      return { left: prev * wkW - bkW/2, width: bkW };
+      const bkW  = WK_PX * 0.6;
+      return { left: prev * WK_PX - bkW/2, width: bkW };
     }
   }, []);
 
@@ -172,6 +173,21 @@ export default function PianoApp({ onBack }) {
     }).catch(()=>{});
     return ()=>{ if(acc) for(const i of acc.inputs.values()) i.onmidimessage=null; };
   }, [press, release]);
+
+  // sync chaser scroll with piano scroll
+  useEffect(()=>{
+    const pianoScroll = pianoRef.current?.parentElement;
+    const chaserScroll = document.getElementById('chaserScroll');
+    if (!pianoScroll || !chaserScroll) return;
+    const onPianoScroll = () => { chaserScroll.scrollLeft = pianoScroll.scrollLeft; };
+    const onChaserScroll = () => { pianoScroll.scrollLeft = chaserScroll.scrollLeft; };
+    pianoScroll.addEventListener('scroll', onPianoScroll);
+    chaserScroll.addEventListener('scroll', onChaserScroll);
+    return ()=>{
+      pianoScroll.removeEventListener('scroll', onPianoScroll);
+      chaserScroll.removeEventListener('scroll', onChaserScroll);
+    };
+  }, []);
 
   const Toggle = ({ value, onChange }) => (
     <div onClick={()=>onChange(!value)} style={{ position:"relative", display:"inline-flex", alignItems:"center", width:36, height:20, borderRadius:10, cursor:"pointer", background:value?"#00d18c":"#2a3a30", border:`1px solid ${value?"#00d18c":"#1f2e28"}`, transition:"background 0.2s", flexShrink:0 }}>
@@ -233,7 +249,8 @@ export default function PianoApp({ onBack }) {
       )}
 
       {/* ── NOTE CHASER ── */}
-      <div ref={chaserRef} style={{ flex:1, background:"#000", position:"relative", overflow:"hidden" }}>
+      <div style={{ flex:1, overflowX:"auto", overflowY:"hidden", scrollbarWidth:"none" }} id="chaserScroll">
+      <div ref={chaserRef} style={{ height:"100%", background:"#000", position:"relative", width: PIANO_W, overflow:"hidden" }}>
         {beams.map(b=>{
           const age     = (Date.now()-b.born)/1000;
           const travel  = age * chaserH * 1.1;
@@ -254,10 +271,13 @@ export default function PianoApp({ onBack }) {
             }}/>
           );
         })}
-      </div>
+      </div></div>
 
       {/* ── PIANO KEYS ── */}
-      <div ref={pianoRef} style={{ height:"36vh", position:"relative", background:"#1a1a1a", flexShrink:0, borderTop:"2px solid #111" }}>
+      {/* scroll wrapper */}
+      <div style={{ height:"36vh", flexShrink:0, borderTop:"2px solid #111", overflowX:"auto", overflowY:"hidden",
+        scrollbarWidth:"thin", scrollbarColor:"#1a2e24 #000" }}>
+      <div ref={pianoRef} style={{ height:"100%", position:"relative", background:"#1a1a1a", width: PIANO_W }}>
 
         {/* White keys */}
         <div style={{ position:"absolute", inset:0, display:"flex" }}>
@@ -272,7 +292,7 @@ export default function PianoApp({ onBack }) {
                 onTouchStart={e=>{e.preventDefault();press(k.midi);}}
                 onTouchEnd={e=>{e.preventDefault();release(k.midi);}}
                 style={{
-                  flex:1, height:"100%",
+                  width: WK_PX, height:"100%", flexShrink:0,
                   background: pressed
                     ? "linear-gradient(#d0f0e0 96%, #bbb 4%)"
                     : "linear-gradient(#FFFFF7 96%, #eee 4%)",
@@ -302,9 +322,9 @@ export default function PianoApp({ onBack }) {
         <div style={{ position:"absolute", top:0, left:0, right:0, height:"62%", pointerEvents:"none", zIndex:5 }}>
           {BLACK_KEYS.map(k=>{
             const pressed = pressedKeys.has(k.midi);
-            const prev    = WHITE_KEYS.filter(wk=>wk.midi<k.midi).length;
-            const leftPct = prev/WK_COUNT*100;
-            const bwPct   = 0.6/WK_COUNT*100;
+            const prev   = WHITE_KEYS.filter(wk=>wk.midi<k.midi).length;
+            const leftPx = prev * WK_PX;
+            const bwPx   = WK_PX * 0.6;
             return (
               <div key={k.midi}
                 onMouseDown={e=>{e.stopPropagation();e.preventDefault();press(k.midi);}}
@@ -314,8 +334,8 @@ export default function PianoApp({ onBack }) {
                 onTouchEnd={e=>{e.preventDefault();e.stopPropagation();release(k.midi);}}
                 style={{
                   position:"absolute",
-                  left:`calc(${leftPct}% - ${bwPct/2}%)`,
-                  width:`${bwPct}%`, height:"100%",
+                  left: leftPx - bwPx/2,
+                  width: bwPx, height:"100%",
                   background: pressed
                     ? "linear-gradient(to bottom, #555 0%, #333 100%)"
                     : "linear-gradient(to bottom, #414141 0%, #252525 100%)",
