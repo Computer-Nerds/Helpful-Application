@@ -187,34 +187,42 @@ export default function PianoApp({ onBack }) {
 
       {/* ── TOP BAR ── */}
       {!hideNav && (
-        <div style={{ background:"#0a0f0d", borderBottom:"1px solid #1a2e24", height:52, display:"flex", alignItems:"center", gap:18, padding:"0 20px", flexShrink:0 }}>
+        <div style={{ background:"#0a0f0d", borderBottom:"1px solid #1a2e24", padding:"0 20px", height:52, display:"flex", alignItems:"center", gap:16, flexShrink:0 }}>
           <button onClick={onBack}
             style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
-          <span style={{ fontSize:16, fontWeight:800 }}>🎹 Piano</span>
+          <span style={{ fontSize:16, fontWeight:800, letterSpacing:"0.5px" }}>🎹 Piano</span>
 
-          <div style={{ display:"flex", alignItems:"center", gap:7, fontSize:13, color:"#7a9e8e" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          {/* Volume */}
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginLeft:12 }}>
+            <span style={{ fontSize:12, color:"#7a9e8e" }}>Vol</span>
             <input type="range" min="0" max="1" step="0.05" value={volume}
               onChange={e=>setVolume(parseFloat(e.target.value))}
-              style={{ width:90, accentColor:"#00d18c", cursor:"pointer" }}/>
+              style={{ width:90, accentColor:"#00d18c" }}/>
+            <span style={{ fontSize:12, color:"#4a7060", minWidth:28 }}>{Math.round(volume*100)}%</span>
           </div>
 
-          <div style={{ display:"flex", alignItems:"center", gap:7, fontSize:13, color:"#7a9e8e" }}>
-            <Toggle value={showLetters} onChange={setShowLetters}/> Labels
-          </div>
+          {/* Labels */}
+          <label style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", fontSize:13, color:"#7a9e8e" }}>
+            <input type="checkbox" checked={showLetters} onChange={e=>setShowLetters(e.target.checked)} style={{ accentColor:"#00d18c" }}/>
+            Labels
+          </label>
 
-          <div style={{ display:"flex", alignItems:"center", gap:7, fontSize:13, color:"#7a9e8e" }}>
-            <Toggle value={hideNav} onChange={setHideNav}/> Hide Nav
-            <span style={{ fontSize:11, color:"#2a4a38" }}>Ctrl+H</span>
-          </div>
+          {/* Sustain */}
+          <label style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", fontSize:13, color: sustain?"#00d18c":"#7a9e8e" }}>
+            <input type="checkbox" checked={sustain} onChange={e=>setSustain(e.target.checked)} style={{ accentColor:"#00d18c" }}/>
+            Sustain
+          </label>
 
-          <div style={{ display:"flex", alignItems:"center", gap:7, fontSize:13, color: sustain?"#00d18c":"#7a9e8e" }}>
-            <Toggle value={sustain} onChange={setSustain}/> Sustain
-            <span style={{ fontSize:11, color:"#2a4a38" }}>Ctrl+S</span>
-          </div>
+          {/* Hide Nav */}
+          <label style={{ display:"flex", alignItems:"center", gap:6, cursor:"pointer", fontSize:13, color:"#7a9e8e" }}>
+            <input type="checkbox" checked={hideNav} onChange={e=>setHideNav(e.target.checked)} style={{ accentColor:"#00d18c" }}/>
+            Hide Nav
+          </label>
 
           <div style={{ flex:1 }}/>
-          <span style={{ fontSize:11, color:"#1a3028" }}>A S D F G H J K → C D E F G A B C</span>
+          <span style={{ fontSize:11, color:"#2a4a38" }}>
+            {navigator.requestMIDIAccess ? "MIDI ready" : "No MIDI API"}
+          </span>
         </div>
       )}
 
