@@ -22,10 +22,7 @@ const WHITE_KEYS = ALL_KEYS.filter(k => !k.isBlack);
 const BLACK_KEYS = ALL_KEYS.filter(k =>  k.isBlack);
 const WK_COUNT   = WHITE_KEYS.length;
 
-const KB_MAP = {
-  "a":60,"w":61,"s":62,"e":63,"d":64,"f":65,"t":66,
-  "g":67,"y":68,"h":69,"u":70,"j":71,"k":72,
-};
+
 
 // ── Audio ─────────────────────────────────────────────────────
 let audioCtx = null;
@@ -143,20 +140,15 @@ export default function PianoApp({ onBack }) {
     stopNote(midi, sustainRef.current);
   }, []);
 
-  // keyboard
+  // keyboard shortcuts only (no note playing)
   useEffect(()=>{
-    const held = new Set();
     const dn = e => {
       if (e.ctrlKey && e.key.toLowerCase()==="s") { setSustain(v=>!v); e.preventDefault(); return; }
       if (e.ctrlKey && e.key.toLowerCase()==="h") { setHideNav(v=>!v);  e.preventDefault(); return; }
-      if (e.repeat) return;
-      const m = KB_MAP[e.key.toLowerCase()];
-      if (m && !held.has(m)) { held.add(m); press(m); }
     };
-    const up = e => { const m=KB_MAP[e.key.toLowerCase()]; if(m){held.delete(m);release(m);} };
-    window.addEventListener("keydown",dn); window.addEventListener("keyup",up);
-    return ()=>{ window.removeEventListener("keydown",dn); window.removeEventListener("keyup",up); };
-  }, [press, release]);
+    window.addEventListener("keydown",dn);
+    return ()=> window.removeEventListener("keydown",dn);
+  }, []);
 
   // MIDI
   useEffect(()=>{
@@ -188,7 +180,7 @@ export default function PianoApp({ onBack }) {
       {/* ── TOP BAR ── */}
       {!hideNav && (
         <div style={{ background:"#0a0f0d", borderBottom:"1px solid #1a2e24", padding:"0 20px", height:52, display:"flex", alignItems:"center", gap:16, flexShrink:0 }}>
-          <button onClick={onBack}
+          <button onClick={()=>{ if(onBack) onBack(); }}
             style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
           <span style={{ fontSize:16, fontWeight:800, letterSpacing:"0.5px" }}>🎹 Piano</span>
 
@@ -230,6 +222,17 @@ export default function PianoApp({ onBack }) {
         <div style={{ position:"fixed", top:8, left:8, zIndex:100 }}>
           <button onClick={()=>setHideNav(false)}
             style={{ background:"#0a0f0d", border:"1px solid #1a2e24", color:"#7a9e8e", borderRadius:8, padding:"4px 12px", cursor:"pointer", fontSize:12 }}>☰</button>
+        </div>
+      )}
+
+      {/* ── SHORTCUTS BAR ── */}
+      {!hideNav && (
+        <div style={{ background:"#0d1410", borderBottom:"1px solid #1a2e24", padding:"5px 20px", fontSize:11, color:"#2a4a38", flexShrink:0, display:"flex", gap:16 }}>
+          <span>🎹 MIDI &amp; mouse playable</span>
+          <span style={{ color:"#1a3028" }}>|</span>
+          <span>Ctrl+S = sustain</span>
+          <span style={{ color:"#1a3028" }}>|</span>
+          <span>Ctrl+H = hide nav</span>
         </div>
       )}
 
