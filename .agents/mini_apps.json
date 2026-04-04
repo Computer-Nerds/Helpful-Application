@@ -4,6 +4,9 @@
   "pages": {
     "Notes": {
       "title": "Notes"
+    },
+    "Chess": {
+      "title": "Chess"
     }
   }
 }

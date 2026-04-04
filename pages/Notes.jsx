@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import ChessGame from "./Chess.jsx";
 
 const WEATHER_KEY = "95b942dc3f7006dda16797bd6b501d29";
 const CITY = "Oklahoma City";
@@ -469,9 +470,15 @@ function TodayCalendarCard({ events, onNavigate }) {
   );
 }
 
+// ── Chess Embed Wrapper ───────────────────────────────────────
+function ChessEmbed() {
+  return <ChessGame />;
+}
+
 // ── Main Dashboard ─────────────────────────────────────────
 export default function Dashboard() {
   const [page, setPage] = useState("home");
+  const [subPage, setSubPage] = useState(null);
   const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
   const [greeting, setGreeting] = useState("");
@@ -707,12 +714,28 @@ export default function Dashboard() {
               <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:28 }}>Your apps live here</div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:16 }}>
                 {[{icon:"📝",label:"Notes",bg:"#1a2e25"},{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"}].map(app=>(
-                  <div key={app.label} style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:16, padding:"24px 16px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:10, cursor:"pointer" }}>
+                  <div key={app.label}
+                    onClick={() => { if (app.label==="Chess") setSubPage("chess"); }}
+                    style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:16, padding:"24px 16px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:10, cursor:"pointer" }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor="#00d18c"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor="#1f2e28"}
+                  >
                     <div style={{ width:48, height:48, borderRadius:12, background:app.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:24 }}>{app.icon}</div>
                     <span style={{ fontSize:13 }}>{app.label}</span>
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* ── CHESS SUB-PAGE ── */}
+          {page==="apps" && subPage==="chess" && (
+            <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
+              <div style={{ padding:"12px 16px", background:"#0e1512", borderBottom:"1px solid #1a2e24", display:"flex", alignItems:"center", gap:12 }}>
+                <button onClick={() => setSubPage(null)} style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"6px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
+                <span style={{ fontSize:15, fontWeight:700 }}>Chess</span>
+              </div>
+              <ChessEmbed />
             </div>
           )}
 
