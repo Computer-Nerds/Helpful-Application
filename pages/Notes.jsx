@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import ChessGame from "./Chess.jsx";
 import PianoGame from "./Piano.jsx";
+import TypingApp from "./Typing.jsx";
 
 const WEATHER_KEY = "95b942dc3f7006dda16797bd6b501d29";
 const CITY = "Oklahoma City";
@@ -477,8 +478,8 @@ function ChessEmbed({ onTimeUpdate, onBack }) {
 }
 
 // ── Piano Embed Wrapper ───────────────────────────────────────
-function PianoEmbed({ onBack }) {
-  return <PianoGame onBack={onBack} />;
+function PianoEmbed({ onBack, onTimeUpdate }) {
+  return <PianoGame onBack={onBack} onTimeUpdate={onTimeUpdate} />;
 }
 
 // ── Main Dashboard ─────────────────────────────────────────
@@ -486,6 +487,7 @@ export default function Dashboard() {
   const [page, setPage] = useState("home");
   const [subPage, setSubPage] = useState(null);
   const [chessSeconds, setChessSeconds] = useState(() => parseInt(localStorage.getItem('chessTimer')||'0'));
+  const [pianoSeconds, setPianoSeconds] = useState(() => parseInt(localStorage.getItem('pianoTimer')||'0'));
   const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
   const [greeting, setGreeting] = useState("");
@@ -501,6 +503,7 @@ export default function Dashboard() {
 
   useEffect(() => { localStorage.setItem("projects", JSON.stringify(projects)); }, [projects]);
   useEffect(() => { localStorage.setItem('chessTimer', String(chessSeconds)); }, [chessSeconds]);
+  useEffect(() => { localStorage.setItem('pianoTimer', String(pianoSeconds)); }, [pianoSeconds]);
   useEffect(() => { localStorage.setItem("calEvents", JSON.stringify(calEvents)); }, [calEvents]);
 
   useEffect(() => {
@@ -638,6 +641,22 @@ export default function Dashboard() {
                     </div>
                     {chessSeconds>=1800 && <div style={{ fontSize:10, color:"#00d18c", marginTop:4 }}>✓ Goal complete!</div>}
                   </div>
+                  {/* Piano progress */}
+                  <div style={{ marginTop:12 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                        <span style={{ fontSize:16 }}>🎹</span>
+                        <span style={{ fontSize:13, fontWeight:600 }}>Piano</span>
+                      </div>
+                      <span style={{ fontSize:11, color: pianoSeconds>=1800?"#00d18c":"#7a9e8e" }}>
+                        {Math.floor(pianoSeconds/60)}m / 30m
+                      </span>
+                    </div>
+                    <div style={{ height:6, background:"#1f2e28", borderRadius:3, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${Math.min((pianoSeconds/1800)*100,100)}%`, background: pianoSeconds>=1800?"#00d18c":"#a855f7", borderRadius:3, transition:"width 0.5s" }}/>
+                    </div>
+                    {pianoSeconds>=1800 && <div style={{ fontSize:10, color:"#00d18c", marginTop:4 }}>✓ Goal complete!</div>}
+                  </div>
                 </div>
 
                 {projects.length > 0 && (
@@ -742,9 +761,9 @@ export default function Dashboard() {
               <div style={{ fontSize:26, fontWeight:700, marginBottom:4 }}>Apps</div>
               <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:28 }}>Your apps live here</div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:16 }}>
-                {[{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"}].map(app=>(
+                {[{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"},{icon:"⌨️",label:"Typing",bg:"#1a2e2e"}].map(app=>(
                   <div key={app.label}
-                    onClick={() => { if (app.label==="Chess") setSubPage("chess"); if (app.label==="Piano") setSubPage("piano"); }}
+                    onClick={() => { if (app.label==="Chess") setSubPage("chess"); if (app.label==="Piano") setSubPage("piano"); if (app.label==="Typing") setSubPage("typing"); }}
                     style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:16, padding:"24px 16px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:10, cursor:"pointer" }}
                     onMouseEnter={e => e.currentTarget.style.borderColor="#00d18c"}
                     onMouseLeave={e => e.currentTarget.style.borderColor="#1f2e28"}
@@ -767,7 +786,14 @@ export default function Dashboard() {
           {/* ── PIANO SUB-PAGE ── */}
           {page==="apps" && subPage==="piano" && (
             <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
-              <PianoEmbed onBack={() => setSubPage(null)} />
+              <PianoEmbed onTimeUpdate={(s) => setPianoSeconds(s)} onBack={() => setSubPage(null)} />
+            </div>
+          )}
+
+          {/* ── TYPING SUB-PAGE ── */}
+          {page==="apps" && subPage==="typing" && (
+            <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
+              <TypingApp onBack={() => setSubPage(null)} />
             </div>
           )}
 
