@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Track } from "../api/entities";
+import { Track } from "@/api/entities";
 
 function formatDur(s) {
   if (!s || isNaN(s)) return "--:--";

@@ -5,6 +5,12 @@
     "Chess": {
       "title": "Chess"
     },
+    "Home": {
+      "title": "Home"
+    },
+    "Music": {
+      "title": "Music"
+    },
     "Notes": {
       "title": "Notes"
     },
@@ -13,12 +19,6 @@
     },
     "Typing": {
       "title": "Typing"
-    },
-    "Music": {
-      "title": "Music"
-    },
-    "Home": {
-      "title": "Home"
     }
   }
 }
