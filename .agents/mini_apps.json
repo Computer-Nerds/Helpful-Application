@@ -2,11 +2,11 @@
   "app_id": "69cf6b8a5f566e854e010503",
   "slug": "johnny-6-app-4e010503",
   "pages": {
-    "Notes": {
-      "title": "Notes"
-    },
     "Chess": {
       "title": "Chess"
+    },
+    "Notes": {
+      "title": "Notes"
     }
   }
 }

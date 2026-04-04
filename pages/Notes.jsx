@@ -754,10 +754,6 @@ export default function Dashboard() {
           {/* ── CHESS SUB-PAGE ── */}
           {page==="apps" && subPage==="chess" && (
             <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
-              <div style={{ padding:"12px 16px", background:"#0e1512", borderBottom:"1px solid #1a2e24", display:"flex", alignItems:"center", gap:12 }}>
-                <button onClick={() => setSubPage(null)} style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"6px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
-                <span style={{ fontSize:15, fontWeight:700 }}>Chess</span>
-              </div>
               <ChessEmbed onTimeUpdate={(s) => setChessSeconds(s)} />
             </div>
           )}
