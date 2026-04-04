@@ -31,6 +31,7 @@ const IconShield = ({ active }) => (
 function RichEditor({ projectId, value, onChange }) {
   const ref = useRef(null);
   const loadedFor = useRef(null);
+  const savedSel = useRef(null);
 
   useEffect(() => {
     if (ref.current && loadedFor.current !== projectId) {
@@ -39,150 +40,161 @@ function RichEditor({ projectId, value, onChange }) {
     }
   }, [projectId, value]);
 
-  // Keep editor focused and fire onChange
-  const cmd = (command, arg = null) => {
-    ref.current.focus();
-    document.execCommand(command, false, arg);
-    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
+  const emit = () => { if (ref.current) onChange(ref.current.innerHTML); };
+
+  // ── Selection helpers ──────────────────────────────────
+  const saveSel = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) savedSel.current = sel.getRangeAt(0).cloneRange();
   };
 
-  // Get the block-level ancestor of the current selection inside the editor
-  const getBlock = () => {
+  const restoreSel = () => {
+    ref.current.focus();
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return null;
-    let node = sel.getRangeAt(0).commonAncestorContainer;
-    if (node.nodeType === 3) node = node.parentNode;
-    const blockTags = ["P","H1","H2","H3","H4","DIV","LI","BLOCKQUOTE"];
-    while (node && node !== ref.current) {
-      if (blockTags.includes(node.nodeName)) return node;
-      node = node.parentNode;
+    sel.removeAllRanges();
+    if (savedSel.current) sel.addRange(savedSel.current);
+  };
+
+  // Walk up from a node to find the nearest block inside the editor
+  const nearestBlock = (node) => {
+    const BLOCKS = ["P","H1","H2","H3","H4","LI","DIV","BLOCKQUOTE"];
+    let n = node;
+    if (n && n.nodeType === 3) n = n.parentNode;
+    while (n && n !== ref.current) {
+      if (BLOCKS.includes(n.nodeName)) return n;
+      n = n.parentNode;
     }
     return null;
   };
 
-  // Change heading / paragraph tag by replacing the node in-place
-  const setBlockTag = (tag) => {
-    ref.current.focus();
-    const block = getBlock();
-    if (!block || block === ref.current) {
-      // Nothing selected — just insert a new element
-      document.execCommand("formatBlock", false, tag);
-    } else {
-      const replacement = document.createElement(tag);
-      replacement.innerHTML = block.innerHTML;
-      // preserve inline styles (e.g. text-align)
-      if (block.style.cssText) replacement.style.cssText = block.style.cssText;
-      block.replaceWith(replacement);
-      // Place cursor inside new element
-      const sel = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(replacement);
-      range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
-  };
-
-  // Set text-align on every block in the selection
-  const setAlign = (align) => {
-    ref.current.focus();
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    const range = sel.getRangeAt(0);
-    const blockTags = ["P","H1","H2","H3","H4","DIV","LI","BLOCKQUOTE"];
-
-    // Collect all block nodes touched by selection
-    const touched = new Set();
-    const walker = document.createTreeWalker(ref.current, NodeFilter.SHOW_ELEMENT);
-    let n = walker.nextNode();
-    while (n) {
-      if (blockTags.includes(n.nodeName) && range.intersectsNode(n)) {
-        touched.add(n);
+  // Get all block nodes touched by current saved selection
+  const getTouchedBlocks = () => {
+    if (!savedSel.current) return [];
+    const range = savedSel.current;
+    const BLOCKS = ["P","H1","H2","H3","H4","LI","DIV","BLOCKQUOTE"];
+    const found = [];
+    // Walk every element in the editor
+    const all = ref.current.querySelectorAll("*");
+    all.forEach(el => {
+      if (BLOCKS.includes(el.nodeName) && range.intersectsNode(el)) {
+        // Make sure it's the deepest block (not a parent of another block)
+        const hasBlockChild = [...el.children].some(c => BLOCKS.includes(c.nodeName));
+        if (!hasBlockChild) found.push(el);
       }
-      n = walker.nextNode();
+    });
+    // Fallback: just the anchor block
+    if (found.length === 0) {
+      const b = nearestBlock(range.commonAncestorContainer);
+      if (b) found.push(b);
     }
-    // If nothing found, fall back to the single block
-    if (touched.size === 0) {
-      const b = getBlock();
-      if (b) touched.add(b);
-    }
-    touched.forEach(b => { b.style.textAlign = align; });
-    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
+    return found;
   };
 
-  // Wrap selected text in a <span> with a font-size
+  // ── Commands ───────────────────────────────────────────
+  const execCmd = (cmd, arg = null) => {
+    restoreSel();
+    document.execCommand(cmd, false, arg);
+    setTimeout(emit, 0);
+  };
+
+  const setBlockTag = (tag) => {
+    restoreSel();
+    const block = nearestBlock(window.getSelection().getRangeAt(0).commonAncestorContainer);
+    if (block) {
+      const el = document.createElement(tag);
+      el.innerHTML = block.innerHTML;
+      if (block.style.textAlign) el.style.textAlign = block.style.textAlign;
+      block.replaceWith(el);
+      // restore cursor inside new el
+      const sel = window.getSelection();
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      r.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(r);
+      savedSel.current = r.cloneRange();
+    } else {
+      document.execCommand("formatBlock", false, "<" + tag + ">");
+    }
+    setTimeout(emit, 0);
+  };
+
+  const setAlign = (align) => {
+    // Use saved selection — don't call restoreSel so we don't move focus yet
+    const blocks = getTouchedBlocks();
+    blocks.forEach(b => { b.style.textAlign = align; });
+    // Also handle bare text nodes directly in editor (wrap in p first)
+    if (blocks.length === 0 && savedSel.current) {
+      restoreSel();
+      document.execCommand("formatBlock", false, "<p>");
+      const b = nearestBlock(window.getSelection().getRangeAt(0).commonAncestorContainer);
+      if (b) b.style.textAlign = align;
+    }
+    setTimeout(emit, 0);
+  };
+
   const setFontSize = (px) => {
-    ref.current.focus();
+    restoreSel();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
     if (range.collapsed) return;
-    // Remove any existing font-size spans inside selection first
-    document.execCommand("removeFormat", false, null);
-    // Re-grab range after removeFormat
-    const sel2 = window.getSelection();
-    if (!sel2 || sel2.rangeCount === 0) return;
-    const range2 = sel2.getRangeAt(0);
     const span = document.createElement("span");
     span.style.fontSize = px;
     try {
-      range2.surroundContents(span);
+      range.surroundContents(span);
     } catch {
-      const frag = range2.extractContents();
+      const frag = range.extractContents();
       span.appendChild(frag);
-      range2.insertNode(span);
+      range.insertNode(span);
     }
-    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
+    savedSel.current = null; // reset after font size applied
+    setTimeout(emit, 0);
   };
 
   const ToolBtn = ({ label, title, onMD }) => (
     <button
       title={title || label}
       onMouseDown={e => { e.preventDefault(); onMD(); }}
-      style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 8px", borderRadius: 4, fontSize: 13, fontWeight: 600, minWidth: 28 }}
+      style={{ background:"none", border:"none", color:"#a0c9b8", cursor:"pointer", padding:"4px 8px", borderRadius:4, fontSize:13, fontWeight:600, minWidth:28 }}
     >{label}</button>
   );
-  const Divider = () => <div style={{ width: 1, height: 18, background: "#1f2e28", margin: "0 4px" }} />;
-
+  const Divider = () => <div style={{ width:1, height:18, background:"#1f2e28", margin:"0 4px" }} />;
   const fontSizes = ["10px","12px","14px","16px","18px","24px","32px","48px"];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-      {/* Toolbar */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2, padding: "6px 12px", background: "#141917", borderBottom: "1px solid #1f2e28", flexShrink: 0 }}>
-        <ToolBtn label="B"   title="Bold"           onMD={() => cmd("bold")} />
-        <ToolBtn label="I"   title="Italic"          onMD={() => cmd("italic")} />
-        <ToolBtn label="U"   title="Underline"       onMD={() => cmd("underline")} />
-        <ToolBtn label="S̶"   title="Strikethrough"   onMD={() => cmd("strikeThrough")} />
+    <div style={{ display:"flex", flexDirection:"column", flex:1, minHeight:0 }}>
+      <div style={{ display:"flex", flexWrap:"wrap", alignItems:"center", gap:2, padding:"6px 12px", background:"#141917", borderBottom:"1px solid #1f2e28", flexShrink:0 }}>
+        <ToolBtn label="B"   title="Bold"          onMD={() => execCmd("bold")} />
+        <ToolBtn label="I"   title="Italic"         onMD={() => execCmd("italic")} />
+        <ToolBtn label="U"   title="Underline"      onMD={() => execCmd("underline")} />
+        <ToolBtn label="S̶"   title="Strikethrough"  onMD={() => execCmd("strikeThrough")} />
         <Divider />
-        <ToolBtn label="H1"  title="Heading 1"       onMD={() => setBlockTag("h1")} />
-        <ToolBtn label="H2"  title="Heading 2"       onMD={() => setBlockTag("h2")} />
-        <ToolBtn label="H3"  title="Heading 3"       onMD={() => setBlockTag("h3")} />
-        <ToolBtn label="¶"   title="Normal text"     onMD={() => setBlockTag("p")} />
+        <ToolBtn label="H1"  title="Heading 1"      onMD={() => setBlockTag("h1")} />
+        <ToolBtn label="H2"  title="Heading 2"      onMD={() => setBlockTag("h2")} />
+        <ToolBtn label="H3"  title="Heading 3"      onMD={() => setBlockTag("h3")} />
+        <ToolBtn label="¶"   title="Normal text"    onMD={() => setBlockTag("p")} />
         <Divider />
-        {/* Font size */}
         <select
           defaultValue=""
-          onMouseDown={e => e.stopPropagation()}
+          onMouseDown={() => saveSel()}
           onChange={e => { setFontSize(e.target.value); e.target.value = ""; }}
-          style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#a0c9b8", borderRadius: 4, fontSize: 12, padding: "3px 6px", cursor: "pointer", outline: "none" }}
+          style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#a0c9b8", borderRadius:4, fontSize:12, padding:"3px 6px", cursor:"pointer", outline:"none" }}
         >
           <option value="" disabled>Size</option>
           {fontSizes.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <Divider />
-        <ToolBtn label="•"   title="Bullet list"     onMD={() => cmd("insertUnorderedList")} />
-        <ToolBtn label="1."  title="Numbered list"   onMD={() => cmd("insertOrderedList")} />
+        <ToolBtn label="•"   title="Bullet list"    onMD={() => execCmd("insertUnorderedList")} />
+        <ToolBtn label="1."  title="Numbered list"  onMD={() => execCmd("insertOrderedList")} />
         <Divider />
-        <ToolBtn label="⬅"  title="Align left"      onMD={() => setAlign("left")} />
-        <ToolBtn label="⬛"  title="Align center"    onMD={() => setAlign("center")} />
-        <ToolBtn label="➡"  title="Align right"     onMD={() => setAlign("right")} />
+        <ToolBtn label="⬅"  title="Align left"     onMD={() => setAlign("left")} />
+        <ToolBtn label="⬛"  title="Align center"   onMD={() => setAlign("center")} />
+        <ToolBtn label="➡"  title="Align right"    onMD={() => setAlign("right")} />
         <Divider />
-        <ToolBtn label="—"   title="Horizontal rule"  onMD={() => cmd("insertHorizontalRule")} />
+        <ToolBtn label="—"   title="Horizontal rule" onMD={() => execCmd("insertHorizontalRule")} />
       </div>
       <style>{`
-        .rich-editor { box-sizing: border-box; }
         .rich-editor ul { list-style-type: disc !important; padding-left: 28px !important; margin: 4px 0 !important; }
         .rich-editor ol { list-style-type: decimal !important; padding-left: 28px !important; margin: 4px 0 !important; }
         .rich-editor li { display: list-item !important; margin: 2px 0 !important; }
@@ -197,8 +209,11 @@ function RichEditor({ projectId, value, onChange }) {
         contentEditable
         suppressContentEditableWarning
         className="rich-editor"
+        onMouseUp={saveSel}
+        onKeyUp={saveSel}
+        onSelect={saveSel}
         onInput={() => { if (ref.current) onChange(ref.current.innerHTML); }}
-        style={{ flex: 1, padding: "20px 28px", outline: "none", overflowY: "auto", fontSize: 14, lineHeight: 1.8, color: "#e8f0ed", caretColor: "#00d18c" }}
+        style={{ flex:1, padding:"20px 28px", outline:"none", overflowY:"auto", fontSize:14, lineHeight:1.8, color:"#e8f0ed", caretColor:"#00d18c" }}
       />
     </div>
   );
