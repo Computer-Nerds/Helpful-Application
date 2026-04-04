@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Dashboard</title>
-  <!-- Lucide icons via CDN -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +30,7 @@
       user-select: none;
     }
 
-    /* Custom title bar */
+    /* Title bar */
     #titlebar {
       height: 36px;
       background: #003d2a;
@@ -43,40 +42,16 @@
       flex-shrink: 0;
       border-bottom: 1px solid #004d34;
     }
-
-    #titlebar-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #a0c9b8;
-      letter-spacing: 0.5px;
-    }
-
-    #titlebar-controls {
-      display: flex;
-      gap: 8px;
-      -webkit-app-region: no-drag;
-    }
-
-    .tb-btn {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-    }
-
+    #titlebar-title { font-size: 13px; font-weight: 600; color: #a0c9b8; letter-spacing: 0.5px; }
+    #titlebar-controls { display: flex; gap: 8px; -webkit-app-region: no-drag; }
+    .tb-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; }
     #tb-close { background: #ff5f57; }
     #tb-min   { background: #febc2e; }
     #tb-max   { background: #28c840; }
-
     .tb-btn:hover { filter: brightness(1.2); }
 
     /* Main layout */
-    #app {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    #app { display: flex; flex: 1; overflow: hidden; }
 
     /* Sidebar */
     #sidebar {
@@ -89,22 +64,8 @@
       gap: 4px;
       flex-shrink: 0;
     }
-
-    .nav-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      width: 100%;
-    }
-
-    .nav-divider {
-      width: 36px;
-      height: 1px;
-      background: rgba(255,255,255,0.12);
-      margin: 8px 0;
-    }
-
+    .nav-group { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
+    .nav-divider { width: 36px; height: 1px; background: rgba(255,255,255,0.12); margin: 8px 0; }
     .nav-spacer { flex: 1; }
 
     .nav-btn {
@@ -121,17 +82,8 @@
       transition: background 0.15s, color 0.15s;
       position: relative;
     }
-
-    .nav-btn:hover {
-      background: rgba(255,255,255,0.12);
-      color: #fff;
-    }
-
-    .nav-btn.active {
-      background: rgba(255,255,255,0.18);
-      color: #fff;
-    }
-
+    .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-btn.active { background: rgba(255,255,255,0.18); color: #fff; }
     .nav-btn.active::before {
       content: '';
       position: absolute;
@@ -141,8 +93,6 @@
       background: #fff;
       border-radius: 0 3px 3px 0;
     }
-
-    /* Tooltip */
     .nav-btn[data-tip]:hover::after {
       content: attr(data-tip);
       position: absolute;
@@ -157,36 +107,15 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
+    .nav-emoji { font-size: 20px; line-height: 1; }
 
-    /* Apps grid section — 4 squares */
-    #apps-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      padding: 2px 6px;
-    }
+    /* Apps grid icon */
+    #apps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 2px 6px; }
+    .app-square { width: 20px; height: 20px; border-radius: 4px; background: rgba(255,255,255,0.25); transition: background 0.15s; }
+    .nav-btn:hover .app-square, .nav-btn.active .app-square { background: rgba(255,255,255,0.8); }
 
-    .app-square {
-      width: 20px;
-      height: 20px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.25);
-      transition: background 0.15s;
-      cursor: pointer;
-    }
-
-    .nav-btn:hover .app-square,
-    .nav-btn.active .app-square {
-      background: rgba(255,255,255,0.8);
-    }
-
-    /* Content area */
-    #content {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+    /* Content */
+    #content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 
     .page {
       display: none;
@@ -195,7 +124,6 @@
       overflow-y: auto;
       animation: fadeIn 0.2s ease;
     }
-
     .page.active { display: flex; flex-direction: column; }
 
     @keyframes fadeIn {
@@ -204,59 +132,93 @@
     }
 
     /* Page headers */
-    .page-header {
-      margin-bottom: 28px;
-    }
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .page-header p  { font-size: 14px; color: var(--text-muted); }
 
-    .page-header h1 {
-      font-size: 26px;
+    /* Section label */
+    .section-label {
+      font-size: 11px;
       font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .page-header p {
-      font-size: 14px;
       color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 24px 0 12px;
     }
 
     /* Cards */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px;
     }
+    .card h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .value { font-size: 28px; font-weight: 700; color: var(--text); }
+    .card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-    .card h3 {
-      font-size: 13px;
+    /* Piano card Pomodoro */
+    .piano-pomo {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pomo-mini-display {
+      font-size: 36px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .pomo-mini-display.break-mode { color: #febc2e; }
+    .pomo-mini-phase {
+      font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-
-    .card .value {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .card .sub {
-      font-size: 12px;
-      color: var(--text-muted);
+    .pomo-mini-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
       margin-top: 4px;
     }
+    .pomo-mini-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .pomo-mini-btn:hover { background: rgba(255,255,255,0.14); }
+    .pomo-mini-dots { display: flex; gap: 5px; margin-left: auto; align-items: center; }
+    .pomo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+    .pomo-dot.done { background: var(--accent); }
+    .pomo-progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .pomo-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
+    .pomo-progress-fill.break-mode { background: #febc2e; }
 
     /* Planner */
     .task-list { display: flex; flex-direction: column; gap: 10px; }
-
     .task-item {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -266,72 +228,24 @@
       align-items: center;
       gap: 12px;
     }
-
-    .task-item input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent);
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .task-item label {
-      font-size: 14px;
-      color: var(--text);
-      cursor: pointer;
-      flex: 1;
-    }
-
-    .task-item input[type="checkbox"]:checked + label {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    .task-tag {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: rgba(0, 209, 140, 0.15);
-      color: var(--accent);
-    }
-
-    .add-task-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
+    .task-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+    .task-item label { font-size: 14px; color: var(--text); cursor: pointer; flex: 1; }
+    .task-item input[type="checkbox"]:checked + label { text-decoration: line-through; color: var(--text-muted); }
+    .task-tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: rgba(0,209,140,0.15); color: var(--accent); }
+    .add-task-row { display: flex; gap: 10px; margin-bottom: 20px; }
     .add-task-row input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
+      flex: 1; padding: 10px 14px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); font-size: 14px; outline: none;
     }
-
     .add-task-row input:focus { border-color: var(--accent); }
-
     .add-task-row button {
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: none;
-      background: var(--accent);
-      color: #003d2a;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
+      padding: 10px 18px; border-radius: 10px; border: none;
+      background: var(--accent); color: #003d2a; font-weight: 700; font-size: 14px; cursor: pointer;
     }
 
     /* Apps page */
-    .apps-page-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 16px;
-    }
-
+    .apps-page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
     .app-tile {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -344,68 +258,48 @@
       cursor: pointer;
       transition: border-color 0.15s, transform 0.1s;
     }
+    .app-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .app-tile .app-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .app-tile span { font-size: 13px; color: var(--text); text-align: center; }
 
-    .app-tile:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .app-tile .app-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
-
-    .app-tile span {
-      font-size: 13px;
-      color: var(--text);
-      text-align: center;
+    /* Piano page */
+    #page-piano {
+      padding: 0 !important;
     }
 
     /* Security */
-    .security-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-
-    .security-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
+    .security-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+    .security-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .security-icon.green { background: rgba(0,209,140,0.15); color: var(--accent); }
     .security-icon.yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
     .security-icon.red { background: rgba(255,95,87,0.15); color: #ff5f57; }
-
     .security-info { flex: 1; }
     .security-info h4 { font-size: 14px; font-weight: 600; color: var(--text); }
     .security-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-    .security-badge {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 600;
-    }
-
+    .security-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
     .badge-green { background: rgba(0,209,140,0.15); color: var(--accent); }
     .badge-yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
     .badge-red { background: rgba(255,95,87,0.15); color: #ff5f57; }
+
+    /* Chess card */
+    .chess-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .chess-detail { font-size: 12px; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -424,20 +318,19 @@
     <!-- Sidebar -->
     <nav id="sidebar">
       <div class="nav-group">
-        <!-- Home -->
-        <button class="nav-btn active" data-page="home" data-tip="Home" onclick="navigate('home', this)">
+        <button class="nav-btn active" data-page="home"    data-tip="Home"    onclick="navigate('home', this)">
           <i data-lucide="house" width="22" height="22"></i>
         </button>
-
-        <!-- Planner -->
         <button class="nav-btn" data-page="planner" data-tip="Planner" onclick="navigate('planner', this)">
           <i data-lucide="file-text" width="22" height="22"></i>
+        </button>
+        <button class="nav-btn" data-page="piano"   data-tip="Piano"   onclick="navigate('piano', this)">
+          <span class="nav-emoji">🎹</span>
         </button>
       </div>
 
       <div class="nav-divider"></div>
 
-      <!-- Apps (4 squares) -->
       <button class="nav-btn" data-page="apps" data-tip="Apps" onclick="navigate('apps', this)">
         <div id="apps-grid">
           <div class="app-square"></div>
@@ -449,7 +342,6 @@
 
       <div class="nav-spacer"></div>
 
-      <!-- Security -->
       <button class="nav-btn" data-page="security" data-tip="Security" onclick="navigate('security', this)">
         <i data-lucide="shield" width="22" height="22"></i>
       </button>
@@ -458,12 +350,14 @@
     <!-- Content -->
     <div id="content">
 
-      <!-- Home -->
+      <!-- ── HOME ── -->
       <div class="page active" id="page-home">
         <div class="page-header">
-          <h1>Good morning 👋</h1>
-          <p id="home-date">Today is Friday, April 3</p>
+          <h1 id="home-greeting">Good morning 👋</h1>
+          <p id="home-date">Loading…</p>
         </div>
+
+        <div class="section-label">Overview</div>
         <div class="card-grid">
           <div class="card">
             <h3>Tasks Today</h3>
@@ -471,24 +365,64 @@
             <div class="sub">Open tasks in planner</div>
           </div>
           <div class="card">
-            <h3>Apps</h3>
-            <div class="value">4</div>
-            <div class="sub">Installed apps</div>
-          </div>
-          <div class="card">
-            <h3>Security</h3>
-            <div class="value" style="color: #00d18c;">Good</div>
-            <div class="sub">No issues found</div>
-          </div>
-          <div class="card">
             <h3>Time</h3>
             <div class="value" id="home-time">--:--</div>
             <div class="sub" id="home-tz">Local time</div>
           </div>
+          <div class="card">
+            <h3>Chess Today</h3>
+            <div class="chess-bar">
+              <div class="value" id="chess-time-val">0 min</div>
+              <div class="progress-bar"><div class="progress-fill" id="chess-progress" style="width:0%"></div></div>
+              <div class="chess-detail" id="chess-detail">Goal: 30 min</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Piano</div>
+        <div class="card-grid">
+          <div class="card" style="min-width:200px;">
+            <h3>Pomodoro</h3>
+            <div class="piano-pomo">
+              <div>
+                <div class="pomo-mini-phase" id="home-pomo-phase">Focus</div>
+                <div class="pomo-mini-display" id="home-pomo-display">25:00</div>
+              </div>
+              <div class="pomo-progress-bar">
+                <div class="pomo-progress-fill" id="home-pomo-bar" style="width:0%"></div>
+              </div>
+              <div class="pomo-mini-controls">
+                <button class="pomo-mini-btn" id="home-pomo-play" onclick="homePomoPlaToggle()">▶</button>
+                <button class="pomo-mini-btn" onclick="homePomReset()">↺</button>
+                <button class="pomo-mini-btn" onclick="homePomSkip()">⏭</button>
+                <div class="pomo-mini-dots">
+                  <div class="pomo-dot" id="hp-d0"></div>
+                  <div class="pomo-dot" id="hp-d1"></div>
+                  <div class="pomo-dot" id="hp-d2"></div>
+                  <div class="pomo-dot" id="hp-d3"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Open Piano</h3>
+            <div class="value" style="font-size:36px; cursor:pointer;" onclick="navigate('piano', document.querySelector('[data-page=piano]'))">🎹</div>
+            <div class="sub">Launch the piano app</div>
+          </div>
+          <div class="card">
+            <h3>Sessions Today</h3>
+            <div class="value" id="piano-sessions-count">0</div>
+            <div class="sub">Pomodoro sessions</div>
+          </div>
         </div>
       </div>
 
-      <!-- Planner -->
+      <!-- ── PIANO PAGE ── -->
+      <div class="page" id="page-piano">
+        <iframe id="piano-iframe" src="piano.html" style="width:100%;height:100%;border:none;display:block;"></iframe>
+      </div>
+
+      <!-- ── PLANNER ── -->
       <div class="page" id="page-planner">
         <div class="page-header">
           <h1>Planner</h1>
@@ -501,33 +435,37 @@
         <div class="task-list" id="task-list"></div>
       </div>
 
-      <!-- Apps -->
+      <!-- ── APPS ── -->
       <div class="page" id="page-apps">
         <div class="page-header">
           <h1>Apps</h1>
           <p>Your installed apps</p>
         </div>
         <div class="apps-page-grid">
-          <div class="app-tile">
+          <div class="app-tile" onclick="openApp('notes.html')">
             <div class="app-icon" style="background:#1a2e25;">📝</div>
             <span>Notes</span>
           </div>
-          <div class="app-tile">
+          <div class="app-tile" onclick="openApp('chess.html')">
             <div class="app-icon" style="background:#1a1a2e;">♟️</div>
             <span>Chess</span>
           </div>
-          <div class="app-tile">
+          <div class="app-tile" onclick="navigate('piano', document.querySelector('[data-page=piano]'))">
             <div class="app-icon" style="background:#2e1a1a;">🎹</div>
             <span>Piano</span>
           </div>
-          <div class="app-tile">
+          <div class="app-tile" onclick="openApp('spanish.html')">
             <div class="app-icon" style="background:#2a1a2e;">🇪🇸</div>
             <span>Spanish</span>
+          </div>
+          <div class="app-tile" onclick="openApp('typing.html')">
+            <div class="app-icon" style="background:#1a1f2e;">⌨️</div>
+            <span>Typing</span>
           </div>
         </div>
       </div>
 
-      <!-- Security -->
+      <!-- ── SECURITY ── -->
       <div class="page" id="page-security">
         <div class="page-header">
           <h1>Security</h1>
@@ -535,34 +473,22 @@
         </div>
         <div class="security-item">
           <div class="security-icon green"><i data-lucide="shield-check" width="20" height="20"></i></div>
-          <div class="security-info">
-            <h4>Firewall</h4>
-            <p>Windows Defender Firewall is active</p>
-          </div>
+          <div class="security-info"><h4>Firewall</h4><p>Windows Defender Firewall is active</p></div>
           <span class="security-badge badge-green">Active</span>
         </div>
         <div class="security-item">
           <div class="security-icon green"><i data-lucide="lock" width="20" height="20"></i></div>
-          <div class="security-info">
-            <h4>App Permissions</h4>
-            <p>No suspicious permissions detected</p>
-          </div>
+          <div class="security-info"><h4>App Permissions</h4><p>No suspicious permissions detected</p></div>
           <span class="security-badge badge-green">Clear</span>
         </div>
         <div class="security-item">
           <div class="security-icon yellow"><i data-lucide="alert-triangle" width="20" height="20"></i></div>
-          <div class="security-info">
-            <h4>System Updates</h4>
-            <p>Check for pending OS updates</p>
-          </div>
+          <div class="security-info"><h4>System Updates</h4><p>Check for pending OS updates</p></div>
           <span class="security-badge badge-yellow">Check</span>
         </div>
         <div class="security-item">
           <div class="security-icon green"><i data-lucide="eye-off" width="20" height="20"></i></div>
-          <div class="security-info">
-            <h4>Privacy</h4>
-            <p>No data is sent externally by this app</p>
-          </div>
+          <div class="security-info"><h4>Privacy</h4><p>No data is sent externally by this app</p></div>
           <span class="security-badge badge-green">Private</span>
         </div>
       </div>
@@ -571,23 +497,21 @@
   </div><!-- end #app -->
 
   <script>
-    const { ipcRenderer } = require('electron');
-    const { BrowserWindow } = require('@electron/remote') || {};
+    // ─── Electron ────────────────────────────────────────────────────────
+    function closeWin() { try { require('electron').ipcRenderer.send('window-close'); } catch(e){} }
+    function minWin()   { try { require('electron').ipcRenderer.send('window-min');   } catch(e){} }
+    function maxWin()   { try { require('electron').ipcRenderer.send('window-max');   } catch(e){} }
+    function openApp(file) { try { require('electron').ipcRenderer.send('open-app', file); } catch(e){ window.open(file); } }
 
-    // Title bar controls
-    function closeWin() { require('electron').ipcRenderer.send('window-close'); }
-    function minWin()   { require('electron').ipcRenderer.send('window-min'); }
-    function maxWin()   { require('electron').ipcRenderer.send('window-max'); }
-
-    // Navigation
+    // ─── Navigation ──────────────────────────────────────────────────────
     function navigate(page, btn) {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
       document.getElementById('page-' + page).classList.add('active');
     }
 
-    // Clock
+    // ─── Clock & date ────────────────────────────────────────────────────
     function updateClock() {
       const now = new Date();
       const h = String(now.getHours()).padStart(2,'0');
@@ -598,23 +522,21 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Date
     const dateEl = document.getElementById('home-date');
     if (dateEl) {
       const d = new Date();
       dateEl.textContent = 'Today is ' + d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     }
 
-    // Greeting
-    const h1 = document.querySelector('#page-home h1');
+    const greet = document.getElementById('home-greeting');
     const hr = new Date().getHours();
-    if (h1) {
-      if (hr < 12)      h1.textContent = 'Good morning 👋';
-      else if (hr < 17) h1.textContent = 'Good afternoon 👋';
-      else              h1.textContent = 'Good evening 👋';
+    if (greet) {
+      if (hr < 12)      greet.textContent = 'Good morning 👋';
+      else if (hr < 17) greet.textContent = 'Good afternoon 👋';
+      else              greet.textContent = 'Good evening 👋';
     }
 
-    // Planner (localStorage)
+    // ─── Planner ─────────────────────────────────────────────────────────
     let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
 
     function renderTasks() {
@@ -623,7 +545,6 @@
       const open = tasks.filter(t => !t.done).length;
       const ct = document.getElementById('tasks-count');
       if (ct) ct.textContent = open;
-
       tasks.forEach((task, i) => {
         const id = 'task-' + i;
         const div = document.createElement('div');
@@ -666,7 +587,112 @@
 
     renderTasks();
 
-    // Init Lucide icons
+    // ─── Chess progress ───────────────────────────────────────────────────
+    function updateChessCard() {
+      const today = new Date().toDateString();
+      const stored = JSON.parse(localStorage.getItem('chess_daily') || '{}');
+      const mins = stored.date === today ? Math.floor((stored.seconds || 0) / 60) : 0;
+      const pct = Math.min(100, (mins / 30) * 100);
+      const el = document.getElementById('chess-time-val');
+      const bar = document.getElementById('chess-progress');
+      const det = document.getElementById('chess-detail');
+      if (el) el.textContent = mins + ' min';
+      if (bar) bar.style.width = pct + '%';
+      if (det) det.textContent = mins >= 30 ? '✓ Goal reached!' : `${30 - mins} min remaining`;
+    }
+    updateChessCard();
+    setInterval(updateChessCard, 5000);
+
+    // ─── Piano sessions counter ───────────────────────────────────────────
+    function updatePianoSessions() {
+      const count = parseInt(localStorage.getItem('piano_sessions_today') || '0');
+      const el = document.getElementById('piano-sessions-count');
+      if (el) el.textContent = count;
+    }
+    updatePianoSessions();
+
+    // ─── Home Pomodoro (piano section) ────────────────────────────────────
+    const HOME_POMO_PHASES = [
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Break',       secs:  5 * 60 },
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Break',       secs:  5 * 60 },
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Break',       secs:  5 * 60 },
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Long Break',  secs: 15 * 60 },
+    ];
+
+    let hPomoPhase = 0;
+    let hPomoRemaining = HOME_POMO_PHASES[0].secs;
+    let hPomoRunning = false;
+    let hPomoInterval = null;
+    let hPomoSession = 0;
+
+    function renderHomePomo() {
+      const m = Math.floor(hPomoRemaining / 60);
+      const s = hPomoRemaining % 60;
+      const disp = document.getElementById('home-pomo-display');
+      disp.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      const phase = HOME_POMO_PHASES[hPomoPhase];
+      document.getElementById('home-pomo-phase').textContent = phase.label;
+      const isBreak = phase.label.includes('Break');
+      disp.className = 'pomo-mini-display' + (isBreak ? ' break-mode' : '');
+      document.getElementById('home-pomo-play').textContent = hPomoRunning ? '⏸' : '▶';
+      const bar = document.getElementById('home-pomo-bar');
+      const total = HOME_POMO_PHASES[hPomoPhase].secs;
+      bar.style.width = ((1 - hPomoRemaining / total) * 100) + '%';
+      bar.className = 'pomo-progress-fill' + (isBreak ? ' break-mode' : '');
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('hp-d' + i).className = 'pomo-dot' + (i < hPomoSession ? ' done' : '');
+      }
+    }
+
+    function homePomoPlaToggle() {
+      if (hPomoRunning) {
+        clearInterval(hPomoInterval);
+        hPomoRunning = false;
+      } else {
+        hPomoRunning = true;
+        hPomoInterval = setInterval(() => {
+          hPomoRemaining--;
+          if (hPomoRemaining <= 0) hPomoNext();
+          renderHomePomo();
+        }, 1000);
+      }
+      renderHomePomo();
+    }
+
+    function hPomoNext() {
+      clearInterval(hPomoInterval);
+      hPomoRunning = false;
+      const phase = HOME_POMO_PHASES[hPomoPhase];
+      if (phase.label === 'Focus') {
+        hPomoSession = Math.min(4, hPomoSession + 1);
+        // increment sessions counter
+        const prev = parseInt(localStorage.getItem('piano_sessions_today') || '0');
+        localStorage.setItem('piano_sessions_today', prev + 1);
+        updatePianoSessions();
+      }
+      hPomoPhase = (hPomoPhase + 1) % HOME_POMO_PHASES.length;
+      if (hPomoPhase === 0) hPomoSession = 0;
+      hPomoRemaining = HOME_POMO_PHASES[hPomoPhase].secs;
+      try { new Notification('Helpful App', { body: HOME_POMO_PHASES[hPomoPhase].label + ' phase started!' }); } catch(e){}
+      renderHomePomo();
+    }
+
+    function homePomReset() {
+      clearInterval(hPomoInterval);
+      hPomoRunning = false;
+      hPomoRemaining = HOME_POMO_PHASES[hPomoPhase].secs;
+      renderHomePomo();
+    }
+
+    function homePomSkip() { hPomoNext(); }
+
+    renderHomePomo();
+
+    // ─── Lucide ───────────────────────────────────────────────────────────
     lucide.createIcons();
   </script>
 </body>
