@@ -49,12 +49,49 @@ function RichEditor({ projectId, value, onChange }) {
   );
   const Divider = () => <div style={{ width: 1, height: 18, background: "#1f2e28", margin: "0 4px" }} />;
 
+  // Save & restore selection so toolbar clicks don't lose cursor/selection
+  const savedRange = useRef(null);
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) savedRange.current = sel.getRangeAt(0).cloneRange();
+  };
+  const restoreSelection = () => {
+    if (!savedRange.current) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange.current);
+  };
+
   const fontSizes = [
-    { label: "Small", val: "1" },
-    { label: "Normal", val: "3" },
-    { label: "Large", val: "5" },
-    { label: "X-Large", val: "7" },
+    { label: "10px", val: "10px" },
+    { label: "12px", val: "12px" },
+    { label: "14px", val: "14px" },
+    { label: "16px", val: "16px" },
+    { label: "18px", val: "18px" },
+    { label: "24px", val: "24px" },
+    { label: "32px", val: "32px" },
+    { label: "48px", val: "48px" },
   ];
+
+  const applyFontSize = (px) => {
+    restoreSelection();
+    ref.current.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+    const span = document.createElement("span");
+    span.style.fontSize = px;
+    try {
+      range.surroundContents(span);
+    } catch(e) {
+      // selection spans multiple nodes — wrap extracted content
+      const frag = range.extractContents();
+      span.appendChild(frag);
+      range.insertNode(span);
+    }
+    onChange(ref.current.innerHTML);
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -71,8 +108,8 @@ function RichEditor({ projectId, value, onChange }) {
         <Divider />
         {/* Font size dropdown */}
         <select
-          onMouseDown={e => e.stopPropagation()}
-          onChange={e => { ref.current.focus(); document.execCommand("fontSize", false, e.target.value); e.target.value = ""; }}
+          onMouseDown={e => { saveSelection(); }}
+          onChange={e => { applyFontSize(e.target.value); e.target.value = ""; }}
           defaultValue=""
           style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#a0c9b8", borderRadius: 4, fontSize: 12, padding: "3px 6px", cursor: "pointer", outline: "none" }}
         >
@@ -83,9 +120,9 @@ function RichEditor({ projectId, value, onChange }) {
         <ToolBtn label="•" title="Bullet list" onMD={e => { e.preventDefault(); ref.current.focus(); document.execCommand("insertUnorderedList", false, null); onChange(ref.current.innerHTML); }} />
         <ToolBtn label="1." title="Numbered list" onMD={e => { e.preventDefault(); ref.current.focus(); document.execCommand("insertOrderedList", false, null); onChange(ref.current.innerHTML); }} />
         <Divider />
-        <ToolBtn label="⬅" title="Align left" onMD={e => { e.preventDefault(); exec("justifyLeft"); }} />
-        <ToolBtn label="⬛" title="Align center" onMD={e => { e.preventDefault(); exec("justifyCenter"); }} />
-        <ToolBtn label="➡" title="Align right" onMD={e => { e.preventDefault(); exec("justifyRight"); }} />
+        <ToolBtn label="⬅" title="Align left" onMD={e => { e.preventDefault(); restoreSelection(); exec("justifyLeft"); }} />
+        <ToolBtn label="⬛" title="Align center" onMD={e => { e.preventDefault(); restoreSelection(); exec("justifyCenter"); }} />
+        <ToolBtn label="➡" title="Align right" onMD={e => { e.preventDefault(); restoreSelection(); exec("justifyRight"); }} />
         <Divider />
         <ToolBtn label="—" title="Horizontal rule" onMD={e => { e.preventDefault(); exec("insertHorizontalRule"); }} />
       </div>
@@ -100,6 +137,7 @@ function RichEditor({ projectId, value, onChange }) {
         .rich-editor hr { border: none; border-top: 1px solid #1f2e28; margin: 12px 0; }
       `}</style>
       <div ref={ref} contentEditable suppressContentEditableWarning className="rich-editor"
+        onMouseUp={saveSelection} onKeyUp={saveSelection}
         onInput={() => { if (ref.current) onChange(ref.current.innerHTML); }}
         style={{ flex: 1, padding: "20px 28px", outline: "none", overflowY: "auto", fontSize: 14, lineHeight: 1.8, color: "#e8f0ed", caretColor: "#00d18c" }} />
     </div>
@@ -378,7 +416,9 @@ export default function Dashboard() {
   useEffect(() => {
     const tick = () => {
       const n = new Date();
-      setTime(`${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`);
+      const hr12 = n.getHours() % 12 || 12;
+      const ampm = n.getHours() < 12 ? "AM" : "PM";
+      setTime(`${hr12}:${String(n.getMinutes()).padStart(2,"0")} ${ampm}`);
       setBottomDate(n.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }));
       const hr = n.getHours();
       setGreeting(hr < 12 ? "Good morning 👋" : hr < 17 ? "Good afternoon 👋" : "Good evening 👋");
