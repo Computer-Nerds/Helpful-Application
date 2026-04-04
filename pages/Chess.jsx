@@ -187,6 +187,8 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
   const [lastMove, setLastMove] = useState(null);
   const [status, setStatus] = useState("Your turn");
   const [gameOver, setGameOver] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef(null);
   const [thinking, setThinking] = useState(false);
   const [history, setHistory] = useState([]);
   const [promotion, setPromotion] = useState(null);
@@ -219,6 +221,42 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
     const m = Math.floor(s / 60), sec = s % 60;
     return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
   };
+
+  // ── Confetti ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!showConfetti) return;
+    const canvas = confettiRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const pieces = Array.from({length:160}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      w: 8 + Math.random()*8,
+      h: 5 + Math.random()*5,
+      r: Math.random()*Math.PI*2,
+      dr: (Math.random()-0.5)*0.2,
+      dx: (Math.random()-0.5)*2,
+      dy: 2.5 + Math.random()*3,
+      color: ["#00d18c","#4e8ef7","#f7a94e","#f74e4e","#e8f0ed","#ffd700"][Math.floor(Math.random()*6)],
+    }));
+    let raf;
+    const draw = () => {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach(p => {
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+        ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        ctx.restore();
+        p.x+=p.dx; p.y+=p.dy; p.r+=p.dr;
+        if(p.y>canvas.height) { p.y=-10; p.x=Math.random()*canvas.width; }
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    const t = setTimeout(() => { setShowConfetti(false); cancelAnimationFrame(raf); }, 4000);
+    return () => { cancelAnimationFrame(raf); clearTimeout(t); };
+  }, [showConfetti]);
 
   // ── Sync persisted timer to dashboard on mount ──────────────
   useEffect(() => {
@@ -258,8 +296,8 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
     const kPos  = findKing(b, color);
     const inChk = kPos && isAttacked(b, kPos[0], kPos[1], color==="w"?"b":"w", st);
     if (moves.length===0) {
-      if (inChk) return { text: color==="w" ? "Checkmate — you lose!" : "Checkmate — you win! 🎉", over:true };
-      return { text:"Stalemate — draw!", over:true };
+      if (inChk) return { text: color==="w" ? "Checkmate — you lose!" : "Checkmate — you win! 🎉", over:true, win: color!=="w" };
+      return { text:"Stalemate — draw!", over:true, win:false };
     }
     if (inChk) return { text: color==="w" ? "You're in check!" : "Bot is in check!", over:false };
     return { text: botJustMoved ? "Your turn" : "Bot is thinking…", over:false };
@@ -285,9 +323,9 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
         + (promoType ? "="+promoType.toUpperCase() : "");
       setHistory(prev => [...prev, san]);
 
-      const { text, over } = getStatus(nb, ns, isBot);
+      const { text, over, win } = getStatus(nb, ns, isBot);
       setStatus(text);
-      if (over) { setGameOver(true); setTimerRunning(false); return; }
+      if (over) { setGameOver(true); setTimerRunning(false); if (win) setShowConfetti(true); return; }
 
       if (!isBot) {
         // trigger bot
@@ -333,8 +371,11 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
   // ── Shared top bar ────────────────────────────────────────
   const TopBar = () => (
     <div style={{ width:"100%", background:"#0a0f0d", borderBottom:"1px solid #1a2e24", padding:"0 20px", height:52, display:"flex", alignItems:"center", gap:12, flexShrink:0, boxSizing:"border-box" }}>
-      <button onClick={onBack}
-        style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>← Apps</button>
+      <button
+        onClick={() => { if (screen === "game") setScreen("select"); else if (onBack) onBack(); }}
+        style={{ background:"#1a1f1d", border:"1px solid #1f2e28", color:"#7a9e8e", borderRadius:8, padding:"5px 14px", cursor:"pointer", fontSize:13 }}>
+        {screen === "game" ? "← Levels" : "← Apps"}
+      </button>
       <div style={{ fontSize:14, fontWeight:700 }}>
         {screen==="game"
           ? <>{rating?.label} <span style={{ color:"#7a9e8e", fontWeight:400, fontSize:12 }}>~{rating?.elo} ELO</span></>
@@ -492,6 +533,11 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
             </div>
           </div>
         </div>
+      )}
+      {/* Confetti overlay */}
+      {showConfetti && (
+        <canvas ref={confettiRef} onClick={()=>setShowConfetti(false)}
+          style={{ position:"fixed", inset:0, zIndex:999, pointerEvents:"auto", cursor:"pointer" }}/>
       )}
     </div>
   );
