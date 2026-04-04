@@ -77,9 +77,9 @@
 
     /* ── Bottom weather bar ── */
     #weatherbar {
-      height: 80px; min-height: 80px; background: #0a0f0d;
+      height: 90px; min-height: 90px; background: #0a0f0d;
       border-top: 1px solid #1a2e24;
-      display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; gap: 0;
+      display: flex; align-items: center; padding: 0 20px 4px; flex-shrink: 0; gap: 0;
     }
     #today-weather {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -132,7 +132,7 @@
 
     /* ── PLANNER PAGE ── */
     #planner-sidebar {
-      width: 220px; background: #0e1512; border-right: 1px solid #1a2e24;
+      width: 260px; background: #0e1512; border-right: 1px solid #1a2e24;
       display: flex; flex-direction: column; flex-shrink: 0;
     }
     #planner-sidebar-header { padding: 16px; font-size: 14px; font-weight: 700; border-bottom: 1px solid #1a2e24; }
@@ -1125,8 +1125,17 @@ function showPlannerSection(section, projectId) {
 
 function toggleNewProject() {
   const row = document.getElementById('new-project-row');
+  const wasOpen = row.classList.contains('open');
   row.classList.toggle('open');
-  if (row.classList.contains('open')) document.getElementById('new-project-input').focus();
+  if (!wasOpen) {
+    // Opening new project form - don't show calendar behind it, show empty state
+    document.getElementById('calendar-view').style.display = 'none';
+    document.getElementById('project-view').style.display = 'none';
+    document.getElementById('planner-empty').style.display = 'flex';
+    currentPlannerSection = null;
+    renderPlannerSidebar();
+    document.getElementById('new-project-input').focus();
+  }
 }
 
 function saveNewProject() {
@@ -1905,26 +1914,54 @@ function renderTypingPrompt(){
 }
 
 function typingHandleInput(e){
-  if(typingFinished)return;
-  const val=e.target.value;
-  if(val.length>typingPrompt.length)return;
-  if(!typingStarted&&val.length>0){typingStarted=true;typingStartTime=Date.now();clearInterval(typingWpmInterval);typingWpmInterval=setInterval(()=>{const el=(Date.now()-typingStartTime)/60000;typingWpm=el>0?Math.round((typingTyped.length/5)/el):0;const wpmEl=document.getElementById('typing-wpm');wpmEl.textContent=typingWpm;wpmEl.style.color=typingWpm>=80?'#00d18c':typingWpm>=50?'#f7a94e':'#e8f0ed';},300);}
-  typingTyped=val;
-  let wrong=0;for(let i=0;i<val.length;i++){if(val[i]!==typingPrompt[i])wrong++;}
-  typingAcc=val.length>0?Math.round(((val.length-wrong)/val.length)*100):100;
-  const accEl=document.getElementById('typing-acc');accEl.textContent=typingAcc+'%';accEl.style.color=typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171';
-  document.getElementById('typing-prog-fill').style.width=(typingPrompt.length?Math.min((val.length/typingPrompt.length)*100,100):0)+'%';
+  if(typingFinished) return;
+  const val = e.target.value;
+  if(val.length > typingPrompt.length) { e.target.value = val.slice(0, typingPrompt.length); return; }
+
+  // Start timer on first keypress
+  if(!typingStarted && val.length > 0){
+    typingStarted = true;
+    typingStartTime = Date.now();
+    clearInterval(typingWpmInterval);
+    typingWpmInterval = setInterval(() => {
+      const mins = (Date.now() - typingStartTime) / 60000;
+      const live = mins > 0 ? Math.round((typingTyped.length / 5) / mins) : 0;
+      const wpmEl = document.getElementById('typing-wpm');
+      if(wpmEl){ wpmEl.textContent = live; wpmEl.style.color = live>=80?'#00d18c':live>=50?'#f7a94e':'#e8f0ed'; }
+    }, 300);
+  }
+
+  typingTyped = val;
+
+  // Accuracy
+  let wrong = 0;
+  for(let i = 0; i < val.length; i++){ if(val[i] !== typingPrompt[i]) wrong++; }
+  typingAcc = val.length > 0 ? Math.round(((val.length - wrong) / val.length) * 100) : 100;
+  const accEl = document.getElementById('typing-acc');
+  if(accEl){ accEl.textContent = typingAcc + '%'; accEl.style.color = typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'; }
+
+  // Progress
+  const progEl = document.getElementById('typing-prog-fill');
+  if(progEl) progEl.style.width = (typingPrompt.length ? Math.min((val.length/typingPrompt.length)*100,100) : 0) + '%';
+
   renderTypingPrompt();
-  if(val===typingPrompt){
-    clearInterval(typingWpmInterval);typingFinished=true;
-    const el=(Date.now()-typingStartTime)/60000;
-    const fw=Math.round((typingPrompt.length/5)/el);typingWpm=fw;
-    const wpmEl=document.getElementById('typing-wpm');
-    wpmEl.textContent=fw;wpmEl.style.color=fw>=80?'#00d18c':fw>=50?'#f7a94e':'#e8f0ed';
-    const accEl=document.getElementById('typing-acc');
-    accEl.textContent=typingAcc+'%';accEl.style.color=typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171';
-    if(fw>typingBestWpm){typingBestWpm=fw;localStorage.setItem('typing_best_wpm',String(fw));updateTypingBest();}
-    setTimeout(()=>typingReset(),1800);
+
+  // Check completion - compare char by char to avoid any encoding issues
+  if(val.length === typingPrompt.length && val === typingPrompt){
+    clearInterval(typingWpmInterval);
+    typingFinished = true;
+    const mins = (Date.now() - typingStartTime) / 60000;
+    const fw = mins > 0 ? Math.round((typingPrompt.length / 5) / mins) : 0;
+    typingWpm = fw;
+
+    // Flash final stats
+    const wpmEl2 = document.getElementById('typing-wpm');
+    if(wpmEl2){ wpmEl2.textContent = fw; wpmEl2.style.color = fw>=80?'#00d18c':fw>=50?'#f7a94e':'#e8f0ed'; }
+    const accEl2 = document.getElementById('typing-acc');
+    if(accEl2){ accEl2.textContent = typingAcc + '%'; accEl2.style.color = typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'; }
+
+    if(fw > typingBestWpm){ typingBestWpm = fw; localStorage.setItem('typing_best_wpm', String(fw)); updateTypingBest(); }
+    setTimeout(() => typingReset(), 1800);
   }
 }
 
