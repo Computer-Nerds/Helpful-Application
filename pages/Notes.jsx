@@ -778,7 +778,7 @@ export default function Dashboard() {
           {page==="apps" && (
             <div style={{ flex:1, padding:"32px 36px", overflowY:"auto" }}>
               <div style={{ fontSize:26, fontWeight:700, marginBottom:4 }}>Apps</div>
-              <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:28 }}>Your apps live here</div>
+              <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:28 }}>Your apps live here.</div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:16 }}>
                 {[{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"},{icon:"⌨️",label:"Typing",bg:"#1a2e2e"},{icon:"🎵",label:"Music",bg:"#1a2e1a"}].map(app=>(
                   <div key={app.label}
