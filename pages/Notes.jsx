@@ -488,6 +488,7 @@ export default function Dashboard() {
   const [subPage, setSubPage] = useState(null);
   const [chessSeconds, setChessSeconds] = useState(() => parseInt(localStorage.getItem('chessTimer')||'0'));
   const [pianoSeconds, setPianoSeconds] = useState(() => parseInt(localStorage.getItem('pianoTimer')||'0'));
+  const [typingSeconds, setTypingSeconds] = useState(() => parseInt(localStorage.getItem('typingTimer')||'0'));
   const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
   const [greeting, setGreeting] = useState("");
@@ -504,6 +505,7 @@ export default function Dashboard() {
   useEffect(() => { localStorage.setItem("projects", JSON.stringify(projects)); }, [projects]);
   useEffect(() => { localStorage.setItem('chessTimer', String(chessSeconds)); }, [chessSeconds]);
   useEffect(() => { localStorage.setItem('pianoTimer', String(pianoSeconds)); }, [pianoSeconds]);
+  useEffect(() => { localStorage.setItem('typingTimer', String(typingSeconds)); }, [typingSeconds]);
   useEffect(() => { localStorage.setItem("calEvents", JSON.stringify(calEvents)); }, [calEvents]);
 
   useEffect(() => {
@@ -657,6 +659,22 @@ export default function Dashboard() {
                     </div>
                     {pianoSeconds>=1800 && <div style={{ fontSize:10, color:"#00d18c", marginTop:4 }}>✓ Goal complete!</div>}
                   </div>
+                  {/* Typing progress */}
+                  <div style={{ marginTop:12 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                        <span style={{ fontSize:16 }}>⌨️</span>
+                        <span style={{ fontSize:13, fontWeight:600 }}>Typing</span>
+                      </div>
+                      <span style={{ fontSize:11, color: typingSeconds>=900?"#00d18c":"#7a9e8e" }}>
+                        {Math.floor(typingSeconds/60)}m / 15m
+                      </span>
+                    </div>
+                    <div style={{ height:6, background:"#1f2e28", borderRadius:3, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:`${Math.min((typingSeconds/900)*100,100)}%`, background: typingSeconds>=900?"#00d18c":"#f7a94e", borderRadius:3, transition:"width 0.5s" }}/>
+                    </div>
+                    {typingSeconds>=900 && <div style={{ fontSize:10, color:"#00d18c", marginTop:4 }}>✓ Goal complete!</div>}
+                  </div>
                 </div>
 
                 {projects.length > 0 && (
@@ -793,7 +811,7 @@ export default function Dashboard() {
           {/* ── TYPING SUB-PAGE ── */}
           {page==="apps" && subPage==="typing" && (
             <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
-              <TypingApp onBack={() => setSubPage(null)} />
+              <TypingApp onTimeUpdate={(s) => setTypingSeconds(s)} onBack={() => setSubPage(null)} />
             </div>
           )}
 
