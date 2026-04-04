@@ -31,7 +31,6 @@ const IconShield = ({ active }) => (
 function RichEditor({ projectId, value, onChange }) {
   const ref = useRef(null);
   const loadedFor = useRef(null);
-  const savedRange = useRef(null);
 
   useEffect(() => {
     if (ref.current && loadedFor.current !== projectId) {
@@ -40,102 +39,109 @@ function RichEditor({ projectId, value, onChange }) {
     }
   }, [projectId, value]);
 
-  // Save selection whenever user interacts with editor
-  const saveSelection = () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      savedRange.current = sel.getRangeAt(0).cloneRange();
-    }
-  };
-
-  const restoreSelection = () => {
+  // Keep editor focused and fire onChange
+  const cmd = (command, arg = null) => {
     ref.current.focus();
-    if (!savedRange.current) return;
+    document.execCommand(command, false, arg);
+    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
+  };
+
+  // Get the block-level ancestor of the current selection inside the editor
+  const getBlock = () => {
     const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedRange.current);
+    if (!sel || sel.rangeCount === 0) return null;
+    let node = sel.getRangeAt(0).commonAncestorContainer;
+    if (node.nodeType === 3) node = node.parentNode;
+    const blockTags = ["P","H1","H2","H3","H4","DIV","LI","BLOCKQUOTE"];
+    while (node && node !== ref.current) {
+      if (blockTags.includes(node.nodeName)) return node;
+      node = node.parentNode;
+    }
+    return null;
   };
 
-  // Standard execCommand (bold, italic, lists etc — these work fine)
-  const exec = (cmd, val = null) => {
-    restoreSelection();
-    document.execCommand(cmd, false, val);
-    onChange(ref.current.innerHTML);
+  // Change heading / paragraph tag by replacing the node in-place
+  const setBlockTag = (tag) => {
+    ref.current.focus();
+    const block = getBlock();
+    if (!block || block === ref.current) {
+      // Nothing selected — just insert a new element
+      document.execCommand("formatBlock", false, tag);
+    } else {
+      const replacement = document.createElement(tag);
+      replacement.innerHTML = block.innerHTML;
+      // preserve inline styles (e.g. text-align)
+      if (block.style.cssText) replacement.style.cssText = block.style.cssText;
+      block.replaceWith(replacement);
+      // Place cursor inside new element
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(replacement);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
   };
 
-  // Wrap selected content in a block-level tag (H1, H2, H3, P)
-  const applyBlock = (tag) => {
-    restoreSelection();
+  // Set text-align on every block in the selection
+  const setAlign = (align) => {
+    ref.current.focus();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
-    // Find the closest block ancestor inside the editor
-    let node = range.commonAncestorContainer;
-    if (node.nodeType === 3) node = node.parentNode; // text node → parent
-    // Walk up until we hit the editor or a block element
-    while (node && node !== ref.current && !["P","H1","H2","H3","DIV","LI"].includes(node.nodeName)) {
-      node = node.parentNode;
-    }
-    if (!node || node === ref.current) {
-      // No block found, wrap selection
-      const el = document.createElement(tag);
-      try { range.surroundContents(el); } catch(e) {
-        const frag = range.extractContents();
-        el.appendChild(frag);
-        range.insertNode(el);
+    const blockTags = ["P","H1","H2","H3","H4","DIV","LI","BLOCKQUOTE"];
+
+    // Collect all block nodes touched by selection
+    const touched = new Set();
+    const walker = document.createTreeWalker(ref.current, NodeFilter.SHOW_ELEMENT);
+    let n = walker.nextNode();
+    while (n) {
+      if (blockTags.includes(n.nodeName) && range.intersectsNode(n)) {
+        touched.add(n);
       }
-    } else {
-      // Replace existing block tag
-      const el = document.createElement(tag);
-      el.innerHTML = node.innerHTML;
-      // Copy alignment style if present
-      if (node.style && node.style.textAlign) el.style.textAlign = node.style.textAlign;
-      node.replaceWith(el);
+      n = walker.nextNode();
     }
-    onChange(ref.current.innerHTML);
+    // If nothing found, fall back to the single block
+    if (touched.size === 0) {
+      const b = getBlock();
+      if (b) touched.add(b);
+    }
+    touched.forEach(b => { b.style.textAlign = align; });
+    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
   };
 
-  // Apply text-align to the nearest block element
-  const applyAlign = (align) => {
-    restoreSelection();
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
-    let node = sel.getRangeAt(0).commonAncestorContainer;
-    if (node.nodeType === 3) node = node.parentNode;
-    // Walk up to find a block
-    while (node && node !== ref.current) {
-      const display = window.getComputedStyle(node).display;
-      if (display === "block" || display === "list-item" || display === "flex") break;
-      node = node.parentNode;
-    }
-    if (node && node !== ref.current) {
-      node.style.textAlign = align;
-    }
-    onChange(ref.current.innerHTML);
-  };
-
-  // Apply font size via span wrapping
-  const applyFontSize = (px) => {
-    restoreSelection();
+  // Wrap selected text in a <span> with a font-size
+  const setFontSize = (px) => {
+    ref.current.focus();
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
     if (range.collapsed) return;
+    // Remove any existing font-size spans inside selection first
+    document.execCommand("removeFormat", false, null);
+    // Re-grab range after removeFormat
+    const sel2 = window.getSelection();
+    if (!sel2 || sel2.rangeCount === 0) return;
+    const range2 = sel2.getRangeAt(0);
     const span = document.createElement("span");
     span.style.fontSize = px;
-    try { range.surroundContents(span); } catch(e) {
-      const frag = range.extractContents();
+    try {
+      range2.surroundContents(span);
+    } catch {
+      const frag = range2.extractContents();
       span.appendChild(frag);
-      range.insertNode(span);
+      range2.insertNode(span);
     }
-    onChange(ref.current.innerHTML);
+    setTimeout(() => { if (ref.current) onChange(ref.current.innerHTML); }, 0);
   };
 
   const ToolBtn = ({ label, title, onMD }) => (
-    <button title={title || label} onMouseDown={onMD}
-      style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 8px", borderRadius: 4, fontSize: 13, fontWeight: 600, minWidth: 28 }}>
-      {label}
-    </button>
+    <button
+      title={title || label}
+      onMouseDown={e => { e.preventDefault(); onMD(); }}
+      style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 8px", borderRadius: 4, fontSize: 13, fontWeight: 600, minWidth: 28 }}
+    >{label}</button>
   );
   const Divider = () => <div style={{ width: 1, height: 18, background: "#1f2e28", margin: "0 4px" }} />;
 
@@ -143,37 +149,40 @@ function RichEditor({ projectId, value, onChange }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      {/* Toolbar */}
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2, padding: "6px 12px", background: "#141917", borderBottom: "1px solid #1f2e28", flexShrink: 0 }}>
-        <ToolBtn label="B"  title="Bold"          onMD={e => { e.preventDefault(); exec("bold"); }} />
-        <ToolBtn label="I"  title="Italic"         onMD={e => { e.preventDefault(); exec("italic"); }} />
-        <ToolBtn label="U"  title="Underline"      onMD={e => { e.preventDefault(); exec("underline"); }} />
-        <ToolBtn label="S̶"  title="Strikethrough"  onMD={e => { e.preventDefault(); exec("strikeThrough"); }} />
+        <ToolBtn label="B"   title="Bold"           onMD={() => cmd("bold")} />
+        <ToolBtn label="I"   title="Italic"          onMD={() => cmd("italic")} />
+        <ToolBtn label="U"   title="Underline"       onMD={() => cmd("underline")} />
+        <ToolBtn label="S̶"   title="Strikethrough"   onMD={() => cmd("strikeThrough")} />
         <Divider />
-        <ToolBtn label="H1" title="Heading 1"      onMD={e => { e.preventDefault(); applyBlock("h1"); }} />
-        <ToolBtn label="H2" title="Heading 2"      onMD={e => { e.preventDefault(); applyBlock("h2"); }} />
-        <ToolBtn label="H3" title="Heading 3"      onMD={e => { e.preventDefault(); applyBlock("h3"); }} />
-        <ToolBtn label="¶"  title="Normal text"    onMD={e => { e.preventDefault(); applyBlock("p"); }} />
+        <ToolBtn label="H1"  title="Heading 1"       onMD={() => setBlockTag("h1")} />
+        <ToolBtn label="H2"  title="Heading 2"       onMD={() => setBlockTag("h2")} />
+        <ToolBtn label="H3"  title="Heading 3"       onMD={() => setBlockTag("h3")} />
+        <ToolBtn label="¶"   title="Normal text"     onMD={() => setBlockTag("p")} />
         <Divider />
+        {/* Font size */}
         <select
-          onMouseDown={e => { saveSelection(); }}
-          onChange={e => { applyFontSize(e.target.value); e.target.value = ""; }}
           defaultValue=""
+          onMouseDown={e => e.stopPropagation()}
+          onChange={e => { setFontSize(e.target.value); e.target.value = ""; }}
           style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#a0c9b8", borderRadius: 4, fontSize: 12, padding: "3px 6px", cursor: "pointer", outline: "none" }}
         >
           <option value="" disabled>Size</option>
           {fontSizes.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <Divider />
-        <ToolBtn label="•"  title="Bullet list"    onMD={e => { e.preventDefault(); exec("insertUnorderedList"); }} />
-        <ToolBtn label="1." title="Numbered list"  onMD={e => { e.preventDefault(); exec("insertOrderedList"); }} />
+        <ToolBtn label="•"   title="Bullet list"     onMD={() => cmd("insertUnorderedList")} />
+        <ToolBtn label="1."  title="Numbered list"   onMD={() => cmd("insertOrderedList")} />
         <Divider />
-        <ToolBtn label="⬅" title="Align left"     onMD={e => { e.preventDefault(); applyAlign("left"); }} />
-        <ToolBtn label="⬛" title="Align center"   onMD={e => { e.preventDefault(); applyAlign("center"); }} />
-        <ToolBtn label="➡" title="Align right"    onMD={e => { e.preventDefault(); applyAlign("right"); }} />
+        <ToolBtn label="⬅"  title="Align left"      onMD={() => setAlign("left")} />
+        <ToolBtn label="⬛"  title="Align center"    onMD={() => setAlign("center")} />
+        <ToolBtn label="➡"  title="Align right"     onMD={() => setAlign("right")} />
         <Divider />
-        <ToolBtn label="—"  title="Horizontal rule" onMD={e => { e.preventDefault(); exec("insertHorizontalRule"); }} />
+        <ToolBtn label="—"   title="Horizontal rule"  onMD={() => cmd("insertHorizontalRule")} />
       </div>
       <style>{`
+        .rich-editor { box-sizing: border-box; }
         .rich-editor ul { list-style-type: disc !important; padding-left: 28px !important; margin: 4px 0 !important; }
         .rich-editor ol { list-style-type: decimal !important; padding-left: 28px !important; margin: 4px 0 !important; }
         .rich-editor li { display: list-item !important; margin: 2px 0 !important; }
@@ -188,8 +197,6 @@ function RichEditor({ projectId, value, onChange }) {
         contentEditable
         suppressContentEditableWarning
         className="rich-editor"
-        onMouseUp={saveSelection}
-        onKeyUp={saveSelection}
         onInput={() => { if (ref.current) onChange(ref.current.innerHTML); }}
         style={{ flex: 1, padding: "20px 28px", outline: "none", overflowY: "auto", fontSize: 14, lineHeight: 1.8, color: "#e8f0ed", caretColor: "#00d18c" }}
       />
