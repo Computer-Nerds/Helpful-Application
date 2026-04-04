@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "artist": {
+      "type": "string"
+    },
+    "album": {
+      "type": "string"
+    },
+    "duration": {
+      "type": "number"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "cover_url": {
+      "type": "string"
+    },
+    "order": {
+      "type": "number"
+    }
+  },
+  "required": [],
+  "name": "Track"
+}
