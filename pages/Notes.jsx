@@ -41,17 +41,6 @@ function RichEditor({ projectId, value, onChange }) {
 
   const exec = (cmd, val = null) => { ref.current.focus(); document.execCommand(cmd, false, val); };
 
-  const insertBulletList = (e) => {
-    e.preventDefault(); ref.current.focus();
-    document.execCommand("insertUnorderedList", false, null);
-    onChange(ref.current.innerHTML);
-  };
-  const insertNumberedList = (e) => {
-    e.preventDefault(); ref.current.focus();
-    document.execCommand("insertOrderedList", false, null);
-    onChange(ref.current.innerHTML);
-  };
-
   const ToolBtn = ({ label, title, onMD }) => (
     <button title={title || label} onMouseDown={onMD}
       style={{ background: "none", border: "none", color: "#a0c9b8", cursor: "pointer", padding: "4px 8px", borderRadius: 4, fontSize: 13, fontWeight: 600, minWidth: 28 }}>
@@ -59,6 +48,13 @@ function RichEditor({ projectId, value, onChange }) {
     </button>
   );
   const Divider = () => <div style={{ width: 1, height: 18, background: "#1f2e28", margin: "0 4px" }} />;
+
+  const fontSizes = [
+    { label: "Small", val: "1" },
+    { label: "Normal", val: "3" },
+    { label: "Large", val: "5" },
+    { label: "X-Large", val: "7" },
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -73,8 +69,19 @@ function RichEditor({ projectId, value, onChange }) {
         <ToolBtn label="H3" title="Heading 3" onMD={e => { e.preventDefault(); exec("formatBlock", "<h3>"); }} />
         <ToolBtn label="¶" title="Normal text" onMD={e => { e.preventDefault(); exec("formatBlock", "<p>"); }} />
         <Divider />
-        <ToolBtn label="•" title="Bullet list" onMD={insertBulletList} />
-        <ToolBtn label="1." title="Numbered list" onMD={insertNumberedList} />
+        {/* Font size dropdown */}
+        <select
+          onMouseDown={e => e.stopPropagation()}
+          onChange={e => { ref.current.focus(); document.execCommand("fontSize", false, e.target.value); e.target.value = ""; }}
+          defaultValue=""
+          style={{ background: "#1a1f1d", border: "1px solid #1f2e28", color: "#a0c9b8", borderRadius: 4, fontSize: 12, padding: "3px 6px", cursor: "pointer", outline: "none" }}
+        >
+          <option value="" disabled>Size</option>
+          {fontSizes.map(s => <option key={s.val} value={s.val}>{s.label}</option>)}
+        </select>
+        <Divider />
+        <ToolBtn label="•" title="Bullet list" onMD={e => { e.preventDefault(); ref.current.focus(); document.execCommand("insertUnorderedList", false, null); onChange(ref.current.innerHTML); }} />
+        <ToolBtn label="1." title="Numbered list" onMD={e => { e.preventDefault(); ref.current.focus(); document.execCommand("insertOrderedList", false, null); onChange(ref.current.innerHTML); }} />
         <Divider />
         <ToolBtn label="⬅" title="Align left" onMD={e => { e.preventDefault(); exec("justifyLeft"); }} />
         <ToolBtn label="⬛" title="Align center" onMD={e => { e.preventDefault(); exec("justifyCenter"); }} />
@@ -83,9 +90,9 @@ function RichEditor({ projectId, value, onChange }) {
         <ToolBtn label="—" title="Horizontal rule" onMD={e => { e.preventDefault(); exec("insertHorizontalRule"); }} />
       </div>
       <style>{`
-        .rich-editor ul { list-style-type: disc !important; padding-left: 24px !important; margin: 4px 0 !important; }
-        .rich-editor ol { list-style-type: decimal !important; padding-left: 24px !important; margin: 4px 0 !important; }
-        .rich-editor li { display: list-item !important; margin: 2px 0 !important; }
+        .rich-editor ul { list-style-type: disc !important; padding-left: 28px !important; margin: 4px 0 !important; }
+        .rich-editor ol { list-style-type: decimal !important; padding-left: 28px !important; margin: 4px 0 !important; }
+        .rich-editor li { display: list-item !important; margin: 2px 0 !important; text-align: left !important; }
         .rich-editor h1 { font-size: 2em; font-weight: 800; margin: 8px 0 4px; color: #e8f0ed; }
         .rich-editor h2 { font-size: 1.5em; font-weight: 700; margin: 8px 0 4px; color: #e8f0ed; }
         .rich-editor h3 { font-size: 1.2em; font-weight: 700; margin: 6px 0 4px; color: #e8f0ed; }
@@ -204,6 +211,8 @@ function CalendarView({ events, setEvents }) {
 function ProjectView({ project, onUpdate }) {
   const [tab, setTab] = useState("notes");
   const [taskInput, setTaskInput] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   const getHealth = (p) => {
     const total = p.tasks?.length || 0;
@@ -226,6 +235,13 @@ function ProjectView({ project, onUpdate }) {
   };
   const toggleTask = (id) => onUpdate({ ...project, tasks: project.tasks.map(t => t.id===id ? {...t, done: !t.done} : t) });
   const removeTask = (id) => onUpdate({ ...project, tasks: project.tasks.filter(t => t.id !== id) });
+
+  const startEdit = (task) => { setEditingId(task.id); setEditText(task.text); };
+  const saveEdit = (id) => {
+    if (!editText.trim()) return;
+    onUpdate({ ...project, tasks: project.tasks.map(t => t.id===id ? {...t, text: editText.trim()} : t) });
+    setEditingId(null); setEditText("");
+  };
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -251,7 +267,9 @@ function ProjectView({ project, onUpdate }) {
           ))}
         </div>
       </div>
+
       {tab === "notes" && <RichEditor projectId={project.id} value={project.notes||""} onChange={html => onUpdate({...project, notes: html})} />}
+
       {tab === "tasks" && (
         <div style={{ flex: 1, padding: "20px 28px", overflowY: "auto" }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
@@ -264,9 +282,28 @@ function ProjectView({ project, onUpdate }) {
             {(!project.tasks || project.tasks.length === 0) && <div style={{ color: "#7a9e8e", fontSize: 14 }}>No tasks yet.</div>}
             {(project.tasks||[]).map(task => (
               <div key={task.id} style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 10, padding: "12px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-                <input type="checkbox" checked={task.done} onChange={() => toggleTask(task.id)} style={{ width: 17, height: 17, accentColor: "#00d18c", cursor: "pointer", flexShrink: 0 }} />
-                <span style={{ flex: 1, fontSize: 14, color: task.done?"#7a9e8e":"#e8f0ed", textDecoration: task.done?"line-through":"none" }}>{task.text}</span>
-                <button onClick={() => removeTask(task.id)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 18 }}>×</button>
+                <input type="checkbox" checked={task.done} onChange={() => toggleTask(task.id)}
+                  style={{ width: 17, height: 17, accentColor: "#00d18c", cursor: "pointer", flexShrink: 0 }} />
+
+                {editingId === task.id ? (
+                  <input
+                    autoFocus
+                    value={editText}
+                    onChange={e => setEditText(e.target.value)}
+                    onKeyDown={e => { if (e.key==="Enter") saveEdit(task.id); if (e.key==="Escape") setEditingId(null); }}
+                    onBlur={() => saveEdit(task.id)}
+                    style={{ flex: 1, background: "#111312", border: "1px solid #00d18c", borderRadius: 6, padding: "4px 8px", color: "#e8f0ed", fontSize: 14, outline: "none" }}
+                  />
+                ) : (
+                  <span
+                    onClick={() => startEdit(task)}
+                    title="Click to edit"
+                    style={{ flex: 1, fontSize: 14, color: task.done?"#7a9e8e":"#e8f0ed", textDecoration: task.done?"line-through":"none", cursor: "text" }}>
+                    {task.text}
+                  </span>
+                )}
+
+                <button onClick={() => removeTask(task.id)} style={{ background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 18, flexShrink: 0 }}>×</button>
               </div>
             ))}
           </div>
@@ -280,34 +317,29 @@ function ProjectView({ project, onUpdate }) {
 function TodayCalendarCard({ events, onNavigate }) {
   const now = new Date();
   const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
-  const monthDay = now.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+  const monthName = now.toLocaleDateString("en-US", { month: "long" });
   const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
   const todayEvents = events.filter(e => e.date === todayKey);
 
   return (
     <div onClick={onNavigate}
-      style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20, cursor: "pointer", minWidth: 220, maxWidth: 300 }}>
-      {/* Header */}
+      style={{ background: "#1a1f1d", border: "1px solid #1f2e28", borderRadius: 14, padding: 20, cursor: "pointer", minWidth: 220, maxWidth: 280 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
         <div>
           <div style={{ fontSize: 12, color: "#7a9e8e", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 700, marginBottom: 2 }}>Today</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: "#e8f0ed", lineHeight: 1 }}>{now.getDate()}</div>
-          <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 2 }}>{dayName}</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#e8f0ed", lineHeight: 1 }}>{now.getDate()}</div>
+          <div style={{ fontSize: 12, color: "#7a9e8e", marginTop: 3 }}>{dayName}</div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 12, color: "#7a9e8e" }}>{monthDay.split(" ")[0]}</div>
+          <div style={{ fontSize: 13, color: "#a0c9b8", fontWeight: 600 }}>{monthName}</div>
           <div style={{ fontSize: 11, color: "#4a7060" }}>{now.getFullYear()}</div>
         </div>
       </div>
-
-      {/* Divider */}
       <div style={{ height: 1, background: "#1f2e28", marginBottom: 12 }} />
-
-      {/* Events */}
       {todayEvents.length === 0 ? (
         <div style={{ fontSize: 12, color: "#4a7060", fontStyle: "italic" }}>No events today</div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
           {todayEvents.map(ev => (
             <div key={ev.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 3, height: 3, borderRadius: "50%", background: ev.color, flexShrink: 0, marginTop: 1 }} />
@@ -319,8 +351,6 @@ function TodayCalendarCard({ events, onNavigate }) {
           ))}
         </div>
       )}
-
-      {/* Footer hint */}
       <div style={{ marginTop: 12, fontSize: 10, color: "#2a4a3a" }}>Click to open calendar →</div>
     </div>
   );
@@ -331,10 +361,10 @@ export default function Dashboard() {
   const [page, setPage] = useState("home");
   const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
   const [greeting, setGreeting] = useState("");
   const [forecast, setForecast] = useState([]);
   const [todayWeather, setTodayWeather] = useState(null);
+  const [bottomDate, setBottomDate] = useState("");
 
   const [projects, setProjects] = useState(() => JSON.parse(localStorage.getItem("projects") || "[]"));
   const [selectedProjectId, setSelectedProjectId] = useState(null);
@@ -349,7 +379,7 @@ export default function Dashboard() {
     const tick = () => {
       const n = new Date();
       setTime(`${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")}`);
-      setDate(n.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }));
+      setBottomDate(n.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }));
       const hr = n.getHours();
       setGreeting(hr < 12 ? "Good morning 👋" : hr < 17 ? "Good afternoon 👋" : "Good evening 👋");
     };
@@ -456,19 +486,9 @@ export default function Dashboard() {
           {/* ── HOME ── */}
           {page==="home" && (
             <div style={{ flex:1, padding:"32px 36px", overflowY:"auto" }}>
-              <div style={{ fontSize:26, fontWeight:700, marginBottom:4 }}>{greeting}</div>
-              <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:28 }}>{date}</div>
-
-              {/* Card row */}
+              <div style={{ fontSize:26, fontWeight:700, marginBottom:24 }}>{greeting}</div>
               <div style={{ display:"flex", gap:16, flexWrap:"wrap", alignItems:"flex-start" }}>
-
-                {/* Today's Calendar Card */}
-                <TodayCalendarCard
-                  events={calEvents}
-                  onNavigate={() => { setPage("planner"); setPlannerSection("calendar"); }}
-                />
-
-                {/* Projects list */}
+                <TodayCalendarCard events={calEvents} onNavigate={() => { setPage("planner"); setPlannerSection("calendar"); }} />
                 {projects.length > 0 && (
                   <div style={{ flex:1, minWidth:240, display:"flex", flexDirection:"column", gap:10 }}>
                     <div style={{ fontSize:12, color:"#7a9e8e", textTransform:"uppercase", letterSpacing:"0.5px", fontWeight:700, marginBottom:4 }}>Projects</div>
@@ -481,7 +501,7 @@ export default function Dashboard() {
                         <div key={p.id} onClick={()=>{setPage("planner");setPlannerSection("projects");setSelectedProjectId(p.id);}}
                           style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:12, padding:"14px 18px", display:"flex", alignItems:"center", gap:14, cursor:"pointer" }}>
                           <div style={{flex:1}}>
-                            <div style={{ fontSize:15, fontWeight:600, marginBottom: pct!==null?6:0 }}>{p.name}</div>
+                            <div style={{ fontSize:15, fontWeight:600, marginBottom:pct!==null?6:0 }}>{p.name}</div>
                             {pct!==null && (
                               <div style={{ height:3, background:"#1f2e28", borderRadius:2, overflow:"hidden" }}>
                                 <div style={{ height:"100%", width:`${pct}%`, background:h.color, borderRadius:2 }}/>
@@ -497,7 +517,6 @@ export default function Dashboard() {
                     })}
                   </div>
                 )}
-
                 {projects.length === 0 && (
                   <div style={{ color:"#4a7060", fontSize:14, alignSelf:"center" }}>No projects yet — head to the Planner to create one!</div>
                 )}
@@ -628,7 +647,7 @@ export default function Dashboard() {
           ))}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:12, flexShrink:0, paddingLeft:16, borderLeft:"1px solid #1a2e24" }}>
-          <span style={{ fontSize:12, color:"#7a9e8e" }}>{date}</span>
+          <span style={{ fontSize:12, color:"#7a9e8e" }}>{bottomDate}</span>
           <div style={{ width:1, height:16, background:"#1a2e24" }}/>
           <span style={{ fontSize:15, fontWeight:700, color:"#e8f0ed", letterSpacing:"1px" }}>{time}</span>
         </div>
