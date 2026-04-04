@@ -319,10 +319,10 @@
     <nav id="sidebar">
       <div class="nav-group">
         <button class="nav-btn active" data-page="home"    data-tip="Home"    onclick="navigate('home', this)">
-          <i data-lucide="house" width="22" height="22"></i>
+          <span class="nav-emoji">🏠</span>
         </button>
         <button class="nav-btn" data-page="planner" data-tip="Planner" onclick="navigate('planner', this)">
-          <i data-lucide="file-text" width="22" height="22"></i>
+          <span class="nav-emoji">📋</span>
         </button>
         <button class="nav-btn" data-page="piano"   data-tip="Piano"   onclick="navigate('piano', this)">
           <span class="nav-emoji">🎹</span>
@@ -343,7 +343,7 @@
       <div class="nav-spacer"></div>
 
       <button class="nav-btn" data-page="security" data-tip="Security" onclick="navigate('security', this)">
-        <i data-lucide="shield" width="22" height="22"></i>
+        <span class="nav-emoji">🔒</span>
       </button>
     </nav>
 
@@ -461,6 +461,10 @@
           <div class="app-tile" onclick="openApp('typing.html')">
             <div class="app-icon" style="background:#1a1f2e;">⌨️</div>
             <span>Typing</span>
+          </div>
+          <div class="app-tile" onclick="openApp('music.html')">
+            <div class="app-icon" style="background:#1a2e1a;">🎵</div>
+            <span>Music</span>
           </div>
         </div>
       </div>
