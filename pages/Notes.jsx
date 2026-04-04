@@ -736,7 +736,7 @@ export default function Dashboard() {
               <div style={{ fontSize:26, fontWeight:700, marginBottom:4 }}>Apps</div>
               <div style={{ fontSize:14, color:"#7a9e8e", marginBottom:28 }}>Your apps live here</div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:16 }}>
-                {[{icon:"📝",label:"Notes",bg:"#1a2e25"},{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"}].map(app=>(
+                {[{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"}].map(app=>(
                   <div key={app.label}
                     onClick={() => { if (app.label==="Chess") setSubPage("chess"); }}
                     style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:16, padding:"24px 16px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:10, cursor:"pointer" }}
