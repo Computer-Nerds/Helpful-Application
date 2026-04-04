@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
+  <title>Helpful App</title>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,7 +30,7 @@
       user-select: none;
     }
 
-    /* Title bar */
+    /* ── Title bar ── */
     #titlebar {
       height: 36px;
       background: #003d2a;
@@ -50,10 +50,10 @@
     #tb-max   { background: #28c840; }
     .tb-btn:hover { filter: brightness(1.2); }
 
-    /* Main layout */
+    /* ── Layout ── */
     #app { display: flex; flex: 1; overflow: hidden; }
 
-    /* Sidebar */
+    /* ── Sidebar ── */
     #sidebar {
       width: var(--sidebar-width);
       background: var(--sidebar-bg);
@@ -67,166 +67,81 @@
     .nav-group { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
     .nav-divider { width: 36px; height: 1px; background: rgba(255,255,255,0.12); margin: 8px 0; }
     .nav-spacer { flex: 1; }
-
     .nav-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.6);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s, color 0.15s;
-      position: relative;
+      width: 44px; height: 44px; border-radius: 12px; border: none;
+      background: transparent; color: rgba(255,255,255,0.6);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s; position: relative;
     }
-    .nav-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-btn:hover  { background: rgba(255,255,255,0.12); color: #fff; }
     .nav-btn.active { background: rgba(255,255,255,0.18); color: #fff; }
     .nav-btn.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      width: 3px;
-      height: 24px;
-      background: #fff;
-      border-radius: 0 3px 3px 0;
+      content: ''; position: absolute; left: 0;
+      width: 3px; height: 24px; background: #fff; border-radius: 0 3px 3px 0;
     }
     .nav-btn[data-tip]:hover::after {
-      content: attr(data-tip);
-      position: absolute;
-      left: 54px;
-      background: #1a2e25;
-      color: #fff;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      white-space: nowrap;
-      pointer-events: none;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      content: attr(data-tip); position: absolute; left: 54px;
+      background: #1a2e25; color: #fff; font-size: 12px;
+      padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+      pointer-events: none; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
     .nav-emoji { font-size: 20px; line-height: 1; }
-
-    /* Apps grid icon */
     #apps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 2px 6px; }
     .app-square { width: 20px; height: 20px; border-radius: 4px; background: rgba(255,255,255,0.25); transition: background 0.15s; }
     .nav-btn:hover .app-square, .nav-btn.active .app-square { background: rgba(255,255,255,0.8); }
 
-    /* Content */
+    /* ── Content ── */
     #content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-
-    .page {
-      display: none;
-      flex: 1;
-      padding: 32px 36px;
-      overflow-y: auto;
-      animation: fadeIn 0.2s ease;
-    }
+    .page { display: none; flex: 1; padding: 32px 36px; overflow-y: auto; animation: fadeIn 0.2s ease; }
     .page.active { display: flex; flex-direction: column; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Page headers */
+    /* ── Page header ── */
     .page-header { margin-bottom: 28px; }
     .page-header h1 { font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .page-header p  { font-size: 14px; color: var(--text-muted); }
 
-    /* Section label */
+    /* ── Section label ── */
     .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin: 24px 0 12px;
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.8px; margin: 24px 0 12px;
     }
 
-    /* Cards */
+    /* ── Cards ── */
     .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-    }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
     .card h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
     .card .value { font-size: 28px; font-weight: 700; color: var(--text); }
     .card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-    /* Piano card Pomodoro */
-    .piano-pomo {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .pomo-mini-display {
-      font-size: 36px;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      color: var(--accent);
-      letter-spacing: 1px;
-    }
-    .pomo-mini-display.break-mode { color: #febc2e; }
-    .pomo-mini-phase {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .pomo-mini-controls {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-top: 4px;
-    }
-    .pomo-mini-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(255,255,255,0.07);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s;
-    }
-    .pomo-mini-btn:hover { background: rgba(255,255,255,0.14); }
-    .pomo-mini-dots { display: flex; gap: 5px; margin-left: auto; align-items: center; }
-    .pomo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
-    .pomo-dot.done { background: var(--accent); }
-    .pomo-progress-bar {
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .pomo-progress-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width 1s linear;
-    }
-    .pomo-progress-fill.break-mode { background: #febc2e; }
+    /* ── Progress bar ── */
+    .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 6px 0 4px; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
 
-    /* Planner */
+    /* ── Dailys card ── */
+    .daily-item { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+    .daily-item:last-child { margin-bottom: 0; }
+    .daily-row { display: flex; align-items: center; justify-content: space-between; }
+    .daily-label { font-size: 13px; color: var(--text); }
+    .daily-val { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Weather card ── */
+    .weather-main { display: flex; align-items: center; gap: 12px; }
+    .weather-temp { font-size: 36px; font-weight: 700; color: var(--text); }
+    .weather-icon { font-size: 32px; }
+    .weather-desc { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .weather-city { font-size: 11px; color: #3a5548; margin-top: 2px; }
+    .weather-forecast { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .forecast-day { background: rgba(0,209,140,0.06); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; text-align: center; font-size: 11px; color: var(--text-muted); flex: 1; min-width: 48px; }
+    .forecast-day .fd-icon { font-size: 16px; margin: 3px 0; }
+    .forecast-day .fd-temp { font-size: 12px; color: var(--text); font-weight: 600; }
+
+    /* ── Planner ── */
     .task-list { display: flex; flex-direction: column; gap: 10px; }
     .task-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
     }
     .task-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
     .task-item label { font-size: 14px; color: var(--text); cursor: pointer; flex: 1; }
@@ -244,72 +159,37 @@
       background: var(--accent); color: #003d2a; font-weight: 700; font-size: 14px; cursor: pointer;
     }
 
-    /* Apps page */
+    /* ── Apps page ── */
     .apps-page-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
     .app-tile {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: border-color 0.15s, transform 0.1s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 16px 16px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 10px; cursor: pointer; transition: border-color 0.15s, transform 0.1s;
     }
     .app-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
     .app-tile .app-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
     .app-tile span { font-size: 13px; color: var(--text); text-align: center; }
 
-    /* Piano page */
-    #page-piano {
-      padding: 0 !important;
-    }
+    /* ── Piano page (iframe) ── */
+    #page-piano { padding: 0 !important; }
 
-    /* Security */
+    /* ── Security ── */
     .security-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
     .security-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .security-icon.green { background: rgba(0,209,140,0.15); color: var(--accent); }
-    .security-icon.yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
-    .security-icon.red { background: rgba(255,95,87,0.15); color: #ff5f57; }
+    .security-icon.green  { background: rgba(0,209,140,0.15); color: var(--accent); }
+    .security-icon.yellow { background: rgba(255,193,7,0.15);  color: #ffc107; }
+    .security-icon.red    { background: rgba(255,95,87,0.15);   color: #ff5f57; }
     .security-info { flex: 1; }
     .security-info h4 { font-size: 14px; font-weight: 600; color: var(--text); }
-    .security-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .security-info p  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     .security-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
-    .badge-green { background: rgba(0,209,140,0.15); color: var(--accent); }
-    .badge-yellow { background: rgba(255,193,7,0.15); color: #ffc107; }
-    .badge-red { background: rgba(255,95,87,0.15); color: #ff5f57; }
+    .badge-green  { background: rgba(0,209,140,0.15); color: var(--accent); }
+    .badge-yellow { background: rgba(255,193,7,0.15);  color: #ffc107; }
+    .badge-red    { background: rgba(255,95,87,0.15);   color: #ff5f57; }
 
-    /* Chess card */
-    .chess-bar {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .progress-bar {
-      height: 6px;
-      background: var(--border);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 3px;
-      transition: width 0.5s ease;
-    }
-    .chess-detail { font-size: 12px; color: var(--text-muted); }
-
-    
-    /* ─── Music Bubble ──────────────────────────────────────────────── */
-    #music-bubble {
-      position: fixed; bottom: 28px; right: 28px; z-index: 200;
-      display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
-    }
-    #music-bubble.hidden { display: none; }
-
-    /* Expanded card */
+    /* ── Music Bubble ── */
+    #music-bubble { position: fixed; bottom: 28px; right: 28px; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
     #mb-card {
       background: #0b1510; border: 1px solid #1a2e24;
       border-radius: 18px; padding: 14px 16px;
@@ -318,79 +198,45 @@
       animation: mbSlideIn 0.18s ease;
     }
     #mb-card.open { display: flex; }
-    @keyframes mbSlideIn {
-      from { opacity: 0; transform: translateY(10px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0)   scale(1); }
-    }
-
-    #mb-track-info { min-width: 0; }
+    @keyframes mbSlideIn { from { opacity:0; transform:translateY(10px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
     #mb-title  { font-size: 13px; font-weight: 700; color: #e8f0ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     #mb-artist { font-size: 11px; color: #4a7060; margin-top: 2px; }
-
-    /* Seek */
     #mb-seek-row { display: flex; align-items: center; gap: 6px; }
     #mb-elapsed, #mb-dur { font-size: 10px; color: #3a5548; font-variant-numeric: tabular-nums; width: 30px; flex-shrink: 0; }
     #mb-dur { text-align: right; }
-    #mb-seek {
-      flex: 1; height: 3px; background: #1a2e24; border-radius: 2px;
-      cursor: pointer; position: relative;
-    }
+    #mb-seek { flex: 1; height: 3px; background: #1a2e24; border-radius: 2px; cursor: pointer; }
     #mb-seek-fill { height: 100%; background: #00d18c; border-radius: 2px; width: 0%; transition: width 0.3s linear; }
-
-    /* Controls row */
     #mb-controls { display: flex; align-items: center; justify-content: space-between; }
-    .mb-btn {
-      background: none; border: none; cursor: pointer;
-      color: #7a9e8e; font-size: 15px; padding: 4px 6px;
-      border-radius: 6px; transition: color 0.15s;
-      opacity: 0.5;
-    }
+    .mb-btn { background: none; border: none; cursor: pointer; color: #7a9e8e; font-size: 15px; padding: 4px 6px; border-radius: 6px; opacity: 0.5; transition: color 0.15s; }
     .mb-btn:hover { color: #e8f0ed; opacity: 1; }
     .mb-btn.active { color: #00d18c; opacity: 1; }
-    #mb-play {
-      background: #00d18c; border: none; cursor: pointer;
-      color: #003d2a; font-size: 17px;
-      width: 36px; height: 36px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity 0.15s; flex-shrink: 0;
-    }
+    #mb-play { background: #00d18c; border: none; cursor: pointer; color: #003d2a; font-size: 17px; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
     #mb-play:hover { opacity: 0.85; }
-
-    /* Vol */
     #mb-vol-row { display: flex; align-items: center; gap: 6px; }
     #mb-vol-row span { font-size: 13px; }
     #mb-vol { flex: 1; accent-color: #00d18c; cursor: pointer; }
-
-    /* Floating button */
     #mb-fab {
-      width: 52px; height: 52px; border-radius: 50%;
-      background: #00d18c; border: none; cursor: pointer;
+      width: 52px; height: 52px; border-radius: 50%; border: none;
+      background: linear-gradient(135deg, #00d18c, #00a870);
+      color: #003d2a; font-size: 22px; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,209,140,0.35);
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px; box-shadow: 0 4px 20px rgba(0,209,140,0.35);
-      transition: transform 0.15s, box-shadow 0.15s;
-      position: relative; flex-shrink: 0;
+      transition: transform 0.15s, box-shadow 0.15s; position: relative;
     }
     #mb-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,209,140,0.5); }
     #mb-fab-wave {
-      position: absolute; inset: 0; border-radius: 50%;
-      background: transparent;
-      border: 2px solid rgba(0,209,140,0.4);
-      animation: none;
+      position: absolute; inset: -4px; border-radius: 50%;
+      border: 2px solid rgba(0,209,140,0.3);
     }
-    #mb-fab-wave.pulsing {
-      animation: mbPulse 1.4s ease-out infinite;
-    }
-    @keyframes mbPulse {
-      0%   { transform: scale(1);   opacity: 0.7; }
-      100% { transform: scale(1.7); opacity: 0; }
-    }
+    #mb-fab-wave.pulsing { animation: mbPulse 1.4s ease-out infinite; }
+    @keyframes mbPulse { 0%{transform:scale(1);opacity:0.6;} 100%{transform:scale(1.5);opacity:0;} }
   </style>
 </head>
 <body>
 
   <!-- Title bar -->
   <div id="titlebar">
-    <span id="titlebar-title">Dashboard</span>
+    <span id="titlebar-title">Helpful App</span>
     <div id="titlebar-controls">
       <button class="tb-btn" id="tb-min"   onclick="minWin()"></button>
       <button class="tb-btn" id="tb-max"   onclick="maxWin()"></button>
@@ -405,11 +251,8 @@
         <button class="nav-btn active" data-page="home"    data-tip="Home"    onclick="navigate('home', this)">
           <span class="nav-emoji">🏠</span>
         </button>
-        <button class="nav-btn" data-page="planner" data-tip="Planner" onclick="navigate('planner', this)">
+        <button class="nav-btn"        data-page="planner" data-tip="Planner" onclick="navigate('planner', this)">
           <span class="nav-emoji">📋</span>
-        </button>
-        <button class="nav-btn" data-page="piano"   data-tip="Piano"   onclick="navigate('piano', this)">
-          <span class="nav-emoji">🎹</span>
         </button>
       </div>
 
@@ -417,21 +260,20 @@
 
       <button class="nav-btn" data-page="apps" data-tip="Apps" onclick="navigate('apps', this)">
         <div id="apps-grid">
-          <div class="app-square"></div>
-          <div class="app-square"></div>
-          <div class="app-square"></div>
-          <div class="app-square"></div>
+          <div class="app-square"></div><div class="app-square"></div>
+          <div class="app-square"></div><div class="app-square"></div>
         </div>
       </button>
 
-      <div class="nav-spacer"></div>
+      <div class="nav-divider"></div>
 
       <button class="nav-btn" data-page="security" data-tip="Security" onclick="navigate('security', this)">
         <span class="nav-emoji">🔒</span>
       </button>
+
+      <div class="nav-spacer"></div>
     </nav>
 
-    <!-- Content -->
     <div id="content">
 
       <!-- ── HOME ── -->
@@ -443,60 +285,71 @@
 
         <div class="section-label">Overview</div>
         <div class="card-grid">
-          <div class="card">
-            <h3>Tasks Today</h3>
-            <div class="value" id="tasks-count">0</div>
-            <div class="sub">Open tasks in planner</div>
-          </div>
+
+          <!-- Time -->
           <div class="card">
             <h3>Time</h3>
             <div class="value" id="home-time">--:--</div>
             <div class="sub" id="home-tz">Local time</div>
           </div>
+
+          <!-- Tasks -->
           <div class="card">
-            <h3>Chess Today</h3>
-            <div class="chess-bar">
-              <div class="value" id="chess-time-val">0 min</div>
-              <div class="progress-bar"><div class="progress-fill" id="chess-progress" style="width:0%"></div></div>
-              <div class="chess-detail" id="chess-detail">Goal: 30 min</div>
+            <h3>Tasks Today</h3>
+            <div class="value" id="tasks-count">0</div>
+            <div class="sub">Open tasks in planner</div>
+          </div>
+
+          <!-- Weather -->
+          <div class="card" id="weather-card" style="grid-column: span 2;">
+            <h3>Weather — Oklahoma City</h3>
+            <div class="weather-main">
+              <div class="weather-icon" id="wx-icon">🌤️</div>
+              <div>
+                <div class="weather-temp" id="wx-temp">--°F</div>
+                <div class="weather-desc" id="wx-desc">Loading…</div>
+                <div class="weather-city" id="wx-feels">Feels like --°F</div>
+              </div>
             </div>
+            <div class="weather-forecast" id="wx-forecast"></div>
           </div>
         </div>
 
-        <div class="section-label">Piano</div>
+        <div class="section-label">Dailys</div>
         <div class="card-grid">
-          <div class="card" style="min-width:200px;">
-            <h3>Pomodoro</h3>
-            <div class="piano-pomo">
-              <div>
-                <div class="pomo-mini-phase" id="home-pomo-phase">Focus</div>
-                <div class="pomo-mini-display" id="home-pomo-display">25:00</div>
-              </div>
-              <div class="pomo-progress-bar">
-                <div class="pomo-progress-fill" id="home-pomo-bar" style="width:0%"></div>
-              </div>
-              <div class="pomo-mini-controls">
-                <button class="pomo-mini-btn" id="home-pomo-play" onclick="homePomoPlaToggle()">▶</button>
-                <button class="pomo-mini-btn" onclick="homePomReset()">↺</button>
-                <button class="pomo-mini-btn" onclick="homePomSkip()">⏭</button>
-                <div class="pomo-mini-dots">
-                  <div class="pomo-dot" id="hp-d0"></div>
-                  <div class="pomo-dot" id="hp-d1"></div>
-                  <div class="pomo-dot" id="hp-d2"></div>
-                  <div class="pomo-dot" id="hp-d3"></div>
+          <!-- Dailys card -->
+          <div class="card" style="grid-column: span 2;">
+            <h3>Today's Goals</h3>
+            <div style="margin-top: 8px;">
+
+              <!-- Chess -->
+              <div class="daily-item">
+                <div class="daily-row">
+                  <span class="daily-label">♟️ Chess</span>
+                  <span class="daily-val" id="chess-val">0 / 30 min</span>
                 </div>
+                <div class="progress-bar"><div class="progress-fill" id="chess-bar" style="width:0%"></div></div>
               </div>
+
+              <!-- Piano -->
+              <div class="daily-item">
+                <div class="daily-row">
+                  <span class="daily-label">🎹 Piano</span>
+                  <span class="daily-val" id="piano-val">0 / 30 min</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="piano-bar" style="width:0%"></div></div>
+              </div>
+
+              <!-- Typing -->
+              <div class="daily-item">
+                <div class="daily-row">
+                  <span class="daily-label">⌨️ Typing</span>
+                  <span class="daily-val" id="typing-val">0 / 15 min</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill" id="typing-bar" style="width:0%"></div></div>
+              </div>
+
             </div>
-          </div>
-          <div class="card">
-            <h3>Open Piano</h3>
-            <div class="value" style="font-size:36px; cursor:pointer;" onclick="navigate('piano', document.querySelector('[data-page=piano]'))">🎹</div>
-            <div class="sub">Launch the piano app</div>
-          </div>
-          <div class="card">
-            <h3>Sessions Today</h3>
-            <div class="value" id="piano-sessions-count">0</div>
-            <div class="sub">Pomodoro sessions</div>
           </div>
         </div>
       </div>
@@ -537,10 +390,6 @@
           <div class="app-tile" onclick="navigate('piano', document.querySelector('[data-page=piano]'))">
             <div class="app-icon" style="background:#2e1a1a;">🎹</div>
             <span>Piano</span>
-          </div>
-          <div class="app-tile" onclick="openApp('spanish.html')">
-            <div class="app-icon" style="background:#2a1a2e;">🇪🇸</div>
-            <span>Spanish</span>
           </div>
           <div class="app-tile" onclick="openApp('typing.html')">
             <div class="app-icon" style="background:#1a1f2e;">⌨️</div>
@@ -584,14 +433,44 @@
     </div><!-- end #content -->
   </div><!-- end #app -->
 
+  <!-- ── Music Bubble ── -->
+  <div id="music-bubble">
+    <audio id="mb-audio"></audio>
+    <div id="mb-card">
+      <div>
+        <div id="mb-title">No track</div>
+        <div id="mb-artist"></div>
+      </div>
+      <div id="mb-seek-row">
+        <span id="mb-elapsed">0:00</span>
+        <div id="mb-seek" onclick="mbSeek(event)"><div id="mb-seek-fill"></div></div>
+        <span id="mb-dur">0:00</span>
+      </div>
+      <div id="mb-controls">
+        <button class="mb-btn" id="mb-shuffle-btn" onclick="mbToggleShuffle()">🔀</button>
+        <button class="mb-btn" onclick="mbPrev()">⏮</button>
+        <button id="mb-play" onclick="mbTogglePlay()">▶</button>
+        <button class="mb-btn" onclick="mbNext()">⏭</button>
+        <button class="mb-btn" id="mb-repeat-btn" onclick="mbToggleRepeat()">🔁</button>
+      </div>
+      <div id="mb-vol-row">
+        <span id="mb-vol-icon">🔊</span>
+        <input id="mb-vol" type="range" min="0" max="1" step="0.01" value="0.8" oninput="mbSetVol(this.value)">
+      </div>
+    </div>
+    <button id="mb-fab" onclick="mbToggleCard()">
+      <div id="mb-fab-wave"></div>🎵
+    </button>
+  </div>
+
   <script>
-    // ─── Electron ────────────────────────────────────────────────────────
+    // ── Electron ──
     function closeWin() { try { require('electron').ipcRenderer.send('window-close'); } catch(e){} }
     function minWin()   { try { require('electron').ipcRenderer.send('window-min');   } catch(e){} }
     function maxWin()   { try { require('electron').ipcRenderer.send('window-max');   } catch(e){} }
     function openApp(file) { try { require('electron').ipcRenderer.send('open-app', file); } catch(e){ window.open(file); } }
 
-    // ─── Navigation ──────────────────────────────────────────────────────
+    // ── Navigation ──
     function navigate(page, btn) {
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -599,34 +478,24 @@
       document.getElementById('page-' + page).classList.add('active');
     }
 
-    // ─── Clock & date ────────────────────────────────────────────────────
+    // ── Clock ──
     function updateClock() {
       const now = new Date();
-      const h = String(now.getHours()).padStart(2,'0');
-      const m = String(now.getMinutes()).padStart(2,'0');
       const el = document.getElementById('home-time');
-      if (el) el.textContent = h + ':' + m;
+      if (el) el.textContent = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
     }
     setInterval(updateClock, 1000);
     updateClock();
 
     const dateEl = document.getElementById('home-date');
-    if (dateEl) {
-      const d = new Date();
-      dateEl.textContent = 'Today is ' + d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    }
+    if (dateEl) dateEl.textContent = 'Today is ' + new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
 
     const greet = document.getElementById('home-greeting');
     const hr = new Date().getHours();
-    if (greet) {
-      if (hr < 12)      greet.textContent = 'Good morning 👋';
-      else if (hr < 17) greet.textContent = 'Good afternoon 👋';
-      else              greet.textContent = 'Good evening 👋';
-    }
+    if (greet) greet.textContent = hr < 12 ? 'Good morning 👋' : hr < 17 ? 'Good afternoon 👋' : 'Good evening 👋';
 
-    // ─── Planner ─────────────────────────────────────────────────────────
+    // ── Planner ──
     let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-
     function renderTasks() {
       const list = document.getElementById('task-list');
       list.innerHTML = '';
@@ -646,7 +515,6 @@
         list.appendChild(div);
       });
     }
-
     function addTask() {
       const input = document.getElementById('task-input');
       const text = input.value.trim();
@@ -656,196 +524,107 @@
       input.value = '';
       renderTasks();
     }
-
-    function toggleTask(i) {
-      tasks[i].done = !tasks[i].done;
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      renderTasks();
-    }
-
-    function removeTask(i) {
-      tasks.splice(i, 1);
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      renderTasks();
-    }
-
-    function escHtml(str) {
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
-
+    function toggleTask(i) { tasks[i].done = !tasks[i].done; localStorage.setItem('tasks', JSON.stringify(tasks)); renderTasks(); }
+    function removeTask(i) { tasks.splice(i, 1); localStorage.setItem('tasks', JSON.stringify(tasks)); renderTasks(); }
+    function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     renderTasks();
 
-    // ─── Chess progress ───────────────────────────────────────────────────
-    function updateChessCard() {
+    // ── Dailys ──
+    function updateDailys() {
       const today = new Date().toDateString();
-      const stored = JSON.parse(localStorage.getItem('chess_daily') || '{}');
-      const mins = stored.date === today ? Math.floor((stored.seconds || 0) / 60) : 0;
-      const pct = Math.min(100, (mins / 30) * 100);
-      const el = document.getElementById('chess-time-val');
-      const bar = document.getElementById('chess-progress');
-      const det = document.getElementById('chess-detail');
-      if (el) el.textContent = mins + ' min';
-      if (bar) bar.style.width = pct + '%';
-      if (det) det.textContent = mins >= 30 ? '✓ Goal reached!' : `${30 - mins} min remaining`;
+
+      // Chess — stored by chess.html as localStorage key 'chess_time_today_obj'
+      const chessRaw = JSON.parse(localStorage.getItem('chess_time_today_obj') || '{"date":"","secs":0}');
+      const chessSecs = chessRaw.date === today ? (chessRaw.secs || 0) : 0;
+      // fallback: also check raw seconds key
+      const chessFallback = parseInt(localStorage.getItem('chess_time_today') || '0');
+      const chessMin = Math.floor((chessSecs || chessFallback) / 60);
+      const chessPct = Math.min(100, (chessMin / 30) * 100);
+      document.getElementById('chess-val').textContent = chessMin + ' / 30 min' + (chessMin >= 30 ? ' ✓' : '');
+      document.getElementById('chess-bar').style.width = chessPct + '%';
+
+      // Piano — stored by piano.html as localStorage key 'piano_timer'
+      const pianoSecs = parseInt(localStorage.getItem('piano_timer') || '0');
+      const pianoMin = Math.floor(pianoSecs / 60);
+      const pianoPct = Math.min(100, (pianoMin / 30) * 100);
+      document.getElementById('piano-val').textContent = pianoMin + ' / 30 min' + (pianoMin >= 30 ? ' ✓' : '');
+      document.getElementById('piano-bar').style.width = pianoPct + '%';
+
+      // Typing — stored by typing.html as localStorage key 'typing_time_today'
+      const typingSecs = parseInt(localStorage.getItem('typing_time_today') || '0');
+      const typingMin = Math.floor(typingSecs / 60);
+      const typingPct = Math.min(100, (typingMin / 15) * 100);
+      document.getElementById('typing-val').textContent = typingMin + ' / 15 min' + (typingMin >= 15 ? ' ✓' : '');
+      document.getElementById('typing-bar').style.width = typingPct + '%';
     }
-    updateChessCard();
-    setInterval(updateChessCard, 5000);
+    updateDailys();
+    setInterval(updateDailys, 5000);
 
-    // ─── Piano sessions counter ───────────────────────────────────────────
-    function updatePianoSessions() {
-      const count = parseInt(localStorage.getItem('piano_sessions_today') || '0');
-      const el = document.getElementById('piano-sessions-count');
-      if (el) el.textContent = count;
-    }
-    updatePianoSessions();
-
-    // ─── Home Pomodoro (piano section) ────────────────────────────────────
-    const HOME_POMO_PHASES = [
-      { label: 'Focus',       secs: 25 * 60 },
-      { label: 'Break',       secs:  5 * 60 },
-      { label: 'Focus',       secs: 25 * 60 },
-      { label: 'Break',       secs:  5 * 60 },
-      { label: 'Focus',       secs: 25 * 60 },
-      { label: 'Break',       secs:  5 * 60 },
-      { label: 'Focus',       secs: 25 * 60 },
-      { label: 'Long Break',  secs: 15 * 60 },
-    ];
-
-    let hPomoPhase = 0;
-    let hPomoRemaining = HOME_POMO_PHASES[0].secs;
-    let hPomoRunning = false;
-    let hPomoInterval = null;
-    let hPomoSession = 0;
-
-    function renderHomePomo() {
-      const m = Math.floor(hPomoRemaining / 60);
-      const s = hPomoRemaining % 60;
-      const disp = document.getElementById('home-pomo-display');
-      disp.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-      const phase = HOME_POMO_PHASES[hPomoPhase];
-      document.getElementById('home-pomo-phase').textContent = phase.label;
-      const isBreak = phase.label.includes('Break');
-      disp.className = 'pomo-mini-display' + (isBreak ? ' break-mode' : '');
-      document.getElementById('home-pomo-play').textContent = hPomoRunning ? '⏸' : '▶';
-      const bar = document.getElementById('home-pomo-bar');
-      const total = HOME_POMO_PHASES[hPomoPhase].secs;
-      bar.style.width = ((1 - hPomoRemaining / total) * 100) + '%';
-      bar.className = 'pomo-progress-fill' + (isBreak ? ' break-mode' : '');
-      for (let i = 0; i < 4; i++) {
-        document.getElementById('hp-d' + i).className = 'pomo-dot' + (i < hPomoSession ? ' done' : '');
+    // ── Weather ──
+    const WX_KEY = '95b942dc3f7006dda16797bd6b501d29';
+    const WX_ICONS = {
+      200:'⛈️',201:'⛈️',202:'⛈️',210:'🌩️',211:'🌩️',212:'🌩️',221:'🌩️',230:'⛈️',231:'⛈️',232:'⛈️',
+      300:'🌦️',301:'🌦️',302:'🌦️',310:'🌦️',311:'🌧️',312:'🌧️',313:'🌧️',314:'🌧️',321:'🌧️',
+      500:'🌧️',501:'🌧️',502:'🌧️',503:'🌧️',504:'🌧️',511:'🌨️',520:'🌦️',521:'🌦️',522:'🌦️',531:'🌦️',
+      600:'❄️',601:'❄️',602:'❄️',611:'🌨️',612:'🌨️',613:'🌨️',615:'🌨️',616:'🌨️',620:'🌨️',621:'🌨️',622:'🌨️',
+      701:'🌫️',711:'💨',721:'🌫️',731:'💨',741:'🌫️',751:'💨',761:'💨',762:'🌋',771:'🌬️',781:'🌪️',
+      800:'☀️',801:'🌤️',802:'⛅',803:'🌥️',804:'☁️'
+    };
+    function wxIcon(id) { return WX_ICONS[id] || '🌡️'; }
+    function fToStr(k) { return Math.round((k - 273.15) * 9/5 + 32) + '°F'; }
+    async function loadWeather() {
+      try {
+        const r = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=Oklahoma City,US&appid=${WX_KEY}&cnt=40`);
+        const d = await r.json();
+        if (!d.list) return;
+        const now = d.list[0];
+        document.getElementById('wx-temp').textContent = fToStr(now.main.temp);
+        document.getElementById('wx-desc').textContent = now.weather[0].description.replace(/\b\w/g,c=>c.toUpperCase());
+        document.getElementById('wx-feels').textContent = 'Feels like ' + fToStr(now.main.feels_like);
+        document.getElementById('wx-icon').textContent = wxIcon(now.weather[0].id);
+        // 5-day forecast (one per day, noon slots)
+        const days = {};
+        d.list.forEach(item => {
+          const date = new Date(item.dt * 1000);
+          const key = date.toDateString();
+          const h = date.getHours();
+          if (!days[key] || Math.abs(h - 12) < Math.abs(new Date(days[key].dt * 1000).getHours() - 12)) days[key] = item;
+        });
+        const fc = document.getElementById('wx-forecast');
+        fc.innerHTML = '';
+        Object.values(days).slice(0, 5).forEach(item => {
+          const date = new Date(item.dt * 1000);
+          const label = date.toLocaleDateString('en-US', { weekday: 'short' });
+          const div = document.createElement('div');
+          div.className = 'forecast-day';
+          div.innerHTML = `<div>${label}</div><div class="fd-icon">${wxIcon(item.weather[0].id)}</div><div class="fd-temp">${fToStr(item.main.temp)}</div>`;
+          fc.appendChild(div);
+        });
+      } catch(e) {
+        document.getElementById('wx-desc').textContent = 'Weather unavailable';
       }
     }
+    loadWeather();
+    setInterval(loadWeather, 10 * 60 * 1000);
 
-    function homePomoPlaToggle() {
-      if (hPomoRunning) {
-        clearInterval(hPomoInterval);
-        hPomoRunning = false;
-      } else {
-        hPomoRunning = true;
-        hPomoInterval = setInterval(() => {
-          hPomoRemaining--;
-          if (hPomoRemaining <= 0) hPomoNext();
-          renderHomePomo();
-        }, 1000);
-      }
-      renderHomePomo();
-    }
-
-    function hPomoNext() {
-      clearInterval(hPomoInterval);
-      hPomoRunning = false;
-      const phase = HOME_POMO_PHASES[hPomoPhase];
-      if (phase.label === 'Focus') {
-        hPomoSession = Math.min(4, hPomoSession + 1);
-        // increment sessions counter
-        const prev = parseInt(localStorage.getItem('piano_sessions_today') || '0');
-        localStorage.setItem('piano_sessions_today', prev + 1);
-        updatePianoSessions();
-      }
-      hPomoPhase = (hPomoPhase + 1) % HOME_POMO_PHASES.length;
-      if (hPomoPhase === 0) hPomoSession = 0;
-      hPomoRemaining = HOME_POMO_PHASES[hPomoPhase].secs;
-      try { new Notification('Helpful App', { body: HOME_POMO_PHASES[hPomoPhase].label + ' phase started!' }); } catch(e){}
-      renderHomePomo();
-    }
-
-    function homePomReset() {
-      clearInterval(hPomoInterval);
-      hPomoRunning = false;
-      hPomoRemaining = HOME_POMO_PHASES[hPomoPhase].secs;
-      renderHomePomo();
-    }
-
-    function homePomSkip() { hPomoNext(); }
-
-    renderHomePomo();
-
-    // ─── Lucide ───────────────────────────────────────────────────────────
+    // ── Lucide ──
     lucide.createIcons();
-  </script>
 
-
-  <!-- ── Music Bubble ── -->
-  <div id="music-bubble" class="hidden">
-    <audio id="mb-audio"></audio>
-
-    <div id="mb-card">
-      <div id="mb-track-info">
-        <div id="mb-title">No track</div>
-        <div id="mb-artist"></div>
-      </div>
-      <div id="mb-seek-row">
-        <span id="mb-elapsed">0:00</span>
-        <div id="mb-seek" onclick="mbSeek(event)"><div id="mb-seek-fill"></div></div>
-        <span id="mb-dur">0:00</span>
-      </div>
-      <div id="mb-controls">
-        <button class="mb-btn" id="mb-shuffle-btn" onclick="mbToggleShuffle()" title="Shuffle">🔀</button>
-        <button class="mb-btn" onclick="mbPrev()" title="Previous">⏮</button>
-        <button id="mb-play" onclick="mbTogglePlay()">▶</button>
-        <button class="mb-btn" onclick="mbNext()" title="Next">⏭</button>
-        <button class="mb-btn" id="mb-repeat-btn" onclick="mbToggleRepeat()" title="Repeat">🔁</button>
-      </div>
-      <div id="mb-vol-row">
-        <span id="mb-vol-icon">🔊</span>
-        <input id="mb-vol" type="range" min="0" max="1" step="0.01" value="0.8" oninput="mbSetVol(this.value)">
-      </div>
-    </div>
-
-    <button id="mb-fab" onclick="mbToggleCard()">
-      <div id="mb-fab-wave"></div>
-      🎵
-    </button>
-  </div>
-
-  <script>
-    // ─── Music Bubble ─────────────────────────────────────────────────────
+    // ── Music Bubble (localStorage) ──
     const MB = { tracks: [], idx: 0, shuffle: false, repeat: false, playing: false, open: false, volume: 0.8 };
     const mbAudio = document.getElementById('mb-audio');
 
-    function mbFmt(s) {
-      if (!s || isNaN(s)) return '0:00';
-      return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
-    }
+    function mbFmt(s) { if (!s || isNaN(s)) return '0:00'; return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0'); }
 
-    async function mbLoadTracks() {
-      try {
-        const res = await fetch('https://api.base44.com/api/apps/69cf6a85f0ef6a1f0f44476a/entities/Track/list', {
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await res.json();
-        MB.tracks = Array.isArray(data) ? data : (data.items || data.data || []);
-        if (MB.tracks.length > 0) {
-          document.getElementById('music-bubble').classList.remove('hidden');
-          mbLoadTrack(0, false);
-        }
-      } catch(e) { console.warn('Music bubble:', e); }
+    function mbInit() {
+      MB.tracks = JSON.parse(localStorage.getItem('music_tracks') || '[]');
+      if (MB.tracks.length > 0) mbLoadTrack(0, false);
     }
 
     function mbLoadTrack(idx, autoplay) {
       MB.idx = ((idx % MB.tracks.length) + MB.tracks.length) % MB.tracks.length;
       const t = MB.tracks[MB.idx];
-      mbAudio.src = t.file_url;
+      mbAudio.src = t.dataUrl;
       mbAudio.volume = MB.volume;
       mbAudio.load();
       document.getElementById('mb-title').textContent  = t.title  || 'Untitled';
@@ -858,56 +637,32 @@
       mbRenderPlay();
     }
 
-    function mbToggleCard() {
-      MB.open = !MB.open;
-      document.getElementById('mb-card').classList.toggle('open', MB.open);
-    }
-
+    function mbToggleCard() { MB.open = !MB.open; document.getElementById('mb-card').classList.toggle('open', MB.open); }
     function mbTogglePlay() {
       if (!MB.tracks.length) return;
       if (MB.playing) { mbAudio.pause(); MB.playing = false; }
       else { mbAudio.play().catch(()=>{}); MB.playing = true; }
       mbRenderPlay();
     }
-
     function mbRenderPlay() {
       document.getElementById('mb-play').textContent = MB.playing ? '⏸' : '▶';
       document.getElementById('mb-fab-wave').classList.toggle('pulsing', MB.playing);
     }
-
     function mbNext() {
       if (!MB.tracks.length) return;
-      if (MB.shuffle) {
-        let ni = MB.idx;
-        if (MB.tracks.length > 1) while (ni === MB.idx) ni = Math.floor(Math.random() * MB.tracks.length);
-        mbLoadTrack(ni, MB.playing);
-      } else {
-        mbLoadTrack(MB.idx + 1, MB.playing);
-      }
+      let ni = MB.shuffle ? Math.floor(Math.random() * MB.tracks.length) : MB.idx + 1;
+      mbLoadTrack(ni, MB.playing);
     }
-
     function mbPrev() {
       if (mbAudio.currentTime > 3) { mbAudio.currentTime = 0; return; }
       mbLoadTrack(MB.idx - 1, MB.playing);
     }
-
-    function mbToggleShuffle() {
-      MB.shuffle = !MB.shuffle;
-      document.getElementById('mb-shuffle-btn').classList.toggle('active', MB.shuffle);
-    }
-
-    function mbToggleRepeat() {
-      MB.repeat = !MB.repeat;
-      document.getElementById('mb-repeat-btn').classList.toggle('active', MB.repeat);
-    }
-
+    function mbToggleShuffle() { MB.shuffle = !MB.shuffle; document.getElementById('mb-shuffle-btn').classList.toggle('active', MB.shuffle); }
+    function mbToggleRepeat() { MB.repeat = !MB.repeat; document.getElementById('mb-repeat-btn').classList.toggle('active', MB.repeat); }
     function mbSetVol(v) {
-      MB.volume = parseFloat(v);
-      mbAudio.volume = MB.volume;
-      const icon = MB.volume === 0 ? '🔇' : MB.volume < 0.5 ? '🔉' : '🔊';
-      document.getElementById('mb-vol-icon').textContent = icon;
+      MB.volume = parseFloat(v); mbAudio.volume = MB.volume;
+      document.getElementById('mb-vol-icon').textContent = MB.volume === 0 ? '🔇' : MB.volume < 0.5 ? '🔉' : '🔊';
     }
-
     function mbSeek(e) {
       const rect = document.getElementById('mb-seek').getBoundingClientRect();
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -920,17 +675,12 @@
       document.getElementById('mb-dur').textContent     = mbFmt(d);
       document.getElementById('mb-seek-fill').style.width = d > 0 ? ((e/d)*100)+'%' : '0%';
     });
-
-    mbAudio.addEventListener('loadedmetadata', () => {
-      document.getElementById('mb-dur').textContent = mbFmt(mbAudio.duration);
-    });
-
     mbAudio.addEventListener('ended', () => {
       if (MB.repeat) { mbAudio.currentTime = 0; mbAudio.play(); return; }
       mbNext();
     });
 
-    mbLoadTracks();
+    mbInit();
   </script>
 </body>
 </html>
