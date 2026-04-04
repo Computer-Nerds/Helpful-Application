@@ -77,15 +77,15 @@
 
     /* ── Bottom weather bar ── */
     #weatherbar {
-      height: 60px; min-height: 60px; background: #0a0f0d;
+      height: 80px; min-height: 80px; background: #0a0f0d;
       border-top: 1px solid #1a2e24;
-      display: flex; align-items: center; padding: 0 16px; flex-shrink: 0; gap: 0;
+      display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; gap: 0;
     }
     #today-weather {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 0 16px 0 8px; border-right: 1px solid #1a2e24; margin-right: 8px; gap: 1px;
     }
-    #today-temp { font-size: 19px; font-weight: 800; color: #e8f0ed; }
+    #today-temp { font-size: 22px; font-weight: 800; color: #e8f0ed; }
     #today-hilow { font-size: 11px; color: #7a9e8e; }
     #today-desc { font-size: 10px; color: #7a9e8e; }
     #forecast { display: flex; align-items: center; flex: 1; gap: 0; }
@@ -93,12 +93,12 @@
       display: flex; flex-direction: column; align-items: center; padding: 0 16px;
       border-right: 1px solid #1a2e24; gap: 2px;
     }
-    .fc-day-name { font-size: 11px; color: #4a7060; font-weight: 700; }
-    .fc-icon { font-size: 18px; }
-    .fc-temps { font-size: 11px; color: #7a9e8e; }
+    .fc-day-name { font-size: 12px; color: #7a9e8e; font-weight: 700; }
+    .fc-icon { font-size: 22px; }
+    .fc-temps { font-size: 12px; color: #7a9e8e; }
     #clock-area { margin-left: auto; text-align: right; }
-    #clock { font-size: 22px; font-weight: 800; color: #e8f0ed; }
-    #clock-date { font-size: 11px; color: #4a7060; }
+    #clock { font-size: 26px; font-weight: 800; color: #e8f0ed; }
+    #clock-date { font-size: 12px; color: #7a9e8e; }
 
     /* ── HOME PAGE ── */
     #home-content { flex: 1; padding: 32px 36px; overflow-y: auto; }
@@ -516,9 +516,7 @@
     <!-- ══ PLANNER ══ -->
     <div class="page" id="page-planner">
       <div id="planner-sidebar">
-        <div id="planner-sidebar-header">
-          <span style="font-size:13px;color:#7a9e8e">📅</span> Calendar
-        </div>
+        <div id="planner-sidebar-header">Planner</div>
         <button id="planner-cal-btn" onclick="showPlannerSection('calendar')">📅 Calendar</button>
         <div style="height:1px;background:#1a2e24;margin:4px 0"></div>
         <div id="planner-projects-header">
@@ -715,6 +713,9 @@
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px" id="piano-sustain-label" style="color:#7a9e8e">
             <input type="checkbox" id="piano-sustain-chk" onchange="pianoSustainChange(this.checked)" style="accent-color:#00d18c"> Sustain
           </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#7a9e8e" id="piano-hidenav-label">
+            <input type="checkbox" id="piano-hidenav-chk" onchange="pianoHideNavChange(this.checked)" style="accent-color:#00d18c"> Hide Nav
+          </label>
           <div style="flex:1"></div>
           <div class="timer-block">
             <span class="timer-display" id="piano-timer-display">00:00</span>
@@ -889,7 +890,7 @@ function setPage(p) {
   });
   if (p === 'planner') {
     renderPlannerSidebar();
-    if (!currentPlannerSection) showPlannerSection('calendar');
+    if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
   if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); }
   if (p === 'piano') initPiano();
@@ -1781,6 +1782,11 @@ function renderPianoKeys(){
 
 function pianoKeydown(e){
   if(e.ctrlKey&&e.key.toLowerCase()==='s'){pianoSustain=!pianoSustain;document.getElementById('piano-sustain-chk').checked=pianoSustain;e.preventDefault();}
+  if(e.ctrlKey&&e.key.toLowerCase()==='h'){const chk=document.getElementById('piano-hidenav-chk');chk.checked=!chk.checked;pianoHideNavChange(chk.checked);e.preventDefault();}
+}
+function pianoHideNavChange(hide){
+  document.getElementById('piano-topbar').style.display=hide?'none':'flex';
+  document.getElementById('piano-info').style.display=hide?'none':'flex';
 }
 
 function pianoPress(midi){
@@ -1913,7 +1919,10 @@ function typingHandleInput(e){
     clearInterval(typingWpmInterval);typingFinished=true;
     const el=(Date.now()-typingStartTime)/60000;
     const fw=Math.round((typingPrompt.length/5)/el);typingWpm=fw;
-    document.getElementById('typing-wpm').textContent=fw;
+    const wpmEl=document.getElementById('typing-wpm');
+    wpmEl.textContent=fw;wpmEl.style.color=fw>=80?'#00d18c':fw>=50?'#f7a94e':'#e8f0ed';
+    const accEl=document.getElementById('typing-acc');
+    accEl.textContent=typingAcc+'%';accEl.style.color=typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171';
     if(fw>typingBestWpm){typingBestWpm=fw;localStorage.setItem('typing_best_wpm',String(fw));updateTypingBest();}
     setTimeout(()=>typingReset(),1800);
   }
