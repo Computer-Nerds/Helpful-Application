@@ -80,7 +80,7 @@ function stopNote(midi, sustain=false, immediate=false) {
 // ── Beam chaser ───────────────────────────────────────────────
 let beamId = 0;
 
-export default function PianoApp({ onBack }) {
+export default function PianoApp({ onBack, onTimeUpdate }) {
   const [pressedKeys, setPressedKeys] = useState(new Set());
   const [volume,      setVolume]      = useState(0.8);
   const [sustain,     setSustain]     = useState(false);
@@ -93,6 +93,37 @@ export default function PianoApp({ onBack }) {
   const pianoRef   = useRef(null);
   const chaserRef  = useRef(null);
   const rafRef     = useRef(null);
+  const timerRef   = useRef(null);
+
+  // ── Practice timer (mirrors Chess) ──────────────────────────
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [elapsed, setElapsed]           = useState(() => parseInt(localStorage.getItem('pianoTimer')||'0'));
+
+  useEffect(() => {
+    if (timerRunning) {
+      timerRef.current = setInterval(() => {
+        setElapsed(e => {
+          const next = e + 1;
+          localStorage.setItem('pianoTimer', String(next));
+          if (onTimeUpdate) onTimeUpdate(next);
+          return next;
+        });
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [timerRunning]);
+
+  useEffect(() => {
+    const saved = parseInt(localStorage.getItem('pianoTimer')||'0');
+    if (onTimeUpdate && saved > 0) onTimeUpdate(saved);
+  }, []);
+
+  const formatTime = (s) => {
+    const m = Math.floor(s/60), sec = s%60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  };
 
   useEffect(()=>{ sustainRef.current = sustain; }, [sustain]);
   useEffect(()=>{ volumeRef.current  = volume;  }, [volume]);
@@ -215,6 +246,27 @@ export default function PianoApp({ onBack }) {
           <span style={{ fontSize:11, color:"#2a4a38" }}>
             {navigator.requestMIDIAccess ? "MIDI ready" : "No MIDI API"}
           </span>
+
+          {/* Practice Timer */}
+          <div style={{ display:"flex", alignItems:"center", gap:8, background:"#0d1a14", border:"1px solid #1f2e28", borderRadius:10, padding:"4px 12px", marginLeft:8 }}>
+            <span style={{ fontSize:15, fontWeight:800, letterSpacing:"2px", color:elapsed>=1800?"#00d18c":"#e8f0ed", minWidth:50, textAlign:"center", fontVariantNumeric:"tabular-nums" }}>
+              {formatTime(elapsed)}
+            </span>
+            <button onClick={()=>setTimerRunning(v=>!v)}
+              style={{ background:timerRunning?"rgba(247,78,78,0.15)":"rgba(0,209,140,0.15)", border:`1px solid ${timerRunning?"#f74e4e":"#00d18c"}`, borderRadius:6, padding:"2px 10px", cursor:"pointer", fontSize:12, fontWeight:700, color:timerRunning?"#f74e4e":"#00d18c" }}>
+              {timerRunning?"⏸":"▶"}
+            </button>
+            <button onClick={()=>{ setTimerRunning(false); setElapsed(0); localStorage.setItem('pianoTimer','0'); if(onTimeUpdate) onTimeUpdate(0); }}
+              title="Reset"
+              style={{ background:"none", border:"none", cursor:"pointer", padding:"2px 4px", color:"#4a7060", display:"flex", alignItems:"center" }}
+              onMouseEnter={e=>e.currentTarget.style.color="#e8f0ed"}
+              onMouseLeave={e=>e.currentTarget.style.color="#4a7060"}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
