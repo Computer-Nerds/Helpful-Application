@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import ChessGame from "./Chess.jsx";
+import PianoGame from "./Piano.jsx";
 
 const WEATHER_KEY = "95b942dc3f7006dda16797bd6b501d29";
 const CITY = "Oklahoma City";
@@ -475,6 +476,11 @@ function ChessEmbed({ onTimeUpdate, onBack }) {
   return <ChessGame onTimeUpdate={onTimeUpdate} onBack={onBack} />;
 }
 
+// ── Piano Embed Wrapper ───────────────────────────────────────
+function PianoEmbed({ onBack }) {
+  return <PianoGame onBack={onBack} />;
+}
+
 // ── Main Dashboard ─────────────────────────────────────────
 export default function Dashboard() {
   const [page, setPage] = useState("home");
@@ -738,7 +744,7 @@ export default function Dashboard() {
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:16 }}>
                 {[{icon:"♟️",label:"Chess",bg:"#1a1a2e"},{icon:"🎹",label:"Piano",bg:"#2e1a1a"},{icon:"🇪🇸",label:"Spanish",bg:"#2a1a2e"}].map(app=>(
                   <div key={app.label}
-                    onClick={() => { if (app.label==="Chess") setSubPage("chess"); }}
+                    onClick={() => { if (app.label==="Chess") setSubPage("chess"); if (app.label==="Piano") setSubPage("piano"); }}
                     style={{ background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:16, padding:"24px 16px 16px", display:"flex", flexDirection:"column", alignItems:"center", gap:10, cursor:"pointer" }}
                     onMouseEnter={e => e.currentTarget.style.borderColor="#00d18c"}
                     onMouseLeave={e => e.currentTarget.style.borderColor="#1f2e28"}
@@ -755,6 +761,13 @@ export default function Dashboard() {
           {page==="apps" && subPage==="chess" && (
             <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
               <ChessEmbed onTimeUpdate={(s) => setChessSeconds(s)} onBack={() => setSubPage(null)} />
+            </div>
+          )}
+
+          {/* ── PIANO SUB-PAGE ── */}
+          {page==="apps" && subPage==="piano" && (
+            <div style={{ position:"fixed", inset:0, background:"#111312", zIndex:50, overflowY:"auto" }}>
+              <PianoEmbed onBack={() => setSubPage(null)} />
             </div>
           )}
 
