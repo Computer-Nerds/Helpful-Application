@@ -4,9 +4,22 @@ import { useState, useEffect, useRef, useCallback } from "react";
 //  BUILT-IN CHESS ENGINE
 // ─────────────────────────────────────────────────────────────
 const FILES = ["a","b","c","d","e","f","g","h"];
+// White pieces rendered as filled black symbols on light background (CSS invert trick)
+// We render all pieces as filled black unicode, then color via CSS
 const PIECE_UNICODE = {
-  K:"♔", Q:"♕", R:"♖", B:"♗", N:"♘", P:"♙",
+  K:"♚", Q:"♛", R:"♜", B:"♝", N:"♞", P:"♟",
   k:"♚", q:"♛", r:"♜", b:"♝", n:"♞", p:"♟",
+};
+// White uses the same filled glyphs but colored white with black outline via text-shadow
+const WHITE_STYLE = {
+  color: "#ffffff",
+  textShadow: "-1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 3px rgba(0,0,0,0.6)",
+  filter: "none",
+};
+const BLACK_STYLE = {
+  color: "#111111",
+  textShadow: "0 1px 3px rgba(0,0,0,0.4)",
+  filter: "none",
 };
 const RATINGS = [
   { label:"Beginner",     elo:400,  depth:1, rand:0.9  },
@@ -161,7 +174,7 @@ function playCapture() {
 // ─────────────────────────────────────────────────────────────
 //  REACT COMPONENT
 // ─────────────────────────────────────────────────────────────
-const SQUARE_SIZE = 58;
+const SQUARE_SIZE = 70;
 const initState = () => ({ castle:"KQkq", ep:null, turn:"w" });
 
 export default function ChessApp({ onTimeUpdate, onBack }) {
@@ -183,7 +196,7 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
 
   // ── Timer ──────────────────────────────────────────────────
   const [timerRunning, setTimerRunning] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(() => parseInt(localStorage.getItem('chessTimer')||'0'));
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -191,6 +204,7 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
       timerRef.current = setInterval(() => {
         setElapsed(e => {
           const next = e + 1;
+          localStorage.setItem('chessTimer', String(next));
           if (onTimeUpdate) onTimeUpdate(next);
           return next;
         });
@@ -205,6 +219,12 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
     const m = Math.floor(s / 60), sec = s % 60;
     return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
   };
+
+  // ── Sync persisted timer to dashboard on mount ──────────────
+  useEffect(() => {
+    const saved = parseInt(localStorage.getItem('chessTimer')||'0');
+    if (onTimeUpdate && saved > 0) onTimeUpdate(saved);
+  }, []);
 
   // ── Start game ─────────────────────────────────────────────
   const startGame = (r) => {
@@ -328,8 +348,18 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
           {formatTime(elapsed)}
         </span>
         <button onClick={()=>setTimerRunning(v=>!v)}
-          style={{ background:timerRunning?"#f74e4e25":"#00d18c25", border:`1px solid ${timerRunning?"#f74e4e":"#00d18c"}`, borderRadius:6, padding:"3px 12px", cursor:"pointer", fontSize:12, fontWeight:700, color:timerRunning?"#f74e4e":"#00d18c" }}>
+          style={{ background:timerRunning?"#f74e4e25":"#00d18c25", border:`1px solid ${timerRunning?"#f74e4e":"#00d18c"}`, borderRadius:6, padding:"3px 10px", cursor:"pointer", fontSize:12, fontWeight:700, color:timerRunning?"#f74e4e":"#00d18c" }}>
           {timerRunning?"⏸":"▶"}
+        </button>
+        <button onClick={()=>{ setTimerRunning(false); setElapsed(0); localStorage.setItem('chessTimer','0'); if(onTimeUpdate) onTimeUpdate(0); }}
+          title="Reset timer"
+          style={{ background:"none", border:"none", cursor:"pointer", padding:"3px 4px", display:"flex", alignItems:"center", color:"#4a7060" }}
+          onMouseEnter={e=>e.currentTarget.style.color="#e8f0ed"}
+          onMouseLeave={e=>e.currentTarget.style.color="#4a7060"}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+          </svg>
         </button>
       </div>
       {screen==="game" && (
@@ -390,9 +420,9 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
                   {hl && !piece && <div style={{ width:18, height:18, borderRadius:"50%", background:"rgba(0,0,0,0.22)", pointerEvents:"none" }}/>}
                   {hl && piece  && <div style={{ position:"absolute", inset:0, border:"3px solid rgba(0,0,0,0.25)", pointerEvents:"none" }}/>}
                   {piece && !isAnimFrom && (
-                    <span style={{ fontSize:36, lineHeight:1, zIndex:1, transition:"none",
-                      filter:piece.color==="w"?"drop-shadow(0 1px 1px rgba(0,0,0,0.4))":"drop-shadow(0 1px 2px rgba(0,0,0,0.8))" }}>
-                      {PIECE_UNICODE[piece.color==="w"?piece.type.toUpperCase():piece.type]}
+                    <span style={{ fontSize:44, lineHeight:1, zIndex:1, transition:"none", userSelect:"none",
+                      ...(piece.color==="w" ? WHITE_STYLE : BLACK_STYLE) }}>
+                      {PIECE_UNICODE[piece.type]}
                     </span>
                   )}
                   {file===0&&<span style={{ position:"absolute",top:2,left:3,fontSize:9,fontWeight:700,color:light?darkSq:lightSq,opacity:0.7,pointerEvents:"none" }}>{8-rank}</span>}
@@ -409,11 +439,12 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
             key={animPiece.key}
             style={{
               position:"absolute",
-              fontSize:36,
+              fontSize:44,
               lineHeight:1,
               zIndex:20,
               pointerEvents:"none",
-              filter: animPiece.piece.color==="w"?"drop-shadow(0 1px 1px rgba(0,0,0,0.4))":"drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+              userSelect:"none",
+              ...(animPiece.piece.color==="w" ? WHITE_STYLE : BLACK_STYLE),
               left: animPiece.fromPx.x - 18,
               top:  animPiece.fromPx.y - 18,
               transform:"translate(0,0)",
@@ -421,7 +452,7 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
               "--dx": `${animPiece.toPx.x - animPiece.fromPx.x}px`,
               "--dy": `${animPiece.toPx.y - animPiece.fromPx.y}px`,
             }}>
-            {PIECE_UNICODE[animPiece.piece.color==="w"?animPiece.piece.type.toUpperCase():animPiece.piece.type]}
+            {PIECE_UNICODE[animPiece.piece.type]}
           </span>
         )}
       </div>
@@ -455,7 +486,7 @@ export default function ChessApp({ onTimeUpdate, onBack }) {
               {["q","r","b","n"].map(p=>(
                 <button key={p} onClick={()=>executeMove(promotion.move, board, gameState, p)}
                   style={{ width:60, height:60, background:"#111312", border:"1px solid #1f2e28", borderRadius:10, fontSize:36, cursor:"pointer" }}>
-                  {PIECE_UNICODE[p.toUpperCase()]}
+                  {PIECE_UNICODE[p]}
                 </button>
               ))}
             </div>

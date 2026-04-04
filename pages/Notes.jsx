@@ -479,7 +479,7 @@ function ChessEmbed({ onTimeUpdate, onBack }) {
 export default function Dashboard() {
   const [page, setPage] = useState("home");
   const [subPage, setSubPage] = useState(null);
-  const [chessSeconds, setChessSeconds] = useState(() => parseInt(localStorage.getItem('chessSeconds')||'0'));
+  const [chessSeconds, setChessSeconds] = useState(() => parseInt(localStorage.getItem('chessTimer')||'0'));
   const [plannerSection, setPlannerSection] = useState("projects");
   const [time, setTime] = useState("");
   const [greeting, setGreeting] = useState("");
@@ -494,7 +494,7 @@ export default function Dashboard() {
   const [calEvents, setCalEvents] = useState(() => JSON.parse(localStorage.getItem("calEvents") || "[]"));
 
   useEffect(() => { localStorage.setItem("projects", JSON.stringify(projects)); }, [projects]);
-  useEffect(() => { localStorage.setItem("chessSeconds", String(chessSeconds)); }, [chessSeconds]);
+  useEffect(() => { localStorage.setItem('chessTimer', String(chessSeconds)); }, [chessSeconds]);
   useEffect(() => { localStorage.setItem("calEvents", JSON.stringify(calEvents)); }, [calEvents]);
 
   useEffect(() => {
