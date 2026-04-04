@@ -300,6 +300,55 @@
       transition: width 0.5s ease;
     }
     .chess-detail { font-size: 12px; color: var(--text-muted); }
+
+    /* ─── Music Player Bar ──────────────────────────────────────────── */
+    #music-player {
+      position: fixed; bottom: 0; left: var(--sidebar-width); right: 0;
+      height: 72px; background: #040806;
+      border-top: 1px solid #004d34;
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 24px; z-index: 100;
+    }
+    #music-player.hidden { display: none; }
+    #mp-art {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: #0a1f16; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    #mp-info { flex: 1; min-width: 0; }
+    #mp-title { font-size: 13px; font-weight: 600; color: #e8f0ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #mp-artist { font-size: 11px; color: #4a7060; margin-top: 2px; }
+    #mp-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .mp-btn {
+      background: none; border: none; cursor: pointer; color: #7a9e8e;
+      font-size: 16px; padding: 4px 6px; border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .mp-btn:hover { color: #e8f0ed; background: rgba(255,255,255,0.05); }
+    .mp-btn.active { color: #00d18c; }
+    #mp-play-btn {
+      background: #00d18c; border: none; cursor: pointer; color: #003d2a;
+      font-size: 18px; width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.15s;
+    }
+    #mp-play-btn:hover { opacity: 0.85; }
+    #mp-seek-wrap { flex: 1; min-width: 80px; max-width: 260px; display: flex; align-items: center; gap: 8px; }
+    #mp-elapsed, #mp-dur { font-size: 11px; color: #3a5548; font-variant-numeric: tabular-nums; width: 34px; flex-shrink: 0; }
+    #mp-dur { text-align: right; }
+    #mp-seek {
+      flex: 1; height: 4px; background: #1a2e24; border-radius: 2px;
+      cursor: pointer; position: relative;
+    }
+    #mp-seek-fill { height: 100%; background: #00d18c; border-radius: 2px; width: 0%; transition: width 0.3s linear; }
+    #mp-vol-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    #mp-vol { width: 70px; accent-color: #00d18c; cursor: pointer; }
+    #mp-open-btn {
+      background: none; border: 1px solid #1a2e24; color: #4a7060;
+      border-radius: 7px; padding: 4px 10px; cursor: pointer; font-size: 11px;
+      flex-shrink: 0; transition: color 0.15s, border-color 0.15s;
+    }
+    #mp-open-btn:hover { color: #00d18c; border-color: #00d18c; }
   </style>
 </head>
 <body>
@@ -698,6 +747,148 @@
 
     // ─── Lucide ───────────────────────────────────────────────────────────
     lucide.createIcons();
+  </script>
+
+  <!-- ── Persistent Music Player Bar ── -->
+  <div id="music-player" class="hidden">
+    <audio id="mp-audio"></audio>
+    <div id="mp-art">🎵</div>
+    <div id="mp-info">
+      <div id="mp-title">No track</div>
+      <div id="mp-artist"></div>
+    </div>
+    <div id="mp-seek-wrap">
+      <span id="mp-elapsed">0:00</span>
+      <div id="mp-seek" onclick="mpSeek(event)"><div id="mp-seek-fill"></div></div>
+      <span id="mp-dur">0:00</span>
+    </div>
+    <div id="mp-controls">
+      <button class="mp-btn" id="mp-shuffle-btn" onclick="mpToggleShuffle()" title="Shuffle">🔀</button>
+      <button class="mp-btn" onclick="mpPrev()" title="Previous">⏮</button>
+      <button id="mp-play-btn" onclick="mpTogglePlay()" title="Play/Pause">▶</button>
+      <button class="mp-btn" onclick="mpNext()" title="Next">⏭</button>
+      <button class="mp-btn" id="mp-repeat-btn" onclick="mpToggleRepeat()" title="Repeat">🔁</button>
+    </div>
+    <div id="mp-vol-wrap">
+      <span id="mp-vol-icon">🔊</span>
+      <input id="mp-vol" type="range" min="0" max="1" step="0.01" value="0.8" oninput="mpSetVol(this.value)">
+    </div>
+    <button id="mp-open-btn" onclick="openApp('music.html')">Open ↗</button>
+  </div>
+
+  <script>
+    // ─── Music Player Bar ─────────────────────────────────────────────────
+    const MP = {
+      tracks: [], idx: 0, shuffle: false, repeat: false,
+      playing: false, volume: 0.8, loaded: false
+    };
+    const mpAudio = document.getElementById('mp-audio');
+    const mpBar   = document.getElementById('music-player');
+
+    function mpFmt(s) {
+      if (!s || isNaN(s)) return '0:00';
+      const m = Math.floor(s/60), sec = Math.floor(s%60);
+      return m + ':' + String(sec).padStart(2,'0');
+    }
+
+    async function mpLoadTracks() {
+      try {
+        const res = await fetch('https://api.base44.com/api/apps/69cf6a85f0ef6a1f0f44476a/entities/Track/list', {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        MP.tracks = Array.isArray(data) ? data : (data.items || data.data || []);
+        if (MP.tracks.length > 0) {
+          mpBar.classList.remove('hidden');
+          mpLoadTrack(0, false);
+        }
+      } catch(e) { console.warn('Music player:', e); }
+    }
+
+    function mpLoadTrack(idx, autoplay) {
+      if (!MP.tracks.length) return;
+      MP.idx = ((idx % MP.tracks.length) + MP.tracks.length) % MP.tracks.length;
+      const t = MP.tracks[MP.idx];
+      mpAudio.src = t.file_url;
+      mpAudio.load();
+      mpAudio.volume = MP.volume;
+      document.getElementById('mp-title').textContent  = t.title  || 'Untitled';
+      document.getElementById('mp-artist').textContent = t.artist || '';
+      document.getElementById('mp-seek-fill').style.width = '0%';
+      document.getElementById('mp-elapsed').textContent = '0:00';
+      document.getElementById('mp-dur').textContent = '0:00';
+      if (autoplay) { mpAudio.play().catch(()=>{}); MP.playing = true; }
+      else { MP.playing = false; }
+      mpRenderPlay();
+    }
+
+    function mpTogglePlay() {
+      if (!MP.tracks.length) return;
+      if (MP.playing) { mpAudio.pause(); MP.playing = false; }
+      else { mpAudio.play().catch(()=>{}); MP.playing = true; }
+      mpRenderPlay();
+    }
+
+    function mpRenderPlay() {
+      document.getElementById('mp-play-btn').textContent = MP.playing ? '⏸' : '▶';
+    }
+
+    function mpNext() {
+      if (!MP.tracks.length) return;
+      if (MP.shuffle) {
+        let ni = MP.idx;
+        if (MP.tracks.length > 1) while (ni === MP.idx) ni = Math.floor(Math.random()*MP.tracks.length);
+        mpLoadTrack(ni, MP.playing);
+      } else {
+        mpLoadTrack(MP.idx + 1, MP.playing);
+      }
+    }
+
+    function mpPrev() {
+      if (mpAudio.currentTime > 3) { mpAudio.currentTime = 0; return; }
+      mpLoadTrack(MP.idx - 1, MP.playing);
+    }
+
+    function mpToggleShuffle() {
+      MP.shuffle = !MP.shuffle;
+      document.getElementById('mp-shuffle-btn').classList.toggle('active', MP.shuffle);
+    }
+
+    function mpToggleRepeat() {
+      MP.repeat = !MP.repeat;
+      document.getElementById('mp-repeat-btn').classList.toggle('active', MP.repeat);
+    }
+
+    function mpSetVol(v) {
+      MP.volume = parseFloat(v);
+      mpAudio.volume = MP.volume;
+      document.getElementById('mp-vol-icon').textContent = MP.volume === 0 ? '🔇' : MP.volume < 0.5 ? '🔉' : '🔊';
+    }
+
+    function mpSeek(e) {
+      const rect = document.getElementById('mp-seek').getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      if (mpAudio.duration) mpAudio.currentTime = pct * mpAudio.duration;
+    }
+
+    mpAudio.addEventListener('timeupdate', () => {
+      const e = mpAudio.currentTime, d = mpAudio.duration || 0;
+      document.getElementById('mp-elapsed').textContent = mpFmt(e);
+      document.getElementById('mp-dur').textContent = mpFmt(d);
+      document.getElementById('mp-seek-fill').style.width = d > 0 ? ((e/d)*100) + '%' : '0%';
+    });
+
+    mpAudio.addEventListener('loadedmetadata', () => {
+      document.getElementById('mp-dur').textContent = mpFmt(mpAudio.duration);
+    });
+
+    mpAudio.addEventListener('ended', () => {
+      if (MP.repeat) { mpAudio.currentTime = 0; mpAudio.play(); return; }
+      mpNext();
+      if (!MP.playing) { MP.playing = false; mpRenderPlay(); }
+    });
+
+    mpLoadTracks();
   </script>
 </body>
 </html>
