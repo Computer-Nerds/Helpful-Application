@@ -644,6 +644,20 @@
       </div>
     </div>
 
+    <!-- ══ SPANISH ══ -->
+    <div class="page" id="page-spanish">
+      <div style="flex:1;display:flex;flex-direction:column;min-height:0;background:#111312;overflow:hidden">
+        <div style="background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0">
+          <button class="btn btn-ghost" onclick="closeApp('spanish')">← Apps</button>
+          <span style="font-size:16px;font-weight:800">🇪🇸 Spanish</span>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;color:#4a7060;flex-direction:column;gap:12px">
+          <div style="font-size:40px">🇪🇸</div>
+          <div style="font-size:16px">Spanish Vocab — Coming Soon</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ CHESS ══ -->
     <div class="page" id="page-chess">
       <div id="chess-view">
@@ -881,6 +895,7 @@ function setPage(p) {
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
   if (p === 'music') musicInit();
+  if (p === 'chess') chessInit();
 }
 
 function openApp(app) { setPage(app); }
