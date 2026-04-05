@@ -2198,8 +2198,8 @@ function musicHandleFiles(files){
 function musicSaveTracks(){
   try{localStorage.setItem('music_tracks',JSON.stringify(musicTracks));}
   catch(e){
-    // If storage is full (base64 audio can be large), save without audio data but keep covers
-    try{musicSaveTracks();}
+    // Storage full — save metadata + covers only, drop audio blobs
+    try{localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(t=>({...t,file_url:''}))));}
     catch(e2){console.warn('Music storage full');}
   }
 }
@@ -2213,7 +2213,7 @@ function renderMusicTracks(){
     <div class="music-track-item${t.id===musicCurrent?' active':''}" onclick="musicSelectTrack('${t.id}')">
       <span class="music-track-num">${t.id===musicCurrent?'▶':i+1}</span>
       <div class="music-track-art" onclick="event.stopPropagation();musicOpenEdit('${t.id}')" title="Set album art">
-        ${t.cover?`<img src="${t.cover}" alt="art">`:'🎵'}
+        ${t.cover?'<img src="'+t.cover+'" alt="art">':'🎵'}
       </div>
       <div class="music-track-info">
         <div class="music-track-title" style="color:${t.id===musicCurrent?'#00d18c':'#e8f0ed'}">${t.title}</div>
@@ -2285,7 +2285,7 @@ function hmwSyncState(){
   const artEl=document.getElementById('hmw-art');
   if(titleEl)titleEl.textContent=t?t.title:'No track';
   if(artistEl)artistEl.textContent=t?(t.artist||'Unknown Artist'):'—';
-  if(artEl)artEl.innerHTML=t&&t.cover?`<img src="${{t.cover}}" alt="art">`:'♪';
+  if(artEl)artEl.innerHTML=t&&t.cover?`<img src="${t.cover}" alt="art">`:'♪';
   const playBtn=document.getElementById('hmw-play');
   if(playBtn)playBtn.innerHTML=musicPlaying?'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
   const shufBtn=document.getElementById('hmw-shuffle');
