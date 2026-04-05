@@ -439,6 +439,24 @@
     #music-vol-row span { font-size: 14px; }
     #music-vol { flex: 1; accent-color: #00d18c; }
 
+    /* ── HOME MUSIC WIDGET ── */
+    #home-music-widget { background: #0e1512; border: 1px solid #1a2e24; border-radius: 16px; padding: 14px 16px; min-width: 260px; flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
+    #hmw-art-row { display: flex; align-items: center; gap: 12px; }
+    #hmw-art { width: 44px; height: 44px; border-radius: 10px; background: #1a2e24; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; overflow: hidden; border: 1px solid #263d30; }
+    #hmw-art img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+    #hmw-title { font-size: 13px; font-weight: 700; color: #e8f0ed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #hmw-artist { font-size: 11px; color: #4a7060; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #hmw-seek { width: 100%; height: 3px; background: #1a2e24; border-radius: 2px; cursor: pointer; }
+    #hmw-seek-fill { height: 100%; background: #00d18c; border-radius: 2px; width: 0%; transition: width 0.3s linear; }
+    #hmw-controls { display: flex; align-items: center; justify-content: space-between; }
+    .hmw-btn { background: none; border: none; cursor: pointer; color: #5a8070; padding: 5px 8px; border-radius: 7px; display: flex; align-items: center; transition: color 0.15s; }
+    .hmw-btn:hover { color: #e8f0ed; }
+    .hmw-btn.active { color: #00d18c; }
+    #hmw-play { background: #00d18c; border: none; cursor: pointer; color: #003d2a; width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; transition: opacity 0.15s; }
+    #hmw-play:hover { opacity: 0.85; }
+    #hmw-open { font-size: 11px; color: #3a6050; background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; text-decoration: underline; }
+    #hmw-open:hover { color: #7ad4b8; }
+
     /* New project input */
     #new-project-row { padding: 0 10px 10px; display: none; }
     #new-project-row.open { display: flex; gap: 6px; }
@@ -569,6 +587,27 @@
           <div id="home-projects">
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
+          </div>
+
+          <!-- Music Widget -->
+          <div id="home-music-widget">
+            <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
+            <div id="hmw-art-row">
+              <div id="hmw-art">♪</div>
+              <div style="flex:1;min-width:0">
+                <div id="hmw-title">No track</div>
+                <div id="hmw-artist">—</div>
+              </div>
+              <button id="hmw-open" onclick="openApp('music')" title="Open Music">Open ↗</button>
+            </div>
+            <div id="hmw-seek" onclick="hmwSeek(event)"><div id="hmw-seek-fill"></div></div>
+            <div id="hmw-controls">
+              <button class="hmw-btn" id="hmw-shuffle" onclick="musicToggleShuffle();hmwSyncState()" title="Shuffle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+              <button class="hmw-btn" onclick="musicPrev();hmwSyncState()" title="Previous"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg></button>
+              <button id="hmw-play" onclick="musicTogglePlay();hmwSyncState()" title="Play/Pause"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+              <button class="hmw-btn" onclick="musicNext();hmwSyncState()" title="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+              <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+            </div>
           </div>
 
         </div>
@@ -873,7 +912,7 @@
               </div>
             </div>
             <div id="music-vol-row" style="display:flex;align-items:center;gap:8px;margin-left:16px">
-              <span>🔊</span>
+              <span style="display:flex;align-items:center;color:#4a7060"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></span>
               <input type="range" id="music-vol" min="0" max="1" step="0.05" value="0.8" oninput="musicVolChange(this.value)">
             </div>
           </div>
@@ -883,11 +922,11 @@
             <span class="music-time right" id="music-duration">--:--</span>
           </div>
           <div id="music-controls">
-            <button class="music-ctrl-btn" id="music-shuffle-btn" onclick="musicToggleShuffle()" title="Shuffle">🔀</button>
-            <button class="music-ctrl-btn" onclick="musicPrev()" title="Previous">⏮</button>
-            <button id="music-play-btn" onclick="musicTogglePlay()" title="Play/Pause">▶</button>
-            <button class="music-ctrl-btn" onclick="musicNext()" title="Next">⏭</button>
-            <button class="music-ctrl-btn" id="music-repeat-btn" onclick="musicToggleRepeat()" title="Repeat">🔁</button>
+            <button class="music-ctrl-btn" id="music-shuffle-btn" onclick="musicToggleShuffle()" title="Shuffle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg></button>
+            <button class="music-ctrl-btn" onclick="musicPrev()" title="Previous"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg></button>
+            <button id="music-play-btn" onclick="musicTogglePlay()" title="Play/Pause"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+            <button class="music-ctrl-btn" onclick="musicNext()" title="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+            <button class="music-ctrl-btn" id="music-repeat-btn" onclick="musicToggleRepeat()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
           </div>
         </div>
       </div>
@@ -969,7 +1008,7 @@ function setPage(p) {
   if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
-  if (p === 'music') musicInit();
+  if (p === 'music') { musicInit(); hmwSyncState(); }
   if (p === 'chess') chessInit();
 }
 
@@ -2114,7 +2153,7 @@ let musicInitialized=false;
 function musicInit(){
   if(musicInitialized)return;
   musicInitialized=true;
-  try{musicTracks=JSON.parse(localStorage.getItem('music_tracks')||'[]');}catch{musicTracks=[];}
+  try{musicTracks=JSON.parse(localStorage.getItem('music_tracks')||'[]');}catch(e){musicTracks=[];}
   if(musicTracks.length&&!musicCurrent)musicCurrent=musicTracks[0].id;
   renderMusicTracks();
   musicLoadCurrent();
@@ -2136,17 +2175,33 @@ function musicFmtTime(s){if(!s||isNaN(s))return'--:--';return Math.floor(s/60)+'
 function musicHandleFiles(files){
   const supported=[...files].filter(f=>f.type.startsWith('audio/')||/\.(wav|mp3|ogg|flac|m4a)$/i.test(f.name));
   if(!supported.length)return;
+  let pending=supported.length;
   supported.forEach(f=>{
     const id=Date.now()+Math.random();
-    const url=URL.createObjectURL(f);
     const title=f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
-    musicTracks.push({id,title,artist:'',file_url:url});
+    const reader=new FileReader();
+    reader.onload=(e)=>{
+      musicTracks.push({id,title,artist:'',file_url:e.target.result,cover:''});
+      pending--;
+      if(pending===0){
+        musicSaveTracks();
+        if(!musicCurrent&&musicTracks.length)musicCurrent=musicTracks[0].id;
+        renderMusicTracks();
+        musicLoadCurrent();
+        document.getElementById('music-upload-panel').classList.remove('open');
+      }
+    };
+    reader.readAsDataURL(f);
   });
-  localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(t=>({...t,file_url:''}))));
-  if(!musicCurrent&&musicTracks.length)musicCurrent=musicTracks[0].id;
-  renderMusicTracks();
-  musicLoadCurrent();
-  document.getElementById('music-upload-panel').classList.remove('open');
+}
+
+function musicSaveTracks(){
+  try{localStorage.setItem('music_tracks',JSON.stringify(musicTracks));}
+  catch(e){
+    // If storage is full (base64 audio can be large), save without audio data but keep covers
+    try{musicSaveTracks();}
+    catch(e2){console.warn('Music storage full');}
+  }
 }
 
 function musicToggleUpload(){document.getElementById('music-upload-panel').classList.toggle('open');}
@@ -2185,13 +2240,14 @@ function musicLoadCurrent(){
   const artEl=document.getElementById('music-player-art');
   if(artEl){artEl.innerHTML=t&&t.cover?`<img src="${t.cover}" alt="art">`:'🎵';}
   if(t&&t.file_url){audio.src=t.file_url;audio.load();musicElapsed=0;musicDuration=0;updateMusicSeek();}
+  hmwSyncState();
 }
 
 function musicTogglePlay(){
   const audio=document.getElementById('music-audio');
   if(!audio.src&&musicTracks.length){musicCurrent=musicTracks[0].id;renderMusicTracks();musicLoadCurrent();}
-  if(musicPlaying){audio.pause();musicPlaying=false;document.getElementById('music-play-btn').textContent='▶';}
-  else{audio.play().catch(()=>{});musicPlaying=true;document.getElementById('music-play-btn').textContent='⏸';}
+  if(musicPlaying){audio.pause();musicPlaying=false;document.getElementById('music-play-btn').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';}
+  else{audio.play().catch(()=>{});musicPlaying=true;document.getElementById('music-play-btn').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';}
 }
 
 function musicNext(){
@@ -2217,6 +2273,34 @@ function updateMusicSeek(){
   const pct=musicDuration>0?(musicElapsed/musicDuration)*100:0;
   document.getElementById('music-seek-fill').style.width=pct+'%';
   document.getElementById('music-elapsed').textContent=musicFmtTime(musicElapsed);
+  // Sync widget seek bar too
+  const hf=document.getElementById('hmw-seek-fill');
+  if(hf)hf.style.width=pct+'%';
+}
+
+function hmwSyncState(){
+  const t=musicTracks.find(x=>x.id==musicCurrent);
+  const titleEl=document.getElementById('hmw-title');
+  const artistEl=document.getElementById('hmw-artist');
+  const artEl=document.getElementById('hmw-art');
+  if(titleEl)titleEl.textContent=t?t.title:'No track';
+  if(artistEl)artistEl.textContent=t?(t.artist||'Unknown Artist'):'—';
+  if(artEl)artEl.innerHTML=t&&t.cover?`<img src="${{t.cover}}" alt="art">`:'♪';
+  const playBtn=document.getElementById('hmw-play');
+  if(playBtn)playBtn.innerHTML=musicPlaying?'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  const shufBtn=document.getElementById('hmw-shuffle');
+  if(shufBtn)shufBtn.classList.toggle('active',musicShuffle);
+  const repBtn=document.getElementById('hmw-repeat');
+  if(repBtn)repBtn.classList.toggle('active',musicRepeat);
+}
+
+function hmwSeek(e){
+  const el=document.getElementById('hmw-seek');
+  if(!el)return;
+  const rect=el.getBoundingClientRect();
+  const pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+  const audio=document.getElementById('music-audio');
+  audio.currentTime=pct*musicDuration;musicElapsed=audio.currentTime;updateMusicSeek();
 }
 
 function musicSeek(e){
@@ -2230,7 +2314,7 @@ function musicSeek(e){
 function musicDeleteTrack(id){
   musicTracks=musicTracks.filter(t=>t.id!=id);
   if(musicCurrent==id){musicCurrent=musicTracks[0]?.id||null;musicLoadCurrent();}
-  localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(t=>({...t,file_url:''}))));
+  musicSaveTracks();
   renderMusicTracks();
 }
 
@@ -2254,7 +2338,7 @@ function musicSaveEdit(){
   if(!t)return;
   t.title=document.getElementById('music-edit-title-input').value.trim()||t.title;
   t.artist=document.getElementById('music-edit-artist-input').value.trim();
-  localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(x=>({...x,file_url:''}))));
+  musicSaveTracks();
   renderMusicTracks();
   if(musicCurrent==musicEditingId)musicLoadCurrent();
   musicCloseEdit();
@@ -2272,7 +2356,7 @@ function musicHandleArt(files){
       const preview=document.getElementById('music-edit-art-preview');
       preview.innerHTML=`<img src="${e.target.result}" alt="art">`;
       // Save cover to localStorage immediately
-      localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(x=>({...x,file_url:''}))));
+      musicSaveTracks();
     }
   };
   reader.readAsDataURL(f);
