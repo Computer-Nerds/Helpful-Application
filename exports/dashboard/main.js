@@ -22,9 +22,9 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 
-ipcMain.on('window-close', () => win && win.close());
-ipcMain.on('window-min',   () => win && win.minimize());
-ipcMain.on('window-max',   () => win && (win.isMaximized() ? win.unmaximize() : win.maximize()));
+ipcMain.on('win-close',    () => win && win.close());
+ipcMain.on('win-minimize', () => win && win.minimize());
+ipcMain.on('win-maximize', () => win && (win.isMaximized() ? win.unmaximize() : win.maximize()));
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
