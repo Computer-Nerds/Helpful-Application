@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-// ── Word banks (v2) ────────────────────────────────────────────────────────────────
+// ── Word banks ────────────────────────────────────────────────────────────────
 const WORDS_EASY = ["the","be","to","of","and","a","in","that","have","it","for","not","on","with","he","as","you","do","at","this","but","his","by","from","they","we","say","her","she","or","an","will","my","one","all","would","there","their","what","so","up","out","if","about","who","get","which","go","me","when","make","can","like","time","no","just","him","know","take","people","into","year","your","good","some","could","them","see","other","than","then","now","look","only","come","its","over","think","also","back","after","use","two","how","our","work","first","well","way","even","new","want","because","any","these","give","day","most","us"];
 const WORDS_HARD = ["rhythm","bureaucracy","entrepreneur","conscientious","phenomenon","onomatopoeia","necessary","accommodate","occurrence","perseverance","miscellaneous","acquaintance","Mediterranean","psychological","reconnaissance","extraordinary","approximately","distinguishable","incomprehensible","responsibilities","simultaneously","acknowledgement","conscientiously","extraordinarily","revolutionary","unprecedented","sophisticated","unambiguously","characteristic","disappointment"];
 const SENTENCES = [
@@ -49,17 +49,21 @@ function tokenize(str) {
 }
 
 export default function TypingApp({ onBack, onTimeUpdate }) {
-  const [mode, setMode]         = useState("words");
-  const [prompt, setPrompt]     = useState(() => getPrompt("words"));
-  const [typed, setTyped]       = useState("");
-  const [started, setStarted]   = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [mode, setMode]           = useState("words");
+  const [prompt, setPrompt]       = useState(() => getPrompt("words"));
+  const [typed, setTyped]         = useState("");
+  const [started, setStarted]     = useState(false);
+  const [finished, setFinished]   = useState(false);
   const [startTime, setStartTime] = useState(null);
-  const [wpm, setWpm]           = useState(0);
-  const [acc, setAcc]           = useState(100);
-  const [bestWpm, setBestWpm]   = useState(() => parseInt(localStorage.getItem("typing_best_wpm")||"0"));
+  const [wpm, setWpm]             = useState(0);
+  const [acc, setAcc]             = useState(100);
+  const [finalWpm, setFinalWpm]   = useState(0);
+  const [finalAcc, setFinalAcc]   = useState(100);
+  const [finalErrors, setFinalErrors] = useState(0);
+  const [isNewBest, setIsNewBest] = useState(false);
+  const [bestWpm, setBestWpm]     = useState(() => parseInt(localStorage.getItem("typing_best_wpm")||"0"));
 
-  // ── Practice timer (count-up, mirrors Chess) ──────────────────
+  // ── Practice timer ──────────────────────────────────────────────
   const [timerRunning, setTimerRunning] = useState(false);
   const [elapsed, setElapsed]           = useState(() => parseInt(localStorage.getItem("typingTimer")||"0"));
   const timerRef = useRef(null);
@@ -80,7 +84,6 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
     return () => clearInterval(timerRef.current);
   }, [timerRunning]);
 
-  // Sync persisted value to dashboard on mount
   useEffect(() => {
     const saved = parseInt(localStorage.getItem("typingTimer")||"0");
     if (onTimeUpdate && saved > 0) onTimeUpdate(saved);
@@ -97,8 +100,8 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
   useEffect(() => {
     if (started && !finished && startTime) {
       wpmRef.current = setInterval(() => {
-        const elapsed = (Date.now()-startTime)/60000;
-        setWpm(elapsed>0 ? Math.round((typed.length/5)/elapsed) : 0);
+        const el = (Date.now()-startTime)/60000;
+        setWpm(el>0 ? Math.round((typed.length/5)/el) : 0);
       }, 300);
     }
     return () => clearInterval(wpmRef.current);
@@ -109,6 +112,7 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
     setPrompt(getPrompt(m));
     setTyped(""); setStarted(false); setFinished(false);
     setStartTime(null); setWpm(0); setAcc(100);
+    setFinalWpm(0); setFinalAcc(100); setFinalErrors(0); setIsNewBest(false);
     setTimeout(() => inputRef.current?.focus(), 50);
   }
 
@@ -120,16 +124,31 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
     if (val.length > prompt.length) return;
     if (!started && val.length > 0) { setStarted(true); setStartTime(Date.now()); }
     setTyped(val);
+
     let wrong = 0;
     for (let i=0; i<val.length; i++) { if (val[i]!==prompt[i]) wrong++; }
-    setAcc(val.length>0 ? Math.round(((val.length-wrong)/val.length)*100) : 100);
+    const newAcc = val.length>0 ? Math.round(((val.length-wrong)/val.length)*100) : 100;
+    setAcc(newAcc);
+
     if (val===prompt) {
       clearInterval(wpmRef.current);
       const el = (Date.now()-startTime)/60000;
       const fw = Math.round((prompt.length/5)/el);
-      setWpm(fw); setFinished(true);
-      if (fw>bestWpm) { setBestWpm(fw); localStorage.setItem("typing_best_wpm",String(fw)); }
-      setTimeout(() => resetPrompt(mode), 1800);
+      const errCount = val.split("").filter((c,i) => c!==prompt[i]).length;
+      const newBest = fw > bestWpm;
+
+      setWpm(fw);
+      setFinalWpm(fw);
+      setFinalAcc(newAcc);
+      setFinalErrors(errCount);
+      setIsNewBest(newBest);
+      setFinished(true);
+
+      if (newBest) {
+        setBestWpm(fw);
+        localStorage.setItem("typing_best_wpm", String(fw));
+      }
+      // DON'T auto-reset — let user read the results, Tab/Esc to continue
     }
   }
 
@@ -145,11 +164,10 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
   const charColors = prompt.split("").map((ch, i) => {
     if (i < typed.length)
       return typed[i]===ch ? { color:"#00d18c", bg:"transparent" } : { color:"#f87171", bg:"rgba(248,113,113,0.12)" };
-    return { color:"#3a5548", bg:"transparent" };
+    return { color:"#8aada0", bg:"transparent" };
   });
 
   const tokens = tokenize(prompt);
-  const wrongCount = typed.split("").filter((c,i) => c!==prompt[i]).length;
   const progress = prompt.length>0 ? (typed.length/prompt.length)*100 : 0;
 
   return (
@@ -183,7 +201,7 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
           </div>
         ))}
 
-        {/* Practice timer — count up, same as Chess */}
+        {/* Practice timer */}
         <div style={{ display:"flex", alignItems:"center", gap:8, background:"#1a1f1d", border:"1px solid #1f2e28", borderRadius:10, padding:"5px 14px" }}>
           <span style={{ fontSize:16, fontWeight:800, letterSpacing:"2px", color:elapsed>=900?"#00d18c":"#e8f0ed", minWidth:54, textAlign:"center", fontVariantNumeric:"tabular-nums" }}>
             {formatTime(elapsed)}
@@ -202,8 +220,6 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
             </svg>
           </button>
         </div>
-
-        <span style={{ fontSize:11, color:"#2a4a38" }}>Esc · Tab = reset</span>
       </div>
 
       {/* ── PROGRESS BAR ── */}
@@ -212,75 +228,130 @@ export default function TypingApp({ onBack, onTimeUpdate }) {
       </div>
 
       {/* ── TYPING AREA ── */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 48px", gap:24 }}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"32px 48px", gap:20 }}
         onClick={() => inputRef.current?.focus()}>
 
-        {/* Prompt box */}
+        {/* Prompt box — always visible with clear border */}
         <div style={{
-          width:"100%", maxWidth:800,
-          background:"#141a17",
-          border:`1px solid ${finished?"#00d18c":"#1f2e28"}`,
+          width:"100%",
+          maxWidth:820,
+          background:"#111714",
+          border:`2px solid ${finished ? "#00d18c" : "#263d30"}`,
           borderRadius:16,
-          padding:"28px 36px",
+          padding:"32px 40px",
           fontSize:22,
-          lineHeight:2,
+          lineHeight:2.1,
           letterSpacing:"0.3px",
           position:"relative",
           cursor:"text",
           transition:"border-color 0.3s",
-          textAlign:"center",
-          wordBreak:"normal",
+          // Ensure full words wrap, never mid-word
+          wordBreak:"keep-all",
           overflowWrap:"normal",
           whiteSpace:"normal",
         }}>
-          {tokens.map((token, ti) => {
-            if (token.type === "space") {
-              const i = token.start;
-              const color = i < typed.length ? (typed[i]===" "?"#00d18c":"#f87171") : "#3a5548";
-              const isCursor = i === typed.length;
-              return (
-                <span key={ti} style={{ color, position:"relative", display:"inline" }}>
-                  {isCursor && <span style={{ position:"absolute", left:0, top:"15%", width:2, height:"70%", background:"#00d18c", borderRadius:1, animation:"blink 1s step-end infinite" }} />}
-                  {"\u00A0"}
-                </span>
-              );
-            } else {
-              return (
-                <span key={ti} style={{ display:"inline-block", whiteSpace:"nowrap" }}>
-                  {token.text.split("").map((ch, ci) => {
-                    const i = token.start + ci;
-                    const { color, bg } = charColors[i] || { color:"#3a5548", bg:"transparent" };
-                    const isCursor = i === typed.length;
-                    return (
-                      <span key={ci} style={{ color, background:bg, borderRadius:2, position:"relative", display:"inline" }}>
-                        {isCursor && <span style={{ position:"absolute", left:0, top:"10%", width:2, height:"80%", background:"#00d18c", borderRadius:1, animation:"blink 1s step-end infinite" }} />}
-                        {ch}
-                      </span>
-                    );
-                  })}
-                </span>
-              );
-            }
-          })}
 
+          {/* Render tokens — words never break mid-character */}
+          <div style={{ lineHeight:2.1 }}>
+            {tokens.map((token, ti) => {
+              if (token.type === "space") {
+                const i = token.start;
+                const color = i < typed.length
+                  ? (typed[i]===" " ? "#00d18c" : "#f87171")
+                  : "#3a5548";
+                const isCursor = i === typed.length;
+                return (
+                  <span key={ti} style={{ color, position:"relative", display:"inline" }}>
+                    {isCursor && (
+                      <span style={{ position:"absolute", left:0, top:"15%", width:2, height:"70%", background:"#00d18c", borderRadius:1, animation:"blink 1s step-end infinite" }} />
+                    )}
+                    {"\u00A0"}
+                  </span>
+                );
+              } else {
+                return (
+                  <span key={ti} style={{ display:"inline-block", whiteSpace:"nowrap" }}>
+                    {token.text.split("").map((ch, ci) => {
+                      const i = token.start + ci;
+                      const { color, bg } = charColors[i] || { color:"#8aada0", bg:"transparent" };
+                      const isCursor = i === typed.length;
+                      return (
+                        <span key={ci} style={{ color, background:bg, borderRadius:2, position:"relative", display:"inline" }}>
+                          {isCursor && (
+                            <span style={{ position:"absolute", left:0, top:"10%", width:2, height:"80%", background:"#00d18c", borderRadius:1, animation:"blink 1s step-end infinite" }} />
+                          )}
+                          {ch}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
+              }
+            })}
+          </div>
+
+          {/* ── RESULTS OVERLAY — stays until Tab/Esc ── */}
           {finished && (
-            <div style={{ position:"absolute", inset:0, background:"rgba(14,18,16,0.93)", borderRadius:16, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8, zIndex:5 }}>
-              <div style={{ fontSize:28 }}>✓</div>
-              <div style={{ fontSize:24, fontWeight:800, color:"#00d18c" }}>{wpm} WPM</div>
-              <div style={{ fontSize:14, color:"#7a9e8e" }}>{acc}% accuracy · {wrongCount} error{wrongCount!==1?"s":""}</div>
-              {wpm===bestWpm && wpm>0 && <div style={{ fontSize:12, color:"#f7a94e", marginTop:4 }}>🏆 New personal best!</div>}
+            <div style={{
+              position:"absolute", inset:0,
+              background:"rgba(10,15,12,0.96)",
+              borderRadius:14,
+              display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+              gap:10, zIndex:10,
+              border:"2px solid #00d18c",
+            }}>
+              <div style={{ fontSize:36 }}>✅</div>
+              <div style={{ fontSize:48, fontWeight:900, color:"#00d18c", lineHeight:1, fontVariantNumeric:"tabular-nums" }}>
+                {finalWpm} <span style={{ fontSize:20, fontWeight:500, color:"#7ad4b8" }}>WPM</span>
+              </div>
+              <div style={{ display:"flex", gap:24, marginTop:4 }}>
+                <div style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:22, fontWeight:800, color:finalAcc>=95?"#00d18c":finalAcc>=80?"#f7a94e":"#f87171" }}>{finalAcc}%</div>
+                  <div style={{ fontSize:11, color:"#4a8070", textTransform:"uppercase", letterSpacing:"0.5px" }}>Accuracy</div>
+                </div>
+                <div style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:22, fontWeight:800, color:finalErrors===0?"#00d18c":finalErrors<=3?"#f7a94e":"#f87171" }}>{finalErrors}</div>
+                  <div style={{ fontSize:11, color:"#4a8070", textTransform:"uppercase", letterSpacing:"0.5px" }}>Errors</div>
+                </div>
+                {bestWpm>0 && (
+                  <div style={{ textAlign:"center" }}>
+                    <div style={{ fontSize:22, fontWeight:800, color:"#7a9e8e" }}>{bestWpm}</div>
+                    <div style={{ fontSize:11, color:"#4a8070", textTransform:"uppercase", letterSpacing:"0.5px" }}>Best WPM</div>
+                  </div>
+                )}
+              </div>
+              {isNewBest && (
+                <div style={{ fontSize:14, color:"#f7a94e", background:"rgba(247,169,78,0.12)", border:"1px solid rgba(247,169,78,0.3)", borderRadius:8, padding:"4px 14px", marginTop:2 }}>
+                  🏆 New personal best!
+                </div>
+              )}
+              <div style={{ fontSize:13, color:"#4a8070", marginTop:6 }}>
+                Press <kbd style={{ background:"#1a2e24", border:"1px solid #2a4a38", borderRadius:5, padding:"2px 8px", fontSize:12, color:"#7ad4b8" }}>Tab</kbd> or <kbd style={{ background:"#1a2e24", border:"1px solid #2a4a38", borderRadius:5, padding:"2px 8px", fontSize:12, color:"#7ad4b8" }}>Esc</kbd> to try again
+              </div>
             </div>
           )}
         </div>
 
+        {/* Hidden input */}
         <input ref={inputRef} value={typed} onChange={handleInput}
           style={{ position:"absolute", opacity:0, pointerEvents:"none", width:1, height:1 }}
           autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
 
-        <div style={{ fontSize:12, color:"#2a4a38", display:"flex", gap:20 }}>
-          <span style={{ color:"#1a5a3a" }}>🟢 correct</span>
-          <span style={{ color:"#5a2a2a" }}>🔴 wrong</span>
-          <span>· Esc to reset</span>
+        {/* ── LEGEND / SUBTITLES ── */}
+        <div style={{ display:"flex", gap:24, alignItems:"center", fontSize:13, color:"#5a8070" }}>
+          <span style={{ display:"flex", alignItems:"center", gap:6 }}>
+            <span style={{ width:12, height:12, borderRadius:3, background:"#00d18c", display:"inline-block" }} />
+            <span style={{ color:"#7ad4b8" }}>Correct</span>
+          </span>
+          <span style={{ display:"flex", alignItems:"center", gap:6 }}>
+            <span style={{ width:12, height:12, borderRadius:3, background:"#f87171", display:"inline-block" }} />
+            <span style={{ color:"#f87171" }}>Mistake</span>
+          </span>
+          <span style={{ color:"#3a6050" }}>·</span>
+          <span style={{ color:"#5a8070" }}>
+            <kbd style={{ background:"#141a17", border:"1px solid #263d30", borderRadius:5, padding:"2px 8px", fontSize:12, color:"#7ad4b8", marginRight:4 }}>Tab</kbd>
+            reset
+          </span>
         </div>
       </div>
 
