@@ -365,11 +365,11 @@
     #typing-prog-bar { width: 100%; max-width: 920px; height: 4px; background: #1f2e28; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
     #typing-prog-fill { height: 100%; background: #00d18c; border-radius: 2px; transition: width 0.3s; }
     .typing-stat { background: #1a1f1d; border: 1px solid #1f2e28; border-radius: 10px; padding: 4px 14px; text-align: center; min-width: 62px; }
-    #typing-box { background: #111714; border: 2px solid #263d30; border-radius: 16px; padding: 28px 36px; position: relative; cursor: text; transition: border-color 0.3s; width: 100%; max-width: 900px; flex-shrink: 0; }
+    #typing-box { background: #111714; border: 2px solid #263d30; border-radius: 16px; padding: 28px 36px; position: relative; cursor: text; transition: border-color 0.3s; width: 100%; max-width: 900px; flex-shrink: 0; min-height: 260px; }
     #typing-box.finished { border-color: #00d18c; }
     #typing-word { display: inline-block; white-space: nowrap; }
-    #typing-results { position: absolute; inset: 0; background: rgba(10,15,12,0.97); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 10; border: 2px solid #00d18c; overflow: hidden; padding: 20px; box-sizing: border-box; }
-    .typing-result-wpm { font-size: 52px; font-weight: 900; color: #00d18c; line-height: 1; font-variant-numeric: tabular-nums; }
+    #typing-results { position: absolute; inset: -2px; background: rgba(10,15,12,0.97); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; z-index: 10; border: 2px solid #00d18c; overflow: hidden; padding: 16px; box-sizing: border-box; }
+    .typing-result-wpm { font-size: 44px; font-weight: 900; color: #00d18c; line-height: 1; font-variant-numeric: tabular-nums; }
     .typing-result-sub { display: flex; gap: 28px; margin-top: 4px; }
     .typing-result-stat { text-align: center; }
     .typing-result-stat-val { font-size: 24px; font-weight: 800; }
@@ -403,6 +403,23 @@
     .music-track-sub { font-size: 12px; color: #4a7060; margin-top: 2px; }
     .music-track-dur { font-size: 12px; color: #4a7060; flex-shrink: 0; }
     .music-track-del { background: none; border: none; color: #4a7060; cursor: pointer; font-size: 14px; padding: 4px 8px; border-radius: 6px; font-family: inherit; }
+    .music-track-del:hover { color: #ff5f57; background: rgba(255,95,87,0.1); }
+    .music-track-art { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: #1a2e24; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; cursor: pointer; border: 1px solid #263d30; }
+    .music-track-art img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+    .music-track-edit { background: none; border: none; color: #3a5548; cursor: pointer; font-size: 13px; padding: 3px 7px; border-radius: 5px; font-family: inherit; flex-shrink: 0; }
+    .music-track-edit:hover { color: #7ad4b8; background: rgba(0,209,140,0.08); }
+    #music-edit-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; align-items: center; justify-content: center; }
+    #music-edit-modal.open { display: flex; }
+    #music-edit-box { background: #111714; border: 1px solid #263d30; border-radius: 16px; padding: 28px 32px; width: 380px; display: flex; flex-direction: column; gap: 16px; }
+    #music-edit-box h3 { margin: 0; font-size: 16px; color: #e8f0ed; }
+    .music-edit-field label { display: block; font-size: 12px; color: #4a8070; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .music-edit-field input[type=text] { width: 100%; background: #0e1512; border: 1px solid #263d30; color: #e8f0ed; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+    .music-edit-field input[type=text]:focus { outline: none; border-color: #00d18c; }
+    .music-edit-art-preview { width: 100%; height: 140px; border-radius: 10px; background: #1a2e24; border: 2px dashed #263d30; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #4a8070; cursor: pointer; overflow: hidden; transition: border-color 0.2s; }
+    .music-edit-art-preview:hover { border-color: #00d18c; color: #7ad4b8; }
+    .music-edit-art-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+    #music-player-art { width: 48px; height: 48px; border-radius: 10px; background: #1a2e24; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; border: 1px solid #263d30; }
+    #music-player-art img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
     .music-track-del:hover { color: #ff5f57; background: rgba(255,95,87,0.1); }
     #music-player { background: #080c0a; border-top: 1px solid #141e1a; padding: 14px 20px; flex-shrink: 0; }
     #music-player-title { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -438,6 +455,32 @@
     <button class="tb-btn" id="tb-min" title="Minimize">&#x2013;</button>
     <button class="tb-btn" id="tb-max" title="Maximize">&#x25A1;</button>
     <button class="tb-btn" id="tb-close" title="Close">&#x2715;</button>
+  </div>
+</div>
+
+<!-- Music edit modal -->
+<div id="music-edit-modal" onclick="if(event.target===this)musicCloseEdit()">
+  <div id="music-edit-box">
+    <h3>✏️ Edit Track</h3>
+    <div class="music-edit-field">
+      <label>Title</label>
+      <input type="text" id="music-edit-title-input" placeholder="Track title">
+    </div>
+    <div class="music-edit-field">
+      <label>Artist</label>
+      <input type="text" id="music-edit-artist-input" placeholder="Artist name">
+    </div>
+    <div class="music-edit-field">
+      <label>Album Art</label>
+      <div class="music-edit-art-preview" id="music-edit-art-preview" onclick="musicPickArt()">
+        <span>🖼️ Click to set album art</span>
+      </div>
+      <input type="file" id="music-art-file-input" accept="image/*" style="display:none" onchange="musicHandleArt(this.files)">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+      <button class="btn btn-ghost" onclick="musicCloseEdit()">Cancel</button>
+      <button class="btn btn-accent" onclick="musicSaveEdit()">Save</button>
+    </div>
   </div>
 </div>
 
@@ -822,9 +865,12 @@
         <div id="music-track-list"></div>
         <div id="music-player">
           <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="flex:1;min-width:0">
-              <div id="music-player-title">No track selected</div>
-              <div id="music-player-artist"></div>
+            <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+              <div id="music-player-art">🎵</div>
+              <div style="min-width:0">
+                <div id="music-player-title">No track selected</div>
+                <div id="music-player-artist"></div>
+              </div>
             </div>
             <div id="music-vol-row" style="display:flex;align-items:center;gap:8px;margin-left:16px">
               <span>🔊</span>
@@ -2111,10 +2157,14 @@ function renderMusicTracks(){
   el.innerHTML=musicTracks.map((t,i)=>`
     <div class="music-track-item${t.id===musicCurrent?' active':''}" onclick="musicSelectTrack('${t.id}')">
       <span class="music-track-num">${t.id===musicCurrent?'▶':i+1}</span>
+      <div class="music-track-art" onclick="event.stopPropagation();musicOpenEdit('${t.id}')" title="Set album art">
+        ${t.cover?`<img src="${t.cover}" alt="art">`:'🎵'}
+      </div>
       <div class="music-track-info">
         <div class="music-track-title" style="color:${t.id===musicCurrent?'#00d18c':'#e8f0ed'}">${t.title}</div>
-        <div class="music-track-sub">${t.artist||'Unknown'}</div>
+        <div class="music-track-sub">${t.artist||'Unknown Artist'}</div>
       </div>
+      <button class="music-track-edit" onclick="event.stopPropagation();musicOpenEdit('${t.id}')" title="Edit">✏️</button>
       <button class="music-track-del" onclick="event.stopPropagation();musicDeleteTrack('${t.id}')" title="Remove">✕</button>
     </div>
   `).join('');
@@ -2132,6 +2182,8 @@ function musicLoadCurrent(){
   const audio=document.getElementById('music-audio');
   document.getElementById('music-player-title').textContent=t?t.title:'No track selected';
   document.getElementById('music-player-artist').textContent=t?(t.artist||''):'';
+  const artEl=document.getElementById('music-player-art');
+  if(artEl){artEl.innerHTML=t&&t.cover?`<img src="${t.cover}" alt="art">`:'🎵';}
   if(t&&t.file_url){audio.src=t.file_url;audio.load();musicElapsed=0;musicDuration=0;updateMusicSeek();}
 }
 
@@ -2178,7 +2230,52 @@ function musicSeek(e){
 function musicDeleteTrack(id){
   musicTracks=musicTracks.filter(t=>t.id!=id);
   if(musicCurrent==id){musicCurrent=musicTracks[0]?.id||null;musicLoadCurrent();}
+  localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(t=>({...t,file_url:''}))));
   renderMusicTracks();
+}
+
+let musicEditingId=null;
+function musicOpenEdit(id){
+  musicEditingId=id;
+  const t=musicTracks.find(x=>x.id==id);
+  if(!t)return;
+  document.getElementById('music-edit-title-input').value=t.title||'';
+  document.getElementById('music-edit-artist-input').value=t.artist||'';
+  const preview=document.getElementById('music-edit-art-preview');
+  preview.innerHTML=t.cover?`<img src="${t.cover}" alt="art">`:'<span>🖼️ Click to set album art</span>';
+  document.getElementById('music-edit-modal').classList.add('open');
+}
+function musicCloseEdit(){
+  document.getElementById('music-edit-modal').classList.remove('open');
+  musicEditingId=null;
+}
+function musicSaveEdit(){
+  const t=musicTracks.find(x=>x.id==musicEditingId);
+  if(!t)return;
+  t.title=document.getElementById('music-edit-title-input').value.trim()||t.title;
+  t.artist=document.getElementById('music-edit-artist-input').value.trim();
+  localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(x=>({...x,file_url:''}))));
+  renderMusicTracks();
+  if(musicCurrent==musicEditingId)musicLoadCurrent();
+  musicCloseEdit();
+}
+function musicPickArt(){
+  document.getElementById('music-art-file-input').click();
+}
+function musicHandleArt(files){
+  const f=files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const t=musicTracks.find(x=>x.id==musicEditingId);
+    if(t){
+      t.cover=e.target.result;
+      const preview=document.getElementById('music-edit-art-preview');
+      preview.innerHTML=`<img src="${e.target.result}" alt="art">`;
+      // Save cover to localStorage immediately
+      localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(x=>({...x,file_url:''}))));
+    }
+  };
+  reader.readAsDataURL(f);
 }
 
 // ════════════════════════════════════════════════════════════
