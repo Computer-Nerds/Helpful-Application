@@ -512,6 +512,9 @@
     @keyframes mathFlashGreen { 0%,100%{background:#0f0f0f} 50%{background:#00d18c18} }
     @keyframes mathShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 80%{transform:translateX(-3px)} }
     @keyframes mathPop { 0%{transform:scale(.4);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+    #math-answer-input::-webkit-outer-spin-button,
+    #math-answer-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+    #math-answer-input[type=number] { -moz-appearance:textfield; }
 
     </style>
 </head>
@@ -2565,9 +2568,9 @@ async function musicHandleArt(files){
 
   // ── Question generation ──────────────────────────────────────
   function mRange(){
-    // Scale numbers with level
-    const max = Math.min(12 + m.level * 3, 100);
-    return max;
+    if(m.level <= 20) return 10;
+    // After level 20, scale up gradually
+    return Math.min(10 + (m.level - 20) * 3, 100);
   }
   function mRand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
@@ -2581,10 +2584,10 @@ async function musicHandleArt(files){
     } else if(op==='-'){
       a=mRand(1,R); b=mRand(0,a); answer=a-b;
     } else if(op==='×'){
-      const maxMul=Math.min(2+Math.floor(m.level/2),12);
+      const maxMul=m.level<=20?10:Math.min(10+Math.floor((m.level-20)/2),12);
       a=mRand(1,maxMul); b=mRand(1,maxMul); answer=a*b;
     } else { // ÷
-      b=mRand(1,Math.min(2+Math.floor(m.level/2),12));
+      b=mRand(1,m.level<=20?10:Math.min(10+Math.floor((m.level-20)/2),12));
       answer=mRand(1,Math.min(2+Math.floor(m.level/2),12));
       a=b*answer;
     }
@@ -2638,7 +2641,12 @@ async function musicHandleArt(files){
       input.classList.add('correct');
       const streakTxt = m.streak>=3 ? ' 🔥 '+m.streak+' streak!' : '';
       mSetFeedback('+'+xpGain+' XP'+streakTxt, '#00d18c');
-      setTimeout(()=>input.classList.remove('correct'),400);
+      mSave();
+      mGenQuestion();
+      input.value='';
+      mRender();
+      setTimeout(()=>{ input.classList.remove('correct'); input.focus(); },300);
+      return;
     } else {
       // Wrong ❌
       const xpLoss=mXPLostForWrong();
@@ -2650,6 +2658,7 @@ async function musicHandleArt(files){
       setTimeout(()=>input.classList.remove('wrong'),400);
     }
 
+    // Wrong path continues here
     mSave();
     mGenQuestion();
     input.value='';
