@@ -5,7 +5,7 @@ const fs   = require('fs');
 let win;
 
 // ── Music folder paths ──────────────────────────────────────────────────────
-const MUSIC_DIR  = path.join(app.getPath('userData'), 'music');
+const MUSIC_DIR  = path.join(__dirname, 'music');
 const COVERS_DIR = path.join(MUSIC_DIR, 'covers');
 const LIB_FILE   = path.join(MUSIC_DIR, 'library.json');
 

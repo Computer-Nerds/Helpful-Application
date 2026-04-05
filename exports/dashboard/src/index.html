@@ -462,7 +462,58 @@
     #new-project-row.open { display: flex; gap: 6px; }
     #new-project-input { flex: 1; font-size: 13px; padding: 6px 10px; }
     #new-project-save { background: #00d18c; color: #003d2a; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 13px; font-weight: 700; font-family: inherit; }
-  </style>
+  
+    /* ══════════════ MATH ══════════════ */
+    #math-view { display:flex; flex-direction:column; height:100%; overflow:hidden; background:#0f0f0f; }
+    #math-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
+    #math-view .page-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:24px 20px; overflow-y:auto; gap:20px; }
+
+    /* XP Bar */
+    #math-xp-bar-wrap { width:100%; max-width:520px; }
+    #math-level-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+    #math-level-label { font-size:13px; font-weight:700; color:#00d18c; letter-spacing:1px; }
+    #math-xp-label { font-size:12px; color:#3a5548; }
+    #math-xp-bar-bg { width:100%; height:10px; background:#1a2e22; border-radius:99px; overflow:hidden; }
+    #math-xp-bar-fill { height:100%; background:linear-gradient(90deg,#00d18c,#00ff9d); border-radius:99px; transition:width 0.5s cubic-bezier(.4,0,.2,1); }
+
+    /* Question card */
+    #math-card { width:100%; max-width:520px; background:#141414; border:1px solid #1e2e28; border-radius:16px; padding:32px 28px; display:flex; flex-direction:column; align-items:center; gap:20px; }
+    #math-streak-row { display:flex; align-items:center; gap:8px; font-size:13px; color:#3a5548; align-self:flex-start; }
+    #math-streak-fire { font-size:18px; }
+    #math-question { font-size:42px; font-weight:800; color:#e8f0ed; letter-spacing:1px; text-align:center; }
+    #math-ops-row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .math-op-btn { background:#1a2e22; border:1px solid #1e2e28; color:#3a5548; border-radius:8px; padding:4px 12px; font-size:12px; cursor:pointer; transition:all .15s; }
+    .math-op-btn.active { background:#00d18c22; border-color:#00d18c; color:#00d18c; }
+
+    #math-answer-row { display:flex; gap:10px; width:100%; }
+    #math-answer-input { flex:1; background:#0f0f0f; border:2px solid #1e2e28; color:#e8f0ed; font-size:24px; font-weight:700; text-align:center; border-radius:10px; padding:12px; outline:none; transition:border-color .2s; }
+    #math-answer-input:focus { border-color:#00d18c44; }
+    #math-answer-input.correct { border-color:#00d18c; animation:mathFlashGreen .4s ease; }
+    #math-answer-input.wrong   { border-color:#e05252; animation:mathShake .35s ease; }
+    #math-submit-btn { background:#00d18c; color:#0f0f0f; font-weight:800; font-size:16px; border:none; border-radius:10px; padding:12px 24px; cursor:pointer; transition:background .15s; }
+    #math-submit-btn:hover { background:#00ff9d; }
+
+    #math-feedback { font-size:15px; font-weight:600; min-height:22px; text-align:center; }
+
+    /* Stats row */
+    #math-stats { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; width:100%; max-width:520px; }
+    .math-stat { background:#141414; border:1px solid #1e2e28; border-radius:12px; padding:12px 20px; text-align:center; min-width:90px; }
+    .math-stat-val { font-size:22px; font-weight:800; color:#00d18c; }
+    .math-stat-lbl { font-size:11px; color:#3a5548; margin-top:2px; }
+
+    /* Level up overlay */
+    #math-levelup { position:absolute; inset:0; background:#0f0f0f; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:50; opacity:0; pointer-events:none; transition:opacity .3s; }
+    #math-levelup.show { opacity:1; pointer-events:all; }
+    #math-levelup-emoji { font-size:72px; animation:mathPop .5s cubic-bezier(.4,0,.2,1); }
+    #math-levelup-title { font-size:32px; font-weight:900; color:#00d18c; }
+    #math-levelup-sub { font-size:15px; color:#3a5548; }
+    #math-levelup-btn { margin-top:8px; background:#00d18c; color:#0f0f0f; font-weight:800; border:none; border-radius:10px; padding:12px 32px; font-size:16px; cursor:pointer; }
+
+    @keyframes mathFlashGreen { 0%,100%{background:#0f0f0f} 50%{background:#00d18c18} }
+    @keyframes mathShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 80%{transform:translateX(-3px)} }
+    @keyframes mathPop { 0%{transform:scale(.4);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+
+    </style>
 </head>
 <body>
 
@@ -727,6 +778,77 @@
             <div class="app-icon" style="background:#1a2e1a">🎵</div>
             <span class="app-label">Music</span>
           </div>
+          <div class="app-tile" onclick="openApp('math')">
+            <div class="app-icon" style="background:#1a2a1e">🧮</div>
+            <span class="app-label">Math</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MATH ══ -->
+    <div class="page" id="page-math">
+      <div id="math-view" style="position:relative">
+
+        <!-- Level-up overlay -->
+        <div id="math-levelup">
+          <div id="math-levelup-emoji">⬆️</div>
+          <div id="math-levelup-title">Level Up!</div>
+          <div id="math-levelup-sub"></div>
+          <button id="math-levelup-btn" onclick="mathDismissLevelUp()">Keep Going →</button>
+        </div>
+
+        <div id="math-topbar">
+          <button class="btn btn-ghost" onclick="closeApp('math')">← Apps</button>
+          <span style="font-size:16px;font-weight:800">🧮 Math</span>
+          <div style="flex:1"></div>
+          <button class="btn btn-ghost" onclick="mathReset()" style="font-size:13px;color:#3a5548">↺ Reset</button>
+        </div>
+
+        <div class="page-body">
+
+          <!-- XP Bar -->
+          <div id="math-xp-bar-wrap">
+            <div id="math-level-row">
+              <span id="math-level-label">LEVEL 1</span>
+              <span id="math-xp-label">0 / 10 XP</span>
+            </div>
+            <div id="math-xp-bar-bg"><div id="math-xp-bar-fill" style="width:0%"></div></div>
+          </div>
+
+          <!-- Question Card -->
+          <div id="math-card">
+            <div id="math-streak-row">
+              <span id="math-streak-fire">🔥</span>
+              <span id="math-streak-txt">0 streak</span>
+            </div>
+
+            <!-- Operation toggles -->
+            <div id="math-ops-row">
+              <button class="math-op-btn active" data-op="+" onclick="mathToggleOp(this)">＋ Add</button>
+              <button class="math-op-btn active" data-op="-" onclick="mathToggleOp(this)">－ Sub</button>
+              <button class="math-op-btn" data-op="×" onclick="mathToggleOp(this)">× Mul</button>
+              <button class="math-op-btn" data-op="÷" onclick="mathToggleOp(this)">÷ Div</button>
+            </div>
+
+            <div id="math-question">?</div>
+
+            <div id="math-answer-row">
+              <input id="math-answer-input" type="number" placeholder="?" autocomplete="off"
+                onkeydown="if(event.key==='Enter')mathSubmit()">
+              <button id="math-submit-btn" onclick="mathSubmit()">✓</button>
+            </div>
+            <div id="math-feedback"></div>
+          </div>
+
+          <!-- Stats -->
+          <div id="math-stats">
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-correct">0</div><div class="math-stat-lbl">Correct</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-wrong" style="color:#e05252">0</div><div class="math-stat-lbl">Wrong</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-best">0</div><div class="math-stat-lbl">Best Streak</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-acc">—</div><div class="math-stat-lbl">Accuracy</div></div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -987,7 +1109,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music'];
+const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -1012,6 +1134,7 @@ function setPage(p) {
   if (p === 'typing') initTyping();
   if (p === 'music') { musicInit(); hmwSyncState(); }
   if (p === 'chess') chessInit();
+  if (p === 'math')  mathInit();
 }
 
 function openApp(app) { setPage(app); }
@@ -2387,6 +2510,212 @@ async function musicHandleArt(files){
   renderMusicTracks();
   if(musicCurrent==t.id) musicLoadCurrent();
 }
+
+// ════════════════════════════════════════════════════════════
+//  MATH — RPG XP SYSTEM
+// ════════════════════════════════════════════════════════════
+(function(){
+
+  // ── XP table: XP needed to reach each level ─────────────────
+  function xpForLevel(lvl){ return Math.floor(10 * Math.pow(1.35, lvl - 1)); }
+
+  // ── State ────────────────────────────────────────────────────
+  let m = {
+    level:   1,
+    xp:      0,
+    streak:  0,
+    best:    0,
+    correct: 0,
+    wrong:   0,
+    ops:     ['+', '-'],
+    qVal:    null,  // { a, b, op, answer }
+  };
+
+  function mLoad(){
+    try{ const s=localStorage.getItem('math_rpg'); if(s){ const p=JSON.parse(s); Object.assign(m,p); } }catch(e){}
+  }
+  function mSave(){
+    localStorage.setItem('math_rpg', JSON.stringify({
+      level:m.level,xp:m.xp,streak:m.streak,best:m.best,correct:m.correct,wrong:m.wrong,ops:m.ops
+    }));
+  }
+
+  // ── XP & Levelling ──────────────────────────────────────────
+  function mAddXP(amount){
+    m.xp += amount;
+    let needed = xpForLevel(m.level);
+    while(m.xp >= needed){
+      m.xp -= needed;
+      m.level++;
+      needed = xpForLevel(m.level);
+      mShowLevelUp();
+    }
+  }
+  function mLoseXP(amount){
+    m.xp = Math.max(0, m.xp - amount);
+  }
+
+  function mXPForCorrect(){
+    // More XP at higher levels for harder questions, base 1–3
+    return Math.max(1, Math.floor(1 + (m.level - 1) * 0.3));
+  }
+  function mXPLostForWrong(){
+    return Math.max(1, Math.floor(mXPForCorrect() * 0.5));
+  }
+
+  // ── Question generation ──────────────────────────────────────
+  function mRange(){
+    // Scale numbers with level
+    const max = Math.min(12 + m.level * 3, 100);
+    return max;
+  }
+  function mRand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  function mGenQuestion(){
+    if(!m.ops.length) return;
+    const op = m.ops[Math.floor(Math.random()*m.ops.length)];
+    const R = mRange();
+    let a, b, answer;
+    if(op==='+'){
+      a=mRand(1,R); b=mRand(1,R); answer=a+b;
+    } else if(op==='-'){
+      a=mRand(1,R); b=mRand(0,a); answer=a-b;
+    } else if(op==='×'){
+      const maxMul=Math.min(2+Math.floor(m.level/2),12);
+      a=mRand(1,maxMul); b=mRand(1,maxMul); answer=a*b;
+    } else { // ÷
+      b=mRand(1,Math.min(2+Math.floor(m.level/2),12));
+      answer=mRand(1,Math.min(2+Math.floor(m.level/2),12));
+      a=b*answer;
+    }
+    m.qVal={a,b,op,answer};
+  }
+
+  // ── Render ───────────────────────────────────────────────────
+  function mRender(){
+    const needed = xpForLevel(m.level);
+    const pct    = Math.min(100,(m.xp/needed)*100);
+    document.getElementById('math-level-label').textContent = 'LEVEL '+m.level;
+    document.getElementById('math-xp-label').textContent    = m.xp+' / '+needed+' XP';
+    document.getElementById('math-xp-bar-fill').style.width = pct+'%';
+
+    document.getElementById('math-streak-txt').textContent  = m.streak+' streak';
+    document.getElementById('math-streak-fire').textContent = m.streak>=5?'🔥':m.streak>=3?'✨':'💪';
+
+    if(m.qVal){
+      const {a,b,op}=m.qVal;
+      document.getElementById('math-question').textContent = a+' '+op+' '+b+' = ?';
+    }
+
+    document.getElementById('math-stat-correct').textContent = m.correct;
+    document.getElementById('math-stat-wrong').textContent   = m.wrong;
+    document.getElementById('math-stat-best').textContent    = m.best;
+    const total = m.correct+m.wrong;
+    document.getElementById('math-stat-acc').textContent = total>0 ? Math.round((m.correct/total)*100)+'%' : '—';
+  }
+
+  function mSetFeedback(txt, color, dur=1200){
+    const el=document.getElementById('math-feedback');
+    el.textContent=txt; el.style.color=color;
+    clearTimeout(el._t);
+    el._t=setTimeout(()=>{ el.textContent=''; },dur);
+  }
+
+  // ── Submit answer ────────────────────────────────────────────
+  window.mathSubmit = function(){
+    const input=document.getElementById('math-answer-input');
+    const val=parseInt(input.value,10);
+    if(isNaN(val)){ input.focus(); return; }
+    if(!m.qVal) return;
+
+    if(val===m.qVal.answer){
+      // Correct ✅
+      const xpGain=mXPForCorrect();
+      m.correct++;
+      m.streak++;
+      if(m.streak>m.best) m.best=m.streak;
+      mAddXP(xpGain);
+      input.classList.add('correct');
+      const streakTxt = m.streak>=3 ? ' 🔥 '+m.streak+' streak!' : '';
+      mSetFeedback('+'+xpGain+' XP'+streakTxt, '#00d18c');
+      setTimeout(()=>input.classList.remove('correct'),400);
+    } else {
+      // Wrong ❌
+      const xpLoss=mXPLostForWrong();
+      m.wrong++;
+      m.streak=0;
+      mLoseXP(xpLoss);
+      input.classList.add('wrong');
+      mSetFeedback('✕  Answer was '+m.qVal.answer+'  −'+xpLoss+' XP', '#e05252', 1800);
+      setTimeout(()=>input.classList.remove('wrong'),400);
+    }
+
+    mSave();
+    mGenQuestion();
+    input.value='';
+    input.focus();
+    mRender();
+  };
+
+  // ── Op toggles ───────────────────────────────────────────────
+  window.mathToggleOp = function(btn){
+    const op=btn.dataset.op;
+    if(m.ops.includes(op)){
+      if(m.ops.length===1) return; // always keep at least one
+      m.ops=m.ops.filter(o=>o!==op);
+      btn.classList.remove('active');
+    } else {
+      m.ops.push(op);
+      btn.classList.add('active');
+    }
+    mSave();
+    mGenQuestion();
+    mRender();
+  };
+
+  // ── Level up overlay ─────────────────────────────────────────
+  function mShowLevelUp(){
+    const needed=xpForLevel(m.level);
+    document.getElementById('math-levelup-title').textContent='Level '+m.level+'!';
+    document.getElementById('math-levelup-sub').textContent =
+      'Next level needs '+needed+' XP · Keep it up!';
+    const emojis=['⬆️','🚀','⭐','🏆','💎','🔥','✨','👑'];
+    document.getElementById('math-levelup-emoji').textContent=emojis[Math.min(m.level-1,emojis.length-1)];
+    document.getElementById('math-levelup').classList.add('show');
+  }
+  window.mathDismissLevelUp=function(){
+    document.getElementById('math-levelup').classList.remove('show');
+    document.getElementById('math-answer-input').focus();
+  };
+
+  // ── Reset ────────────────────────────────────────────────────
+  window.mathReset=function(){
+    if(!confirm('Reset all progress?')) return;
+    m={level:1,xp:0,streak:0,best:0,correct:0,wrong:0,ops:['+','-'],qVal:null};
+    localStorage.removeItem('math_rpg');
+    // Reset op buttons
+    document.querySelectorAll('.math-op-btn').forEach(b=>{
+      b.classList.toggle('active', b.dataset.op==='+'||b.dataset.op==='-');
+    });
+    mGenQuestion();
+    mRender();
+    document.getElementById('math-feedback').textContent='';
+    document.getElementById('math-answer-input').value='';
+  };
+
+  // ── Init ─────────────────────────────────────────────────────
+  window.mathInit=function(){
+    mLoad();
+    // Restore op button states
+    document.querySelectorAll('.math-op-btn').forEach(b=>{
+      b.classList.toggle('active', m.ops.includes(b.dataset.op));
+    });
+    mGenQuestion();
+    mRender();
+    setTimeout(()=>document.getElementById('math-answer-input').focus(),50);
+  };
+
+})();
 
 // ════════════════════════════════════════════════════════════
 //  INIT
