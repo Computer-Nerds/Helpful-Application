@@ -15,17 +15,21 @@
 
     /* ── Title bar ── */
     #titlebar {
-      height: 36px; background: #d8ddd9;
+      height: 32px; background: #0a0f0d;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px; -webkit-app-region: drag; flex-shrink: 0;
-      border-bottom: 1px solid #b0b8b4;
+      padding: 0 0 0 12px; -webkit-app-region: drag; flex-shrink: 0;
+      border-bottom: 1px solid #1a2e24;
     }
-    #titlebar-title { font-size: 13px; font-weight: 700; color: #1a2e25; letter-spacing: 0.3px; }
-    #titlebar-controls { display: flex; gap: 8px; -webkit-app-region: no-drag; }
-    .tb-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; }
-    #tb-close { background: #ff5f57; }
-    #tb-min   { background: #febc2e; }
-    #tb-max   { background: #28c840; }
+    #titlebar-title { font-size: 12px; font-weight: 600; color: #4a7060; letter-spacing: 0.3px; user-select: none; }
+    #titlebar-controls { display: flex; gap: 0; -webkit-app-region: no-drag; height: 32px; }
+    .tb-btn {
+      width: 46px; height: 32px; border: none; cursor: pointer;
+      background: transparent; color: #7a9e8e; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s; font-family: inherit;
+    }
+    .tb-btn:hover { background: rgba(255,255,255,0.07); color: #e8f0ed; }
+    #tb-close:hover { background: #c42b1c; color: #fff; }
 
     /* ── Body layout ── */
     #body { display: flex; flex: 1; min-height: 0; }
@@ -350,21 +354,21 @@
     /* ── TYPING ── */
     #typing-view { flex: 1; display: flex; flex-direction: column; min-height: 0; background: #0e1210; color: #e8f0ed; overflow: hidden; }
     #typing-topbar { background: #0a0f0d; border-bottom: 1px solid #1a2e24; padding: 0 20px; height: 54px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
-    #typing-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 32px; }
-    #typing-prompt { font-size: 24px; line-height: 2; text-align: left; max-width: 900px; width: 100%; letter-spacing: 0.5px; display: flex; flex-wrap: wrap; gap: 0; font-family: 'Consolas', 'Courier New', monospace; word-break: keep-all; overflow-wrap: normal; }
+    #typing-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 32px; gap: 12px; overflow: hidden; }
+    #typing-prompt { font-size: 22px; line-height: 1.9; text-align: left; width: 100%; letter-spacing: 0.4px; display: flex; flex-wrap: wrap; gap: 0; font-family: 'Consolas', 'Courier New', monospace; word-break: keep-all; overflow-wrap: normal; }
     .typing-char { white-space: pre; border-radius: 2px; }
     .typing-char.correct { color: #00d18c; }
     .typing-char.wrong { color: #f87171; background: rgba(248,113,113,0.12); }
     .typing-char.pending { color: #3a5548; }
     .typing-char.cursor { border-left: 2px solid #00d18c; }
     #typing-input { position: absolute; opacity: 0; pointer-events: none; }
-    #typing-prog-bar { width: 100%; max-width: 900px; height: 3px; background: #1f2e28; border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+    #typing-prog-bar { width: 100%; max-width: 920px; height: 4px; background: #1f2e28; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
     #typing-prog-fill { height: 100%; background: #00d18c; border-radius: 2px; transition: width 0.3s; }
     .typing-stat { background: #1a1f1d; border: 1px solid #1f2e28; border-radius: 10px; padding: 4px 14px; text-align: center; min-width: 62px; }
-    #typing-box { background: #111714; border: 2px solid #263d30; border-radius: 16px; padding: 32px 40px; position: relative; cursor: text; transition: border-color 0.3s; width: 100%; max-width: 900px; margin-bottom: 16px; }
+    #typing-box { background: #111714; border: 2px solid #263d30; border-radius: 16px; padding: 28px 36px; position: relative; cursor: text; transition: border-color 0.3s; width: 100%; max-width: 900px; flex-shrink: 0; }
     #typing-box.finished { border-color: #00d18c; }
     #typing-word { display: inline-block; white-space: nowrap; }
-    #typing-results { position: absolute; inset: 0; background: rgba(10,15,12,0.96); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 10; border: 2px solid #00d18c; }
+    #typing-results { position: absolute; inset: 0; background: rgba(10,15,12,0.97); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; z-index: 10; border: 2px solid #00d18c; overflow: hidden; padding: 20px; box-sizing: border-box; }
     .typing-result-wpm { font-size: 52px; font-weight: 900; color: #00d18c; line-height: 1; font-variant-numeric: tabular-nums; }
     .typing-result-sub { display: flex; gap: 28px; margin-top: 4px; }
     .typing-result-stat { text-align: center; }
@@ -431,9 +435,9 @@
 <div id="titlebar">
   <span id="titlebar-title">Helpful App</span>
   <div id="titlebar-controls">
-    <button class="tb-btn" id="tb-close"></button>
-    <button class="tb-btn" id="tb-min"></button>
-    <button class="tb-btn" id="tb-max"></button>
+    <button class="tb-btn" id="tb-min" title="Minimize">&#x2013;</button>
+    <button class="tb-btn" id="tb-max" title="Maximize">&#x25A1;</button>
+    <button class="tb-btn" id="tb-close" title="Close">&#x2715;</button>
   </div>
 </div>
 
