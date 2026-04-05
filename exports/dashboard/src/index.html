@@ -891,8 +891,10 @@
           <button class="btn btn-ghost" onclick="closeApp('music')">← Apps</button>
           <span style="font-size:16px;font-weight:800">🎵 Music</span>
           <div style="flex:1"></div>
+          <button class="btn btn-ghost" onclick="musicOpenFolder()" title="Open music folder" style="font-size:13px">📂 Open Folder</button>
           <button class="btn btn-ghost" id="music-add-btn" onclick="musicToggleUpload()" style="font-weight:600">+ Add Tracks</button>
         </div>
+        <div id="music-folder-hint" style="font-size:11px;color:#3a5548;padding:4px 16px 0;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Your music folder">📁 <span id="music-folder-path">…</span></div>
         <div id="music-upload-panel">
           <div id="music-drop-zone" onclick="document.getElementById('music-file-input').click()">
             <div style="font-size:28px;margin-bottom:8px">🎵</div>
@@ -2149,71 +2151,95 @@ function updateTypingTimerDisplay(){const m=Math.floor(typingTimerElapsed/60),s=
 let musicTracks=[],musicCurrent=null,musicPlaying=false,musicShuffle=false,musicRepeat=false;
 let musicElapsed=0,musicDuration=0,musicVolume=0.8;
 let musicInitialized=false;
+let MUSIC_DIR='';
 
-function musicInit(){
+const ipc = require('electron').ipcRenderer;
+
+async function musicInit(){
   if(musicInitialized)return;
   musicInitialized=true;
-  try{musicTracks=JSON.parse(localStorage.getItem('music_tracks')||'[]');}catch(e){musicTracks=[];}
-  if(musicTracks.length&&!musicCurrent)musicCurrent=musicTracks[0].id;
+
+  // Get music folder path for display
+  MUSIC_DIR = await ipc.invoke('music-get-folder');
+  const folderEl = document.getElementById('music-folder-path');
+  if(folderEl) folderEl.textContent = MUSIC_DIR;
+
+  // Load library from disk
+  const lib = await ipc.invoke('music-get-library');
+  musicTracks = lib;
+  if(musicTracks.length && !musicCurrent) musicCurrent = musicTracks[0].id;
   renderMusicTracks();
   musicLoadCurrent();
-  const audio=document.getElementById('music-audio');
-  audio.volume=musicVolume;
-  audio.ontimeupdate=()=>{musicElapsed=audio.currentTime;updateMusicSeek();};
-  audio.onloadedmetadata=()=>{musicDuration=audio.duration;document.getElementById('music-duration').textContent=musicFmtTime(musicDuration);};
-  audio.onended=()=>{if(musicRepeat){audio.currentTime=0;audio.play();}else musicNext();};
 
-  // Drop zone
-  const dz=document.getElementById('music-drop-zone');
-  dz.ondragover=(e)=>{e.preventDefault();dz.classList.add('dragover');};
-  dz.ondragleave=()=>dz.classList.remove('dragover');
-  dz.ondrop=(e)=>{e.preventDefault();dz.classList.remove('dragover');musicHandleFiles(e.dataTransfer.files);};
+  const audio = document.getElementById('music-audio');
+  audio.volume = musicVolume;
+  audio.ontimeupdate      = () => { musicElapsed=audio.currentTime; updateMusicSeek(); };
+  audio.onloadedmetadata  = () => { musicDuration=audio.duration; document.getElementById('music-duration').textContent=musicFmtTime(musicDuration); };
+  audio.onended           = () => { if(musicRepeat){audio.currentTime=0;audio.play();}else musicNext(); };
+
+  // Listen for folder watcher updates from main process
+  ipc.on('music-library-updated', (_e, tracks) => {
+    musicTracks = tracks;
+    if(!musicTracks.find(t=>t.id==musicCurrent)) musicCurrent = musicTracks[0]?.id||null;
+    renderMusicTracks();
+    musicLoadCurrent();
+  });
+
+  // Drop zone — copy file into music folder
+  const dz = document.getElementById('music-drop-zone');
+  dz.ondragover  = (e) => { e.preventDefault(); dz.classList.add('dragover'); };
+  dz.ondragleave = () => dz.classList.remove('dragover');
+  dz.ondrop = async (e) => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    await musicHandleFiles(e.dataTransfer.files);
+  };
 }
 
 function musicFmtTime(s){if(!s||isNaN(s))return'--:--';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
 
-function musicHandleFiles(files){
-  const supported=[...files].filter(f=>f.type.startsWith('audio/')||/\.(wav|mp3|ogg|flac|m4a)$/i.test(f.name));
+async function musicHandleFiles(files){
+  const supported=[...files].filter(f=>f.type.startsWith('audio/')||/\.(wav|mp3|ogg|flac|m4a|aac)$/i.test(f.name));
   if(!supported.length)return;
-  let pending=supported.length;
-  supported.forEach(f=>{
-    const id=Date.now()+Math.random();
-    const title=f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
-    const reader=new FileReader();
-    reader.onload=(e)=>{
-      musicTracks.push({id,title,artist:'',file_url:e.target.result,cover:''});
-      pending--;
-      if(pending===0){
-        musicSaveTracks();
-        if(!musicCurrent&&musicTracks.length)musicCurrent=musicTracks[0].id;
-        renderMusicTracks();
-        musicLoadCurrent();
-        document.getElementById('music-upload-panel').classList.remove('open');
-      }
-    };
-    reader.readAsDataURL(f);
-  });
+  for(const f of supported){
+    const buf = await f.arrayBuffer();
+    const tracks = await ipc.invoke('music-save-file', f.name, buf);
+    musicTracks = tracks;
+  }
+  if(!musicCurrent&&musicTracks.length) musicCurrent=musicTracks[0].id;
+  renderMusicTracks();
+  musicLoadCurrent();
+  document.getElementById('music-upload-panel').classList.remove('open');
 }
 
-function musicSaveTracks(){
-  try{localStorage.setItem('music_tracks',JSON.stringify(musicTracks));}
-  catch(e){
-    // Storage full — save metadata + covers only, drop audio blobs
-    try{localStorage.setItem('music_tracks',JSON.stringify(musicTracks.map(t=>({...t,file_url:''}))));}
-    catch(e2){console.warn('Music storage full');}
-  }
+function musicGetFileSrc(t){
+  if(!t||!t.filename) return '';
+  // Use file:// protocol with the music folder path
+  const sep = MUSIC_DIR.includes('/') ? '/' : '\\';
+  return 'file://' + MUSIC_DIR + sep + t.filename;
+}
+
+function musicGetCoverSrc(t){
+  if(!t||!t.cover) return '';
+  const sep = MUSIC_DIR.includes('/') ? '/' : '\\';
+  return 'file://' + MUSIC_DIR + sep + 'covers' + sep + t.cover;
 }
 
 function musicToggleUpload(){document.getElementById('music-upload-panel').classList.toggle('open');}
 
+function musicOpenFolder(){ipc.send('music-open-folder');}
+
 function renderMusicTracks(){
   const el=document.getElementById('music-track-list');
-  if(!musicTracks.length){el.innerHTML='<div style="text-align:center;padding:60px 20px;color:#3a5548"><div style="font-size:40px;margin-bottom:12px">🎵</div><div style="font-size:15px">No tracks yet</div><div style="font-size:13px;margin-top:6px">Click "+ Add Tracks" to upload audio files</div></div>';return;}
+  if(!musicTracks.length){
+    el.innerHTML='<div style="text-align:center;padding:60px 20px;color:#3a5548"><div style="font-size:40px;margin-bottom:12px">🎵</div><div style="font-size:15px">No tracks yet</div><div style="font-size:13px;margin-top:6px">Drop audio files here or click "+ Add Tracks"<br>Or drag files into your music folder</div></div>';
+    return;
+  }
   el.innerHTML=musicTracks.map((t,i)=>`
     <div class="music-track-item${t.id===musicCurrent?' active':''}" onclick="musicSelectTrack('${t.id}')">
       <span class="music-track-num">${t.id===musicCurrent?'▶':i+1}</span>
       <div class="music-track-art" onclick="event.stopPropagation();musicOpenEdit('${t.id}')" title="Set album art">
-        ${t.cover?'<img src="'+t.cover+'" alt="art">':'🎵'}
+        ${t.cover?'<img src="'+musicGetCoverSrc(t)+'" alt="art">':'🎵'}
       </div>
       <div class="music-track-info">
         <div class="music-track-title" style="color:${t.id===musicCurrent?'#00d18c':'#e8f0ed'}">${t.title}</div>
@@ -2238,8 +2264,8 @@ function musicLoadCurrent(){
   document.getElementById('music-player-title').textContent=t?t.title:'No track selected';
   document.getElementById('music-player-artist').textContent=t?(t.artist||''):'';
   const artEl=document.getElementById('music-player-art');
-  if(artEl){artEl.innerHTML=t&&t.cover?`<img src="${t.cover}" alt="art">`:'🎵';}
-  if(t&&t.file_url){audio.src=t.file_url;audio.load();musicElapsed=0;musicDuration=0;updateMusicSeek();}
+  if(artEl){artEl.innerHTML=t&&t.cover?'<img src="'+musicGetCoverSrc(t)+'" alt="art">':'🎵';}
+  if(t&&t.filename){audio.src=musicGetFileSrc(t);audio.load();musicElapsed=0;musicDuration=0;updateMusicSeek();}
   hmwSyncState();
 }
 
@@ -2273,7 +2299,6 @@ function updateMusicSeek(){
   const pct=musicDuration>0?(musicElapsed/musicDuration)*100:0;
   document.getElementById('music-seek-fill').style.width=pct+'%';
   document.getElementById('music-elapsed').textContent=musicFmtTime(musicElapsed);
-  // Sync widget seek bar too
   const hf=document.getElementById('hmw-seek-fill');
   if(hf)hf.style.width=pct+'%';
 }
@@ -2285,7 +2310,7 @@ function hmwSyncState(){
   const artEl=document.getElementById('hmw-art');
   if(titleEl)titleEl.textContent=t?t.title:'No track';
   if(artistEl)artistEl.textContent=t?(t.artist||'Unknown Artist'):'—';
-  if(artEl)artEl.innerHTML=t&&t.cover?`<img src="${t.cover}" alt="art">`:'♪';
+  if(artEl)artEl.innerHTML=t&&t.cover?'<img src="'+musicGetCoverSrc(t)+'" alt="art">':"♪";
   const playBtn=document.getElementById('hmw-play');
   if(playBtn)playBtn.innerHTML=musicPlaying?'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
   const shufBtn=document.getElementById('hmw-shuffle');
@@ -2311,10 +2336,12 @@ function musicSeek(e){
   audio.currentTime=pct*musicDuration;musicElapsed=audio.currentTime;updateMusicSeek();
 }
 
-function musicDeleteTrack(id){
-  musicTracks=musicTracks.filter(t=>t.id!=id);
+async function musicDeleteTrack(id){
+  const t=musicTracks.find(x=>x.id==id);
+  if(!t)return;
+  const tracks=await ipc.invoke('music-delete-track', t.filename);
+  musicTracks=tracks;
   if(musicCurrent==id){musicCurrent=musicTracks[0]?.id||null;musicLoadCurrent();}
-  musicSaveTracks();
   renderMusicTracks();
 }
 
@@ -2326,7 +2353,7 @@ function musicOpenEdit(id){
   document.getElementById('music-edit-title-input').value=t.title||'';
   document.getElementById('music-edit-artist-input').value=t.artist||'';
   const preview=document.getElementById('music-edit-art-preview');
-  preview.innerHTML=t.cover?`<img src="${t.cover}" alt="art">`:'<span>🖼️ Click to set album art</span>';
+  preview.innerHTML=t.cover?'<img src="'+musicGetCoverSrc(t)+'" alt="art">'  :'<span>🖼️ Click to set album art</span>';
   document.getElementById('music-edit-modal').classList.add('open');
 }
 function musicCloseEdit(){
@@ -2338,7 +2365,7 @@ function musicSaveEdit(){
   if(!t)return;
   t.title=document.getElementById('music-edit-title-input').value.trim()||t.title;
   t.artist=document.getElementById('music-edit-artist-input').value.trim();
-  musicSaveTracks();
+  ipc.send('music-save-library', musicTracks);
   renderMusicTracks();
   if(musicCurrent==musicEditingId)musicLoadCurrent();
   musicCloseEdit();
@@ -2346,20 +2373,19 @@ function musicSaveEdit(){
 function musicPickArt(){
   document.getElementById('music-art-file-input').click();
 }
-function musicHandleArt(files){
+async function musicHandleArt(files){
   const f=files[0];if(!f)return;
-  const reader=new FileReader();
-  reader.onload=(e)=>{
-    const t=musicTracks.find(x=>x.id==musicEditingId);
-    if(t){
-      t.cover=e.target.result;
-      const preview=document.getElementById('music-edit-art-preview');
-      preview.innerHTML=`<img src="${e.target.result}" alt="art">`;
-      // Save cover to localStorage immediately
-      musicSaveTracks();
-    }
-  };
-  reader.readAsDataURL(f);
+  const t=musicTracks.find(x=>x.id==musicEditingId);
+  if(!t||!t.filename)return;
+  const ext=f.name.split('.').pop().toLowerCase()||'jpg';
+  const buf=await f.arrayBuffer();
+  const coverFilename=await ipc.invoke('music-save-cover', t.filename, buf, ext);
+  t.cover=coverFilename;
+  // Show preview using the file:// path
+  const preview=document.getElementById('music-edit-art-preview');
+  preview.innerHTML='<img src="'+musicGetCoverSrc(t)+'" alt="art">';
+  renderMusicTracks();
+  if(musicCurrent==t.id) musicLoadCurrent();
 }
 
 // ════════════════════════════════════════════════════════════
