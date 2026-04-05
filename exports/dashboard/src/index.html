@@ -351,7 +351,7 @@
     #typing-view { flex: 1; display: flex; flex-direction: column; min-height: 0; background: #0e1210; color: #e8f0ed; overflow: hidden; }
     #typing-topbar { background: #0a0f0d; border-bottom: 1px solid #1a2e24; padding: 0 20px; height: 54px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
     #typing-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 32px; }
-    #typing-prompt { font-size: 24px; line-height: 1.8; text-align: left; max-width: 900px; width: 100%; letter-spacing: 0.5px; display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 28px; font-family: 'Consolas', 'Courier New', monospace; word-break: break-word; }
+    #typing-prompt { font-size: 24px; line-height: 2; text-align: left; max-width: 900px; width: 100%; letter-spacing: 0.5px; display: flex; flex-wrap: wrap; gap: 0; font-family: 'Consolas', 'Courier New', monospace; word-break: keep-all; overflow-wrap: normal; }
     .typing-char { white-space: pre; border-radius: 2px; }
     .typing-char.correct { color: #00d18c; }
     .typing-char.wrong { color: #f87171; background: rgba(248,113,113,0.12); }
@@ -361,6 +361,21 @@
     #typing-prog-bar { width: 100%; max-width: 900px; height: 3px; background: #1f2e28; border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
     #typing-prog-fill { height: 100%; background: #00d18c; border-radius: 2px; transition: width 0.3s; }
     .typing-stat { background: #1a1f1d; border: 1px solid #1f2e28; border-radius: 10px; padding: 4px 14px; text-align: center; min-width: 62px; }
+    #typing-box { background: #111714; border: 2px solid #263d30; border-radius: 16px; padding: 32px 40px; position: relative; cursor: text; transition: border-color 0.3s; width: 100%; max-width: 900px; margin-bottom: 16px; }
+    #typing-box.finished { border-color: #00d18c; }
+    #typing-word { display: inline-block; white-space: nowrap; }
+    #typing-results { position: absolute; inset: 0; background: rgba(10,15,12,0.96); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 10; border: 2px solid #00d18c; }
+    .typing-result-wpm { font-size: 52px; font-weight: 900; color: #00d18c; line-height: 1; font-variant-numeric: tabular-nums; }
+    .typing-result-sub { display: flex; gap: 28px; margin-top: 4px; }
+    .typing-result-stat { text-align: center; }
+    .typing-result-stat-val { font-size: 24px; font-weight: 800; }
+    .typing-result-stat-lbl { font-size: 11px; color: #4a8070; text-transform: uppercase; letter-spacing: 0.5px; }
+    .typing-result-newbest { font-size: 14px; color: #f7a94e; background: rgba(247,169,78,0.12); border: 1px solid rgba(247,169,78,0.3); border-radius: 8px; padding: 4px 14px; }
+    .typing-result-hint { font-size: 13px; color: #4a7060; margin-top: 4px; }
+    .typing-result-hint kbd { background: #1a2e24; border: 1px solid #2a4a38; border-radius: 5px; padding: 2px 8px; font-size: 12px; color: #7ad4b8; }
+    #typing-legend { display: flex; gap: 20px; align-items: center; font-size: 13px; }
+    .typing-legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 5px; }
+    #typing-legend kbd { background: #141a17; border: 1px solid #263d30; border-radius: 5px; padding: 2px 8px; font-size: 12px; color: #7ad4b8; }
     .typing-stat-val { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .typing-stat-label { font-size: 10px; color: #4a7060; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -767,7 +782,16 @@
         </div>
         <div id="typing-main" onclick="document.getElementById('typing-input').focus()">
           <div id="typing-prog-bar"><div id="typing-prog-fill"></div></div>
-          <div id="typing-prompt"></div>
+          <div id="typing-box">
+            <div id="typing-prompt"></div>
+            <div id="typing-results" style="display:none"></div>
+          </div>
+          <div id="typing-legend">
+            <span style="display:flex;align-items:center;color:#7ad4b8"><span class="typing-legend-dot" style="background:#00d18c"></span>Correct</span>
+            <span style="display:flex;align-items:center;color:#f87171"><span class="typing-legend-dot" style="background:#f87171"></span>Mistake</span>
+            <span style="color:#3a6050">·</span>
+            <span style="color:#5a8070"><kbd>Tab</kbd> reset</span>
+          </div>
           <input id="typing-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
       </div>
@@ -1895,6 +1919,8 @@ function typingReset(mode){
   document.getElementById('typing-acc').textContent='--';
   document.getElementById('typing-acc').style.color='#e8f0ed';
   document.getElementById('typing-prog-fill').style.width='0%';
+  const box=document.getElementById('typing-box');if(box)box.classList.remove('finished');
+  const overlay=document.getElementById('typing-results');if(overlay){overlay.style.display='none';overlay.innerHTML='';}
   renderTypingPrompt();
   setTimeout(()=>document.getElementById('typing-input').focus(),50);
 }
@@ -1903,13 +1929,31 @@ function typingSwitchMode(m){typingMode=m;renderTypingModes();typingReset();}
 
 function renderTypingPrompt(){
   const el=document.getElementById('typing-prompt');
-  const chars=typingPrompt.split('');
-  el.innerHTML=chars.map((ch,i)=>{
-    let cls='typing-char';
-    if(i<typingTyped.length)cls+=' '+(typingTyped[i]===ch?'correct':'wrong');
-    else cls+=' pending';
-    if(i===typingTyped.length)cls+=' cursor';
-    return`<span class="${cls}">${ch===' '?'&nbsp;':ch}</span>`;
+  // Tokenize into words + spaces so words never break mid-character
+  const tokens=[];let i=0;
+  while(i<typingPrompt.length){
+    if(typingPrompt[i]===' '){tokens.push({type:'space',start:i});i++;}
+    else{let j=i;while(j<typingPrompt.length&&typingPrompt[j]!==' ')j++;tokens.push({type:'word',start:i,end:j});i=j;}
+  }
+  el.innerHTML=tokens.map(tok=>{
+    if(tok.type==='space'){
+      const i=tok.start;
+      let cls='typing-char';
+      if(i<typingTyped.length)cls+=' '+(typingTyped[i]===' '?'correct':'wrong');
+      else cls+=' pending';
+      if(i===typingTyped.length)cls+=' cursor';
+      return`<span class="${cls}">&nbsp;</span>`;
+    } else {
+      const inner=typingPrompt.slice(tok.start,tok.end).split('').map((ch,ci)=>{
+        const i=tok.start+ci;
+        let cls='typing-char';
+        if(i<typingTyped.length)cls+=' '+(typingTyped[i]===ch?'correct':'wrong');
+        else cls+=' pending';
+        if(i===typingTyped.length)cls+=' cursor';
+        return`<span class="${cls}">${ch}</span>`;
+      }).join('');
+      return`<span style="display:inline-block;white-space:nowrap">${inner}</span>`;
+    }
   }).join('');
 }
 
@@ -1946,22 +1990,51 @@ function typingHandleInput(e){
 
   renderTypingPrompt();
 
-  // Check completion - compare char by char to avoid any encoding issues
+  // Check completion
   if(val.length === typingPrompt.length && val === typingPrompt){
     clearInterval(typingWpmInterval);
     typingFinished = true;
     const mins = (Date.now() - typingStartTime) / 60000;
     const fw = mins > 0 ? Math.round((typingPrompt.length / 5) / mins) : 0;
     typingWpm = fw;
+    const errCount = val.split('').filter((c,i)=>c!==typingPrompt[i]).length;
+    const newBest = fw > typingBestWpm;
 
-    // Flash final stats
+    // Update topbar stats
     const wpmEl2 = document.getElementById('typing-wpm');
     if(wpmEl2){ wpmEl2.textContent = fw; wpmEl2.style.color = fw>=80?'#00d18c':fw>=50?'#f7a94e':'#e8f0ed'; }
     const accEl2 = document.getElementById('typing-acc');
     if(accEl2){ accEl2.textContent = typingAcc + '%'; accEl2.style.color = typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'; }
 
-    if(fw > typingBestWpm){ typingBestWpm = fw; localStorage.setItem('typing_best_wpm', String(fw)); updateTypingBest(); }
-    setTimeout(() => typingReset(), 1800);
+    if(newBest){ typingBestWpm = fw; localStorage.setItem('typing_best_wpm', String(fw)); updateTypingBest(); }
+
+    // Show results overlay — stays until Tab/Esc
+    const box = document.getElementById('typing-box');
+    if(box) box.classList.add('finished');
+    const overlay = document.getElementById('typing-results');
+    if(overlay){
+      overlay.style.display='flex';
+      overlay.innerHTML=`
+        <div style="font-size:36px">✅</div>
+        <div class="typing-result-wpm">${fw} <span style="font-size:20px;font-weight:500;color:#7ad4b8">WPM</span></div>
+        <div class="typing-result-sub">
+          <div class="typing-result-stat">
+            <div class="typing-result-stat-val" style="color:${typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'}">${typingAcc}%</div>
+            <div class="typing-result-stat-lbl">Accuracy</div>
+          </div>
+          <div class="typing-result-stat">
+            <div class="typing-result-stat-val" style="color:${errCount===0?'#00d18c':errCount<=3?'#f7a94e':'#f87171'}">${errCount}</div>
+            <div class="typing-result-stat-lbl">Errors</div>
+          </div>
+          <div class="typing-result-stat">
+            <div class="typing-result-stat-val" style="color:#7a9e8e">${typingBestWpm}</div>
+            <div class="typing-result-stat-lbl">Best WPM</div>
+          </div>
+        </div>
+        ${newBest?'<div class="typing-result-newbest">🏆 New personal best!</div>':''}
+        <div class="typing-result-hint">Press <kbd>Tab</kbd> or <kbd>Esc</kbd> to try again</div>
+      `;
+    }
   }
 }
 
