@@ -4198,8 +4198,8 @@ renderHomeDailys();
 renderHomeProjects();
 renderTodayCard();
 chessInit();
-wordleRenderMini(); // populate mini wordle card on home
-document.getElementById('page-chess').querySelector('#chess-view').addEventListener('click',()=>{},true);
+// wordleRenderMini() is called after wordle vars init below
+const _cv=document.getElementById('page-chess'); if(_cv&&_cv.querySelector('#chess-view')) _cv.querySelector('#chess-view').addEventListener('click',()=>{},true);
 
 // Re-render home daily bars when returning to home
 window.addEventListener('storage', () => { renderHomeDailys(); renderHomeProjects(); });
@@ -5097,6 +5097,12 @@ function nsPick(opt,btn,ch){
   setTimeout(nsNext,1200);
 }
 
+
+
+// ── Wordle home card init (must run after all wordle vars/functions declared) ──
+(function(){
+  try { wordleInit(); wordleRenderMini(); } catch(e) {}
+})();
 
 </script>
 
