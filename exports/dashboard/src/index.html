@@ -1691,6 +1691,15 @@
         <div id="pos-word" style="font-size:42px;font-weight:900;color:#e8f0ed;text-align:center"></div>
         <div id="pos-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%"></div>
         <div id="pos-msg" style="font-size:14px;font-weight:600;min-height:22px;text-align:center"></div>
+        <!-- Definition reveal panel -->
+        <div id="pos-def-panel" style="display:none;flex-direction:column;gap:8px;width:100%;background:#0f1f17;border:1px solid #1f3a2a;border-radius:12px;padding:14px 16px;box-sizing:border-box">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span id="pos-def-badge" style="font-size:16px;font-weight:800"></span>
+            <span id="pos-def-desc" style="font-size:13px;color:#a0c9b8;flex:1"></span>
+          </div>
+          <div id="pos-def-word-def" style="font-size:14px;color:#e8f0ed;font-style:italic"></div>
+          <div id="pos-def-tip" style="font-size:12px;color:#7a9e8e;border-top:1px solid #1f3a2a;padding-top:8px"></div>
+        </div>
       </div>
     </div>
 
@@ -5118,7 +5127,7 @@ function wordleNewRandom() {
   const pick = allW[Math.floor(Math.random()*allW.length)].toUpperCase();
   wAnswer = pick; wIsDaily=false;
   wGuesses=[]; wGameOver=false; wDailyDone=false; wCurrentGuess='';
-  wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg();
+  wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg(); wordleRenderMini();
   document.getElementById('wordle-new-btn').style.display='none';
 }
 
@@ -5934,6 +5943,8 @@ function sbNewPuzzle() {
   document.getElementById('sb-found-list').innerHTML='';
   document.getElementById('sb-msg').textContent='';
   document.getElementById('sb-input').value='';
+  const ap=document.getElementById('sb-add-prompt'); if(ap) ap.style.display='none';
+  sbRenderCustomList();
   // Render hive
   const hive = document.getElementById('sb-hive');
   hive.innerHTML='';
@@ -5950,19 +5961,73 @@ function sbNewPuzzle() {
     hive.appendChild(btn);
   });
 }
+function sbGetCustom(puzzleKey){ try{return JSON.parse(localStorage.getItem('sb_custom_'+puzzleKey)||'{}');}catch{return {};} }
+function sbSaveCustom(puzzleKey,obj){ localStorage.setItem('sb_custom_'+puzzleKey, JSON.stringify(obj)); }
+function sbPuzzleKey(){ return sbPuzzle ? sbPuzzle.center+'_'+sbPuzzle.outer.join('') : ''; }
+function sbAddWord(word){
+  const key=sbPuzzleKey();
+  const custom=sbGetCustom(key);
+  const pts = word.length <= 4 ? 1 : word.length;
+  custom[word]=pts;
+  sbSaveCustom(key,custom);
+  // hide prompt
+  const p=document.getElementById('sb-add-prompt');
+  if(p) p.style.display='none';
+  const msg=document.getElementById('sb-msg');
+  msg.style.color='#4e9fd4'; msg.textContent=`"${word.toUpperCase()}" added (+${pts} pts)!`;
+  setTimeout(()=>{ if(msg.textContent.includes('added')) msg.textContent=''; },1200);
+  sbRenderCustomList();
+}
+function sbRenderCustomList(){
+  const key=sbPuzzleKey();
+  const custom=sbGetCustom(key);
+  const list=document.getElementById('sb-custom-list');
+  if(!list) return;
+  const entries=Object.entries(custom);
+  if(entries.length===0){ list.innerHTML='<span style="font-size:12px;color:#7a9e8e">No custom words yet.</span>'; return; }
+  list.innerHTML='';
+  entries.forEach(([w,pts])=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px';
+    row.innerHTML=`<span style="font-family:monospace;font-weight:700;color:#e8f0ed;font-size:13px">${w.toUpperCase()}</span><span style="color:#00d18c;font-size:12px">${pts} pts</span><button onclick="sbRemoveWord('${w}')" style="margin-left:auto;background:none;border:none;color:#7a9e8e;cursor:pointer;font-size:14px;padding:0">✕</button>`;
+    list.appendChild(row);
+  });
+}
+function sbRemoveWord(word){
+  const key=sbPuzzleKey();
+  const custom=sbGetCustom(key);
+  delete custom[word];
+  sbSaveCustom(key,custom);
+  sbRenderCustomList();
+}
 function sbSubmit() {
   const inp = document.getElementById('sb-input');
   const word = inp.value.trim().toLowerCase();
   const msg = document.getElementById('sb-msg');
+  const addPrompt = document.getElementById('sb-add-prompt');
   inp.value='';
+  if(addPrompt) addPrompt.style.display='none';
   if(word.length < 4) { msg.textContent='Too short (4+ letters)'; return; }
   if(!word.includes(sbPuzzle.center.toLowerCase())) { msg.textContent=`Must contain "${sbPuzzle.center}"`; return; }
   const validLetters = new Set([sbPuzzle.center.toLowerCase(), ...sbPuzzle.outer.map(l=>l.toLowerCase())]);
   if([...word].some(l=>!validLetters.has(l))) { msg.textContent='Invalid letters'; return; }
   if(sbFoundWords.has(word)) { msg.textContent='Already found!'; return; }
-  if(!sbPuzzle.answers.includes(word)) { msg.textContent='Not in word list'; return; }
+  // Check built-in answers + custom words
+  const custom=sbGetCustom(sbPuzzleKey());
+  const isBuiltIn=sbPuzzle.answers.includes(word);
+  const isCustom=Object.prototype.hasOwnProperty.call(custom, word);
+  if(!isBuiltIn && !isCustom){
+    // Offer to add it
+    msg.style.color='#e8a020'; msg.textContent='Not in word list.';
+    if(addPrompt){
+      document.getElementById('sb-add-word-label').textContent=`"${word.toUpperCase()}" (${word.length <= 4 ? 1 : word.length} pts) — is this a real word?`;
+      document.getElementById('sb-add-word-val').value=word;
+      addPrompt.style.display='flex';
+    }
+    return;
+  }
   sbFoundWords.add(word);
-  const pts = word.length <= 4 ? 1 : word.length;
+  const pts = isCustom ? custom[word] : (word.length <= 4 ? 1 : word.length);
   sbScore += pts;
   document.getElementById('sb-score').textContent = sbScore;
   document.getElementById('sb-found-count').textContent = sbFoundWords.size;
@@ -5970,7 +6035,7 @@ function sbSubmit() {
   setTimeout(()=>{ if(msg.textContent===`+${pts} pts!`) msg.textContent=''; },900);
   const chip = document.createElement('div');
   chip.style.cssText='background:#1a3a28;color:#00d18c;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;font-family:monospace';
-  chip.textContent = word.toUpperCase();
+  chip.textContent = word.toUpperCase()+' +'+pts;
   document.getElementById('sb-found-list').prepend(chip);
 }
 function sbDelete() {
@@ -6140,49 +6205,80 @@ function rhymePick(choice,answer,btn,ch){
 // ════════════════════════════════════════════════
 //  PARTS OF SPEECH
 // ════════════════════════════════════════════════
+const POS_DEFS = {
+  Noun:      { color:'#4e9fd4', label:'Noun',      icon:'🔵', desc:'A person, place, thing, or idea.', tip:'Tip: Can usually follow "the" — the elephant, the freedom, the harvest.' },
+  Verb:      { color:'#e87040', label:'Verb',      icon:'🔴', desc:'An action or state of being.', tip:'Tip: Can follow "to" — to jump, to devour, to glimmer.' },
+  Adjective: { color:'#e8a020', label:'Adjective', icon:'🟡', desc:'Describes or modifies a noun.', tip:'Tip: Can appear between "the" and a noun — the beautiful painting, the fragile vase.' },
+  Adverb:    { color:'#00d18c', label:'Adverb',    icon:'🟢', desc:'Modifies a verb, adjective, or another adverb. Often ends in -ly.', tip:'Tip: Ask "how?" "when?" or "where?" about the verb — ran quickly, barely made it.' },
+};
 const POS_DATA = [
-  {word:'quickly',answer:'Adverb',context:'She ran quickly to the store.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'beautiful',answer:'Adjective',context:'The beautiful painting hung on the wall.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'elephant',answer:'Noun',context:'The elephant splashed in the water.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'jumped',answer:'Verb',context:'The frog jumped over the log.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'happily',answer:'Adverb',context:'She happily accepted the gift.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'enormous',answer:'Adjective',context:'The enormous wave crashed on the shore.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'freedom',answer:'Noun',context:'Freedom is a fundamental right.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'whispered',answer:'Verb',context:'He whispered a secret in her ear.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'softly',answer:'Adverb',context:'The wind blew softly through the trees.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'ancient',answer:'Adjective',context:'They discovered an ancient temple.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'curiosity',answer:'Noun',context:'Curiosity led her to explore further.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'devoured',answer:'Verb',context:'The dragon devoured the entire feast.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'fiercely',answer:'Adverb',context:'The competitors fiercely battled for first place.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'fragile',answer:'Adjective',context:'Handle the fragile glassware carefully.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'justice',answer:'Noun',context:'The judge sought justice for all.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'stumbled',answer:'Verb',context:'He stumbled on the dark staircase.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'barely',answer:'Adverb',context:'She barely made it on time.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'vibrant',answer:'Adjective',context:'The vibrant mural decorated the entire wall.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'harvest',answer:'Noun',context:'The harvest this year was exceptional.',choices:['Noun','Verb','Adjective','Adverb']},
-  {word:'glimmered',answer:'Verb',context:'Stars glimmered in the clear night sky.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'quickly',  answer:'Adverb',    context:'She ran quickly to the store.',                  def:'Done in a fast manner; with speed.'},
+  {word:'beautiful',answer:'Adjective', context:'The beautiful painting hung on the wall.',       def:'Pleasing to the senses; having qualities that delight.'},
+  {word:'elephant', answer:'Noun',      context:'The elephant splashed in the water.',            def:'A large mammal with a trunk, native to Africa and Asia.'},
+  {word:'jumped',   answer:'Verb',      context:'The frog jumped over the log.',                  def:'Moved suddenly off the ground by muscular effort.'},
+  {word:'happily',  answer:'Adverb',    context:'She happily accepted the gift.',                 def:'In a happy or joyful manner.'},
+  {word:'enormous', answer:'Adjective', context:'The enormous wave crashed on the shore.',        def:'Very large in size, quantity, or extent.'},
+  {word:'freedom',  answer:'Noun',      context:'Freedom is a fundamental right.',               def:'The power or right to act, speak, or think without restraint.'},
+  {word:'whispered',answer:'Verb',      context:'He whispered a secret in her ear.',              def:'Spoke very softly, using one's breath rather than one's throat.'},
+  {word:'softly',   answer:'Adverb',    context:'The wind blew softly through the trees.',       def:'In a quiet, gentle, or subdued manner.'},
+  {word:'ancient',  answer:'Adjective', context:'They discovered an ancient temple.',             def:'Belonging to the very distant past; extremely old.'},
+  {word:'curiosity',answer:'Noun',      context:'Curiosity led her to explore further.',          def:'A strong desire to know or learn something.'},
+  {word:'devoured', answer:'Verb',      context:'The dragon devoured the entire feast.',          def:'Ate something eagerly and in large amounts.'},
+  {word:'fiercely', answer:'Adverb',    context:'The competitors fiercely battled for first.',   def:'In an intensely aggressive or strong manner.'},
+  {word:'fragile',  answer:'Adjective', context:'Handle the fragile glassware carefully.',       def:'Easily broken or damaged; delicate.'},
+  {word:'justice',  answer:'Noun',      context:'The judge sought justice for all.',             def:'The quality of being fair and reasonable; the legal system.'},
+  {word:'stumbled', answer:'Verb',      context:'He stumbled on the dark staircase.',            def:'Tripped or lost one's balance while walking or running.'},
+  {word:'barely',   answer:'Adverb',    context:'She barely made it on time.',                   def:'Only just; by the smallest possible margin.'},
+  {word:'vibrant',  answer:'Adjective', context:'The vibrant mural decorated the entire wall.', def:'Full of energy and enthusiasm; bright and striking.'},
+  {word:'harvest',  answer:'Noun',      context:'The harvest this year was exceptional.',        def:'The process or period of gathering in crops; the season's yield.'},
+  {word:'glimmered',answer:'Verb',      context:'Stars glimmered in the clear night sky.',       def:'Shone with a faint or wavering light.'},
+  {word:'gracefully',answer:'Adverb',  context:'The dancer moved gracefully across the stage.', def:'In a smooth, elegant, and attractive manner.'},
+  {word:'wilderness',answer:'Noun',    context:'They hiked deep into the wilderness.',           def:'An uncultivated, uninhabited region; wild, natural land.'},
+  {word:'shattered',answer:'Verb',     context:'The vase shattered when it hit the floor.',     def:'Broke suddenly into many pieces.'},
+  {word:'mysterious',answer:'Adjective',context:'A mysterious figure stood in the fog.',        def:'Difficult to understand or explain; full of mystery.'},
+  {word:'gradually', answer:'Adverb',  context:'The fog gradually lifted in the morning.',      def:'In a way that happens slowly, by degrees, over time.'},
+  {word:'abundance', answer:'Noun',    context:'The garden grew in abundance this summer.',      def:'A very large quantity of something; more than enough.'},
+  {word:'collapsed', answer:'Verb',    context:'The old bridge collapsed during the storm.',     def:'Fell down or gave way suddenly.'},
+  {word:'elegant',   answer:'Adjective',context:'She wore an elegant gown to the gala.',        def:'Graceful and stylish in appearance or manner.'},
+  {word:'swiftly',   answer:'Adverb',  context:'The river swiftly carried the leaves away.',   def:'At high speed; quickly and without delay.'},
+  {word:'knowledge', answer:'Noun',    context:'Knowledge is the greatest gift of education.',  def:'Facts, information, and skills acquired through learning.'},
+  {word:'trembled',  answer:'Verb',    context:'Her hands trembled as she opened the letter.',  def:'Shook involuntarily, typically from fear or excitement.'},
 ];
 let posScore=0, posStreak=0;
 function posStart(){ posScore=0; posStreak=0; document.getElementById('pos-score').textContent=0; document.getElementById('pos-streak').textContent=0; posNext(); }
 function posNext(){
-  const item=POS_DATA[Math.floor(Math.random()*POS_DATA.length)];
+  const pool=POS_DATA;
+  const item=pool[Math.floor(Math.random()*pool.length)];
   document.getElementById('pos-context').textContent='"'+item.context+'"';
   document.getElementById('pos-word').textContent=item.word;
   document.getElementById('pos-msg').textContent='';
-  const choices=[...item.choices].sort(()=>Math.random()-.5);
+  const panel=document.getElementById('pos-def-panel');
+  if(panel) panel.style.display='none';
+  const choices=['Noun','Verb','Adjective','Adverb'].sort(()=>Math.random()-.5);
   const ch=document.getElementById('pos-choices');
   ch.innerHTML='';
   choices.forEach(c=>{
     const btn=document.createElement('button');
     btn.textContent=c;
     btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:15px;font-weight:600;cursor:pointer';
-    btn.onclick=()=>posPick(c,item.answer,btn,ch);
+    btn.onclick=()=>posPick(c,item.answer,btn,ch,item);
     ch.appendChild(btn);
   });
 }
-function posPick(choice,answer,btn,ch){
+function posPick(choice,answer,btn,ch,item){
   Array.from(ch.children).forEach(b=>{b.disabled=true;b.style.opacity='0.7';});
   const msg=document.getElementById('pos-msg');
+  const def=POS_DEFS[answer];
+  const panel=document.getElementById('pos-def-panel');
+  // Show definition panel
+  if(panel && def){
+    panel.style.display='flex';
+    document.getElementById('pos-def-badge').textContent=def.icon+' '+def.label;
+    document.getElementById('pos-def-badge').style.color=def.color;
+    document.getElementById('pos-def-desc').textContent=def.desc;
+    document.getElementById('pos-def-word-def').textContent='"'+item.word+'" — '+item.def;
+    document.getElementById('pos-def-tip').textContent=def.tip;
+  }
   if(choice===answer){
     btn.style.background='#538d4e'; btn.style.opacity='1';
     posStreak++; posScore+=10+(posStreak*2);
@@ -6195,7 +6291,7 @@ function posPick(choice,answer,btn,ch){
     posStreak=0; document.getElementById('pos-streak').textContent=0;
     msg.style.color='#e8a020'; msg.textContent=`"${document.getElementById('pos-word').textContent}" is a ${answer}`;
   }
-  setTimeout(posNext,1400);
+  setTimeout(()=>{if(panel) panel.style.display='none'; posNext();},2200);
 }
 
 // ════════════════════════════════════════════════
