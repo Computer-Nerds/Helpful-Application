@@ -1779,7 +1779,10 @@ const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', secur
 function setPage(p) {
   currentPage = p;
   // Brain game auto-init
-  if(p==='wordle' && typeof wordleNewGame!=='undefined') wordleNewGame();
+  if(p==='wordle') {
+    if(!wAnswer) { try { wordleInit(); } catch(e){} }
+    try { wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg(); } catch(e){}
+  }
   if(p==='bg-analogies'&& typeof anaNext!=='undefined')       anaNext();
   if(p==='bg-focus'    && typeof focusStart!=='undefined'){
     document.getElementById('focus-instructions').style.display='flex';
@@ -5867,6 +5870,418 @@ function fixupCheck(){
     document.getElementById('fixup-explanation').textContent=fixupCurrent.explanation;
     document.getElementById('fixup-answer-reveal').style.display='';
   }
+}
+
+// ════════════════════════════════════════════════
+//  COUNTDOWN (home card)
+// ════════════════════════════════════════════════
+function renderCountdown() {
+  const el = document.getElementById('countdown-list');
+  if (!el) return;
+  const events = getCalEvents().filter(e => e.important);
+  if (!events.length) {
+    el.innerHTML = '<div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = events.map(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    const diff = Math.round((d - today) / 86400000);
+    return { ...e, diff };
+  }).filter(e => e.diff >= 0).sort((a,b) => a.diff - b.diff).slice(0, 4);
+  if (!upcoming.length) {
+    el.innerHTML = '<div style="font-size:12px;color:#4a6e5e;font-style:italic">No upcoming important events</div>';
+    return;
+  }
+  el.innerHTML = upcoming.map(e => `
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="background:${e.color}30;border-left:3px solid ${e.color};border-radius:6px;padding:6px 10px;flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;color:${e.color};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div>
+        <div style="font-size:11px;color:#7a9e8e">${e.time ? e.time + ' · ' : ''}${e.date}</div>
+      </div>
+      <div style="text-align:center;min-width:42px">
+        <div style="font-size:20px;font-weight:900;color:#f7a94e;line-height:1">${e.diff === 0 ? '🎉' : e.diff}</div>
+        <div style="font-size:10px;color:#7a9e8e">${e.diff === 0 ? 'Today' : e.diff === 1 ? 'day' : 'days'}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  SPELLING BEE
+// ════════════════════════════════════════════════
+const SB_PUZZLES = [
+  { center:'A', outer:['T','R','N','E','P','L'], answers:['plant','planet','plane','petal','panel','rental','alert','alter','rattle','rant','rant','lean','lane','rale','earl','earn','near','real','rate','late','tale','tale','pale','pane','tape','tare','peat','plat','plan','atone'] },
+  { center:'O', outer:['C','K','S','T','R','E'], answers:['stock','stoke','store','score','core','coke','tore','rote','rose','rest','rock','trek','sort','stroke','sector','secret','resort','rector','escort','correct','poster','protest'] },
+  { center:'I', outer:['S','T','R','N','G','E'], answers:['tiger','tinge','sting','stein','stern','siren','risen','reign','insist','inter','ingest','grist','grin','girl','gins','gist','ring','rein','sine','site','tier','tire','ties','rent','rents','rite','rise','sign','sire','sing','singe','string','single','singer','stir','stinger','tige','tires'] },
+  { center:'E', outer:['B','R','A','D','G','N'], answers:['brand','bared','beard','banger','baned','bane','barge','bare','barn','bead','bean','bear','bed','bend','bread','read','rend','raged','rage','rand','rang','range','rave','rang','gander','grade','grad','gran','grand','grande','grander','garden','near','nerd','neared','drab','drag','dreg','earn','earned'] },
+  { center:'U', outer:['P','L','S','H','T','R'], answers:['plush','slur','slurp','rush','rust','ruts','lust','lure','lush','hurt','hurl','hull','plus','purl','pus','puts','pulse','thru','thrust','thrush'] },
+];
+let sbPuzzle=null, sbFoundWords=new Set(), sbScore=0;
+
+function sbStart() {
+  sbFoundWords=new Set(); sbScore=0;
+  document.getElementById('sb-score').textContent=0;
+  document.getElementById('sb-found-count').textContent=0;
+  document.getElementById('sb-found-list').innerHTML='';
+  document.getElementById('sb-msg').textContent='';
+  sbNewPuzzle();
+}
+function sbNewPuzzle() {
+  sbPuzzle = SB_PUZZLES[Math.floor(Math.random()*SB_PUZZLES.length)];
+  sbFoundWords=new Set(); sbScore=0;
+  document.getElementById('sb-score').textContent=0;
+  document.getElementById('sb-found-count').textContent=0;
+  document.getElementById('sb-found-list').innerHTML='';
+  document.getElementById('sb-msg').textContent='';
+  document.getElementById('sb-input').value='';
+  // Render hive
+  const hive = document.getElementById('sb-hive');
+  hive.innerHTML='';
+  const allLetters = [sbPuzzle.center, ...sbPuzzle.outer];
+  allLetters.forEach((l,i) => {
+    const btn = document.createElement('button');
+    btn.textContent = l;
+    const isCenter = i===0;
+    btn.style.cssText = `width:52px;height:52px;border-radius:50%;border:none;font-size:20px;font-weight:800;cursor:pointer;background:${isCenter?'#f7a94e':'#1a2e24'};color:${isCenter?'#0a1a12':'#e8f0ed'}`;
+    btn.onclick = () => {
+      const inp = document.getElementById('sb-input');
+      inp.value = (inp.value + l).toUpperCase();
+    };
+    hive.appendChild(btn);
+  });
+}
+function sbSubmit() {
+  const inp = document.getElementById('sb-input');
+  const word = inp.value.trim().toLowerCase();
+  const msg = document.getElementById('sb-msg');
+  inp.value='';
+  if(word.length < 4) { msg.textContent='Too short (4+ letters)'; return; }
+  if(!word.includes(sbPuzzle.center.toLowerCase())) { msg.textContent=`Must contain "${sbPuzzle.center}"`; return; }
+  const validLetters = new Set([sbPuzzle.center.toLowerCase(), ...sbPuzzle.outer.map(l=>l.toLowerCase())]);
+  if([...word].some(l=>!validLetters.has(l))) { msg.textContent='Invalid letters'; return; }
+  if(sbFoundWords.has(word)) { msg.textContent='Already found!'; return; }
+  if(!sbPuzzle.answers.includes(word)) { msg.textContent='Not in word list'; return; }
+  sbFoundWords.add(word);
+  const pts = word.length <= 4 ? 1 : word.length;
+  sbScore += pts;
+  document.getElementById('sb-score').textContent = sbScore;
+  document.getElementById('sb-found-count').textContent = sbFoundWords.size;
+  msg.style.color='#00d18c'; msg.textContent=`+${pts} pts!`;
+  setTimeout(()=>{ if(msg.textContent===`+${pts} pts!`) msg.textContent=''; },900);
+  const chip = document.createElement('div');
+  chip.style.cssText='background:#1a3a28;color:#00d18c;border-radius:6px;padding:4px 10px;font-size:13px;font-weight:700;font-family:monospace';
+  chip.textContent = word.toUpperCase();
+  document.getElementById('sb-found-list').prepend(chip);
+}
+function sbDelete() {
+  const inp = document.getElementById('sb-input');
+  inp.value = inp.value.slice(0,-1);
+}
+
+// ════════════════════════════════════════════════
+//  SENTENCE SCRAMBLE
+// ════════════════════════════════════════════════
+const SCR_SENTENCES = [
+  'The quick brown fox jumps over the lazy dog.',
+  'She sells seashells by the seashore.',
+  'A journey of a thousand miles begins with a single step.',
+  'Actions speak louder than words.',
+  'The early bird catches the worm.',
+  'Every cloud has a silver lining.',
+  'Laughter is the best medicine.',
+  'Two heads are better than one.',
+  'Practice makes perfect.',
+  'Time flies when you are having fun.',
+  'You cannot judge a book by its cover.',
+  'The pen is mightier than the sword.',
+  'Knowledge is power.',
+  'Better late than never.',
+  'All that glitters is not gold.',
+  'Where there is a will there is a way.',
+  'Honesty is the best policy.',
+  'Good things come to those who wait.',
+  'The grass is always greener on the other side.',
+  'Birds of a feather flock together.',
+];
+let scrCurrent=null, scrSelected=[], scrRemaining=[], scrScore=0, scrStreak=0;
+function scrStart() {
+  scrScore=0; scrStreak=0;
+  document.getElementById('scr-score').textContent=0;
+  document.getElementById('scr-streak').textContent=0;
+  scrNext();
+}
+function scrNext() {
+  scrCurrent = SCR_SENTENCES[Math.floor(Math.random()*SCR_SENTENCES.length)];
+  scrSelected=[];
+  scrRemaining = scrCurrent.split(' ').sort(()=>Math.random()-.5);
+  document.getElementById('scr-msg').textContent='';
+  document.getElementById('scr-answer-reveal').style.display='none';
+  scrRenderSelected(); scrRenderWords();
+}
+function scrRenderSelected() {
+  const el = document.getElementById('scr-selected');
+  if(!scrSelected.length) { el.innerHTML='<span style="color:#4a6e5e;font-style:italic;font-size:14px">Tap words to build the sentence…</span>'; return; }
+  el.innerHTML = scrSelected.map((w,i)=>`<span onclick="scrRemoveWord(${i})" style="background:#1a3a28;color:#e8f0ed;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:15px">${w}</span>`).join(' ');
+}
+function scrRenderWords() {
+  const el = document.getElementById('scr-words');
+  el.innerHTML='';
+  scrRemaining.forEach((w,i)=>{
+    const btn=document.createElement('button');
+    btn.textContent=w;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:7px;padding:8px 14px;font-size:14px;cursor:pointer';
+    btn.onclick=()=>scrPickWord(i);
+    el.appendChild(btn);
+  });
+}
+function scrPickWord(i) {
+  scrSelected.push(scrRemaining[i]);
+  scrRemaining.splice(i,1);
+  scrRenderSelected(); scrRenderWords();
+}
+function scrRemoveWord(i) {
+  scrRemaining.push(scrSelected[i]);
+  scrSelected.splice(i,1);
+  scrRenderSelected(); scrRenderWords();
+}
+function scrClear() {
+  scrRemaining = [...scrSelected, ...scrRemaining];
+  scrSelected=[];
+  scrRenderSelected(); scrRenderWords();
+}
+function scrCheck() {
+  const attempt = scrSelected.join(' ');
+  const correct = scrCurrent;
+  const msg = document.getElementById('scr-msg');
+  if(attempt === correct) {
+    scrScore+=10+(scrStreak*3); scrStreak++;
+    document.getElementById('scr-score').textContent=scrScore;
+    document.getElementById('scr-streak').textContent=scrStreak;
+    msg.style.color='#00d18c'; msg.textContent='✅ Correct!';
+    setTimeout(scrNext, 900);
+  } else {
+    scrStreak=0; document.getElementById('scr-streak').textContent=0;
+    msg.style.color='#e8a020'; msg.textContent='❌ Not quite';
+    document.getElementById('scr-correct-text').textContent=correct;
+    document.getElementById('scr-answer-reveal').style.display='';
+  }
+}
+function scrSkip() {
+  document.getElementById('scr-correct-text').textContent=scrCurrent;
+  document.getElementById('scr-answer-reveal').style.display='';
+  scrStreak=0; document.getElementById('scr-streak').textContent=0;
+}
+
+// ════════════════════════════════════════════════
+//  RHYME TIME
+// ════════════════════════════════════════════════
+const RHYME_DATA = [
+  {word:'CAT',answer:'HAT',choices:['HAT','DOG','TREE','BLUE']},
+  {word:'MOON',answer:'SPOON',choices:['SPOON','STAR','NIGHT','POND']},
+  {word:'DAY',answer:'PLAY',choices:['PLAY','DARK','WALK','SING']},
+  {word:'NIGHT',answer:'BRIGHT',choices:['BRIGHT','SHADOW','LAMP','SLEEP']},
+  {word:'TREE',answer:'FREE',choices:['FREE','ROCK','COLD','WIND']},
+  {word:'RAIN',answer:'TRAIN',choices:['TRAIN','CLOUD','SNOW','WIND']},
+  {word:'LIGHT',answer:'FLIGHT',choices:['FLIGHT','SPARK','CLOUD','BEAM']},
+  {word:'CAKE',answer:'LAKE',choices:['LAKE','PIE','CANDY','APPLE']},
+  {word:'SONG',answer:'LONG',choices:['LONG','BEAT','TUNE','DRUM']},
+  {word:'BONE',answer:'STONE',choices:['STONE','TOOTH','FLESH','BLOOD']},
+  {word:'CLOCK',answer:'ROCK',choices:['ROCK','TIME','BELL','TICK']},
+  {word:'FIRE',answer:'WIRE',choices:['WIRE','SMOKE','FLAME','HEAT']},
+  {word:'BOOK',answer:'COOK',choices:['COOK','PAGE','READ','WRITE']},
+  {word:'STAR',answer:'FAR',choices:['FAR','MOON','GLOW','WISH']},
+  {word:'SNOW',answer:'GLOW',choices:['GLOW','COLD','ICE','FLAKE']},
+  {word:'MIND',answer:'FIND',choices:['FIND','THINK','BRAIN','KNOW']},
+  {word:'BEAR',answer:'PEAR',choices:['PEAR','GROWL','CAVE','WILD']},
+  {word:'BLUE',answer:'CLUE',choices:['CLUE','SKY','OCEAN','DARK']},
+  {word:'GATE',answer:'LATE',choices:['LATE','FENCE','OPEN','LOCK']},
+  {word:'SHIP',answer:'DRIP',choices:['DRIP','SAIL','OCEAN','WAVE']},
+  {word:'RING',answer:'SING',choices:['SING','BELL','ROUND','METAL']},
+  {word:'SHOE',answer:'BLUE',choices:['BLUE','FOOT','LACE','SOLE']},
+  {word:'FACE',answer:'RACE',choices:['RACE','CHEEK','SMILE','NOSE']},
+  {word:'LAND',answer:'SAND',choices:['SAND','FIELD','GRASS','EARTH']},
+  {word:'HOPE',answer:'ROPE',choices:['ROPE','WISH','DREAM','FAITH']},
+];
+let rhymeScore=0, rhymeStreak=0;
+function rhymeStart(){ rhymeScore=0; rhymeStreak=0; document.getElementById('rhyme-score').textContent=0; document.getElementById('rhyme-streak').textContent=0; rhymeNext(); }
+function rhymeNext(){
+  const item=RHYME_DATA[Math.floor(Math.random()*RHYME_DATA.length)];
+  document.getElementById('rhyme-word').textContent=item.word;
+  document.getElementById('rhyme-msg').textContent='';
+  const choices=[...item.choices].sort(()=>Math.random()-.5);
+  const ch=document.getElementById('rhyme-choices');
+  ch.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.textContent=c;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:10px;padding:18px 10px;font-size:18px;font-weight:700;cursor:pointer;text-align:center';
+    btn.onclick=()=>rhymePick(c,item.answer,btn,ch);
+    ch.appendChild(btn);
+  });
+}
+function rhymePick(choice,answer,btn,ch){
+  Array.from(ch.children).forEach(b=>{b.disabled=true;b.style.opacity='0.7';});
+  const msg=document.getElementById('rhyme-msg');
+  if(choice===answer){
+    btn.style.background='#538d4e'; btn.style.opacity='1';
+    rhymeStreak++; rhymeScore+=10+(rhymeStreak*2);
+    document.getElementById('rhyme-score').textContent=rhymeScore;
+    document.getElementById('rhyme-streak').textContent=rhymeStreak;
+    msg.style.color='#00d18c'; msg.textContent='🎵 Rhymes!';
+  } else {
+    btn.style.background='#8d3a3a'; btn.style.opacity='1';
+    Array.from(ch.children).forEach(b=>{if(b.textContent===answer){b.style.background='#538d4e';b.style.opacity='1';}});
+    rhymeStreak=0; document.getElementById('rhyme-streak').textContent=0;
+    msg.style.color='#e8a020'; msg.textContent=`"${answer}" rhymes with "${document.getElementById('rhyme-word').textContent}"`;
+  }
+  setTimeout(rhymeNext,1400);
+}
+
+// ════════════════════════════════════════════════
+//  PARTS OF SPEECH
+// ════════════════════════════════════════════════
+const POS_DATA = [
+  {word:'quickly',answer:'Adverb',context:'She ran quickly to the store.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'beautiful',answer:'Adjective',context:'The beautiful painting hung on the wall.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'elephant',answer:'Noun',context:'The elephant splashed in the water.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'jumped',answer:'Verb',context:'The frog jumped over the log.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'happily',answer:'Adverb',context:'She happily accepted the gift.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'enormous',answer:'Adjective',context:'The enormous wave crashed on the shore.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'freedom',answer:'Noun',context:'Freedom is a fundamental right.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'whispered',answer:'Verb',context:'He whispered a secret in her ear.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'softly',answer:'Adverb',context:'The wind blew softly through the trees.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'ancient',answer:'Adjective',context:'They discovered an ancient temple.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'curiosity',answer:'Noun',context:'Curiosity led her to explore further.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'devoured',answer:'Verb',context:'The dragon devoured the entire feast.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'fiercely',answer:'Adverb',context:'The competitors fiercely battled for first place.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'fragile',answer:'Adjective',context:'Handle the fragile glassware carefully.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'justice',answer:'Noun',context:'The judge sought justice for all.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'stumbled',answer:'Verb',context:'He stumbled on the dark staircase.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'barely',answer:'Adverb',context:'She barely made it on time.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'vibrant',answer:'Adjective',context:'The vibrant mural decorated the entire wall.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'harvest',answer:'Noun',context:'The harvest this year was exceptional.',choices:['Noun','Verb','Adjective','Adverb']},
+  {word:'glimmered',answer:'Verb',context:'Stars glimmered in the clear night sky.',choices:['Noun','Verb','Adjective','Adverb']},
+];
+let posScore=0, posStreak=0;
+function posStart(){ posScore=0; posStreak=0; document.getElementById('pos-score').textContent=0; document.getElementById('pos-streak').textContent=0; posNext(); }
+function posNext(){
+  const item=POS_DATA[Math.floor(Math.random()*POS_DATA.length)];
+  document.getElementById('pos-context').textContent='"'+item.context+'"';
+  document.getElementById('pos-word').textContent=item.word;
+  document.getElementById('pos-msg').textContent='';
+  const choices=[...item.choices].sort(()=>Math.random()-.5);
+  const ch=document.getElementById('pos-choices');
+  ch.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.textContent=c;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:15px;font-weight:600;cursor:pointer';
+    btn.onclick=()=>posPick(c,item.answer,btn,ch);
+    ch.appendChild(btn);
+  });
+}
+function posPick(choice,answer,btn,ch){
+  Array.from(ch.children).forEach(b=>{b.disabled=true;b.style.opacity='0.7';});
+  const msg=document.getElementById('pos-msg');
+  if(choice===answer){
+    btn.style.background='#538d4e'; btn.style.opacity='1';
+    posStreak++; posScore+=10+(posStreak*2);
+    document.getElementById('pos-score').textContent=posScore;
+    document.getElementById('pos-streak').textContent=posStreak;
+    msg.style.color='#00d18c'; msg.textContent='✅ Correct!';
+  } else {
+    btn.style.background='#8d3a3a'; btn.style.opacity='1';
+    Array.from(ch.children).forEach(b=>{if(b.textContent===answer){b.style.background='#538d4e';b.style.opacity='1';}});
+    posStreak=0; document.getElementById('pos-streak').textContent=0;
+    msg.style.color='#e8a020'; msg.textContent=`"${document.getElementById('pos-word').textContent}" is a ${answer}`;
+  }
+  setTimeout(posNext,1400);
+}
+
+// ════════════════════════════════════════════════
+//  WORD PROBLEMS
+// ════════════════════════════════════════════════
+const WP_DATA = {
+  easy:[
+    {q:'Tom has 12 apples. He gives 5 to his friend. How many apples does Tom have left?',answer:7,choices:[7,5,12,17],explain:'12 − 5 = 7'},
+    {q:'A bag has 6 red marbles and 4 blue marbles. How many marbles are there in total?',answer:10,choices:[10,2,8,14],explain:'6 + 4 = 10'},
+    {q:'Sara reads 8 pages on Monday and 7 pages on Tuesday. How many pages did she read altogether?',answer:15,choices:[15,1,56,14],explain:'8 + 7 = 15'},
+    {q:'A carton holds 12 eggs. If 3 eggs are broken, how many good eggs remain?',answer:9,choices:[9,3,15,6],explain:'12 − 3 = 9'},
+    {q:'There are 5 birds on a fence. 3 more land. Then 2 fly away. How many are left?',answer:6,choices:[6,8,10,4],explain:'5 + 3 − 2 = 6'},
+    {q:'Each table seats 4 people. There are 3 tables. How many people can sit in all?',answer:12,choices:[12,7,16,9],explain:'4 × 3 = 12'},
+    {q:'Jake saved $15. He spent $7 on a toy. How much money does he have left?',answer:8,choices:[8,22,7,15],explain:'$15 − $7 = $8'},
+    {q:'A pizza is cut into 8 slices. If 3 slices are eaten, how many remain?',answer:5,choices:[5,3,11,8],explain:'8 − 3 = 5'},
+  ],
+  medium:[
+    {q:'A store sells apples for $0.75 each. Maria buys 8 apples. How much does she spend?',answer:6,choices:[6,5.25,7,8.75],explain:'$0.75 × 8 = $6.00'},
+    {q:'A train travels at 60 mph. How far does it travel in 2.5 hours?',answer:150,choices:[150,120,175,90],explain:'60 × 2.5 = 150 miles'},
+    {q:'A rectangle has a length of 12 cm and a width of 5 cm. What is its area?',answer:60,choices:[60,34,17,55],explain:'Area = 12 × 5 = 60 cm²'},
+    {q:'There are 24 students in a class. If they are divided into groups of 6, how many groups are there?',answer:4,choices:[4,6,3,8],explain:'24 ÷ 6 = 4 groups'},
+    {q:'A shirt costs $35. It is on sale for 20% off. What is the sale price?',answer:28,choices:[28,25,30,7],explain:'20% of $35 = $7. $35 − $7 = $28'},
+    {q:'Lisa walks 2.5 miles each day. How many miles does she walk in a week?',answer:17.5,choices:[17.5,15,20,12.5],explain:'2.5 × 7 = 17.5 miles'},
+    {q:'A water tank holds 240 liters. It is currently 3/4 full. How many liters are in the tank?',answer:180,choices:[180,160,200,120],explain:'240 × 3/4 = 180 liters'},
+    {q:'Ben earns $12 per hour. He works 6 hours on Saturday and 4 hours on Sunday. How much does he earn?',answer:120,choices:[120,96,108,144],explain:'(6 + 4) × $12 = $120'},
+  ],
+  hard:[
+    {q:'A car travels 360 miles using 12 gallons of gas. Another car travels 420 miles on 14 gallons. Which car gets better mileage?',answer:'They are equal',choices:['They are equal','First car','Second car','Cannot tell'],explain:'360÷12 = 30 mpg, 420÷14 = 30 mpg — they are equal.'},
+    {q:'A store marks up its products by 40%. Then offers a 25% discount. Is the final price higher or lower than the original?',answer:'Higher (5% more)',choices:['Higher (5% more)','Lower (15% less)','Same price','Higher (40% more)'],explain:'1.40 × 0.75 = 1.05 — the final price is 5% higher than original.'},
+    {q:'Two pipes fill a tank. Pipe A fills it in 3 hours, Pipe B in 6 hours. How long to fill together?',answer:'2 hours',choices:['2 hours','4 hours','1.5 hours','4.5 hours'],explain:'Rate A = 1/3, Rate B = 1/6. Combined = 1/3+1/6 = 1/2 per hour → 2 hours.'},
+    {q:'A recipe uses 2¼ cups of flour per batch. How many cups are needed for 4 batches?',answer:9,choices:[9,8,10,8.5],explain:'2.25 × 4 = 9 cups'},
+    {q:'Sarah invests $500 at 4% annual interest (simple). How much interest has she earned after 3 years?',answer:60,choices:[60,120,20,150],explain:'Simple interest: $500 × 0.04 × 3 = $60'},
+    {q:'A gym membership costs $45/month or $480/year. How much do you save annually by paying yearly?',answer:60,choices:[60,45,30,540],explain:'Monthly: 45×12=$540. Annual: $480. Savings: $60.'},
+    {q:'A box of 36 chocolates is shared equally among 8 people. How many whole chocolates does each person get, and how many are left over?',answer:'4 each, 4 left over',choices:['4 each, 4 left over','4 each, 3 left over','5 each, 1 left over','3 each, 12 left over'],explain:'36 ÷ 8 = 4 remainder 4.'},
+  ]
+};
+let wpLevel='easy', wpScore=0, wpStreak=0, wpCurrent=null;
+function wpSetLevel(lv){
+  wpLevel=lv;
+  ['easy','medium','hard'].forEach(l=>{
+    const btn=document.getElementById('wp-tab-'+l);
+    if(!btn) return;
+    btn.style.background = l===lv ? '#00d18c' : 'transparent';
+    btn.style.color = l===lv ? '#0a1a12' : '#7a9e8e';
+  });
+  wpNext();
+}
+function wpStart(){ wpScore=0; wpStreak=0; document.getElementById('wp-score').textContent=0; document.getElementById('wp-streak').textContent=0; wpNext(); }
+function wpNext(){
+  const pool=WP_DATA[wpLevel];
+  wpCurrent=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('wp-question').textContent=wpCurrent.q;
+  document.getElementById('wp-msg').textContent='';
+  document.getElementById('wp-explanation').style.display='none';
+  const choices=[...wpCurrent.choices].sort(()=>Math.random()-.5);
+  const ch=document.getElementById('wp-choices');
+  ch.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.textContent=c;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:15px;font-weight:600;cursor:pointer;text-align:center';
+    btn.onclick=()=>wpPick(c,btn,ch);
+    ch.appendChild(btn);
+  });
+}
+function wpPick(choice,btn,ch){
+  Array.from(ch.children).forEach(b=>{b.disabled=true;b.style.opacity='0.7';});
+  const msg=document.getElementById('wp-msg');
+  const correct=wpCurrent.answer;
+  const isCorrect = String(choice)===String(correct);
+  if(isCorrect){
+    btn.style.background='#538d4e'; btn.style.opacity='1';
+    wpStreak++; wpScore+=10+(wpStreak*3);
+    document.getElementById('wp-score').textContent=wpScore;
+    document.getElementById('wp-streak').textContent=wpStreak;
+    msg.style.color='#00d18c'; msg.textContent='✅ Correct!';
+  } else {
+    btn.style.background='#8d3a3a'; btn.style.opacity='1';
+    Array.from(ch.children).forEach(b=>{if(String(b.textContent)===String(correct)){b.style.background='#538d4e';b.style.opacity='1';}});
+    wpStreak=0; document.getElementById('wp-streak').textContent=0;
+    msg.style.color='#e8a020'; msg.textContent='❌ Not quite';
+  }
+  const expEl=document.getElementById('wp-explanation');
+  expEl.textContent='💡 '+wpCurrent.explain;
+  expEl.style.display='';
+  setTimeout(wpNext,2000);
 }
 
 </script>
