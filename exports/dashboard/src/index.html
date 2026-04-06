@@ -710,6 +710,12 @@
       min-width:0 !important;
       max-width:none !important;
       flex:none !important;
+      overflow:hidden;
+    }
+    /* Normal view: restore saved width but flow naturally */
+    #home-cards:not(.freeform) > * {
+      position:relative !important;
+      left:auto !important; top:auto !important;
     }
     /* Edit-mode card styling */
     body.edit-mode #home-cards > * {
@@ -720,6 +726,28 @@
     body.edit-mode #home-cards > *:hover {
       outline-color: #00d18c;
     }
+    /* BLOCK all click-through in edit mode — overlay on card body */
+    body.edit-mode #home-cards > * > .card-click-shield {
+      display:block;
+    }
+    .card-click-shield {
+      display:none;
+      position:absolute;
+      inset:0;
+      z-index:15;  /* above content, below drag-bar(30) and resize(30) */
+      cursor:default;
+      border-radius:inherit;
+    }
+    /* Scrollable card interior */
+    .card-inner {
+      position:absolute;
+      inset:20px 0 16px 0; /* leave room for drag bar top, resize corner bottom */
+      overflow-y:auto;
+      overflow-x:hidden;
+    }
+    /* Ensure resize handle always on top */
+    .card-resize-handle { z-index:40 !important; }
+    .card-drag-bar      { z-index:40 !important; }
     /* Drag bar at top of each card */
     .card-drag-bar {
       display:none;
@@ -757,6 +785,21 @@
     }
     #home-quote-card .quote-author {
       font-size:11px; color:#4a7060; text-align:right; font-weight:700;
+    }
+
+    /* All home cards: position relative for overlays */
+    #home-cards > * { position: relative; }
+    /* Card content fills available space when resized */
+    #home-cards.freeform #today-card,
+    #home-cards.freeform #dailys-card,
+    #home-cards.freeform #home-projects,
+    #home-cards.freeform #home-wordle-card,
+    #home-cards.freeform #home-countdown-card,
+    #home-cards.freeform #home-fitness-card,
+    #home-cards.freeform #home-quote-card,
+    #home-cards.freeform #home-music-widget {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
     }
 </style>
 </head>
@@ -858,6 +901,7 @@
           <!-- Today card -->
           <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">TODAY</div>
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
@@ -868,6 +912,7 @@
           <!-- Dailys card -->
           <div id="dailys-card">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:14px">Dailys</div>
 
             <div class="daily-row">
@@ -910,6 +955,7 @@
           <!-- Projects -->
           <div id="home-projects">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
           <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
@@ -918,6 +964,7 @@
           <!-- Wordle Mini Card -->
           <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
             <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
@@ -926,6 +973,7 @@
           <!-- Countdown Card -->
           <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer" onclick="setPage('planner')">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">⭐ UPCOMING</div>
             <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
@@ -936,11 +984,13 @@
           <!-- Fitness Card -->
           <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div></div>
 
           <!-- Quote of the Day Card -->
           <div id="home-quote-card">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
             <div id="quote-text" class="quote-text">Loading…</div>
             <div id="quote-author" class="quote-author"></div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
@@ -949,6 +999,7 @@
           <!-- Music Widget -->
           <div id="home-music-widget">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
             <div id="hmw-art-row">
               <div id="hmw-art">♪</div>
@@ -967,6 +1018,7 @@
               <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
           </div>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
 
         </div>
       </div>
@@ -7443,37 +7495,34 @@ var CARD_IDS = [
   'home-countdown-card','home-fitness-card','home-quote-card','home-music-widget'
 ];
 
-// Default layout: auto-position cards in a grid on first use
-var DEFAULT_COLS = 4; // approx cards per row
+// ─── Default layout ───────────────────────────
 function getDefaultLayout(container) {
-  var W = container.offsetWidth || 900;
+  var W    = container.offsetWidth || 900;
   var cols = Math.max(2, Math.floor(W / 260));
-  var cardW = Math.floor((W - (cols+1)*14) / cols);
-  var positions = {};
+  var cardW = Math.floor((W - (cols + 1) * 14) / cols);
+  var layout = {};
   var x = 14, y = 14, rowH = 0, col = 0;
-  CARD_IDS.forEach(function(id, i) {
+  CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
     var h = Math.max(el.scrollHeight || 180, 160);
-    positions[id] = { left:x, top:y, width:cardW, height:h };
+    layout[id] = { left: x, top: y, width: cardW, height: h };
     rowH = Math.max(rowH, h);
     col++;
-    if (col >= cols) {
-      col = 0; x = 14; y += rowH + 14; rowH = 0;
-    } else {
-      x += cardW + 14;
-    }
+    if (col >= cols) { col = 0; x = 14; y += rowH + 14; rowH = 0; }
+    else             { x += cardW + 14; }
   });
-  return positions;
+  return layout;
 }
 
+// ─── Toggle ───────────────────────────────────
 function toggleEditMode() {
   editModeActive = !editModeActive;
   document.body.classList.toggle('edit-mode', editModeActive);
   var btn   = document.getElementById('home-edit-btn');
   var label = document.getElementById('home-edit-label');
   if (btn)   btn.classList.toggle('active', editModeActive);
-  if (label) label.textContent = editModeActive ? 'Done' : 'Edit';
+  if (label) label.textContent = editModeActive ? 'Done ✓' : 'Edit';
 
   var container = document.getElementById('home-cards');
   if (!container) return;
@@ -7481,64 +7530,91 @@ function toggleEditMode() {
   if (editModeActive) {
     enterFreeform(container);
   } else {
+    saveCardLayout();   // capture final positions BEFORE removing freeform
     exitFreeform(container);
-    saveCardLayout();
   }
 }
 
+// ─── Enter freeform ───────────────────────────
 function enterFreeform(container) {
   container.classList.add('freeform');
-  var saved = loadCardLayout();
+
+  var saved  = loadCardLayout();
   var layout = saved || getDefaultLayout(container);
-  // Set canvas height
-  var maxBottom = 0;
+
+  // size canvas
+  var maxBottom = 700;
   CARD_IDS.forEach(function(id) {
     var pos = layout[id]; if (!pos) return;
-    maxBottom = Math.max(maxBottom, pos.top + pos.height + 20);
+    maxBottom = Math.max(maxBottom, pos.top + pos.height + 30);
   });
-  container.style.minHeight = Math.max(maxBottom, 700) + 'px';
+  container.style.minHeight = maxBottom + 'px';
 
   CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    var pos = layout[id] || { left:14, top:14, width:240, height:200 };
+    var pos = layout[id] || { left: 14, top: 14, width: 240, height: 200 };
     applyPos(el, pos);
+    el.style.overflow = 'hidden';
+
+    // Disable card's own click while in edit mode via shield
+    var shield = el.querySelector('.card-click-shield');
+    if (shield) {
+      shield.style.display = 'block';
+      // But drag-bar and resize handle must stay clickable (higher z-index in CSS)
+    }
+
     bindDragMove(el, container);
     bindResizeHandle(el, container);
   });
 }
 
+// ─── Exit freeform ────────────────────────────
 function exitFreeform(container) {
   container.classList.remove('freeform');
   container.style.minHeight = '';
+
   CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
+
+    // Remove absolute positioning — card flows back into flex
     el.style.position = '';
     el.style.left     = '';
     el.style.top      = '';
-    el.style.width    = '';
-    el.style.height   = '';
     el.style.zIndex   = '';
-    // Remove listeners by cloning
+    // Keep width so card roughly stays the same size in flex
+    // (browser will clamp to min/max naturally)
+
+    // Re-enable card clicks
+    var shield = el.querySelector('.card-click-shield');
+    if (shield) shield.style.display = 'none';
+
+    // Remove drag/resize listeners cleanly by replacing element
     var clone = el.cloneNode(true);
+    // Re-hide shield on clone
+    var cloneShield = clone.querySelector('.card-click-shield');
+    if (cloneShield) cloneShield.style.display = 'none';
     el.parentNode.replaceChild(clone, el);
-    // Re-attach non-drag onclick if needed
-    reattachCardClicks();
   });
+
+  // Restore click handlers that inline onclick lost during clone
+  reattachCardClicks();
 }
 
+// ─── Re-attach card click handlers ───────────
 function reattachCardClicks() {
   var tc = document.getElementById('today-card');
-  if (tc) tc.onclick = function() { setPage('planner'); showPlannerSection('calendar'); };
+  if (tc) tc.addEventListener('click', function() { setPage('planner'); showPlannerSection('calendar'); });
   var wc = document.getElementById('home-wordle-card');
-  if (wc) wc.onclick = function() { wordleOpen('home'); };
+  if (wc) wc.addEventListener('click', function() { wordleOpen('home'); });
   var fc = document.getElementById('home-fitness-card');
-  if (fc) fc.onclick = function() { setPage('fitness'); };
+  if (fc) fc.addEventListener('click', function() { setPage('fitness'); });
   var cc = document.getElementById('home-countdown-card');
-  if (cc) cc.onclick = function() { setPage('planner'); };
+  if (cc) cc.addEventListener('click', function() { setPage('planner'); });
 }
 
+// ─── Apply position/size to a card ───────────
 function applyPos(el, pos) {
   el.style.left   = pos.left   + 'px';
   el.style.top    = pos.top    + 'px';
@@ -7546,94 +7622,95 @@ function applyPos(el, pos) {
   el.style.height = pos.height + 'px';
 }
 
-// ── Drag to move ──────────────────────────────
+// ─── Drag to move ─────────────────────────────
 function bindDragMove(el, container) {
   var bar = el.querySelector('.card-drag-bar');
   if (!bar) return;
-  bar.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  // Clone-safe: use named handler stored on element
+  if (el._dragMoveHandler) bar.removeEventListener('mousedown', el._dragMoveHandler);
+  el._dragMoveHandler = function(e) {
+    e.preventDefault(); e.stopPropagation();
     bringToFront(el);
     var startX = e.clientX, startY = e.clientY;
-    var origL  = parseInt(el.style.left)  || 0;
-    var origT  = parseInt(el.style.top)   || 0;
+    var origL  = parseFloat(el.style.left) || 0;
+    var origT  = parseFloat(el.style.top)  || 0;
     function onMove(ev) {
-      var dx = ev.clientX - startX;
-      var dy = ev.clientY - startY;
-      var newL = Math.max(0, origL + dx);
-      var newT = Math.max(0, origT + dy);
+      var newL = Math.max(0, origL + ev.clientX - startX);
+      var newT = Math.max(0, origT + ev.clientY - startY);
       el.style.left = newL + 'px';
       el.style.top  = newT + 'px';
-      // Expand canvas if needed
-      var bottom = newT + el.offsetHeight + 20;
-      if (bottom > parseInt(container.style.minHeight || 700)) {
-        container.style.minHeight = bottom + 'px';
-      }
+      expandCanvas(container, newT + el.offsetHeight);
     }
     function onUp() {
       document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('mouseup',   onUp);
       saveCardLayout();
     }
     document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  });
+    document.addEventListener('mouseup',   onUp);
+  };
+  bar.addEventListener('mousedown', el._dragMoveHandler);
 }
 
-// ── Resize ────────────────────────────────────
+// ─── Resize by corner ─────────────────────────
 function bindResizeHandle(el, container) {
   var handle = el.querySelector('.card-resize-handle');
   if (!handle) return;
-  handle.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  if (el._resizeHandler) handle.removeEventListener('mousedown', el._resizeHandler);
+  el._resizeHandler = function(e) {
+    e.preventDefault(); e.stopPropagation();
     bringToFront(el);
     var startX = e.clientX, startY = e.clientY;
     var startW = el.offsetWidth, startH = el.offsetHeight;
     function onMove(ev) {
-      var newW = Math.max(160, startW + (ev.clientX - startX));
-      var newH = Math.max(120, startH + (ev.clientY - startY));
-      el.style.width  = newW + 'px';
-      el.style.height = newH + 'px';
-      el.style.overflow = 'auto';
-      // Expand canvas if needed
-      var bottom = parseInt(el.style.top || 0) + newH + 20;
-      if (bottom > parseInt(container.style.minHeight || 700)) {
-        container.style.minHeight = bottom + 'px';
-      }
+      var newW = Math.max(160, startW + ev.clientX - startX);
+      var newH = Math.max(100, startH + ev.clientY - startY);
+      el.style.width    = newW + 'px';
+      el.style.height   = newH + 'px';
+      expandCanvas(container, parseFloat(el.style.top || 0) + newH);
     }
     function onUp() {
       document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('mouseup',   onUp);
       saveCardLayout();
     }
     document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-  });
+    document.addEventListener('mouseup',   onUp);
+  };
+  handle.addEventListener('mousedown', el._resizeHandler);
+}
+
+function expandCanvas(container, neededBottom) {
+  var current = parseInt(container.style.minHeight || 700);
+  if (neededBottom + 30 > current) {
+    container.style.minHeight = (neededBottom + 30) + 'px';
+  }
 }
 
 function bringToFront(el) {
-  var maxZ = 0;
+  var maxZ = 1;
   CARD_IDS.forEach(function(id) {
     var e = document.getElementById(id);
-    if (e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex || 0));
+    if (e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex || 1));
   });
   el.style.zIndex = maxZ + 1;
 }
 
-// ── Persist layout ────────────────────────────
+// ─── Persist layout ───────────────────────────
 function saveCardLayout() {
   var container = document.getElementById('home-cards');
-  if (!container || !container.classList.contains('freeform')) return;
+  if (!container) return;
   var layout = {};
   CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
+    // Use offsetWidth/Height for accurate size during freeform;
+    // fall back to style values after exit
     layout[id] = {
-      left:   parseInt(el.style.left)   || 0,
-      top:    parseInt(el.style.top)    || 0,
-      width:  el.offsetWidth,
-      height: el.offsetHeight
+      left:   parseFloat(el.style.left)  || 0,
+      top:    parseFloat(el.style.top)   || 0,
+      width:  el.offsetWidth  || parseFloat(el.style.width)  || 240,
+      height: el.offsetHeight || parseFloat(el.style.height) || 200
     };
   });
   localStorage.setItem('homeCardLayoutV2', JSON.stringify(layout));
@@ -7647,7 +7724,8 @@ function loadCardLayout() {
   } catch(e) { return null; }
 }
 
-function setCardSize() {} // no-op (old compat)
+function setCardSize() {} // compat no-op
+
 
 // ════════════════════════════════════════════════
 //  QUOTE OF THE DAY
