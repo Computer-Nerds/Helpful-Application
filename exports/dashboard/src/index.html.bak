@@ -660,7 +660,7 @@
     .math-formula { background:#0a0a0a; border:1px solid #1e2e28; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:15px; color:#e8f0ed; text-align:center; margin:8px 0; }
     .math-example-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
     .math-example-item { display:flex; align-items:center; gap:10px; font-size:13px; }
-    .math-example-item .ex-q { color:#c8e0d4; min-width:200px; }
+    .math-example-item .ex-q { color:#c8e0d4; min-width:160px; }
     .math-example-item .ex-a { color:#00d18c; font-weight:700; }
     #math-learn-practice-btn { margin:0 24px 24px; background:#00d18c; color:#0f0f0f; font-weight:800; font-size:16px; border:none; border-radius:12px; padding:16px; cursor:pointer; flex-shrink:0; }
     #math-learn-practice-btn:hover { background:#00ff9d; }
@@ -821,7 +821,7 @@
           </div>
 
           <!-- Wordle Mini Card -->
-          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px">
+          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:160px">
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
             <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
@@ -1546,7 +1546,7 @@ const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', secur
 function setPage(p) {
   currentPage = p;
   // Brain game auto-init
-  if(p==='wordle' && typeof wordleNewGame!=='undefined') wordleNewGame();
+  if(p==='wordle'      && typeof wordleNewGame!=='undefined' && !wDailyDone && !wAnswer) wordleNewGame();
   if(p==='bg-analogies'&& typeof anaNext!=='undefined')       anaNext();
   if(p==='bg-numseq'   && typeof nsNext!=='undefined')        nsNext();
   if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
@@ -4822,10 +4822,10 @@ function wordleRenderMini() {
   mini.innerHTML='';
   for(let r=0;r<6;r++){
     const row=document.createElement('div');
-    row.style.cssText='display:flex;gap:4px;margin-bottom:4px';
+    row.style.cssText='display:flex;gap:3px;margin-bottom:3px';
     for(let c=0;c<5;c++){
       const cell=document.createElement('div');
-      cell.style.cssText='width:26px;height:26px;border-radius:4px;background:#1a2e24;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#e8f0ed';
+      cell.style.cssText='width:18px;height:18px;border-radius:3px;background:#1a2e24;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#e8f0ed';
       const guess=wGuesses[r];
       if(guess){
         const ch=guess.result[c];
