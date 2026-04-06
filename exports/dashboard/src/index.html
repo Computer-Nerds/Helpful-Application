@@ -972,6 +972,7 @@
         <!-- Tab pills -->
         <div style="display:flex;gap:6px;margin-left:16px">
           <button id="fit-tab-food" onclick="fitSetTab('food')" style="padding:5px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">🍽️ Food</button>
+          <button id="fit-tab-workout" onclick="fitSetTab('workout')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">💪 Workout</button>
           <button id="fit-tab-weight" onclick="fitSetTab('weight')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">⚖️ Weight</button>
         </div>
         <button onclick="fitOpenAddModal()" style="margin-left:auto;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer" id="fit-add-btn">+ Log Food</button>
@@ -1035,6 +1036,109 @@
         </div>
         <!-- Weight log list -->
         <div id="fit-weight-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <!-- WORKOUT TAB -->
+      <div id="fit-workout-panel" style="flex:1;overflow-y:auto;padding:18px 20px;display:none;flex-direction:column;gap:14px;box-sizing:border-box">
+        <!-- Day badge -->
+        <div id="fit-day-badge" style="background:#111a15;border:1px solid #1f3a2a;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+            <div id="fit-day-name" style="font-size:18px;font-weight:900;color:#e8f0ed"></div>
+            <div id="fit-day-focus" style="font-size:13px;color:#00d18c;font-weight:600"></div>
+          </div>
+          <div id="fit-day-emoji" style="font-size:36px"></div>
+        </div>
+        <!-- Add exercise row -->
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:13px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px">Exercises</span>
+          <button onclick="fitOpenWorkoutModal(null)" style="margin-left:auto;background:#1a2e24;color:#00d18c;border:1px solid #1f3a2a;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer">+ Add</button>
+        </div>
+        <div id="fit-exercise-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- WORKOUT MODAL (add/edit exercise) -->
+      <div id="fit-workout-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center">
+        <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:14px;padding:24px;width:min(92vw,360px);display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+          <div id="fit-workout-modal-title" style="font-size:15px;font-weight:700;color:#e8f0ed">Add Exercise</div>
+          <input id="fit-ex-name" placeholder="Exercise name (e.g. Bench Press)"
+            style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:11px;color:#7a9e8e;text-transform:uppercase">Sets</label>
+              <input id="fit-ex-sets" type="number" min="1" max="99" placeholder="3"
+                style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:11px;color:#7a9e8e;text-transform:uppercase">Reps</label>
+              <input id="fit-ex-reps" type="number" min="1" max="999" placeholder="10"
+                style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:11px;color:#7a9e8e;text-transform:uppercase">Weight</label>
+              <input id="fit-ex-weight" type="number" min="0" placeholder="lbs"
+                style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            </div>
+          </div>
+          <input type="hidden" id="fit-ex-edit-id">
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button onclick="fitSaveExercise()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">Save</button>
+            <button onclick="document.getElementById('fit-workout-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT FOOD MODAL -->
+      <div id="fit-edit-food-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center">
+        <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:14px;padding:24px;width:min(92vw,380px);display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+          <div style="font-size:15px;font-weight:700;color:#e8f0ed">Edit Food</div>
+          <input type="hidden" id="fit-edit-food-id">
+          <input id="fit-edit-food-name" placeholder="Food name"
+            style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:11px;color:#7a9e8e;text-transform:uppercase">Calories</label>
+            <input id="fit-edit-food-cal" type="number" min="0"
+              style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+          </div>
+          <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.5px">Macros</div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:11px;color:#4e9fd4">Protein (g)</label>
+              <input id="fit-edit-food-protein" type="number" min="0"
+                style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:11px;color:#e8a020">Carbs (g)</label>
+              <input id="fit-edit-food-carbs" type="number" min="0"
+                style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:11px;color:#f74e4e">Fat (g)</label>
+              <input id="fit-edit-food-fat" type="number" min="0"
+                style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button onclick="fitUpdateFood()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">Save Changes</button>
+            <button onclick="document.getElementById('fit-edit-food-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT WEIGHT MODAL -->
+      <div id="fit-edit-weight-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center">
+        <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:14px;padding:24px;width:min(92vw,320px);display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
+          <div style="font-size:15px;font-weight:700;color:#e8f0ed">Edit Weight Entry</div>
+          <input type="hidden" id="fit-edit-weight-ts">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input id="fit-edit-weight-val" type="number" step="0.1" min="50" max="999"
+              style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:15px;outline:none">
+            <span style="color:#7a9e8e;font-size:13px">lbs</span>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px">
+            <button onclick="fitUpdateWeight()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">Save</button>
+            <button onclick="document.getElementById('fit-edit-weight-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer">Cancel</button>
+          </div>
+        </div>
       </div>
 
       <!-- ADD FOOD MODAL -->
@@ -6700,70 +6804,90 @@ function shModalSave(){
 }
 
 
+
 // ════════════════════════════════════════════════
 //  FITNESS
 // ════════════════════════════════════════════════
 var fitCurrentTab = 'food';
 
+// ── Day schedule ──────────────────────────────
+var FIT_DAYS = {
+  0: { name: 'Sunday',    focus: 'Rest Day',                  emoji: '😴', rest: true  },
+  1: { name: 'Monday',    focus: 'Push Day',                  emoji: '💪', rest: false },
+  2: { name: 'Tuesday',   focus: 'Pull Day',                  emoji: '🏋️', rest: false },
+  3: { name: 'Wednesday', focus: 'Lower Body — Glutes/Hams',  emoji: '🦵', rest: false },
+  4: { name: 'Thursday',  focus: 'Rest Day',                  emoji: '😴', rest: true  },
+  5: { name: 'Friday',    focus: 'Upper Body (Full)',          emoji: '🔥', rest: false },
+  6: { name: 'Saturday',  focus: 'Lower Body — Quads',        emoji: '🦿', rest: false }
+};
+
+// ── Storage helpers ───────────────────────────
 function fitTodayKey() {
   var d = new Date();
   return 'fit_food_' + d.getFullYear() + '_' + (d.getMonth()+1) + '_' + d.getDate();
 }
-function fitLoadFood() { try { return JSON.parse(localStorage.getItem(fitTodayKey()) || '[]'); } catch(e) { return []; } }
-function fitSaveFood2(arr) { localStorage.setItem(fitTodayKey(), JSON.stringify(arr)); }
-function fitLoadWeights() { try { return JSON.parse(localStorage.getItem('fit_weights') || '[]'); } catch(e) { return []; } }
+function fitWorkoutKey() {
+  var d = new Date();
+  return 'fit_workout_' + d.getFullYear() + '_' + (d.getMonth()+1) + '_' + d.getDate();
+}
+function fitLoadFood()       { try { return JSON.parse(localStorage.getItem(fitTodayKey()) || '[]'); } catch(e) { return []; } }
+function fitSaveFood2(arr)   { localStorage.setItem(fitTodayKey(), JSON.stringify(arr)); }
+function fitLoadWeights()    { try { return JSON.parse(localStorage.getItem('fit_weights') || '[]'); } catch(e) { return []; } }
 function fitSaveWeights(arr) { localStorage.setItem('fit_weights', JSON.stringify(arr)); }
-function fitGetGoal() { return parseInt(localStorage.getItem('fit_cal_goal') || '2000'); }
-function fitSaveGoal(v) { localStorage.setItem('fit_cal_goal', String(parseInt(v) || 2000)); }
+function fitLoadExercises()  { try { return JSON.parse(localStorage.getItem(fitWorkoutKey()) || '[]'); } catch(e) { return []; } }
+function fitSaveExercises(arr) { localStorage.setItem(fitWorkoutKey(), JSON.stringify(arr)); }
+function fitGetGoal()        { return parseInt(localStorage.getItem('fit_cal_goal') || '2000'); }
+function fitSaveGoal(v)      { localStorage.setItem('fit_cal_goal', String(parseInt(v) || 2000)); }
 
+// ── Tab switching ─────────────────────────────
 function fitSetTab(tab) {
   fitCurrentTab = tab;
-  var foodPanel = document.getElementById('fit-food-panel');
-  var weightPanel = document.getElementById('fit-weight-panel');
-  var foodTab = document.getElementById('fit-tab-food');
-  var weightTab = document.getElementById('fit-tab-weight');
+  var panels = { food:'fit-food-panel', workout:'fit-workout-panel', weight:'fit-weight-panel' };
+  var tabs   = { food:'fit-tab-food',   workout:'fit-tab-workout',   weight:'fit-tab-weight'  };
   var addBtn = document.getElementById('fit-add-btn');
-  if (tab === 'food') {
-    foodPanel.style.display = 'flex';
-    weightPanel.style.display = 'none';
-    foodTab.style.background = '#00d18c'; foodTab.style.color = '#0a1a12'; foodTab.style.borderColor = '#00d18c';
-    weightTab.style.background = '#1a2e24'; weightTab.style.color = '#7a9e8e'; weightTab.style.borderColor = '#1f3a2a';
-    addBtn.textContent = '+ Log Food';
-    fitRenderFood();
-  } else {
-    foodPanel.style.display = 'none';
-    weightPanel.style.display = 'flex';
-    foodTab.style.background = '#1a2e24'; foodTab.style.color = '#7a9e8e'; foodTab.style.borderColor = '#1f3a2a';
-    weightTab.style.background = '#00d18c'; weightTab.style.color = '#0a1a12'; weightTab.style.borderColor = '#00d18c';
-    addBtn.textContent = '+ Log Weight';
-    fitRenderWeight();
+  Object.keys(panels).forEach(function(k) {
+    var panel = document.getElementById(panels[k]);
+    var tabBtn = document.getElementById(tabs[k]);
+    if (!panel || !tabBtn) return;
+    var active = (k === tab);
+    panel.style.display = active ? 'flex' : 'none';
+    tabBtn.style.background  = active ? '#00d18c' : '#1a2e24';
+    tabBtn.style.color       = active ? '#0a1a12' : '#7a9e8e';
+    tabBtn.style.borderColor = active ? '#00d18c' : '#1f3a2a';
+  });
+  if (addBtn) {
+    if (tab === 'food')    addBtn.textContent = '+ Log Food';
+    if (tab === 'workout') addBtn.textContent = '+ Add Exercise';
+    if (tab === 'weight')  addBtn.textContent = '+ Log Weight';
   }
+  if (tab === 'food')    fitRenderFood();
+  if (tab === 'workout') fitRenderWorkout();
+  if (tab === 'weight')  fitRenderWeight();
 }
 
 function fitOpenAddModal() {
-  if (fitCurrentTab === 'weight') { fitLogWeightPrompt(); return; }
+  if (fitCurrentTab === 'weight')  { document.getElementById('fit-weight-input').focus(); return; }
+  if (fitCurrentTab === 'workout') { fitOpenWorkoutModal(null); return; }
+  // food
   document.getElementById('fit-modal-name').value = '';
-  document.getElementById('fit-modal-cal').value = '';
+  document.getElementById('fit-modal-cal').value  = '';
   document.getElementById('fit-modal-protein').value = '';
-  document.getElementById('fit-modal-carbs').value = '';
-  document.getElementById('fit-modal-fat').value = '';
+  document.getElementById('fit-modal-carbs').value   = '';
+  document.getElementById('fit-modal-fat').value     = '';
   document.getElementById('fit-add-modal').style.display = 'flex';
   setTimeout(function() { document.getElementById('fit-modal-name').focus(); }, 50);
 }
 
-function fitLogWeightPrompt() {
-  document.getElementById('fit-weight-input').focus();
-}
-
+// ── FOOD ─────────────────────────────────────
 function fitSaveFood() {
   var name = document.getElementById('fit-modal-name').value.trim();
   if (!name) return;
-  var cal = parseInt(document.getElementById('fit-modal-cal').value) || 0;
+  var cal     = parseInt(document.getElementById('fit-modal-cal').value)     || 0;
   var protein = parseFloat(document.getElementById('fit-modal-protein').value) || 0;
-  var carbs = parseFloat(document.getElementById('fit-modal-carbs').value) || 0;
-  var fat = parseFloat(document.getElementById('fit-modal-fat').value) || 0;
+  var carbs   = parseFloat(document.getElementById('fit-modal-carbs').value)   || 0;
+  var fat     = parseFloat(document.getElementById('fit-modal-fat').value)     || 0;
   var arr = fitLoadFood();
-  arr.push({ id: 'f' + Date.now(), name: name, cal: cal, protein: protein, carbs: carbs, fat: fat, time: Date.now() });
+  arr.push({ id:'f'+Date.now(), name:name, cal:cal, protein:protein, carbs:carbs, fat:fat, time:Date.now() });
   fitSaveFood2(arr);
   document.getElementById('fit-add-modal').style.display = 'none';
   fitRenderFood();
@@ -6771,177 +6895,322 @@ function fitSaveFood() {
 }
 
 function fitDeleteFood(id) {
-  var arr = fitLoadFood().filter(function(x) { return x.id !== id; });
+  fitSaveFood2(fitLoadFood().filter(function(x) { return x.id !== id; }));
+  fitRenderFood();
+  fitRenderHomeFitnessCard();
+}
+
+function fitOpenEditFood(id) {
+  var item = fitLoadFood().find(function(x) { return x.id === id; });
+  if (!item) return;
+  document.getElementById('fit-edit-food-id').value      = id;
+  document.getElementById('fit-edit-food-name').value    = item.name;
+  document.getElementById('fit-edit-food-cal').value     = item.cal;
+  document.getElementById('fit-edit-food-protein').value = item.protein;
+  document.getElementById('fit-edit-food-carbs').value   = item.carbs;
+  document.getElementById('fit-edit-food-fat').value     = item.fat;
+  document.getElementById('fit-edit-food-modal').style.display = 'flex';
+}
+
+function fitUpdateFood() {
+  var id = document.getElementById('fit-edit-food-id').value;
+  var arr = fitLoadFood();
+  var item = arr.find(function(x) { return x.id === id; });
+  if (!item) return;
+  item.name    = document.getElementById('fit-edit-food-name').value.trim()         || item.name;
+  item.cal     = parseInt(document.getElementById('fit-edit-food-cal').value)        || 0;
+  item.protein = parseFloat(document.getElementById('fit-edit-food-protein').value)  || 0;
+  item.carbs   = parseFloat(document.getElementById('fit-edit-food-carbs').value)    || 0;
+  item.fat     = parseFloat(document.getElementById('fit-edit-food-fat').value)      || 0;
   fitSaveFood2(arr);
+  document.getElementById('fit-edit-food-modal').style.display = 'none';
   fitRenderFood();
   fitRenderHomeFitnessCard();
 }
 
 function fitRenderFood() {
-  var arr = fitLoadFood();
+  var arr  = fitLoadFood();
   var goal = fitGetGoal();
   var goalInput = document.getElementById('fit-calorie-goal');
   if (goalInput) goalInput.value = goal;
-  var totalCal = arr.reduce(function(s, x) { return s + x.cal; }, 0);
-  var totalP = arr.reduce(function(s, x) { return s + x.protein; }, 0);
-  var totalC = arr.reduce(function(s, x) { return s + x.carbs; }, 0);
-  var totalF = arr.reduce(function(s, x) { return s + x.fat; }, 0);
-  var pct = Math.min(100, Math.round((totalCal / goal) * 100));
-  var bar = document.getElementById('fit-cal-bar');
-  var label = document.getElementById('fit-cal-label');
+  var totalCal = arr.reduce(function(s,x) { return s+x.cal; }, 0);
+  var totalP   = arr.reduce(function(s,x) { return s+x.protein; }, 0);
+  var totalC   = arr.reduce(function(s,x) { return s+x.carbs; }, 0);
+  var totalF   = arr.reduce(function(s,x) { return s+x.fat; }, 0);
+  var pct = Math.min(100, Math.round((totalCal/goal)*100));
+  var bar    = document.getElementById('fit-cal-bar');
+  var label  = document.getElementById('fit-cal-label');
   var status = document.getElementById('fit-cal-status');
-  if (bar) { bar.style.width = pct + '%'; bar.style.background = pct >= 100 ? '#f74e4e' : '#00d18c'; }
-  if (label) { label.textContent = totalCal + ' / ' + goal + ' kcal'; label.style.color = pct >= 100 ? '#f74e4e' : '#00d18c'; }
+  if (bar)   { bar.style.width = pct+'%'; bar.style.background = pct>=100 ? '#f74e4e' : '#00d18c'; }
+  if (label) { label.textContent = totalCal+' / '+goal+' kcal'; label.style.color = pct>=100 ? '#f74e4e' : '#00d18c'; }
   if (status) {
-    if (arr.length === 0) { status.textContent = ''; }
-    else if (pct >= 100) { status.textContent = '🔴 Calorie goal reached!'; status.style.color = '#f74e4e'; }
-    else { status.textContent = '✅ ' + (goal - totalCal) + ' kcal remaining'; status.style.color = '#7a9e8e'; }
+    if (!arr.length)   { status.textContent = ''; }
+    else if (pct>=100) { status.textContent = '🔴 Calorie goal reached!'; status.style.color='#f74e4e'; }
+    else               { status.textContent = '✅ '+(goal-totalCal)+' kcal remaining'; status.style.color='#7a9e8e'; }
   }
   var tp = document.getElementById('fit-total-protein');
   var tc = document.getElementById('fit-total-carbs');
   var tf = document.getElementById('fit-total-fat');
-  if (tp) tp.textContent = totalP.toFixed(1) + 'g';
-  if (tc) tc.textContent = totalC.toFixed(1) + 'g';
-  if (tf) tf.textContent = totalF.toFixed(1) + 'g';
+  if (tp) tp.textContent = totalP.toFixed(1)+'g';
+  if (tc) tc.textContent = totalC.toFixed(1)+'g';
+  if (tf) tf.textContent = totalF.toFixed(1)+'g';
   var list = document.getElementById('fit-food-list');
   if (!list) return;
   list.innerHTML = '';
-  if (arr.length === 0) {
-    list.innerHTML = '<div style="color:#7a9e8e;font-size:13px;padding:10px 0">Nothing logged yet today. Hit + Log Food to start.</div>';
+  if (!arr.length) {
+    list.innerHTML = '<div style="color:#7a9e8e;font-size:13px;padding:10px 0">Nothing logged yet today.</div>';
     return;
   }
   arr.slice().reverse().forEach(function(item) {
     var row = document.createElement('div');
     row.style.cssText = 'background:#111a15;border:1px solid #1f3a2a;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px';
     var info = document.createElement('div');
-    info.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px';
+    info.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px;min-width:0';
     var nameRow = document.createElement('div');
-    nameRow.style.cssText = 'display:flex;align-items:center;gap:8px';
+    nameRow.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap';
     var nameSpan = document.createElement('span');
     nameSpan.style.cssText = 'font-size:14px;font-weight:700;color:#e8f0ed';
     nameSpan.textContent = item.name;
     var calSpan = document.createElement('span');
     calSpan.style.cssText = 'font-size:13px;font-weight:700;color:#00d18c';
-    calSpan.textContent = item.cal + ' kcal';
-    nameRow.appendChild(nameSpan);
-    nameRow.appendChild(calSpan);
+    calSpan.textContent = item.cal+' kcal';
+    nameRow.appendChild(nameSpan); nameRow.appendChild(calSpan);
     var macroRow = document.createElement('div');
-    macroRow.style.cssText = 'display:flex;gap:10px;font-size:11px;color:#7a9e8e';
+    macroRow.style.cssText = 'font-size:11px;color:#7a9e8e';
     if (item.protein || item.carbs || item.fat) {
-      macroRow.textContent = 'P: ' + item.protein + 'g  C: ' + item.carbs + 'g  F: ' + item.fat + 'g';
+      macroRow.textContent = 'P: '+item.protein+'g  C: '+item.carbs+'g  F: '+item.fat+'g';
     }
-    info.appendChild(nameRow);
-    info.appendChild(macroRow);
-    var del = document.createElement('button');
-    del.style.cssText = 'background:none;border:none;color:#3a5040;font-size:16px;cursor:pointer;padding:2px 6px';
-    del.textContent = '✕';
-    del.addEventListener('click', function() { fitDeleteFood(item.id); });
-    row.appendChild(info);
-    row.appendChild(del);
+    info.appendChild(nameRow); info.appendChild(macroRow);
+    var editBtn = document.createElement('button');
+    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;font-size:14px;cursor:pointer;padding:2px 6px';
+    editBtn.textContent = '✏️';
+    editBtn.addEventListener('click', function() { fitOpenEditFood(item.id); });
+    var delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:16px;cursor:pointer;padding:2px 6px';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', function() { fitDeleteFood(item.id); });
+    row.appendChild(info); row.appendChild(editBtn); row.appendChild(delBtn);
     list.appendChild(row);
   });
 }
 
+// ── WORKOUT ───────────────────────────────────
+function fitRenderWorkout() {
+  var dow = new Date().getDay();
+  var day = FIT_DAYS[dow];
+  var badge = document.getElementById('fit-day-badge');
+  if (badge) {
+    badge.style.borderColor = day.rest ? '#1f3a2a' : '#00d18c';
+    document.getElementById('fit-day-name').textContent  = day.name;
+    document.getElementById('fit-day-focus').textContent = day.focus;
+    document.getElementById('fit-day-focus').style.color = day.rest ? '#7a9e8e' : '#00d18c';
+    document.getElementById('fit-day-emoji').textContent = day.emoji;
+  }
+  var arr  = fitLoadExercises();
+  var list = document.getElementById('fit-exercise-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!arr.length) {
+    list.innerHTML = '<div style="color:#7a9e8e;font-size:13px;padding:10px 0">No exercises logged today. Hit + Add to start.</div>';
+    return;
+  }
+  arr.forEach(function(ex) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:#111a15;border:1px solid #1f3a2a;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px';
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px';
+    var nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:14px;font-weight:700;color:#e8f0ed';
+    nameEl.textContent = ex.name;
+    var detailEl = document.createElement('div');
+    detailEl.style.cssText = 'font-size:12px;color:#7a9e8e';
+    var parts = [];
+    if (ex.sets) parts.push(ex.sets+' sets');
+    if (ex.reps) parts.push(ex.reps+' reps');
+    if (ex.weight) parts.push(ex.weight+' lbs');
+    detailEl.textContent = parts.join('  ·  ') || 'No details';
+    info.appendChild(nameEl); info.appendChild(detailEl);
+    var editBtn = document.createElement('button');
+    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;font-size:14px;cursor:pointer;padding:2px 6px';
+    editBtn.textContent = '✏️';
+    editBtn.addEventListener('click', function() { fitOpenWorkoutModal(ex.id); });
+    var delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:16px;cursor:pointer;padding:2px 6px';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', function() { fitDeleteExercise(ex.id); });
+    card.appendChild(info); card.appendChild(editBtn); card.appendChild(delBtn);
+    list.appendChild(card);
+  });
+}
+
+function fitOpenWorkoutModal(id) {
+  var title = document.getElementById('fit-workout-modal-title');
+  var editId = document.getElementById('fit-ex-edit-id');
+  if (id) {
+    var ex = fitLoadExercises().find(function(x) { return x.id === id; });
+    if (!ex) return;
+    document.getElementById('fit-ex-name').value   = ex.name;
+    document.getElementById('fit-ex-sets').value   = ex.sets || '';
+    document.getElementById('fit-ex-reps').value   = ex.reps || '';
+    document.getElementById('fit-ex-weight').value = ex.weight || '';
+    if (title) title.textContent = 'Edit Exercise';
+    if (editId) editId.value = id;
+  } else {
+    document.getElementById('fit-ex-name').value   = '';
+    document.getElementById('fit-ex-sets').value   = '';
+    document.getElementById('fit-ex-reps').value   = '';
+    document.getElementById('fit-ex-weight').value = '';
+    if (title) title.textContent = 'Add Exercise';
+    if (editId) editId.value = '';
+  }
+  document.getElementById('fit-workout-modal').style.display = 'flex';
+  setTimeout(function() { document.getElementById('fit-ex-name').focus(); }, 50);
+}
+
+function fitSaveExercise() {
+  var name = document.getElementById('fit-ex-name').value.trim();
+  if (!name) return;
+  var sets   = parseInt(document.getElementById('fit-ex-sets').value)   || 0;
+  var reps   = parseInt(document.getElementById('fit-ex-reps').value)   || 0;
+  var weight = parseFloat(document.getElementById('fit-ex-weight').value) || 0;
+  var editId = document.getElementById('fit-ex-edit-id').value;
+  var arr = fitLoadExercises();
+  if (editId) {
+    var ex = arr.find(function(x) { return x.id === editId; });
+    if (ex) { ex.name=name; ex.sets=sets; ex.reps=reps; ex.weight=weight; }
+  } else {
+    arr.push({ id:'e'+Date.now(), name:name, sets:sets, reps:reps, weight:weight });
+  }
+  fitSaveExercises(arr);
+  document.getElementById('fit-workout-modal').style.display = 'none';
+  fitRenderWorkout();
+  fitRenderHomeFitnessCard();
+}
+
+function fitDeleteExercise(id) {
+  fitSaveExercises(fitLoadExercises().filter(function(x) { return x.id !== id; }));
+  fitRenderWorkout();
+  fitRenderHomeFitnessCard();
+}
+
+// ── WEIGHT ────────────────────────────────────
 function fitLogWeight() {
   var val = parseFloat(document.getElementById('fit-weight-input').value);
   if (!val || val <= 0) return;
   var arr = fitLoadWeights();
-  var d = new Date();
-  var dateStr = (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear();
-  // replace today's entry if exists
-  var todayIdx = arr.findIndex(function(x) { return x.date === dateStr; });
-  if (todayIdx >= 0) { arr[todayIdx].w = val; } else { arr.push({ date: dateStr, w: val, ts: Date.now() }); }
+  var d   = new Date();
+  var dateStr = (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+  var ts = Date.now();
+  var idx = arr.findIndex(function(x) { return x.date === dateStr; });
+  if (idx >= 0) { arr[idx].w = val; } else { arr.push({ date:dateStr, w:val, ts:ts }); }
   fitSaveWeights(arr);
   document.getElementById('fit-weight-input').value = '';
   fitRenderWeight();
   fitRenderHomeFitnessCard();
 }
 
+function fitOpenEditWeight(ts) {
+  var entry = fitLoadWeights().find(function(x) { return x.ts === ts; });
+  if (!entry) return;
+  document.getElementById('fit-edit-weight-ts').value  = ts;
+  document.getElementById('fit-edit-weight-val').value = entry.w;
+  document.getElementById('fit-edit-weight-modal').style.display = 'flex';
+}
+
+function fitUpdateWeight() {
+  var ts  = parseInt(document.getElementById('fit-edit-weight-ts').value);
+  var val = parseFloat(document.getElementById('fit-edit-weight-val').value);
+  if (!val) return;
+  var arr = fitLoadWeights();
+  var entry = arr.find(function(x) { return x.ts === ts; });
+  if (entry) entry.w = val;
+  fitSaveWeights(arr);
+  document.getElementById('fit-edit-weight-modal').style.display = 'none';
+  fitRenderWeight();
+  fitRenderHomeFitnessCard();
+}
+
+function fitDeleteWeight(ts) {
+  fitSaveWeights(fitLoadWeights().filter(function(x) { return x.ts !== ts; }));
+  fitRenderWeight();
+  fitRenderHomeFitnessCard();
+}
+
 function fitRenderWeight() {
-  var arr = fitLoadWeights().sort(function(a, b) { return a.ts - b.ts; });
-  var list = document.getElementById('fit-weight-list');
+  var arr    = fitLoadWeights().sort(function(a,b) { return a.ts-b.ts; });
+  var list   = document.getElementById('fit-weight-list');
   var canvas = document.getElementById('fit-weight-canvas');
-  var empty = document.getElementById('fit-weight-empty');
+  var empty  = document.getElementById('fit-weight-empty');
   if (!list || !canvas) return;
   list.innerHTML = '';
-  if (arr.length === 0) {
+  if (!arr.length) {
     canvas.style.display = 'none';
     if (empty) empty.style.display = 'block';
     return;
   }
   canvas.style.display = 'block';
   if (empty) empty.style.display = 'none';
-  // Draw graph
   var W = canvas.offsetWidth || 300;
   var H = 140;
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W; canvas.height = H;
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, W, H);
   var vals = arr.map(function(x) { return x.w; });
-  var minV = Math.min.apply(null, vals) - 2;
-  var maxV = Math.max.apply(null, vals) + 2;
-  var padL = 38, padR = 10, padT = 12, padB = 24;
-  var gW = W - padL - padR;
-  var gH = H - padT - padB;
-  function xPos(i) { return padL + (arr.length < 2 ? gW/2 : (i / (arr.length - 1)) * gW); }
-  function yPos(v) { return padT + gH - ((v - minV) / (maxV - minV)) * gH; }
-  // Grid lines
-  ctx.strokeStyle = '#1f3a2a'; ctx.lineWidth = 1;
-  for (var g = 0; g <= 4; g++) {
-    var gy = padT + (g / 4) * gH;
-    ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
-    var gVal = maxV - (g / 4) * (maxV - minV);
-    ctx.fillStyle = '#7a9e8e'; ctx.font = '10px monospace'; ctx.textAlign = 'right';
-    ctx.fillText(gVal.toFixed(1), padL - 4, gy + 4);
+  var minV = Math.min.apply(null,vals)-2;
+  var maxV = Math.max.apply(null,vals)+2;
+  var padL=38, padR=10, padT=12, padB=24;
+  var gW=W-padL-padR, gH=H-padT-padB;
+  function xPos(i) { return padL + (arr.length<2 ? gW/2 : (i/(arr.length-1))*gW); }
+  function yPos(v) { return padT + gH - ((v-minV)/(maxV-minV))*gH; }
+  ctx.strokeStyle='#1f3a2a'; ctx.lineWidth=1;
+  for (var g=0; g<=4; g++) {
+    var gy = padT+(g/4)*gH;
+    ctx.beginPath(); ctx.moveTo(padL,gy); ctx.lineTo(W-padR,gy); ctx.stroke();
+    var gVal = maxV-(g/4)*(maxV-minV);
+    ctx.fillStyle='#7a9e8e'; ctx.font='10px monospace'; ctx.textAlign='right';
+    ctx.fillText(gVal.toFixed(1), padL-4, gy+4);
   }
-  // Line
-  ctx.strokeStyle = '#00d18c'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.strokeStyle='#00d18c'; ctx.lineWidth=2; ctx.lineJoin='round';
   ctx.beginPath();
-  arr.forEach(function(pt, i) { i === 0 ? ctx.moveTo(xPos(i), yPos(pt.w)) : ctx.lineTo(xPos(i), yPos(pt.w)); });
+  arr.forEach(function(pt,i) { i===0 ? ctx.moveTo(xPos(i),yPos(pt.w)) : ctx.lineTo(xPos(i),yPos(pt.w)); });
   ctx.stroke();
-  // Dots
-  arr.forEach(function(pt, i) {
-    ctx.beginPath(); ctx.arc(xPos(i), yPos(pt.w), 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#00d18c'; ctx.fill();
+  arr.forEach(function(pt,i) {
+    ctx.beginPath(); ctx.arc(xPos(i),yPos(pt.w),4,0,Math.PI*2);
+    ctx.fillStyle='#00d18c'; ctx.fill();
   });
-  // X labels (last 5)
-  var labelArr = arr.slice(-5);
-  var labelStart = Math.max(0, arr.length - 5);
-  ctx.fillStyle = '#7a9e8e'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
-  labelArr.forEach(function(pt, li) {
-    var i = labelStart + li;
+  var labelArr   = arr.slice(-5);
+  var labelStart = Math.max(0, arr.length-5);
+  ctx.fillStyle='#7a9e8e'; ctx.font='9px monospace'; ctx.textAlign='center';
+  labelArr.forEach(function(pt,li) {
+    var i = labelStart+li;
     var parts = pt.date.split('/');
-    ctx.fillText(parts[0] + '/' + parts[1], xPos(i), H - 6);
+    ctx.fillText(parts[0]+'/'+parts[1], xPos(i), H-6);
   });
-  // Weight list (last 15, newest first)
-  arr.slice().reverse().slice(0, 15).forEach(function(pt) {
+  arr.slice().reverse().slice(0,15).forEach(function(pt) {
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:#111a15;border:1px solid #1f3a2a;border-radius:8px;padding:9px 14px';
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;background:#111a15;border:1px solid #1f3a2a;border-radius:8px;padding:9px 14px';
     var d = document.createElement('span');
-    d.style.cssText = 'font-size:13px;color:#7a9e8e';
+    d.style.cssText = 'font-size:13px;color:#7a9e8e;flex:1';
     d.textContent = pt.date;
     var w = document.createElement('span');
     w.style.cssText = 'font-size:14px;font-weight:700;color:#e8f0ed';
-    w.textContent = pt.w + ' lbs';
-    var del = document.createElement('button');
-    del.style.cssText = 'background:none;border:none;color:#3a5040;font-size:14px;cursor:pointer';
-    del.textContent = '✕';
-    del.addEventListener('click', function() { fitDeleteWeight(pt.ts); });
-    row.appendChild(d); row.appendChild(w); row.appendChild(del);
+    w.textContent = pt.w+' lbs';
+    var editBtn = document.createElement('button');
+    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;font-size:14px;cursor:pointer;padding:2px 5px';
+    editBtn.textContent = '✏️';
+    editBtn.addEventListener('click', function() { fitOpenEditWeight(pt.ts); });
+    var delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:14px;cursor:pointer;padding:2px 5px';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', function() { fitDeleteWeight(pt.ts); });
+    row.appendChild(d); row.appendChild(w); row.appendChild(editBtn); row.appendChild(delBtn);
     list.appendChild(row);
   });
 }
 
-function fitDeleteWeight(ts) {
-  var arr = fitLoadWeights().filter(function(x) { return x.ts !== ts; });
-  fitSaveWeights(arr);
-  fitRenderWeight();
-  fitRenderHomeFitnessCard();
-}
-
 function fitRender() {
-  if (fitCurrentTab === 'food') fitRenderFood();
+  if (fitCurrentTab==='food')    fitRenderFood();
+  else if (fitCurrentTab==='workout') fitRenderWorkout();
   else fitRenderWeight();
 }
 
@@ -6949,24 +7218,32 @@ function fitInit() {
   fitSetTab(fitCurrentTab);
 }
 
-// ─── Home dashboard fitness card ────────────────
+// ─── Home dashboard fitness card ────────────────────────────────
 function fitRenderHomeFitnessCard() {
   var card = document.getElementById('home-fitness-card');
   if (!card) return;
-  var arr = fitLoadFood();
-  var goal = fitGetGoal();
-  var totalCal = arr.reduce(function(s, x) { return s + x.cal; }, 0);
-  var pct = Math.min(100, Math.round((totalCal / goal) * 100));
-  var weights = fitLoadWeights().sort(function(a, b) { return a.ts - b.ts; });
-  var latestW = weights.length ? weights[weights.length - 1].w + ' lbs' : '—';
-  var reached = totalCal >= goal;
+  var arr      = fitLoadFood();
+  var goal     = fitGetGoal();
+  var totalCal = arr.reduce(function(s,x) { return s+x.cal; }, 0);
+  var pct      = Math.min(100, Math.round((totalCal/goal)*100));
+  var weights  = fitLoadWeights().sort(function(a,b) { return a.ts-b.ts; });
+  var latestW  = weights.length ? weights[weights.length-1].w+' lbs' : '—';
+  var reached  = totalCal >= goal;
+  var exercises = fitLoadExercises();
+  var dow      = new Date().getDay();
+  var day      = FIT_DAYS[dow];
   card.innerHTML = '';
-  // Title
-  var title = document.createElement('div');
-  title.className = 'section-label';
-  title.style.marginBottom = '12px';
-  title.textContent = 'FITNESS';
-  card.appendChild(title);
+  // Title row with day badge
+  var titleRow = document.createElement('div');
+  titleRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
+  var titleEl = document.createElement('div');
+  titleEl.className = 'section-label';
+  titleEl.textContent = 'FITNESS';
+  var dayBadge = document.createElement('div');
+  dayBadge.style.cssText = 'font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:'+(day.rest?'#1a2e24':'rgba(0,209,140,0.15)')+';color:'+(day.rest?'#7a9e8e':'#00d18c')+';border:1px solid '+(day.rest?'#1f3a2a':'#00d18c');
+  dayBadge.textContent = day.emoji+' '+day.focus;
+  titleRow.appendChild(titleEl); titleRow.appendChild(dayBadge);
+  card.appendChild(titleRow);
   // Calorie bar
   var calRow = document.createElement('div');
   calRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
@@ -6974,23 +7251,18 @@ function fitRenderHomeFitnessCard() {
   calLabel.style.cssText = 'font-size:12px;color:#7a9e8e';
   calLabel.textContent = 'Calories';
   var calVal = document.createElement('span');
-  calVal.style.cssText = 'font-size:12px;font-weight:700;color:' + (reached ? '#f74e4e' : '#00d18c');
-  calVal.textContent = totalCal + ' / ' + goal;
+  calVal.style.cssText = 'font-size:12px;font-weight:700;color:'+(reached?'#f74e4e':'#00d18c');
+  calVal.textContent = totalCal+' / '+goal;
   calRow.appendChild(calLabel); calRow.appendChild(calVal);
   card.appendChild(calRow);
   var track = document.createElement('div');
-  track.style.cssText = 'height:7px;background:#1a2e24;border-radius:4px;overflow:hidden;margin-bottom:10px';
+  track.style.cssText = 'height:7px;background:#1a2e24;border-radius:4px;overflow:hidden;margin-bottom:8px';
   var fill = document.createElement('div');
-  fill.style.cssText = 'height:100%;width:' + pct + '%;border-radius:4px;background:' + (reached ? '#f74e4e' : '#00d18c') + ';transition:width 0.4s';
+  fill.style.cssText = 'height:100%;width:'+pct+'%;border-radius:4px;background:'+(reached?'#f74e4e':'#00d18c')+';transition:width 0.4s';
   track.appendChild(fill); card.appendChild(track);
-  // Status
-  var stat = document.createElement('div');
-  stat.style.cssText = 'font-size:11px;color:' + (reached ? '#f74e4e' : '#7a9e8e') + ';margin-bottom:10px';
-  stat.textContent = reached ? '🔴 Goal reached!' : (arr.length > 0 ? '✅ ' + (goal - totalCal) + ' kcal left' : 'Nothing logged today');
-  card.appendChild(stat);
-  // Weight
+  // Weight row
   var wRow = document.createElement('div');
-  wRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between';
+  wRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:8px';
   var wLabel = document.createElement('span');
   wLabel.style.cssText = 'font-size:12px;color:#7a9e8e';
   wLabel.textContent = 'Latest weight';
@@ -6999,16 +7271,50 @@ function fitRenderHomeFitnessCard() {
   wVal.textContent = latestW;
   wRow.appendChild(wLabel); wRow.appendChild(wVal);
   card.appendChild(wRow);
-  // Today's food items
-  if (arr.length > 0) {
+  // Workout section
+  if (!day.rest && exercises.length > 0) {
     var sep = document.createElement('div');
-    sep.style.cssText = 'border-top:1px solid #1a2e24;margin:10px 0';
+    sep.style.cssText = 'border-top:1px solid #1a2e24;margin:6px 0';
     card.appendChild(sep);
-    var foodTitle = document.createElement('div');
-    foodTitle.style.cssText = 'font-size:11px;color:#7a9e8e;margin-bottom:6px';
-    foodTitle.textContent = "Today's food";
-    card.appendChild(foodTitle);
-    arr.slice(-4).reverse().forEach(function(item) {
+    var wTitle = document.createElement('div');
+    wTitle.style.cssText = 'font-size:11px;color:#7a9e8e;margin-bottom:5px';
+    wTitle.textContent = "Today's exercises ("+exercises.length+")";
+    card.appendChild(wTitle);
+    exercises.slice(0,3).forEach(function(ex) {
+      var eRow = document.createElement('div');
+      eRow.style.cssText = 'display:flex;justify-content:space-between;margin-bottom:3px';
+      var en = document.createElement('span');
+      en.style.cssText = 'font-size:12px;color:#a0c9b8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      en.textContent = ex.name;
+      var ed = document.createElement('span');
+      ed.style.cssText = 'font-size:12px;color:#7a9e8e;margin-left:8px;white-space:nowrap';
+      var parts=[]; if(ex.sets) parts.push(ex.sets+'×'); if(ex.reps) parts.push(ex.reps);
+      ed.textContent = parts.join('');
+      eRow.appendChild(en); eRow.appendChild(ed);
+      card.appendChild(eRow);
+    });
+    if (exercises.length > 3) {
+      var more = document.createElement('div');
+      more.style.cssText = 'font-size:11px;color:#7a9e8e;margin-top:2px';
+      more.textContent = '+' + (exercises.length-3) + ' more';
+      card.appendChild(more);
+    }
+  } else if (day.rest) {
+    var restMsg = document.createElement('div');
+    restMsg.style.cssText = 'font-size:12px;color:#7a9e8e;margin-top:4px';
+    restMsg.textContent = '😴 Rest & recover today';
+    card.appendChild(restMsg);
+  }
+  // Today food items
+  if (arr.length > 0) {
+    var sep2 = document.createElement('div');
+    sep2.style.cssText = 'border-top:1px solid #1a2e24;margin:8px 0 6px';
+    card.appendChild(sep2);
+    var fTitle = document.createElement('div');
+    fTitle.style.cssText = 'font-size:11px;color:#7a9e8e;margin-bottom:5px';
+    fTitle.textContent = "Today's food";
+    card.appendChild(fTitle);
+    arr.slice(-3).reverse().forEach(function(item) {
       var fRow = document.createElement('div');
       fRow.style.cssText = 'display:flex;justify-content:space-between;margin-bottom:3px';
       var fn = document.createElement('span');
@@ -7016,18 +7322,19 @@ function fitRenderHomeFitnessCard() {
       fn.textContent = item.name;
       var fc = document.createElement('span');
       fc.style.cssText = 'font-size:12px;font-weight:700;color:#00d18c;margin-left:8px';
-      fc.textContent = item.cal + ' kcal';
+      fc.textContent = item.cal+' kcal';
       fRow.appendChild(fn); fRow.appendChild(fc);
       card.appendChild(fRow);
     });
-    if (arr.length > 4) {
-      var more = document.createElement('div');
-      more.style.cssText = 'font-size:11px;color:#7a9e8e;margin-top:2px';
-      more.textContent = '+ ' + (arr.length - 4) + ' more';
-      card.appendChild(more);
+    if (arr.length>3) {
+      var more2 = document.createElement('div');
+      more2.style.cssText = 'font-size:11px;color:#7a9e8e;margin-top:2px';
+      more2.textContent = '+' + (arr.length-3) + ' more';
+      card.appendChild(more2);
     }
   }
 }
+
 </script>
 
 
