@@ -2170,7 +2170,7 @@
 
 <script>
   // clear stale layout keys
-  ['homeCardLayout','homeCardLayoutV2'].forEach(function(k){localStorage.removeItem(k);});
+  ['homeCardLayout','homeCardLayoutV2','hcLayout3'].forEach(function(k){localStorage.removeItem(k);});
 // ════════════════════════════════════════════════════════════
 //  TITLEBAR
 // ════════════════════════════════════════════════════════════
@@ -7532,9 +7532,10 @@ function exitFreeform(container) {
     el.style.position = '';
     el.style.left     = '';
     el.style.top      = '';
+    el.style.width    = '';
+    el.style.height   = '';
     el.style.zIndex   = '';
     el.style.overflow = '';
-    // keep width so card looks similar in flex
   });
 }
 
