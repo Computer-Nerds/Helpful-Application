@@ -512,6 +512,49 @@
     @keyframes mathFlashGreen { 0%,100%{background:#0f0f0f} 50%{background:#00d18c18} }
     @keyframes mathShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 80%{transform:translateX(-3px)} }
     @keyframes mathPop { 0%{transform:scale(.4);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+    /* ── SPANISH ── */
+    #spanish-view { flex:1; display:flex; flex-direction:column; min-height:0; overflow:hidden; background:#111312; color:#e8f0ed; }
+    #spanish-topbar { background:#0a0f0d; border-bottom:1px solid #1a2e24; padding:0 20px; height:52px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    #spanish-tabs { display:flex; gap:0; border-bottom:1px solid #1a2e24; background:#0d1210; flex-shrink:0; padding:0 20px; }
+    .sp-tab { padding:10px 18px; font-size:13px; font-weight:600; color:#4a7060; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
+    .sp-tab.active { color:#00d18c; border-bottom-color:#00d18c; }
+    #spanish-body { flex:1; overflow-y:auto; padding:20px; }
+    /* Vocab tab */
+    .sp-search-row { display:flex; gap:10px; margin-bottom:16px; }
+    .sp-search { flex:1; background:#1a1f1d; border:1px solid #1f2e28; color:#e8f0ed; border-radius:10px; padding:10px 14px; font-size:14px; outline:none; }
+    .sp-search:focus { border-color:#00d18c44; }
+    .sp-filter-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+    .sp-filter-btn { background:#1a1f1d; border:1px solid #1f2e28; color:#7a9e8e; border-radius:8px; padding:5px 12px; font-size:12px; cursor:pointer; transition:all .1s; }
+    .sp-filter-btn.active { background:#00d18c22; border-color:#00d18c; color:#00d18c; }
+    .sp-word-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
+    .sp-word-card { background:#1a1f1d; border:1px solid #1f2e28; border-radius:12px; padding:14px; cursor:pointer; transition:all .15s; }
+    .sp-word-card:hover { background:#1f2e28; border-color:#2a3e34; }
+    .sp-word-es { font-size:17px; font-weight:800; color:#e8f0ed; }
+    .sp-word-en { font-size:12px; color:#7a9e8e; margin-top:3px; }
+    .sp-word-type { font-size:10px; color:#3a5548; margin-top:5px; text-transform:uppercase; letter-spacing:.5px; }
+    /* Word detail modal */
+    #sp-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; display:none; align-items:center; justify-content:center; }
+    #sp-modal-overlay.open { display:flex; }
+    #sp-modal { background:#151a17; border:1px solid #1f2e28; border-radius:20px; padding:32px; max-width:420px; width:90%; position:relative; }
+    #sp-modal-close { position:absolute; top:14px; right:14px; background:none; border:none; color:#4a7060; font-size:20px; cursor:pointer; }
+    #sp-modal-es { font-size:36px; font-weight:900; color:#e8f0ed; }
+    #sp-modal-pronun { font-size:15px; color:#7a9e8e; margin:4px 0 2px; font-style:italic; }
+    #sp-modal-type-badge { display:inline-block; background:#00d18c22; color:#00d18c; border-radius:6px; padding:2px 10px; font-size:11px; font-weight:700; letter-spacing:.5px; margin-bottom:12px; }
+    #sp-modal-en { font-size:18px; color:#c8e0d4; margin-bottom:12px; }
+    #sp-modal-example { background:#1a1f1d; border-radius:10px; padding:12px 14px; font-size:13px; color:#7a9e8e; line-height:1.6; }
+    #sp-modal-example strong { color:#c8e0d4; }
+    .sp-modal-speak-btn { margin-top:14px; background:#00d18c22; border:1px solid #00d18c44; color:#00d18c; border-radius:10px; padding:8px 18px; font-size:13px; cursor:pointer; width:100%; }
+    .sp-modal-speak-btn:hover { background:#00d18c33; }
+    /* Grammar tab */
+    .sp-section-card { background:#1a1f1d; border:1px solid #1f2e28; border-radius:14px; padding:18px; margin-bottom:14px; }
+    .sp-section-title { font-size:15px; font-weight:800; color:#00d18c; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .sp-section-body { font-size:13px; color:#9ab8a8; line-height:1.7; }
+    .sp-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+    .sp-table th { color:#00d18c; font-weight:700; padding:6px 10px; border-bottom:1px solid #1f2e28; text-align:left; }
+    .sp-table td { padding:6px 10px; border-bottom:1px solid #111712; color:#9ab8a8; }
+    .sp-table tr:last-child td { border-bottom:none; }
+    .sp-example { background:#111712; border-left:3px solid #00d18c44; border-radius:4px; padding:8px 12px; margin-top:8px; font-size:12px; color:#7a9e8e; }
+    .sp-example em { color:#c8e0d4; font-style:normal; }
     #math-answer-input::-webkit-outer-spin-button,
     #math-answer-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
     #math-answer-input[type=number] { -moz-appearance:textfield; }
@@ -814,9 +857,13 @@
           <button class="btn btn-ghost" onclick="closeApp('math')">← Apps</button>
           <span style="font-size:16px;font-weight:800">🧮 Math</span>
           <div style="flex:1"></div>
-          <div id="math-timer-display" style="font-size:13px;font-weight:700;color:#e8a020;letter-spacing:1px;min-width:52px;text-align:center">0:00</div>
-          <button id="math-timer-btn" onclick="mathTimerToggle()" style="background:#e8a02022;border:1px solid #e8a02044;color:#e8a020;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;margin:0 4px">▶ Start</button>
-          <button class="btn btn-ghost" onclick="mathReset()" style="font-size:13px;color:#3a5548">↺ Reset</button>
+          <div class="timer-block">
+            <span class="timer-display" id="math-timer-display" style="color:#e8a020">00:00</span>
+            <button class="timer-btn" id="math-timer-btn" onclick="mathTimerToggle()" style="background:rgba(232,160,32,0.15);border:1px solid #e8a020;color:#e8a020">▶</button>
+            <button class="timer-reset" onclick="mathTimerReset()" title="Reset">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="page-body">
@@ -1071,6 +1118,44 @@
       </div>
     </div>
 
+    <!-- ══ SPANISH ══ -->
+    <div class="page" id="page-spanish">
+      <div id="spanish-view">
+        <div id="spanish-topbar">
+          <button class="btn btn-ghost" onclick="closeApp('spanish')">← Apps</button>
+          <span style="font-size:16px;font-weight:800">🇪🇸 Spanish</span>
+        </div>
+        <div id="spanish-tabs">
+          <div class="sp-tab active" id="sp-tab-vocab" onclick="spSetTab('vocab')">📖 Vocabulary</div>
+          <div class="sp-tab" id="sp-tab-grammar" onclick="spSetTab('grammar')">📚 Grammar</div>
+        </div>
+        <div id="spanish-body">
+          <!-- Vocab tab content -->
+          <div id="sp-vocab-pane">
+            <div class="sp-search-row">
+              <input class="sp-search" id="sp-search" placeholder="Search words..." oninput="spRenderVocab()">
+            </div>
+            <div class="sp-filter-btns" id="sp-filters"></div>
+            <div class="sp-word-grid" id="sp-word-grid"></div>
+          </div>
+          <!-- Grammar tab content -->
+          <div id="sp-grammar-pane" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spanish word modal -->
+    <div id="sp-modal-overlay" onclick="if(event.target===this)spCloseModal()">
+      <div id="sp-modal">
+        <button id="sp-modal-close" onclick="spCloseModal()">✕</button>
+        <div id="sp-modal-es"></div>
+        <div id="sp-modal-pronun"></div>
+        <div id="sp-modal-type-badge"></div>
+        <div id="sp-modal-en"></div>
+        <div id="sp-modal-example"></div>
+        <button class="sp-modal-speak-btn" onclick="spSpeak()">🔊 Hear pronunciation</button>
+      </div>
+    </div>
   </div><!-- /content -->
 </div><!-- /body -->
 
@@ -1124,7 +1209,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math'];
+const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -1150,13 +1235,15 @@ function setPage(p) {
   if (p === 'music') { musicInit(); hmwSyncState(); }
   if (p === 'chess') chessInit();
   if (p === 'math')  mathInit();
+  if (p === 'spanish') spanishInit();
 }
 
 function openApp(app) { setPage(app); }
 function closeApp(app) {
   if(app==='math' && typeof mathTimerRunning!=='undefined' && mathTimerRunning){
     clearInterval(mathTimerInterval); mathTimerRunning=false;
-    if(document.getElementById('math-timer-btn')) document.getElementById('math-timer-btn').textContent='▶ Start';
+    const mb=document.getElementById('math-timer-btn');
+    if(mb){mb.textContent='▶';mb.style.background='rgba(232,160,32,0.15)';mb.style.borderColor='#e8a020';mb.style.color='#e8a020';}
   }
   setPage('apps');
 }
@@ -1832,7 +1919,7 @@ function chTimerToggle() {
   chTimerRunning=!chTimerRunning;
   const btn=document.getElementById('chess-timer-btn');
   if(chTimerRunning){
-    btn.textContent='⏸';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';
+    btn.textContent='■';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';
     chTimerInterval=setInterval(()=>{chTimerElapsed++;localStorage.setItem('chessTimer',String(chTimerElapsed));updateChessTimerDisplay();renderHomeDailys();},1000);
   }else{
     btn.textContent='▶';btn.style.background='rgba(0,209,140,0.15)';btn.style.borderColor='#00d18c';btn.style.color='#00d18c';
@@ -2113,7 +2200,7 @@ function pianoSustainChange(v){pianoSustain=v;const lbl=document.getElementById(
 function pianoTimerToggle(){
   pianoTimerRunning=!pianoTimerRunning;
   const btn=document.getElementById('piano-timer-btn');
-  if(pianoTimerRunning){btn.textContent='⏸';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';pianoTimerInterval=setInterval(()=>{pianoTimerElapsed++;localStorage.setItem('pianoTimer',String(pianoTimerElapsed));updatePianoTimerDisplay();renderHomeDailys();},1000);}
+  if(pianoTimerRunning){btn.textContent='■';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';pianoTimerInterval=setInterval(()=>{pianoTimerElapsed++;localStorage.setItem('pianoTimer',String(pianoTimerElapsed));updatePianoTimerDisplay();renderHomeDailys();},1000);}
   else{btn.textContent='▶';btn.style.background='rgba(0,209,140,0.15)';btn.style.borderColor='#00d18c';btn.style.color='#00d18c';clearInterval(pianoTimerInterval);}
 }
 function pianoTimerReset(){pianoTimerRunning=false;clearInterval(pianoTimerInterval);pianoTimerElapsed=0;localStorage.setItem('pianoTimer','0');updatePianoTimerDisplay();renderHomeDailys();const btn=document.getElementById('piano-timer-btn');btn.textContent='▶';btn.style.background='rgba(0,209,140,0.15)';btn.style.borderColor='#00d18c';btn.style.color='#00d18c';}
@@ -2304,7 +2391,7 @@ function updateTypingBest(){const el=document.getElementById('typing-best');if(e
 function typingTimerToggle(){
   typingTimerRunning=!typingTimerRunning;
   const btn=document.getElementById('typing-timer-btn');
-  if(typingTimerRunning){btn.textContent='⏸';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';typingTimerInterval=setInterval(()=>{typingTimerElapsed++;localStorage.setItem('typingTimer',String(typingTimerElapsed));updateTypingTimerDisplay();renderHomeDailys();},1000);}
+  if(typingTimerRunning){btn.textContent='■';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';typingTimerInterval=setInterval(()=>{typingTimerElapsed++;localStorage.setItem('typingTimer',String(typingTimerElapsed));updateTypingTimerDisplay();renderHomeDailys();},1000);}
   else{btn.textContent='▶';btn.style.background='rgba(0,209,140,0.15)';btn.style.borderColor='#00d18c';btn.style.color='#00d18c';clearInterval(typingTimerInterval);}
 }
 function typingTimerReset(){typingTimerRunning=false;clearInterval(typingTimerInterval);typingTimerElapsed=0;localStorage.setItem('typingTimer','0');updateTypingTimerDisplay();renderHomeDailys();const btn=document.getElementById('typing-timer-btn');btn.textContent='▶';btn.style.background='rgba(0,209,140,0.15)';btn.style.borderColor='#00d18c';btn.style.color='#00d18c';}
@@ -2602,26 +2689,38 @@ async function musicHandleArt(files){
   function mathTimerRender(){
     const m2=Math.floor(mathTimerSecs/60), s=mathTimerSecs%60;
     const disp=document.getElementById('math-timer-display');
-    const btn=document.getElementById('math-timer-btn');
-    if(disp) disp.textContent=m2+':'+(s<10?'0':'')+s;
-    if(btn)  btn.textContent=mathTimerRunning?'⏸ Pause':'▶ Start';
+    if(disp){
+      disp.textContent=(m2<10?'0':'')+m2+':'+(s<10?'0':'')+s;
+      disp.style.color=mathTimerSecs>=900?'#00d18c':'#e8a020';
+    }
   }
   window.mathTimerToggle=function(){
+    const btn=document.getElementById('math-timer-btn');
+    mathTimerRunning=!mathTimerRunning;
     if(mathTimerRunning){
-      clearInterval(mathTimerInterval);
-      mathTimerRunning=false;
-    } else {
-      mathTimerRunning=true;
+      btn.textContent='■';btn.style.background='rgba(247,78,78,0.15)';btn.style.borderColor='#f74e4e';btn.style.color='#f74e4e';
       mathTimerInterval=setInterval(()=>{
         mathTimerSecs++;
         mathTimerSave();
         mathTimerRender();
-        if(mathTimerSecs===900){ // 15 min goal reached
-          document.getElementById('math-timer-display').style.color='#00d18c';
-        }
+        renderHomeDailys();
       },1000);
+    } else {
+      btn.textContent='▶';btn.style.background='rgba(232,160,32,0.15)';btn.style.borderColor='#e8a020';btn.style.color='#e8a020';
+      clearInterval(mathTimerInterval);
     }
+  };
+
+  window.mathTimerReset=function(){
+    clearInterval(mathTimerInterval);
+    mathTimerRunning=false;
+    mathTimerSecs=0;
+    localStorage.setItem('mathTimer','0');
+    localStorage.removeItem('mathTimerData');
+    const btn=document.getElementById('math-timer-btn');
+    if(btn){btn.textContent='▶';btn.style.background='rgba(232,160,32,0.15)';btn.style.borderColor='#e8a020';btn.style.color='#e8a020';}
     mathTimerRender();
+    renderHomeDailys();
   };
 
   // ── XP & Levelling ──────────────────────────────────────────
@@ -2829,6 +2928,253 @@ document.getElementById('page-chess').querySelector('#chess-view').addEventListe
 
 // Re-render home daily bars when returning to home
 window.addEventListener('storage', () => { renderHomeDailys(); renderHomeProjects(); });
+
+// ═══════════════════════════════════════════════════════════════════
+//  SPANISH APP
+// ═══════════════════════════════════════════════════════════════════
+const SP_VOCAB = [
+  // ── Nouns ──
+  {es:'casa',en:'house',pron:'KAH-sah',type:'noun',example:'La {casa} es grande. (The house is big.)'},
+  {es:'perro',en:'dog',pron:'PEH-rroh',type:'noun',example:'El {perro} corre rápido. (The dog runs fast.)'},
+  {es:'gato',en:'cat',pron:'GAH-toh',type:'noun',example:'El {gato} duerme. (The cat sleeps.)'},
+  {es:'agua',en:'water',pron:'AH-gwah',type:'noun',example:'Quiero {agua}. (I want water.)'},
+  {es:'pan',en:'bread',pron:'PAHN',type:'noun',example:'El {pan} está fresco. (The bread is fresh.)'},
+  {es:'libro',en:'book',pron:'LEE-broh',type:'noun',example:'Leo un {libro}. (I read a book.)'},
+  {es:'ciudad',en:'city',pron:'syoo-DAHD',type:'noun',example:'La {ciudad} es bonita. (The city is beautiful.)'},
+  {es:'coche',en:'car',pron:'KOH-cheh',type:'noun',example:'El {coche} es rojo. (The car is red.)'},
+  {es:'mesa',en:'table',pron:'MEH-sah',type:'noun',example:'La {mesa} es de madera. (The table is made of wood.)'},
+  {es:'silla',en:'chair',pron:'SEE-yah',type:'noun',example:'Siéntate en la {silla}. (Sit in the chair.)'},
+  {es:'ventana',en:'window',pron:'ven-TAH-nah',type:'noun',example:'Abre la {ventana}. (Open the window.)'},
+  {es:'puerta',en:'door',pron:'PWEHR-tah',type:'noun',example:'Cierra la {puerta}. (Close the door.)'},
+  {es:'amigo',en:'friend',pron:'ah-MEE-goh',type:'noun',example:'Él es mi {amigo}. (He is my friend.)'},
+  {es:'familia',en:'family',pron:'fah-MEE-lyah',type:'noun',example:'Mi {familia} es grande. (My family is big.)'},
+  {es:'tiempo',en:'time / weather',pron:'TYEM-poh',type:'noun',example:'No tengo {tiempo}. (I don\'t have time.)'},
+  {es:'dinero',en:'money',pron:'dee-NEH-roh',type:'noun',example:'No tengo {dinero}. (I don\'t have money.)'},
+  {es:'trabajo',en:'work / job',pron:'trah-BAH-hoh',type:'noun',example:'Voy al {trabajo}. (I\'m going to work.)'},
+  {es:'comida',en:'food',pron:'koh-MEE-dah',type:'noun',example:'La {comida} está deliciosa. (The food is delicious.)'},
+  {es:'escuela',en:'school',pron:'es-KWEH-lah',type:'noun',example:'Voy a la {escuela}. (I go to school.)'},
+  {es:'año',en:'year',pron:'AH-nyoh',type:'noun',example:'Este {año} aprendo español. (This year I\'m learning Spanish.)'},
+  // ── Verbs ──
+  {es:'ser',en:'to be (permanent)',pron:'SEHR',type:'verb',example:'Yo {soy} americano. (I am American.)'},
+  {es:'estar',en:'to be (temporary)',pron:'es-TAHR',type:'verb',example:'Yo {estoy} cansado. (I am tired.)'},
+  {es:'tener',en:'to have',pron:'teh-NEHR',type:'verb',example:'Yo {tengo} un perro. (I have a dog.)'},
+  {es:'hacer',en:'to do / make',pron:'ah-SEHR',type:'verb',example:'¿Qué {haces}? (What are you doing?)'},
+  {es:'ir',en:'to go',pron:'EER',type:'verb',example:'Voy a {ir} al mercado. (I\'m going to the market.)'},
+  {es:'poder',en:'to be able to / can',pron:'poh-DEHR',type:'verb',example:'¿{Puedes} ayudarme? (Can you help me?)'},
+  {es:'querer',en:'to want / love',pron:'keh-REHR',type:'verb',example:'{Quiero} aprender español. (I want to learn Spanish.)'},
+  {es:'hablar',en:'to speak',pron:'ah-BLAHR',type:'verb',example:'Yo {hablo} español. (I speak Spanish.)'},
+  {es:'comer',en:'to eat',pron:'koh-MEHR',type:'verb',example:'Voy a {comer} pizza. (I\'m going to eat pizza.)'},
+  {es:'vivir',en:'to live',pron:'bee-BEER',type:'verb',example:'Yo {vivo} en Oklahoma. (I live in Oklahoma.)'},
+  {es:'saber',en:'to know (facts)',pron:'sah-BEHR',type:'verb',example:'Yo {sé} la respuesta. (I know the answer.)'},
+  {es:'ver',en:'to see / watch',pron:'BEHR',type:'verb',example:'¿{Ves} eso? (Do you see that?)'},
+  {es:'venir',en:'to come',pron:'beh-NEER',type:'verb',example:'¿{Vienes} conmigo? (Are you coming with me?)'},
+  {es:'dar',en:'to give',pron:'DAHR',type:'verb',example:'Te {doy} un regalo. (I give you a gift.)'},
+  {es:'llamar',en:'to call',pron:'yah-MAHR',type:'verb',example:'Voy a {llamar} a mi mamá. (I\'m going to call my mom.)'},
+  // ── Adjectives ──
+  {es:'grande',en:'big / great',pron:'GRAHN-deh',type:'adjective',example:'La ciudad es {grande}. (The city is big.)'},
+  {es:'pequeño',en:'small',pron:'peh-KEH-nyoh',type:'adjective',example:'El gato es {pequeño}. (The cat is small.)'},
+  {es:'bueno',en:'good',pron:'BWEH-noh',type:'adjective',example:'¡Eso es {bueno}! (That is good!)'},
+  {es:'malo',en:'bad',pron:'MAH-loh',type:'adjective',example:'El tiempo está {malo}. (The weather is bad.)'},
+  {es:'nuevo',en:'new',pron:'NWEH-boh',type:'adjective',example:'Tengo un coche {nuevo}. (I have a new car.)'},
+  {es:'viejo',en:'old',pron:'BYEH-hoh',type:'adjective',example:'Es un edificio {viejo}. (It\'s an old building.)'},
+  {es:'rápido',en:'fast / quick',pron:'RAH-pee-doh',type:'adjective',example:'El coche es {rápido}. (The car is fast.)'},
+  {es:'bonito',en:'pretty / nice',pron:'boh-NEE-toh',type:'adjective',example:'Es una ciudad {bonita}. (It\'s a pretty city.)'},
+  {es:'fácil',en:'easy',pron:'FAH-seel',type:'adjective',example:'El examen es {fácil}. (The exam is easy.)'},
+  {es:'difícil',en:'difficult',pron:'dee-FEE-seel',type:'adjective',example:'El español no es {difícil}. (Spanish is not difficult.)'},
+  // ── Common Phrases ──
+  {es:'hola',en:'hello',pron:'OH-lah',type:'phrase',example:'{Hola}, ¿cómo estás? (Hello, how are you?)'},
+  {es:'gracias',en:'thank you',pron:'GRAH-syahs',type:'phrase',example:'Muchas {gracias}. (Thank you very much.)'},
+  {es:'por favor',en:'please',pron:'por fah-BOHR',type:'phrase',example:'Habla más despacio, {por favor}. (Speak slower, please.)'},
+  {es:'lo siento',en:'I\'m sorry',pron:'loh SYEHN-toh',type:'phrase',example:'{Lo siento}, no entiendo. (I\'m sorry, I don\'t understand.)'},
+  {es:'de nada',en:'you\'re welcome',pron:'deh NAH-dah',type:'phrase',example:'—Gracias. —{De nada}. (—Thanks. —You\'re welcome.)'},
+  {es:'¿cómo estás?',en:'how are you?',pron:'KOH-moh es-TAHS',type:'phrase',example:'¡Hola! ¿{Cómo estás}? (Hi! How are you?)'},
+  {es:'no entiendo',en:'I don\'t understand',pron:'noh en-TYEN-doh',type:'phrase',example:'{No entiendo} esta palabra. (I don\'t understand this word.)'},
+  {es:'¿hablas inglés?',en:'do you speak English?',pron:'AH-blahs een-GLEHS',type:'phrase',example:'Perdón, ¿{hablas inglés}? (Excuse me, do you speak English?)'},
+  // ── Numbers ──
+  {es:'uno',en:'one',pron:'OO-noh',type:'number',example:'Tengo {un} hermano. (I have one brother.)'},
+  {es:'dos',en:'two',pron:'DOHS',type:'number',example:'Son las {dos}. (It\'s two o\'clock.)'},
+  {es:'tres',en:'three',pron:'TREHS',type:'number',example:'Tengo {tres} gatos. (I have three cats.)'},
+  {es:'diez',en:'ten',pron:'DYEHS',type:'number',example:'Son {diez} dólares. (That\'s ten dollars.)'},
+  {es:'cien',en:'one hundred',pron:'SYEHN',type:'number',example:'Cuesta {cien} dólares. (It costs one hundred dollars.)'},
+];
+
+const SP_TYPE_COLORS = {
+  noun:'#4e8ef7', verb:'#a855f7', adjective:'#f7a94e', phrase:'#00d18c', number:'#e8a020'
+};
+const SP_TYPES = ['all','noun','verb','adjective','phrase','number'];
+let spCurrentTab = 'vocab';
+let spCurrentFilter = 'all';
+let spCurrentWord = null;
+
+function spanishInit() {
+  spSetTab('vocab');
+  spRenderFilters();
+  spRenderVocab();
+  spRenderGrammar();
+}
+
+function spSetTab(tab) {
+  spCurrentTab = tab;
+  document.getElementById('sp-tab-vocab').classList.toggle('active', tab==='vocab');
+  document.getElementById('sp-tab-grammar').classList.toggle('active', tab==='grammar');
+  document.getElementById('sp-vocab-pane').style.display   = tab==='vocab'   ? '' : 'none';
+  document.getElementById('sp-grammar-pane').style.display = tab==='grammar' ? '' : 'none';
+}
+
+function spRenderFilters() {
+  const el = document.getElementById('sp-filters');
+  el.innerHTML = SP_TYPES.map(t => `
+    <button class="sp-filter-btn${t===spCurrentFilter?' active':''}" onclick="spSetFilter('${t}')">
+      ${t==='all'?'🔤 All':t.charAt(0).toUpperCase()+t.slice(1)+'s'}
+    </button>`).join('');
+}
+
+function spSetFilter(t) {
+  spCurrentFilter = t;
+  spRenderFilters();
+  spRenderVocab();
+}
+
+function spRenderVocab() {
+  const q = (document.getElementById('sp-search')?.value||'').toLowerCase();
+  let words = SP_VOCAB;
+  if(spCurrentFilter!=='all') words = words.filter(w=>w.type===spCurrentFilter);
+  if(q) words = words.filter(w=>w.es.includes(q)||w.en.toLowerCase().includes(q));
+  const el = document.getElementById('sp-word-grid');
+  if(!words.length){el.innerHTML='<div style="color:#3a5548;padding:20px">No words found.</div>';return;}
+  el.innerHTML = words.map((w,i)=>`
+    <div class="sp-word-card" onclick="spOpenWord(${SP_VOCAB.indexOf(w)})">
+      <div class="sp-word-es">${w.es}</div>
+      <div class="sp-word-en">${w.en}</div>
+      <div class="sp-word-type" style="color:${SP_TYPE_COLORS[w.type]||'#3a5548'}">${w.type}</div>
+    </div>`).join('');
+}
+
+function spOpenWord(idx) {
+  spCurrentWord = SP_VOCAB[idx];
+  const w = spCurrentWord;
+  document.getElementById('sp-modal-es').textContent = w.es;
+  document.getElementById('sp-modal-pronun').textContent = '/' + w.pron + '/';
+  document.getElementById('sp-modal-type-badge').textContent = w.type.toUpperCase();
+  document.getElementById('sp-modal-type-badge').style.background = (SP_TYPE_COLORS[w.type]||'#00d18c')+'22';
+  document.getElementById('sp-modal-type-badge').style.color = SP_TYPE_COLORS[w.type]||'#00d18c';
+  document.getElementById('sp-modal-en').textContent = w.en;
+  const exHtml = w.example.replace(/\{(.+?)\}/g,'<em>$1</em>');
+  document.getElementById('sp-modal-example').innerHTML = '<strong>Example:</strong><br>' + exHtml;
+  document.getElementById('sp-modal-overlay').classList.add('open');
+  // Auto-speak
+  spSpeak();
+}
+
+function spCloseModal() {
+  document.getElementById('sp-modal-overlay').classList.remove('open');
+  spCurrentWord = null;
+}
+
+function spSpeak() {
+  if(!spCurrentWord) return;
+  const u = new SpeechSynthesisUtterance(spCurrentWord.es);
+  u.lang = 'es-ES';
+  u.rate = 0.85;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+function spRenderGrammar() {
+  const el = document.getElementById('sp-grammar-pane');
+  el.innerHTML = `
+    <div class="sp-section-card">
+      <div class="sp-section-title">🔵 Nouns (Sustantivos)</div>
+      <div class="sp-section-body">
+        Every Spanish noun has a <strong>gender</strong> — either masculine or feminine. This affects the article (the/a) used with it.
+        <table class="sp-table">
+          <tr><th>Gender</th><th>Singular "the"</th><th>Plural "the"</th><th>Example</th></tr>
+          <tr><td>Masculine</td><td>el</td><td>los</td><td><em>el perro</em> → <em>los perros</em></td></tr>
+          <tr><td>Feminine</td><td>la</td><td>las</td><td><em>la casa</em> → <em>las casas</em></td></tr>
+        </table>
+        <div class="sp-example">💡 Tip: Nouns ending in <em>-o</em> are usually masculine; nouns ending in <em>-a</em> are usually feminine.</div>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">🟣 Verbs (Verbos)</div>
+      <div class="sp-section-body">
+        Spanish verbs are conjugated (changed) depending on the subject. The ending changes for each person.
+        <table class="sp-table">
+          <tr><th>Person</th><th>-AR (hablar)</th><th>-ER (comer)</th><th>-IR (vivir)</th></tr>
+          <tr><td>Yo (I)</td><td>hablo</td><td>como</td><td>vivo</td></tr>
+          <tr><td>Tú (you)</td><td>hablas</td><td>comes</td><td>vives</td></tr>
+          <tr><td>Él/Ella (he/she)</td><td>habla</td><td>come</td><td>vive</td></tr>
+          <tr><td>Nosotros (we)</td><td>hablamos</td><td>comemos</td><td>vivimos</td></tr>
+          <tr><td>Ellos (they)</td><td>hablan</td><td>comen</td><td>viven</td></tr>
+        </table>
+        <div class="sp-example">💡 <em>Ser</em> and <em>estar</em> both mean "to be" — <em>ser</em> is for permanent traits, <em>estar</em> is for temporary states.</div>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">🟠 Adjectives (Adjetivos)</div>
+      <div class="sp-section-body">
+        Adjectives in Spanish <strong>agree</strong> with the noun they describe in gender and number.
+        <table class="sp-table">
+          <tr><th></th><th>Masculine</th><th>Feminine</th></tr>
+          <tr><td>Singular</td><td>el perro <em>rápido</em></td><td>la chica <em>rápida</em></td></tr>
+          <tr><td>Plural</td><td>los perros <em>rápidos</em></td><td>las chicas <em>rápidas</em></td></tr>
+        </table>
+        <div class="sp-example">💡 Adjectives usually come <em>after</em> the noun: <em>un coche rojo</em> (a red car), not "a red car" word-order like in English.</div>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">🟡 Pronouns (Pronombres)</div>
+      <div class="sp-section-body">
+        Subject pronouns are often <strong>dropped</strong> in Spanish because the verb ending already tells you who is speaking.
+        <table class="sp-table">
+          <tr><th>Spanish</th><th>English</th></tr>
+          <tr><td>Yo</td><td>I</td></tr>
+          <tr><td>Tú</td><td>You (informal)</td></tr>
+          <tr><td>Él / Ella / Usted</td><td>He / She / You (formal)</td></tr>
+          <tr><td>Nosotros</td><td>We</td></tr>
+          <tr><td>Ellos / Ellas / Ustedes</td><td>They / You all</td></tr>
+        </table>
+        <div class="sp-example">💡 In Latin America, <em>ustedes</em> is used for both formal and informal "you all." In Spain, <em>vosotros</em> is used informally.</div>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">🟢 Common Phrases (Frases Comunes)</div>
+      <div class="sp-section-body">
+        These are the building blocks of everyday conversation:
+        <table class="sp-table">
+          <tr><th>Spanish</th><th>English</th><th>Pronunciation</th></tr>
+          <tr><td>¿Cómo te llamas?</td><td>What's your name?</td><td>KOH-moh teh YAH-mahs</td></tr>
+          <tr><td>Me llamo...</td><td>My name is...</td><td>meh YAH-moh</td></tr>
+          <tr><td>¿De dónde eres?</td><td>Where are you from?</td><td>deh DON-deh EH-rehs</td></tr>
+          <tr><td>No hablo bien español</td><td>I don't speak Spanish well</td><td>noh AH-bloh BYEHN</td></tr>
+          <tr><td>¿Puedes repetir?</td><td>Can you repeat that?</td><td>PWEH-dehs reh-peh-TEER</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">🔴 Questions (Preguntas)</div>
+      <div class="sp-section-body">
+        Spanish question words always carry an accent mark:
+        <table class="sp-table">
+          <tr><th>Word</th><th>Meaning</th><th>Example</th></tr>
+          <tr><td>¿Qué?</td><td>What?</td><td>¿Qué quieres? (What do you want?)</td></tr>
+          <tr><td>¿Quién?</td><td>Who?</td><td>¿Quién es? (Who is it?)</td></tr>
+          <tr><td>¿Dónde?</td><td>Where?</td><td>¿Dónde está? (Where is it?)</td></tr>
+          <tr><td>¿Cuándo?</td><td>When?</td><td>¿Cuándo llegas? (When do you arrive?)</td></tr>
+          <tr><td>¿Por qué?</td><td>Why?</td><td>¿Por qué estudias? (Why are you studying?)</td></tr>
+          <tr><td>¿Cómo?</td><td>How?</td><td>¿Cómo se dice? (How do you say it?)</td></tr>
+        </table>
+        <div class="sp-example">💡 Spanish uses an upside-down <em>¿</em> at the start and <em>?</em> at the end of questions. Same for exclamations: ¡ … !</div>
+      </div>
+    </div>
+  `;
+}
+
 </script>
 </body>
 </html>
