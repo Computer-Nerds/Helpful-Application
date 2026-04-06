@@ -67,6 +67,15 @@
     .btn:hover { opacity: 0.85; }
     .btn-accent { background: #00d18c; color: #003d2a; }
     .btn-ghost { background: #1a1f1d; border: 1px solid #1f2e28; color: #7a9e8e; }
+    .math-back-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #1a1f1d; border: 1px solid #1f2e28; color: #7a9e8e;
+      border-radius: 8px; padding: 0 16px; height: 36px; min-width: 80px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: inherit; line-height: 1; white-space: nowrap;
+      -webkit-app-region: no-drag; pointer-events: all; user-select: none;
+    }
+    .math-back-btn:hover { opacity: 0.85; }
     input[type=text], input[type=time] {
       background: #111312; border: 1px solid #1f2e28; color: #e8f0ed;
       border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none;
@@ -244,16 +253,40 @@
     }
     #rich-editor {
       flex: 1; padding: 20px 28px; outline: none; overflow-y: auto;
-      font-size: 14px; line-height: 1.8; color: #e8f0ed; caret-color: #00d18c;
+      font-size: 14px; line-height: 1.6; color: #e8f0ed; caret-color: #00d18c;
     }
-    #rich-editor ul { list-style-type: disc !important; padding-left: 28px !important; margin: 4px 0 !important; }
-    #rich-editor ol { list-style-type: decimal !important; padding-left: 28px !important; margin: 4px 0 !important; }
-    #rich-editor li { display: list-item !important; margin: 2px 0 !important; }
-    #rich-editor h1 { font-size: 2em !important; font-weight: 800 !important; margin: 8px 0 4px !important; }
-    #rich-editor h2 { font-size: 1.5em !important; font-weight: 700 !important; margin: 8px 0 4px !important; }
-    #rich-editor h3 { font-size: 1.2em !important; font-weight: 700 !important; margin: 6px 0 4px !important; }
-    #rich-editor p { margin: 4px 0 !important; }
-    #rich-editor hr { border: none !important; border-top: 1px solid #1f2e28 !important; margin: 12px 0 !important; }
+    #rich-editor > div, #rich-editor > p { font-size: 14px; }
+    /* Inline size spans: line-height normal so big text doesn't push surrounding lines */
+    #rich-editor span[style*="font-size"] { line-height: normal; vertical-align: baseline; }
+    /* Headings — standalone sizes, no !important so they don't fight spans */
+    #rich-editor h1 { font-size: 2em; font-weight: 800; margin: 8px 0 4px; line-height: 1.25; }
+    #rich-editor h2 { font-size: 1.5em; font-weight: 700; margin: 8px 0 4px; line-height: 1.3; }
+    #rich-editor h3 { font-size: 1.17em; font-weight: 700; margin: 6px 0 4px; line-height: 1.4; }
+    /* Inline font-size spans: since execSize uses setProperty with !important,
+       spans always win over the em-based heading defaults above. No extra rule needed. */
+    #rich-editor p, #rich-editor div { margin: 2px 0; }
+    #rich-editor hr { border: none; border-top: 1px solid #1f2e28; margin: 12px 0; }
+    /* Lists — bullets/numbers align with text, centered lists center their whole block */
+    #rich-editor ul, #rich-editor ol {
+      padding-left: 1.5em;
+      margin: 4px 0;
+    }
+    #rich-editor ul { list-style-type: disc; }
+    #rich-editor ol { list-style-type: decimal; }
+    #rich-editor li { display: list-item; margin: 1px 0; }
+    /* When a list is centered/right-aligned, the whole UL/OL moves */
+    #rich-editor ul[style*="text-align: center"], #rich-editor ol[style*="text-align: center"] {
+      list-style-position: inside; padding-left: 0; text-align: center;
+    }
+    #rich-editor ul[style*="text-align: right"], #rich-editor ol[style*="text-align: right"] {
+      list-style-position: inside; padding-left: 0; text-align: right;
+    }
+    #rich-editor li[style*="text-align: center"] {
+      list-style-position: inside; text-align: center;
+    }
+    #rich-editor li[style*="text-align: right"] {
+      list-style-position: inside; text-align: right;
+    }
 
     /* Tasks */
     .task-add-row { display: flex; gap: 10px; margin-bottom: 16px; }
@@ -465,7 +498,7 @@
   
     /* ══════════════ MATH ══════════════ */
     #math-view { display:flex; flex-direction:column; height:100%; overflow:hidden; background:#0f0f0f; }
-    #math-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
+    #math-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; -webkit-app-region:no-drag; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
     #math-view .page-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:24px 20px; overflow-y:auto; gap:20px; }
 
     /* XP Bar */
@@ -580,7 +613,78 @@
     #math-answer-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
     #math-answer-input[type=number] { -moz-appearance:textfield; }
 
-    </style>
+  
+    /* ── Custom scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1f3a2e; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2a5040; }
+
+    /* ── Math Hub (mode picker) ── */
+    #math-hub { position:absolute; inset:0; background:#0f0f0f; z-index:10; display:flex; flex-direction:column; overflow:hidden; }
+    #math-hub-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; -webkit-app-region:no-drag; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
+    #math-hub-body { flex:1; overflow-y:auto; padding:28px 24px; }
+    #math-hub-body h2 { font-size:13px; font-weight:700; letter-spacing:1px; color:#3a5548; text-transform:uppercase; margin-bottom:14px; }
+    .math-mode-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:28px; }
+    .math-mode-card { background:#141414; border:1px solid #1e2e28; border-radius:14px; padding:20px 16px; cursor:pointer; transition:all .15s; display:flex; flex-direction:column; gap:8px; }
+    .math-mode-card:hover { border-color:#00d18c55; background:#1a2420; }
+    .math-mode-card .mc-emoji { font-size:28px; }
+    .math-mode-card .mc-label { font-size:14px; font-weight:800; color:#e8f0ed; }
+    .math-mode-card .mc-sub { font-size:11px; color:#3a5548; line-height:1.4; }
+    .math-mode-card.mc-arith { border-color:#00d18c44; background:#00d18c08; }
+    .math-mode-card.mc-arith:hover { border-color:#00d18c; background:#00d18c12; }
+
+    /* ── Grade topic picker ── */
+    #math-grade-screen { position:absolute; inset:0; background:#0f0f0f; z-index:11; display:none; flex-direction:column; overflow:hidden; }
+    #math-grade-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; -webkit-app-region:no-drag; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
+    #math-grade-title { font-size:16px; font-weight:800; }
+    #math-grade-body { flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:10px; }
+    .math-topic-row { background:#141414; border:1px solid #1e2e28; border-radius:12px; padding:16px 18px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:space-between; }
+    .math-topic-row:hover { border-color:#00d18c55; background:#1a2420; }
+    .math-topic-row .tr-left { display:flex; flex-direction:column; gap:3px; }
+    .math-topic-row .tr-name { font-size:14px; font-weight:700; color:#e8f0ed; }
+    .math-topic-row .tr-sub { font-size:12px; color:#3a5548; }
+    .math-topic-row .tr-arrow { color:#3a5548; font-size:18px; }
+
+    /* ── Learn screen ── */
+    #math-learn-screen { position:absolute; inset:0; background:#0f0f0f; z-index:12; display:none; flex-direction:column; overflow:hidden; }
+    #math-learn-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; -webkit-app-region:no-drag; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
+    #math-learn-title { font-size:15px; font-weight:800; flex:1; }
+    #math-learn-body { flex:1; overflow-y:auto; padding:24px; max-width:680px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+    .math-learn-section { background:#141414; border:1px solid #1e2e28; border-radius:14px; padding:20px; }
+    .math-learn-section h3 { font-size:13px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; color:#00d18c; margin-bottom:10px; }
+    .math-learn-section p { font-size:14px; color:#c8e0d4; line-height:1.7; margin-bottom:8px; }
+    .math-learn-section p:last-child { margin-bottom:0; }
+    .math-tip-box { background:#00d18c0a; border:1px solid #00d18c22; border-radius:10px; padding:12px 14px; font-size:13px; color:#7ad4b8; line-height:1.6; margin-top:4px; }
+    .math-tip-box strong { color:#00d18c; }
+    .math-formula { background:#0a0a0a; border:1px solid #1e2e28; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:15px; color:#e8f0ed; text-align:center; margin:8px 0; }
+    .math-example-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+    .math-example-item { display:flex; align-items:center; gap:10px; font-size:13px; }
+    .math-example-item .ex-q { color:#c8e0d4; min-width:160px; }
+    .math-example-item .ex-a { color:#00d18c; font-weight:700; }
+    #math-learn-practice-btn { margin:0 24px 24px; background:#00d18c; color:#0f0f0f; font-weight:800; font-size:16px; border:none; border-radius:12px; padding:16px; cursor:pointer; flex-shrink:0; }
+    #math-learn-practice-btn:hover { background:#00ff9d; }
+
+    /* ── Topic practice screen ── */
+    #math-topic-practice { position:absolute; inset:0; background:#0f0f0f; z-index:13; display:none; flex-direction:column; overflow:hidden; }
+    #math-tp-topbar { display:flex; align-items:center; gap:10px; padding:0 16px; height:52px; -webkit-app-region:no-drag; background:#141414; border-bottom:1px solid #1e2e28; flex-shrink:0; }
+    #math-tp-title { font-size:15px; font-weight:800; flex:1; }
+    #math-tp-body { flex:1; display:flex; flex-direction:column; align-items:center; padding:24px 20px; overflow-y:auto; gap:18px; }
+    #math-tp-question { font-size:26px; font-weight:800; color:#e8f0ed; text-align:center; max-width:560px; line-height:1.4; }
+    #math-tp-choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; max-width:480px; }
+    .math-tp-choice { background:#141414; border:2px solid #1e2e28; border-radius:12px; padding:16px; font-size:16px; font-weight:700; color:#e8f0ed; cursor:pointer; text-align:center; transition:all .15s; }
+    .math-tp-choice:hover { border-color:#00d18c55; background:#1a2420; }
+    .math-tp-choice.correct { border-color:#00d18c; background:#00d18c18; color:#00d18c; }
+    .math-tp-choice.wrong   { border-color:#e05252; background:#e0525218; color:#e05252; }
+    #math-tp-feedback { min-height:60px; width:100%; max-width:480px; background:#141414; border:1px solid #1e2e28; border-radius:12px; padding:14px 16px; font-size:13px; color:#7a9e8e; line-height:1.5; display:none; }
+    #math-tp-feedback.show { display:block; }
+    #math-tp-next { background:#00d18c; color:#0f0f0f; font-weight:800; border:none; border-radius:10px; padding:12px 36px; font-size:15px; cursor:pointer; display:none; }
+    #math-tp-next.show { display:block; }
+    #math-tp-score-row { display:flex; gap:12px; }
+    .math-tp-score { background:#141414; border:1px solid #1e2e28; border-radius:10px; padding:10px 18px; text-align:center; }
+    .math-tp-score-val { font-size:20px; font-weight:800; color:#00d18c; }
+    .math-tp-score-lbl { font-size:11px; color:#3a5548; margin-top:2px; }
+  </style>
 </head>
 <body>
 
@@ -716,6 +820,13 @@
             <div id="home-project-list"></div>
           </div>
 
+          <!-- Wordle Mini Card -->
+          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:160px">
+            <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
+            <div id="wordle-mini-board" style="margin-bottom:8px"></div>
+            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
+          </div>
+
           <!-- Music Widget -->
           <div id="home-music-widget">
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
@@ -793,7 +904,7 @@
               <button class="rich-btn" onmousedown="event.preventDefault();execBlock('h3')" title="H3">H3</button>
               <button class="rich-btn" onmousedown="event.preventDefault();execBlock('p')" title="Normal">¶</button>
               <div class="rich-divider"></div>
-              <select class="rich-size-sel" onmousedown="saveEditorSel()" onchange="execSize(this.value);this.value=''">
+              <select class="rich-size-sel" onfocus="_savedSel=saveRichSel()" onchange="execSize(this.value);this.value=''" onmousedown="event.stopPropagation()">
                 <option value="" disabled selected>Size</option>
                 <option value="10px">10px</option><option value="12px">12px</option>
                 <option value="14px">14px</option><option value="16px">16px</option>
@@ -801,8 +912,8 @@
                 <option value="32px">32px</option><option value="48px">48px</option>
               </select>
               <div class="rich-divider"></div>
-              <button class="rich-btn" onmousedown="event.preventDefault();execFmt('insertUnorderedList')" title="Bullets">•</button>
-              <button class="rich-btn" onmousedown="event.preventDefault();execFmt('insertOrderedList')" title="Numbers">1.</button>
+              <button class="rich-btn" onmousedown="event.preventDefault();execList('ul')" title="Bullets">•</button>
+              <button class="rich-btn" onmousedown="event.preventDefault();execList('ol')" title="Numbers">1.</button>
               <div class="rich-divider"></div>
               <button class="rich-btn" onmousedown="event.preventDefault();execAlign('left')" title="Left">⬅</button>
               <button class="rich-btn" onmousedown="event.preventDefault();execAlign('center')" title="Center">⬛</button>
@@ -858,12 +969,75 @@
             <div class="app-icon" style="background:#1a2a1e">🧮</div>
             <span class="app-label">Math</span>
           </div>
+          <div class="app-tile" onclick="openApp('braingames')">
+            <div class="app-icon" style="background:#0f2e1a">🧠</div>
+            <span class="app-label">Brain Games</span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- ══ MATH ══ -->
     <div class="page" id="page-math">
+
+    <!-- ── Math Hub overlay ── -->
+    <div id="math-hub">
+      <div id="math-hub-topbar">
+        <button onclick="mathHubBack()" class="math-back-btn">← Apps</button>
+        <span style="font-size:16px;font-weight:800">🧮 Math</span>
+      </div>
+      <div id="math-hub-body">
+        <h2>Quick Practice</h2>
+        <div class="math-mode-grid">
+          <div class="math-mode-card mc-arith" onclick="mathGoArithmetic()">
+            <span class="mc-emoji">➕</span>
+            <span class="mc-label">Arithmetic</span>
+            <span class="mc-sub">+  −  ×  ÷  with XP leveling</span>
+          </div>
+        </div>
+        <h2>Grade Levels</h2>
+        <div class="math-mode-grid" id="math-grade-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── Grade / Topic picker ── -->
+    <div id="math-grade-screen">
+      <div id="math-grade-topbar">
+        <button onclick="mathBackToHub()" class="math-back-btn">← Back</button>
+        <span id="math-grade-title">Grade</span>
+      </div>
+      <div id="math-grade-body"></div>
+    </div>
+
+    <!-- ── Learn screen ── -->
+    <div id="math-learn-screen">
+      <div id="math-learn-topbar">
+        <button onclick="mathBackToGrade()" class="math-back-btn">← Back</button>
+        <span id="math-learn-title">Topic</span>
+      </div>
+      <div id="math-learn-body"></div>
+      <button id="math-learn-practice-btn" onclick="mathStartTopicPractice()">Practice Questions →</button>
+    </div>
+
+    <!-- ── Topic practice ── -->
+    <div id="math-topic-practice">
+      <div id="math-tp-topbar">
+        <button onclick="mathBackToLearn()" class="math-back-btn">← Back</button>
+        <span id="math-tp-title">Practice</span>
+        <div style="flex:1"></div>
+        <div id="math-tp-score-row">
+          <div class="math-tp-score"><div class="math-tp-score-val" id="math-tp-correct">0</div><div class="math-tp-score-lbl">Correct</div></div>
+          <div class="math-tp-score"><div class="math-tp-score-val" id="math-tp-wrong" style="color:#e05252">0</div><div class="math-tp-score-lbl">Wrong</div></div>
+        </div>
+      </div>
+      <div id="math-tp-body">
+        <div id="math-tp-question"></div>
+        <div id="math-tp-choices"></div>
+        <div id="math-tp-feedback"></div>
+        <button id="math-tp-next" onclick="mathTPNext()">Next →</button>
+      </div>
+    </div>
+
       <div id="math-view" style="position:relative">
 
         <!-- Level-up overlay -->
@@ -875,8 +1049,8 @@
         </div>
 
         <div id="math-topbar">
-          <button class="btn btn-ghost" onclick="closeApp('math')">← Apps</button>
-          <span style="font-size:16px;font-weight:800">🧮 Math</span>
+          <button onclick="mathGoBackToHub()" class="math-back-btn">← Back</button>
+          <span style="font-size:16px;font-weight:800">🧮 Arithmetic</span>
           <div style="flex:1"></div>
           <div class="timer-block">
             <span class="timer-display" id="math-timer-display" style="color:#e8a020">00:00</span>
@@ -1134,6 +1308,8 @@
         <div id="spanish-topbar">
           <button class="btn btn-ghost" onclick="closeApp('spanish')">← Apps</button>
           <span style="font-size:16px;font-weight:800">🇪🇸 Spanish</span>
+          <div style="flex:1"></div>
+          <button onclick="spOpenAddWord()" style="background:rgba(0,209,140,.15);border:1px solid #00d18c;color:#00d18c;border-radius:8px;padding:5px 16px;font-size:13px;font-weight:700;cursor:pointer">+ Add Word</button>
         </div>
         <div id="spanish-tabs">
           <div class="sp-tab active" id="sp-tab-vocab" onclick="spSetTab('vocab')">📖 Vocabulary</div>
@@ -1201,6 +1377,116 @@
 
     <!-- Floating add button -->
     <button id="sp-add-btn" onclick="spOpenAddWord()">+</button>
+
+    <!-- ══ BRAIN GAMES HUB ══ -->
+    <div id="page-braingames" class="page" style="flex-direction:column">
+      <div id="bg-topbar" style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('apps')">← Apps</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🧠 Brain Games</span>
+      </div>
+      <div style="padding:28px 32px;overflow-y:auto;flex:1;overflow-y:auto">
+        <div style="font-size:26px;font-weight:700;margin-bottom:4px">Brain Games</div>
+        <div style="font-size:14px;color:#7a9e8e;margin-bottom:28px">Train your mind daily.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px">
+          <div class="app-tile" onclick="wordleOpen('braingames')">
+            <div class="app-icon" style="background:#1a2e1a">🟩</div>
+            <span class="app-label">Wordle</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('memory')">
+            <div class="app-icon" style="background:#1a1a2e">🧩</div>
+            <span class="app-label">Memory Grid</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('analogies')">
+            <div class="app-icon" style="background:#2e1a2e">🔗</div>
+            <span class="app-label">Analogies</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('speedread')">
+            <div class="app-icon" style="background:#2e2a1a">📖</div>
+            <span class="app-label">Speed Read</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('numseq')">
+            <div class="app-icon" style="background:#1a2e2e">🔢</div>
+            <span class="app-label">Number Sequence</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ WORDLE ══ -->
+    <div id="page-wordle" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" id="wordle-back-btn" onclick="wordleGoBack()">← Back</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🟩 Daily Wordle</span>
+      </div>
+      <div id="wordle-wrap" style="display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;flex:1;overflow-y:auto">
+        <div id="wordle-msg" style="height:28px;font-size:15px;font-weight:600;color:#e8a020;margin-bottom:8px"></div>
+        <div id="wordle-board" style="display:grid;grid-template-rows:repeat(6,1fr);gap:6px;margin-bottom:18px"></div>
+        <div id="wordle-keyboard" style="display:flex;flex-direction:column;gap:6px;align-items:center"></div>
+        <button id="wordle-new-btn" onclick="wordleNewGame()" style="display:none;margin-top:18px;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 28px;font-size:15px;font-weight:700;cursor:pointer">New Game</button>
+      </div>
+    </div>
+
+    <!-- ══ MEMORY GRID ══ -->
+    <div id="page-bg-memory" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🧩 Memory Grid</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:28px;overflow-y:auto;flex:1;overflow-y:auto">
+        <div style="font-size:13px;color:#7a9e8e;margin-bottom:6px">Level <span id="mem-level">1</span> &nbsp;|&nbsp; Score <span id="mem-score">0</span></div>
+        <div id="mem-msg" style="height:24px;font-size:14px;font-weight:600;color:#e8a020;margin-bottom:10px"></div>
+        <div id="mem-grid" style="display:grid;gap:8px;margin-bottom:20px"></div>
+        <button id="mem-btn" onclick="memStart()" style="background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:700;cursor:pointer">Start</button>
+      </div>
+    </div>
+
+    <!-- ══ ANALOGIES ══ -->
+    <div id="page-bg-analogies" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔗 Analogies</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;overflow-y:auto;flex:1;overflow-y:auto">
+        <div style="font-size:13px;color:#7a9e8e;margin-bottom:16px">Score: <span id="ana-score">0</span> &nbsp;|&nbsp; Streak: <span id="ana-streak">0</span></div>
+        <div id="ana-question" style="font-size:20px;font-weight:700;color:#e8f0ed;margin-bottom:24px;text-align:center;min-height:32px"></div>
+        <div id="ana-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:420px;margin-bottom:16px"></div>
+        <div id="ana-msg" style="height:22px;font-size:14px;font-weight:600;color:#00d18c"></div>
+        <button onclick="anaNext()" style="margin-top:12px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">Skip →</button>
+      </div>
+    </div>
+
+    <!-- ══ SPEED READ ══ -->
+    <div id="page-bg-speedread" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">📖 Speed Read</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;overflow-y:auto;flex:1;overflow-y:auto">
+        <div style="font-size:13px;color:#7a9e8e;margin-bottom:8px">WPM: <span id="sr-wpm">—</span> &nbsp;|&nbsp; Score: <span id="sr-score">0</span></div>
+        <div id="sr-flash" style="font-size:36px;font-weight:800;color:#e8f0ed;min-height:56px;margin:24px 0;text-align:center;letter-spacing:1px"></div>
+        <div id="sr-question" style="font-size:16px;color:#a0c9b8;margin-bottom:16px;text-align:center;min-height:40px"></div>
+        <div id="sr-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:400px;margin-bottom:12px"></div>
+        <div id="sr-msg" style="height:22px;font-size:14px;font-weight:600;color:#00d18c"></div>
+        <button id="sr-start-btn" onclick="srStart()" style="margin-top:16px;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:700;cursor:pointer">Start</button>
+      </div>
+    </div>
+
+    <!-- ══ NUMBER SEQUENCE ══ -->
+    <div id="page-bg-numseq" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔢 Number Sequence</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;overflow-y:auto;flex:1;overflow-y:auto">
+        <div style="font-size:13px;color:#7a9e8e;margin-bottom:8px">Score: <span id="ns-score">0</span> &nbsp;|&nbsp; Streak: <span id="ns-streak">0</span></div>
+        <div style="font-size:14px;color:#a0c9b8;margin-bottom:20px">What comes next?</div>
+        <div id="ns-sequence" style="font-size:28px;font-weight:700;color:#e8f0ed;letter-spacing:8px;margin-bottom:24px;text-align:center"></div>
+        <div id="ns-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;margin-bottom:12px"></div>
+        <div id="ns-msg" style="height:22px;font-size:14px;font-weight:600;color:#00d18c"></div>
+        <button onclick="nsNext()" style="margin-top:12px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">Skip →</button>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /body -->
 
@@ -1254,11 +1540,16 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish'];
+const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-numseq'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
   currentPage = p;
+  // Brain game auto-init
+  if(p==='wordle'      && typeof wordleNewGame!=='undefined' && !wDailyDone && !wAnswer) wordleNewGame();
+  if(p==='bg-analogies'&& typeof anaNext!=='undefined')       anaNext();
+  if(p==='bg-numseq'   && typeof nsNext!=='undefined')        nsNext();
+  if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
   PAGES.forEach(id => {
     const el = document.getElementById('page-' + id);
     if (el) el.classList.toggle('active', id === p);
@@ -1284,6 +1575,10 @@ function setPage(p) {
 }
 
 function openApp(app) { setPage(app); }
+function openBrainGame(game) {
+  if (game === 'wordle') setPage('wordle');
+  else setPage('bg-' + game);
+}
 function closeApp(app) {
   if(app==='math' && typeof mathTimerRunning!=='undefined' && mathTimerRunning){
     clearInterval(mathTimerInterval); mathTimerRunning=false;
@@ -1564,50 +1859,276 @@ function saveNewProject() {
 }
 
 // ── Rich Editor ────────────────────────────────────────────
-let _savedSel = null;
-function saveEditorSel() {
-  const sel = window.getSelection();
-  if (sel && sel.rangeCount > 0) _savedSel = sel.getRangeAt(0).cloneRange();
+// ── Rich editor helpers ─────────────────────────────────────────────────────
+// All toolbar buttons use onmousedown+preventDefault so the editor never loses
+// focus and the live selection is always valid. No save/restore needed.
+
+function getEd() { return document.getElementById('rich-editor'); }
+
+function getTopBlock(node) {
+  const ed = getEd();
+  let n = (node && node.nodeType === 3) ? node.parentNode : node;
+  while (n && n.parentNode !== ed) n = n.parentNode;
+  return (n && n !== ed) ? n : null;
 }
-function restoreEditorSel() {
-  const ed = document.getElementById('rich-editor');
-  ed.focus();
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  if (_savedSel) sel.addRange(_savedSel);
-}
-function execFmt(cmd) { restoreEditorSel(); document.execCommand(cmd, false, null); saveNotes(); }
-function execBlock(tag) {
-  restoreEditorSel();
-  document.execCommand('formatBlock', false, '<'+tag+'>');
+
+// Bold / italic / underline / strikethrough / HR
+function execFmt(cmd) {
+  document.execCommand(cmd, false, null);
   saveNotes();
 }
-function execAlign(align) {
-  const ed = document.getElementById('rich-editor');
-  if (_savedSel) {
-    const range = _savedSel;
-    const walker = document.createTreeWalker(ed, NodeFilter.SHOW_ELEMENT);
-    while (walker.nextNode()) {
-      const n = walker.currentNode;
-      if (['P','H1','H2','H3','LI','DIV','BLOCKQUOTE'].includes(n.nodeName) && range.intersectsNode(n)) {
-        n.style.textAlign = align;
-      }
-    }
-  }
-  saveNotes();
-}
-function execSize(px) {
-  if (!px) return;
-  restoreEditorSel();
+
+// Bullet / numbered list — fully manual, no execCommand
+function execList(type) {
+  const ed = getEd();
   const sel = window.getSelection();
   if (!sel || sel.rangeCount === 0) return;
   const range = sel.getRangeAt(0);
-  if (range.collapsed) return;
-  const span = document.createElement('span');
-  span.style.fontSize = px;
-  try { range.surroundContents(span); } catch { const f = range.extractContents(); span.appendChild(f); range.insertNode(span); }
+
+  // Walk up to find UL/OL ancestor inside editor
+  function findList(startNode) {
+    let n = startNode;
+    while (n && n !== ed) {
+      if (n.nodeName === 'UL' || n.nodeName === 'OL') return n;
+      n = n.parentNode;
+    }
+    return null;
+  }
+
+  // Walk up to find the LI the cursor is inside
+  function findLI(startNode) {
+    let n = startNode;
+    while (n && n !== ed) {
+      if (n.nodeName === 'LI') return n;
+      n = n.parentNode;
+    }
+    return null;
+  }
+
+  const listEl = findList(range.startContainer);
+
+  if (listEl) {
+    // ── REMOVE just the current LI, leave others intact ──
+    const curLI = findLI(range.startContainer);
+    const listAlign = listEl.style.textAlign || '';
+
+    // Build a plain div from this LI's content
+    const div = document.createElement('div');
+    const align = (curLI && curLI.style.textAlign) || listAlign;
+    if (align) div.style.textAlign = align;
+    if (curLI) {
+      while (curLI.firstChild) div.appendChild(curLI.firstChild);
+    }
+
+    const allLIs = Array.from(listEl.querySelectorAll(':scope > li'));
+    if (!curLI || allLIs.length <= 1) {
+      // Only one item (or no LI found) — remove entire list, replace with div
+      ed.insertBefore(div, listEl);
+      ed.removeChild(listEl);
+    } else {
+      // Split list around the removed LI
+      const idx = allLIs.indexOf(curLI);
+      const before = allLIs.slice(0, idx);
+      const after  = allLIs.slice(idx + 1);
+
+      if (before.length > 0) {
+        const listBefore = document.createElement(listEl.nodeName);
+        if (listEl.style.textAlign) listBefore.style.textAlign = listEl.style.textAlign;
+        before.forEach(li => listBefore.appendChild(li));
+        ed.insertBefore(listBefore, listEl);
+      }
+
+      ed.insertBefore(div, listEl);
+
+      if (after.length > 0) {
+        const listAfter = document.createElement(listEl.nodeName);
+        if (listEl.style.textAlign) listAfter.style.textAlign = listEl.style.textAlign;
+        after.forEach(li => listAfter.appendChild(li));
+        ed.insertBefore(listAfter, listEl);
+      }
+
+      ed.removeChild(listEl);
+    }
+
+    // Place cursor in the extracted div
+    const r = document.createRange();
+    r.selectNodeContents(div); r.collapse(false);
+    sel.removeAllRanges(); sel.addRange(r);
+
+  } else {
+    // ── ADD: wrap current block in list > li ──
+    const block = getTopBlock(range.startContainer);
+    if (!block) return;
+    const align = block.style.textAlign || '';
+    const list = document.createElement(type);
+    const li = document.createElement('li');
+    if (align) { list.style.textAlign = align; li.style.textAlign = align; }
+    while (block.firstChild) li.appendChild(block.firstChild);
+    list.appendChild(li);
+    ed.replaceChild(list, block);
+    const r = document.createRange();
+    r.selectNodeContents(li); r.collapse(false);
+    sel.removeAllRanges(); sel.addRange(r);
+  }
   saveNotes();
 }
+
+// Heading / paragraph toggle
+function execBlock(tag) {
+  const ed = getEd();
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+
+  const nodes = new Set();
+  const addBlock = (node) => { const b = getTopBlock(node); if (b) nodes.add(b); };
+  addBlock(range.startContainer);
+  addBlock(range.endContainer);
+  const startB = getTopBlock(range.startContainer);
+  const endB   = getTopBlock(range.endContainer);
+  if (startB && endB && startB !== endB) {
+    let sib = startB.nextSibling;
+    while (sib && sib !== endB) { if (sib.nodeType === 1) nodes.add(sib); sib = sib.nextSibling; }
+  }
+
+  const headingTags = new Set(['h1','h2','h3','h4','h5','h6']);
+
+  let firstNew = null, lastNew = null;
+  nodes.forEach(block => {
+    if (!block || block === ed) return;
+    const curTag = block.nodeName.toLowerCase();
+    const newTag = (curTag === tag) ? 'div' : tag;
+    const newEl = document.createElement(newTag);
+    if (block.style.textAlign) newEl.style.textAlign = block.style.textAlign;
+    while (block.firstChild) newEl.appendChild(block.firstChild);
+
+    // When converting TO a heading: strip all inline font-size spans so the
+    // heading CSS size actually takes effect
+    if (headingTags.has(newTag)) {
+      newEl.querySelectorAll('span').forEach(sp => {
+        sp.style.removeProperty('font-size');
+        if (!sp.getAttribute('style') || !sp.getAttribute('style').trim())
+          sp.removeAttribute('style');
+      });
+    }
+
+    ed.replaceChild(newEl, block);
+    if (!firstNew) firstNew = newEl;
+    lastNew = newEl;
+  });
+
+  if (firstNew && lastNew) {
+    const r = document.createRange();
+    r.setStart(firstNew, 0);
+    r.setEnd(lastNew, lastNew.childNodes.length);
+    sel.removeAllRanges();
+    sel.addRange(r);
+    _savedSel = r.cloneRange();
+  }
+  saveNotes();
+}
+
+// Alignment — directly set style.textAlign on the block, no execCommand
+function execAlign(align) {
+  const ed = getEd();
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+  const val = (align === 'left') ? '' : align;
+
+  const startB = getTopBlock(range.startContainer);
+  const endB   = getTopBlock(range.endContainer);
+  const blocks = new Set();
+  if (startB) blocks.add(startB);
+  if (endB)   blocks.add(endB);
+  if (startB && endB && startB !== endB) {
+    let sib = startB.nextSibling;
+    while (sib && sib !== endB) { if (sib.nodeType === 1) blocks.add(sib); sib = sib.nextSibling; }
+  }
+
+  blocks.forEach(block => {
+    if (!block) return;
+    block.style.textAlign = val;
+    if (block.nodeName === 'UL' || block.nodeName === 'OL') {
+      block.querySelectorAll('li').forEach(li => li.style.textAlign = val);
+    }
+  });
+  saveNotes();
+}
+
+// Save/restore selection for toolbar controls that steal focus (e.g. <select>)
+let _savedSel = null;
+function saveRichSel() {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) _savedSel = sel.getRangeAt(0).cloneRange();
+  return _savedSel;
+}
+function restoreRichSel() {
+  if (!_savedSel) return false;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(_savedSel);
+  return true;
+}
+
+// Font size — saves/restores selection so the <select> focus-steal doesn't matter
+function execSize(px) {
+  if (!px) return;
+  // Restore the selection we saved when the select was focused
+  restoreRichSel();
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  const range = sel.getRangeAt(0);
+
+  if (range.collapsed) {
+    // Nothing selected — just update the block's font-size so new typing uses it.
+    // Find the current top-level block and set its font-size.
+    const ed = getEd();
+    let block = range.startContainer;
+    if (block.nodeType === 3) block = block.parentNode;
+    while (block && block.parentNode !== ed) block = block.parentNode;
+    if (block && block !== ed) block.style.fontSize = px;
+    // Also set on a zero-width span so inline content inherits it without adding a newline
+    const span = document.createElement('span');
+    span.style.setProperty('font-size', px, 'important');
+    // empty span - just move cursor after it so typing picks up the size
+    range.insertNode(span);
+    const r = document.createRange();
+    r.setStartAfter(span);
+    r.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(r);
+    saveNotes();
+    return;
+  }
+
+  const frag = range.extractContents();
+  // Strip nested font-size spans (unwrap them, keep their children)
+  Array.from(frag.querySelectorAll('span')).reverse().forEach(sp => {
+    if (sp.style.fontSize) {
+      sp.style.removeProperty('font-size');
+      const remainingStyle = (sp.getAttribute('style') || '').trim();
+      if (!remainingStyle) {
+        const p = sp.parentNode;
+        if (p) { while (sp.firstChild) p.insertBefore(sp.firstChild, sp); p.removeChild(sp); }
+      }
+    }
+  });
+
+  const span = document.createElement('span');
+  span.style.setProperty('font-size', px, 'important');
+  span.appendChild(frag);
+  range.insertNode(span);
+
+  // Clean up any leftover empty spans in the editor (ghost spaces)
+  getEd().querySelectorAll('span:empty').forEach(s => s.remove());
+
+  const nr = document.createRange();
+  nr.selectNodeContents(span);
+  sel.removeAllRanges(); sel.addRange(nr);
+  saveNotes();
+}
+
 
 function loadProject(id) {
   const projects = getProjects();
@@ -1648,9 +2169,6 @@ function saveNotes() {
 }
 
 document.getElementById('rich-editor').addEventListener('input', saveNotes);
-document.getElementById('rich-editor').addEventListener('mouseup', saveEditorSel);
-document.getElementById('rich-editor').addEventListener('keyup', saveEditorSel);
-document.getElementById('rich-editor').addEventListener('select', saveEditorSel);
 
 function renderTasks(p) {
   const list = document.getElementById('task-list');
@@ -2962,6 +3480,717 @@ async function musicHandleArt(files){
 
 })();
 
+
+// ════════════════════════════════════════════════════════════
+//  MATH GRADES — curriculum data + hub/learn/practice logic
+// ════════════════════════════════════════════════════════════
+(function(){
+
+const GRADES = [
+  {
+    id:'g3', emoji:'3️⃣', label:'3rd Grade',
+    sub:'Multiplication, division, fractions intro',
+    topics:[
+      {
+        id:'multiplication', name:'Multiplication', sub:'Times tables & arrays',
+        learn:[
+          { heading:'What is Multiplication?', body:'Multiplication is repeated addition. Instead of adding the same number over and over, you multiply. <strong>3 × 4</strong> means "3 groups of 4" = 4 + 4 + 4 = <strong>12</strong>.' },
+          { heading:'The Times Table', body:'Knowing your times tables (1–12) by heart is the foundation of all higher math. Drill them daily until they feel automatic.' },
+          { heading:'Properties', body:'<strong>Commutative:</strong> 3 × 4 = 4 × 3<br><strong>Associative:</strong> (2 × 3) × 4 = 2 × (3 × 4)<br><strong>Zero property:</strong> anything × 0 = 0<br><strong>Identity:</strong> anything × 1 = itself' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>×9 trick:</strong> hold up 10 fingers. Fold the Nth finger. Digits on each side = the answer (e.g., 9×3: fold finger 3 → 2 fingers left, 7 right = 27).<br>• <strong>×5 trick:</strong> multiply by 10 then halve it.<br>• <strong>×4 trick:</strong> double, then double again.' },
+          { heading:'Examples', examples:[['3 × 7','21'],['6 × 8','48'],['9 × 6','54'],['7 × 7','49'],['12 × 11','132']] }
+        ],
+        questions:[
+          { q:'What is 6 × 7?', a:'42', choices:['36','42','48','54'], explain:'6 × 7 = 42. Think: 6 × 6 = 36, plus one more 6 = 42.' },
+          { q:'What is 8 × 9?', a:'72', choices:['63','64','72','81'], explain:'8 × 9 = 72. Trick: 9 × 8 — fold finger 8 on the 9s trick → 7 fingers, 2 fingers = 72.' },
+          { q:'What property says 4 × 5 = 5 × 4?', a:'Commutative', choices:['Associative','Commutative','Identity','Zero'], explain:'The Commutative Property says you can swap the order of multiplication and get the same answer.' },
+          { q:'What is 9 × 0?', a:'0', choices:['0','9','18','90'], explain:'Zero Property: anything multiplied by 0 equals 0.' },
+          { q:'What is 7 × 7?', a:'49', choices:['42','47','49','56'], explain:'7 × 7 = 49. This one just needs memorizing — it\'s one of the trickier squares!' },
+          { q:'Which equals 3 × 12?', a:'36', choices:['30','33','36','39'], explain:'3 × 12 = 36. Think: 3 × 10 = 30, plus 3 × 2 = 6, so 36.' },
+          { q:'What is 11 × 6?', a:'66', choices:['56','60','66','67'], explain:'11 × 6 = 66. Trick: 11 × any single digit = that digit twice (11×6 = 66, 11×7 = 77...).' },
+          { q:'What is 4 × 8?', a:'32', choices:['24','28','32','36'], explain:'4 × 8 = 32. Use the ×4 trick: 8 × 2 = 16, then 16 × 2 = 32.' },
+        ]
+      },
+      {
+        id:'division', name:'Division', sub:'Sharing equally & remainders',
+        learn:[
+          { heading:'What is Division?', body:'Division splits a number into equal groups. <strong>12 ÷ 4 = 3</strong> means "12 split into 4 groups gives 3 in each group." It\'s the inverse of multiplication.' },
+          { heading:'Key Terms', body:'<strong>Dividend</strong> ÷ <strong>Divisor</strong> = <strong>Quotient</strong><br>Example: 15 ÷ 3 = 5 → 15 is the dividend, 3 is the divisor, 5 is the quotient.' },
+          { heading:'Remainders', body:'Sometimes a number doesn\'t divide evenly. The leftover is called the <strong>remainder</strong>. Example: 13 ÷ 4 = 3 remainder 1 (written 3 R1).' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• Division and multiplication are inverses — use multiplication facts to check: if 4 × 3 = 12, then 12 ÷ 4 = 3.<br>• To check your answer: <strong>quotient × divisor + remainder = dividend</strong>.' },
+          { heading:'Examples', examples:[['20 ÷ 4','5'],['35 ÷ 7','5'],['48 ÷ 6','8'],['17 ÷ 5','3 R2'],['63 ÷ 9','7']] }
+        ],
+        questions:[
+          { q:'What is 56 ÷ 8?', a:'7', choices:['6','7','8','9'], explain:'56 ÷ 8 = 7. Think: 8 × 7 = 56.' },
+          { q:'What is 45 ÷ 9?', a:'5', choices:['4','5','6','7'], explain:'45 ÷ 9 = 5. Think: 9 × 5 = 45.' },
+          { q:'What is the remainder of 17 ÷ 5?', a:'2', choices:['0','1','2','3'], explain:'17 ÷ 5 = 3 remainder 2. Check: 5 × 3 = 15, 17 − 15 = 2.' },
+          { q:'What term describes the answer in a division problem?', a:'Quotient', choices:['Dividend','Divisor','Quotient','Remainder'], explain:'The result of division is called the quotient.' },
+          { q:'72 ÷ 8 = ?', a:'9', choices:['7','8','9','10'], explain:'72 ÷ 8 = 9. Think: 8 × 9 = 72.' },
+          { q:'What is 0 ÷ 6?', a:'0', choices:['0','1','6','undefined'], explain:'Zero divided by any non-zero number is always 0.' },
+          { q:'Which multiplication fact helps solve 42 ÷ 6?', a:'6 × 7 = 42', choices:['6 × 6 = 36','6 × 7 = 42','6 × 8 = 48','7 × 7 = 49'], explain:'42 ÷ 6 = 7 because 6 × 7 = 42.' },
+        ]
+      },
+      {
+        id:'fractions_intro', name:'Fractions (Intro)', sub:'Halves, thirds, equal parts',
+        learn:[
+          { heading:'What is a Fraction?', body:'A fraction represents part of a whole. Written as <strong>numerator / denominator</strong>. The denominator tells how many equal parts the whole is cut into. The numerator tells how many parts you have.' },
+          { heading:'Reading Fractions', body:'1/2 = "one half" &nbsp;|&nbsp; 3/4 = "three fourths" &nbsp;|&nbsp; 2/3 = "two thirds"<br>If numerator = denominator (4/4), you have the whole thing = 1.' },
+          { heading:'Equivalent Fractions', body:'Different fractions can represent the same amount: 1/2 = 2/4 = 3/6. Multiply or divide both numerator and denominator by the same number.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• Picture a pizza: 1/4 means the pizza is cut into 4 slices and you have 1.<br>• To check if two fractions are equal, cross-multiply: 1/2 vs 2/4 → 1×4 = 4, 2×2 = 4 ✓' },
+          { heading:'Examples', examples:[['Is 2/4 = 1/2?','Yes (×2)'],['Is 3/6 = 1/2?','Yes (×3)'],['Which is bigger: 3/4 or 2/4?','3/4'],['Shade 3/8 of a bar','3 of 8 parts']] }
+        ],
+        questions:[
+          { q:'What does the denominator tell you?', a:'How many equal parts the whole is divided into', choices:['How many parts you have','How many equal parts the whole is divided into','The value of each part','Whether the fraction is proper'], explain:'The denominator (bottom number) tells you the total number of equal parts.' },
+          { q:'Which fraction is equivalent to 1/2?', a:'3/6', choices:['1/3','2/6? No... 3/6','3/6','4/8 only'], explain:'3/6 = 1/2 because 3÷3=1 and 6÷3=2.' },
+          { q:'Which is larger: 3/4 or 2/4?', a:'3/4', choices:['2/4','3/4','They are equal','Cannot compare'], explain:'When denominators are the same, larger numerator = larger fraction. 3 > 2, so 3/4 > 2/4.' },
+          { q:'What is 2/2 equal to?', a:'1', choices:['0','1/2','1','2'], explain:'When numerator equals denominator, the fraction equals 1 (a whole).' },
+          { q:'If a pizza is cut into 8 slices and you eat 3, what fraction did you eat?', a:'3/8', choices:['3/5','3/8','5/8','8/3'], explain:'3 parts out of 8 total = 3/8.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'g4', emoji:'4️⃣', label:'4th Grade',
+    sub:'Multi-digit ops, decimals, angles',
+    topics:[
+      {
+        id:'multidigit_mult', name:'Multi-Digit Multiplication', sub:'Standard algorithm & area model',
+        learn:[
+          { heading:'Multiplying Larger Numbers', body:'When multiplying numbers larger than 12, we use the <strong>standard algorithm</strong>: multiply digit by digit, carrying when needed, then add the partial products.' },
+          { heading:'The Area Model', body:'Draw a rectangle split into parts. For 23 × 14: split into (20+3) × (10+4). Calculate each section: 20×10=200, 20×4=80, 3×10=30, 3×4=12. Add: 200+80+30+12 = 322.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Multiply by 10:</strong> just add a zero to the end.<br>• <strong>Multiply by 100:</strong> add two zeros.<br>• Break big numbers into friendly parts using the distributive property: 7 × 98 = 7×100 − 7×2 = 700 − 14 = 686.' },
+          { heading:'Examples', examples:[['24 × 3','72'],['45 × 6','270'],['23 × 14','322'],['7 × 98','686']] }
+        ],
+        questions:[
+          { q:'What is 24 × 6?', a:'144', choices:['124','140','144','148'], explain:'24 × 6: 20×6=120, 4×6=24, 120+24=144.' },
+          { q:'What is 35 × 4?', a:'140', choices:['120','130','140','150'], explain:'35 × 4: 30×4=120, 5×4=20, 120+20=140.' },
+          { q:'Using the area model: 12 × 13 = ?', a:'156', choices:['125','143','156','169'], explain:'(10+2)×(10+3) = 100+30+20+6 = 156.' },
+          { q:'What shortcut multiplies 46 × 100?', a:'Add two zeros → 4600', choices:['Multiply by 2 first','Add two zeros → 4600','Move decimal left','Divide by 10'], explain:'Multiplying by 100 appends two zeros: 46 × 100 = 4600.' },
+          { q:'7 × 99 = ? (use the trick)', a:'693', choices:['679','686','693','700'], explain:'7 × 99 = 7×100 − 7×1 = 700 − 7 = 693.' },
+          { q:'What is 13 × 11?', a:'143', choices:['123','133','143','153'], explain:'11×13: 11×10=110, 11×3=33, 110+33=143.' },
+        ]
+      },
+      {
+        id:'decimals', name:'Decimals', sub:'Tenths, hundredths, comparing',
+        learn:[
+          { heading:'What are Decimals?', body:'Decimals extend our number system past whole numbers. The decimal point separates the whole part from the fractional part. <strong>3.47</strong> = 3 ones + 4 tenths + 7 hundredths.' },
+          { heading:'Place Values', body:'Hundreds | Tens | Ones . Tenths | Hundredths | Thousandths<br>Example: 5.62 → 5 ones, 6 tenths, 2 hundredths.' },
+          { heading:'Comparing Decimals', body:'Line up the decimal points, then compare digit by digit from left to right. 3.7 > 3.48 because 7 tenths > 4 tenths.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• Adding trailing zeros doesn\'t change value: 3.5 = 3.50 = 3.500<br>• To compare, pad with zeros so both have the same decimal places, then compare as whole numbers.<br>• 0.1 = 1/10, 0.01 = 1/100, 0.001 = 1/1000' },
+          { heading:'Examples', examples:[['0.5 + 0.3','0.8'],['Is 0.7 > 0.65?','Yes (0.70 > 0.65)'],['2.3 − 1.1','1.2'],['0.25 = ?','25/100 = 1/4']] }
+        ],
+        questions:[
+          { q:'What place is the 4 in 5.47?', a:'Tenths', choices:['Ones','Tenths','Hundredths','Tens'], explain:'The first digit after the decimal point is in the tenths place.' },
+          { q:'Which is larger: 0.6 or 0.58?', a:'0.6', choices:['0.58','0.6','They are equal','Cannot compare'], explain:'0.6 = 0.60. Compare 60 vs 58 — 60 > 58, so 0.6 > 0.58.' },
+          { q:'0.3 + 0.4 = ?', a:'0.7', choices:['0.07','0.7','7','70'], explain:'3 tenths + 4 tenths = 7 tenths = 0.7.' },
+          { q:'What is 0.25 as a fraction?', a:'1/4', choices:['1/5','1/4','1/2','2/5'], explain:'0.25 = 25/100 = 1/4.' },
+          { q:'1.5 − 0.7 = ?', a:'0.8', choices:['0.7','0.8','0.9','1.2'], explain:'15 tenths − 7 tenths = 8 tenths = 0.8.' },
+        ]
+      },
+      {
+        id:'angles', name:'Angles & Geometry', sub:'Types of angles, measuring degrees',
+        learn:[
+          { heading:'What is an Angle?', body:'An angle is formed when two rays share an endpoint (called the vertex). Angles are measured in <strong>degrees (°)</strong>. A full rotation = 360°.' },
+          { heading:'Types of Angles', body:'<strong>Acute:</strong> less than 90° | <strong>Right:</strong> exactly 90° | <strong>Obtuse:</strong> 90°–180° | <strong>Straight:</strong> exactly 180° | <strong>Reflex:</strong> 180°–360°' },
+          { heading:'Complementary & Supplementary', body:'<strong>Complementary angles</strong> add up to 90°. <strong>Supplementary angles</strong> add up to 180°.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>C</strong>omplementary = <strong>C</strong>orner (90°), <strong>S</strong>upplementary = <strong>S</strong>traight (180°).<br>• A right angle looks like the corner of a piece of paper.<br>• To find a missing complementary angle: 90 − known angle.' },
+          { heading:'Examples', examples:[['Complement of 30°','60°'],['Supplement of 110°','70°'],['Is 85° acute or obtuse?','Acute'],['Two right angles together','180° (straight)']] }
+        ],
+        questions:[
+          { q:'An angle of 130° is classified as:', a:'Obtuse', choices:['Acute','Right','Obtuse','Straight'], explain:'130° is between 90° and 180°, so it\'s obtuse.' },
+          { q:'What is the complement of 55°?', a:'35°', choices:['25°','35°','45°','125°'], explain:'Complementary angles add to 90°. 90 − 55 = 35°.' },
+          { q:'What is the supplement of 70°?', a:'110°', choices:['20°','90°','110°','180°'], explain:'Supplementary angles add to 180°. 180 − 70 = 110°.' },
+          { q:'How many degrees is a right angle?', a:'90°', choices:['45°','90°','180°','360°'], explain:'A right angle is exactly 90°.' },
+          { q:'An acute angle is:', a:'Less than 90°', choices:['Exactly 90°','Less than 90°','Between 90° and 180°','More than 180°'], explain:'Acute means sharp/small — less than 90°.' },
+          { q:'Two angles that add to 180° are called:', a:'Supplementary', choices:['Complementary','Vertical','Supplementary','Adjacent'], explain:'Supplementary angles sum to 180°. Remember: Straight line = 180°.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'g5', emoji:'5️⃣', label:'5th Grade',
+    sub:'Fractions ops, volume, coordinate plane',
+    topics:[
+      {
+        id:'frac_ops', name:'Fraction Operations', sub:'Adding, subtracting, multiplying fractions',
+        learn:[
+          { heading:'Adding & Subtracting Fractions', body:'To add or subtract fractions, the denominators must be the <strong>same (common denominator)</strong>. Find the LCD, convert, then add/subtract the numerators.' },
+          { heading:'Finding the LCD', body:'LCD = Least Common Denominator = smallest number both denominators divide into evenly.<br>1/3 + 1/4: LCD=12. → 4/12 + 3/12 = 7/12.' },
+          { heading:'Multiplying Fractions', body:'Multiply numerators together and denominators together. No common denominator needed! 2/3 × 3/5 = 6/15 = 2/5.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Simplify before multiplying</strong> (cross-cancel) to keep numbers small.<br>• Mixed numbers: convert to improper fractions first (2½ → 5/2).<br>• "Keep, Change, Flip" for dividing fractions: ÷ 2/3 → × 3/2.' },
+          { heading:'Examples', examples:[['1/4 + 1/4','2/4 = 1/2'],['1/2 + 1/3','3/6 + 2/6 = 5/6'],['2/3 × 3/4','6/12 = 1/2'],['3/4 ÷ 1/2','3/4 × 2/1 = 6/4 = 3/2']] }
+        ],
+        questions:[
+          { q:'1/3 + 1/6 = ?', a:'1/2', choices:['2/9','1/2','2/6','3/9'], explain:'LCD = 6. 2/6 + 1/6 = 3/6 = 1/2.' },
+          { q:'3/4 − 1/4 = ?', a:'1/2', choices:['1/4','1/2','2/4','3/8'], explain:'Same denominator: 3/4 − 1/4 = 2/4 = 1/2.' },
+          { q:'2/3 × 3/4 = ?', a:'1/2', choices:['5/7','6/12','1/2','2/3'], explain:'2×3=6, 3×4=12, so 6/12 = 1/2.' },
+          { q:'What is "Keep, Change, Flip" used for?', a:'Dividing fractions', choices:['Adding fractions','Multiplying fractions','Dividing fractions','Finding LCD'], explain:'KCF: keep the first fraction, change ÷ to ×, flip the second fraction.' },
+          { q:'What is 1/2 ÷ 1/4?', a:'2', choices:['1/8','1/2','2','4'], explain:'1/2 ÷ 1/4 = 1/2 × 4/1 = 4/2 = 2.' },
+          { q:'What is the LCD of 1/4 and 1/6?', a:'12', choices:['8','10','12','24'], explain:'Multiples of 4: 4,8,12. Multiples of 6: 6,12. Smallest common = 12.' },
+        ]
+      },
+      {
+        id:'coordinate_plane', name:'Coordinate Plane', sub:'Plotting points, quadrants, distance',
+        learn:[
+          { heading:'The Coordinate Plane', body:'A coordinate plane has two number lines crossing at the <strong>origin (0,0)</strong>. The horizontal line is the <strong>x-axis</strong>; the vertical is the <strong>y-axis</strong>.' },
+          { heading:'Plotting Points', body:'A point is written as (x, y). Move x units horizontally first, then y units vertically. Think: "walk, then climb."' },
+          { heading:'The Four Quadrants', body:'Q I: (+,+) | Q II: (−,+) | Q III: (−,−) | Q IV: (+,−)<br>They go counterclockwise starting from the top-right.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>X comes before Y</strong> — just like the alphabet. Move right/left first, then up/down.<br>• Remember quadrants with: <strong>All Students Take Calculus</strong> (which trig ratios are positive in each quadrant — useful later!).<br>• Distance on a horizontal/vertical line = |difference of coordinates|.' },
+          { heading:'Examples', examples:[['Plot (3, 2)','Right 3, Up 2'],['Plot (−2, 4)','Left 2, Up 4'],['Q of (5, −3)?','Q IV'],['Q of (−1, −1)?','Q III']] }
+        ],
+        questions:[
+          { q:'Which axis is horizontal?', a:'x-axis', choices:['y-axis','x-axis','z-axis','origin'], explain:'The x-axis is the horizontal (left-right) axis.' },
+          { q:'Point (−3, 5) is in which quadrant?', a:'Quadrant II', choices:['Quadrant I','Quadrant II','Quadrant III','Quadrant IV'], explain:'Negative x, positive y = Quadrant II (top-left).' },
+          { q:'Where do the axes meet?', a:'The origin (0,0)', choices:['(1,1)','The x-intercept','The origin (0,0)','A vertex'], explain:'The axes intersect at the origin, which is the point (0, 0).' },
+          { q:'To plot a point, you move __ first, then __', a:'horizontally, then vertically', choices:['vertically, then horizontally','horizontally, then vertically','diagonally','it depends'], explain:'Always go x (horizontal) first, then y (vertical). "Walk, then climb."' },
+          { q:'What quadrant is (4, −2) in?', a:'Quadrant IV', choices:['Quadrant I','Quadrant II','Quadrant III','Quadrant IV'], explain:'Positive x, negative y = Quadrant IV (bottom-right).' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'g6', emoji:'6️⃣', label:'6th Grade',
+    sub:'Ratios, percents, negative numbers',
+    topics:[
+      {
+        id:'ratios', name:'Ratios & Proportions', sub:'Part-to-part, unit rates, scaling',
+        learn:[
+          { heading:'What is a Ratio?', body:'A ratio compares two quantities. Can be written as 3:4, 3/4, or "3 to 4." Ratios can compare part-to-part or part-to-whole.' },
+          { heading:'Proportions', body:'A proportion states two ratios are equal: 3/4 = 6/8. To solve for an unknown, <strong>cross-multiply</strong>: 3×8 = 4×6 → 24 = 24 ✓' },
+          { heading:'Unit Rates', body:'A unit rate compares to 1. "60 miles per hour" = 60 miles per 1 hour. Divide both sides by the denominator to find the unit rate.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Cross-multiply to solve proportions:</strong> a/b = c/d → ad = bc.<br>• To find a unit rate: divide the top number by the bottom number.<br>• Scale factor: if one ratio is k times another, multiply/divide all quantities by k.' },
+          { heading:'Examples', examples:[['Unit rate: 150 miles in 3 hours','50 mph'],['Is 2/3 = 8/12?','Yes (×4)'],['Find x: 5/8 = x/24','x = 15'],['Scale: recipe ×3','multiply every ingredient by 3']] }
+        ],
+        questions:[
+          { q:'Find x: 3/4 = x/12', a:'9', choices:['6','8','9','10'], explain:'Cross-multiply: 3×12 = 4×x → 36 = 4x → x = 9.' },
+          { q:'A car travels 180 miles in 3 hours. What is the unit rate?', a:'60 mph', choices:['40 mph','55 mph','60 mph','540 mph'], explain:'180 ÷ 3 = 60 miles per hour.' },
+          { q:'Are 2/5 and 6/15 proportional?', a:'Yes', choices:['Yes','No','Cannot determine','Only if x > 0'], explain:'2/5 × 3/3 = 6/15. Yes, they are proportional.' },
+          { q:'A recipe needs 2 cups of sugar for 24 cookies. How much for 60 cookies?', a:'5 cups', choices:['3 cups','4 cups','5 cups','6 cups'], explain:'24 cookies → 2 cups. 60 ÷ 24 = 2.5. 2 × 2.5 = 5 cups.' },
+          { q:'Which represents a unit rate?', a:'$4.50 per pound', choices:['6:8 ratio','$9 for 2 pounds','$4.50 per pound','2/3 of the class'], explain:'A unit rate always compares to 1 — "per pound" means per 1 pound.' },
+        ]
+      },
+      {
+        id:'percents', name:'Percents', sub:'Converting, finding percent of a number',
+        learn:[
+          { heading:'What is a Percent?', body:'Percent means "per hundred." 45% = 45/100 = 0.45. Percents describe parts of a whole.' },
+          { heading:'Converting', body:'• Percent → decimal: divide by 100 (move decimal left 2) → 75% = 0.75<br>• Decimal → percent: multiply by 100 (move decimal right 2) → 0.3 = 30%<br>• Fraction → percent: divide numerator ÷ denominator, then × 100' },
+          { heading:'Finding Percent of a Number', body:'Multiply the number by the decimal form: 30% of 80 = 0.30 × 80 = 24.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>10% trick:</strong> move decimal left one place. 10% of 340 = 34.<br>• <strong>50% = half, 25% = quarter.</strong><br>• For 15% tip: find 10%, halve it (5%), add them.<br>• Percent change = (new − old) / old × 100.' },
+          { heading:'Examples', examples:[['25% of 80','20'],['30% of 150','45'],['What % is 18 of 72?','25%'],['0.6 as a percent','60%']] }
+        ],
+        questions:[
+          { q:'What is 25% of 120?', a:'30', choices:['25','30','35','40'], explain:'25% = 0.25. 0.25 × 120 = 30.' },
+          { q:'What is 0.85 as a percent?', a:'85%', choices:['0.85%','8.5%','85%','850%'], explain:'Multiply by 100: 0.85 × 100 = 85%.' },
+          { q:'What is 10% of 470?', a:'47', choices:['4.7','47','470','4700'], explain:'10% trick: move decimal left one place → 47.' },
+          { q:'What percent is 15 out of 60?', a:'25%', choices:['15%','20%','25%','40%'], explain:'15/60 = 0.25 = 25%.' },
+          { q:'A $80 jacket is 20% off. What is the discount?', a:'$16', choices:['$8','$12','$16','$20'], explain:'20% of 80 = 0.20 × 80 = $16.' },
+          { q:'Which is equivalent to 3/4?', a:'75%', choices:['34%','57%','75%','80%'], explain:'3 ÷ 4 = 0.75 = 75%.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'g7', emoji:'7️⃣', label:'7th Grade',
+    sub:'Algebra intro, integers, proportionality',
+    topics:[
+      {
+        id:'linear_equations', name:'Linear Equations', sub:'Solving for x, one and two-step',
+        learn:[
+          { heading:'What is an Equation?', body:'An equation says two expressions are equal. To <strong>solve</strong> means to find the value of the unknown (usually x) that makes it true.' },
+          { heading:'One-Step Equations', body:'Apply the inverse operation to both sides. If x + 5 = 12, subtract 5 from both sides → x = 7. Always do the same thing to both sides.' },
+          { heading:'Two-Step Equations', body:'Work backwards from order of operations (PEMDAS in reverse). For 3x + 4 = 19: first subtract 4 (→ 3x = 15), then divide by 3 (→ x = 5).' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Check your answer</strong> by plugging x back in.<br>• Think of an equation like a balanced scale — whatever you do to one side, do to the other.<br>• Variables on both sides? Collect them on one side first: 5x − 3 = 2x + 9 → 3x = 12 → x = 4.' },
+          { heading:'Examples', examples:[['x + 7 = 15','x = 8'],['3x = 21','x = 7'],['2x + 5 = 13','x = 4'],['5x − 3 = 2x + 9','x = 4']] }
+        ],
+        questions:[
+          { q:'Solve: x + 9 = 20', a:'x = 11', choices:['x = 9','x = 10','x = 11','x = 29'], explain:'Subtract 9 from both sides: x = 20 − 9 = 11.' },
+          { q:'Solve: 4x = 36', a:'x = 9', choices:['x = 4','x = 9','x = 32','x = 144'], explain:'Divide both sides by 4: x = 36 ÷ 4 = 9.' },
+          { q:'Solve: 2x + 3 = 11', a:'x = 4', choices:['x = 4','x = 5','x = 7','x = 8'], explain:'Step 1: subtract 3 → 2x = 8. Step 2: divide by 2 → x = 4.' },
+          { q:'Solve: 5x − 2 = 18', a:'x = 4', choices:['x = 3','x = 4','x = 5','x = 16'], explain:'5x = 18 + 2 = 20. x = 20 ÷ 5 = 4.' },
+          { q:'If 3x + 6 = 2x + 10, what is x?', a:'4', choices:['2','4','6','10'], explain:'Subtract 2x: x + 6 = 10. Subtract 6: x = 4.' },
+          { q:'What is the first step to solve 2x + 7 = 15?', a:'Subtract 7 from both sides', choices:['Multiply both sides by 2','Add 7 to both sides','Subtract 7 from both sides','Divide both sides by 2'], explain:'Work backwards: undo the +7 first by subtracting 7.' },
+        ]
+      },
+      {
+        id:'integers', name:'Integers & Negative Numbers', sub:'Adding, subtracting, multiplying negatives',
+        learn:[
+          { heading:'Integers', body:'Integers are whole numbers including negatives: …−3, −2, −1, 0, 1, 2, 3… The <strong>absolute value</strong> |n| is the distance from zero (always positive).' },
+          { heading:'Adding & Subtracting Negatives', body:'Adding a negative = subtracting. Subtracting a negative = adding.<br>5 + (−3) = 5 − 3 = 2<br>5 − (−3) = 5 + 3 = 8' },
+          { heading:'Multiplying & Dividing', body:'<strong>Same signs → positive.</strong> <strong>Different signs → negative.</strong><br>(−4) × (−3) = +12 | (−4) × 3 = −12' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• Think of a number line: positive = right, negative = left.<br>• <strong>"Two negatives make a positive"</strong> — only for multiplication/division, not addition!<br>• Subtracting = adding the opposite: a − b = a + (−b).' },
+          { heading:'Examples', examples:[['−8 + 3','−5'],['−5 − (−2)','−3'],['(−6) × (−4)','24'],['(−20) ÷ 4','−5']] }
+        ],
+        questions:[
+          { q:'What is −7 + 4?', a:'−3', choices:['−11','−3','3','11'], explain:'Start at −7, move right 4 → −3.' },
+          { q:'What is −5 − (−9)?', a:'4', choices:['−14','−4','4','14'], explain:'Subtracting a negative = adding: −5 + 9 = 4.' },
+          { q:'What is (−6) × (−3)?', a:'18', choices:['−18','−9','9','18'], explain:'Same signs → positive. 6 × 3 = 18.' },
+          { q:'What is (−24) ÷ 6?', a:'−4', choices:['−4','−18','4','18'], explain:'Different signs → negative. 24 ÷ 6 = 4, so −4.' },
+          { q:'What is |−15|?', a:'15', choices:['−15','0','1/15','15'], explain:'Absolute value is always the positive distance from zero.' },
+          { q:'What is −3 + (−8)?', a:'−11', choices:['−11','−5','5','11'], explain:'Adding two negatives: move further left → −3 − 8 = −11.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'g8', emoji:'8️⃣', label:'8th Grade',
+    sub:'Systems of equations, Pythagorean theorem, functions',
+    topics:[
+      {
+        id:'pythagorean', name:'Pythagorean Theorem', sub:'a² + b² = c², distance formula',
+        learn:[
+          { heading:'The Theorem', body:'In a <strong>right triangle</strong>, the square of the hypotenuse (longest side, opposite the right angle) equals the sum of the squares of the other two sides: <strong>a² + b² = c²</strong>.' },
+          { heading:'Finding Missing Sides', body:'If a=3, b=4: c² = 9 + 16 = 25, so c = 5. (3-4-5 is a Pythagorean triple!)<br>To find a leg: a² = c² − b².' },
+          { heading:'Common Triples', body:'3-4-5 | 5-12-13 | 8-15-17 | 7-24-25. Multiples also work: 6-8-10, 9-12-15.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• The hypotenuse is <strong>always</strong> c — the side opposite the right angle.<br>• Memorize 3-4-5 and 5-12-13; they show up constantly.<br>• Distance formula between points is just the Pythagorean theorem: d = √[(x₂−x₁)² + (y₂−y₁)²].' },
+          { heading:'Examples', examples:[['a=6, b=8, c=?','c=10'],['a=5, c=13, b=?','b=12'],['Hyp of 45-45-90 with legs=1','√2 ≈ 1.414'],['Distance (0,0)→(3,4)','5']] }
+        ],
+        questions:[
+          { q:'If a = 3 and b = 4, what is c?', a:'5', choices:['4','5','7','12'], explain:'c² = 3² + 4² = 9 + 16 = 25. c = √25 = 5.' },
+          { q:'If a = 5 and c = 13, what is b?', a:'12', choices:['8','10','12','18'], explain:'b² = 13² − 5² = 169 − 25 = 144. b = 12.' },
+          { q:'Which set is a Pythagorean triple?', a:'5, 12, 13', choices:['3, 5, 7','4, 6, 8','5, 12, 13','6, 9, 12'], explain:'5² + 12² = 25 + 144 = 169 = 13². Only this set satisfies a² + b² = c².' },
+          { q:'What is the hypotenuse always opposite?', a:'The right angle', choices:['The smallest angle','The largest leg','The right angle','The obtuse angle'], explain:'By definition, the hypotenuse is across from the 90° angle.' },
+          { q:'What is the distance from (0,0) to (6,8)?', a:'10', choices:['7','9','10','14'], explain:'d = √(6² + 8²) = √(36+64) = √100 = 10.' },
+          { q:'A ladder 10 ft long leans against a wall. The base is 6 ft from the wall. How high does it reach?', a:'8 ft', choices:['6 ft','7 ft','8 ft','9 ft'], explain:'b² = 10² − 6² = 100 − 36 = 64. b = 8 ft.' },
+        ]
+      },
+      {
+        id:'functions', name:'Functions', sub:'Definition, input/output, linear functions',
+        learn:[
+          { heading:'What is a Function?', body:'A function is a rule that assigns <strong>exactly one output</strong> to each input. Input = x (domain), Output = y or f(x) (range). Written as f(x) = expression.' },
+          { heading:'Vertical Line Test', body:'A graph represents a function if any vertical line crosses it at most once. If a vertical line hits two points, it\'s NOT a function.' },
+          { heading:'Linear Functions', body:'f(x) = mx + b is a linear function. m = slope (rate of change), b = y-intercept (where it crosses the y-axis). The graph is always a straight line.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• f(3) means "evaluate the function when x = 3" — just plug in 3.<br>• Slope = rise/run = Δy/Δx = (y₂−y₁)/(x₂−x₁).<br>• Positive slope → line goes up left-to-right. Negative → goes down.' },
+          { heading:'Examples', examples:[['f(x)=2x+1, f(3)','7'],['Slope of (0,1)→(2,5)','(5−1)/(2−0) = 2'],['Is x²+y²=25 a function?','No (fails VLT)'],['y-intercept of y=3x−4','(0,−4)']] }
+        ],
+        questions:[
+          { q:'If f(x) = 3x − 2, what is f(4)?', a:'10', choices:['10','12','14','16'], explain:'f(4) = 3(4) − 2 = 12 − 2 = 10.' },
+          { q:'What is the slope of the line through (1,3) and (4,9)?', a:'2', choices:['1','2','3','6'], explain:'slope = (9−3)/(4−1) = 6/3 = 2.' },
+          { q:'Which best describes a function?', a:'Each input has exactly one output', choices:['Each output has exactly one input','Each input has exactly one output','Inputs and outputs are always equal','The graph is always a line'], explain:'A function maps each input to exactly one output. Multiple inputs can share an output, but not vice versa.' },
+          { q:'What does the y-intercept of f(x) = 5x + 3 equal?', a:'3', choices:['0','3','5','8'], explain:'The y-intercept is b in f(x) = mx + b. Here b = 3.' },
+          { q:'A graph with a vertical line touching it at two points is:', a:'Not a function', choices:['A function','A linear function','Not a function','A quadratic'], explain:'The Vertical Line Test: if a vertical line touches more than one point, it fails and is not a function.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'alg1', emoji:'📐', label:'Algebra I',
+    sub:'Quadratics, factoring, inequalities',
+    topics:[
+      {
+        id:'factoring', name:'Factoring', sub:'GCF, trinomials, difference of squares',
+        learn:[
+          { heading:'Why Factor?', body:'Factoring rewrites an expression as a product. It\'s used to solve equations, simplify fractions, and find zeros. It\'s the reverse of expanding (FOIL).' },
+          { heading:'GCF (Greatest Common Factor)', body:'Always factor out the GCF first. For 6x² + 9x: GCF = 3x → 3x(2x + 3).' },
+          { heading:'Factoring Trinomials (x² + bx + c)', body:'Find two numbers that multiply to c and add to b. x² + 5x + 6: need × =6, + =5 → 2 and 3 → (x+2)(x+3).' },
+          { heading:'Difference of Squares', body:'a² − b² = (a + b)(a − b). Only works when both terms are perfect squares and there\'s a minus sign. x² − 9 = (x+3)(x−3).' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Always check for GCF first.</strong><br>• Check factoring by expanding back (FOIL).<br>• Difference of squares is one of the most tested patterns — memorize it.<br>• If leading coefficient ≠ 1, use the AC method or guess-and-check with FOIL.' },
+          { heading:'Examples', examples:[['x² + 7x + 12','(x+3)(x+4)'],['x² − 16','(x+4)(x−4)'],['2x² + 8x','2x(x+4)'],['x² − x − 6','(x−3)(x+2)']] }
+        ],
+        questions:[
+          { q:'Factor: x² + 7x + 10', a:'(x+2)(x+5)', choices:['(x+1)(x+10)','(x+2)(x+5)','(x+3)(x+4)','(x+5)(x+5)'], explain:'Need two numbers that multiply to 10 and add to 7: 2 and 5. → (x+2)(x+5).' },
+          { q:'Factor: x² − 25', a:'(x+5)(x−5)', choices:['(x−5)²','(x+5)(x−5)','(x+5)²','cannot factor'], explain:'Difference of squares: x² − 5² = (x+5)(x−5).' },
+          { q:'Factor out the GCF: 4x³ + 8x²', a:'4x²(x + 2)', choices:['2x(2x² + 4x)','4x²(x + 2)','4x(x² + 2x)','x²(4x + 8)'], explain:'GCF = 4x². 4x³ ÷ 4x² = x, 8x² ÷ 4x² = 2 → 4x²(x + 2).' },
+          { q:'Factor: x² − x − 12', a:'(x−4)(x+3)', choices:['(x−4)(x+3)','(x−3)(x+4)','(x−6)(x+2)','(x+4)(x−3)'], explain:'Need × = −12, + = −1: −4 and 3. → (x−4)(x+3).' },
+          { q:'Which is the difference of squares pattern?', a:'a² − b² = (a+b)(a−b)', choices:['a² + b² = (a+b)²','a² − 2ab + b² = (a−b)²','a² − b² = (a+b)(a−b)','a³ − b³ = (a−b)³'], explain:'Difference of squares: a² − b² = (a+b)(a−b). Note: sum of squares does NOT factor.' },
+        ]
+      },
+      {
+        id:'quadratics', name:'Quadratic Formula', sub:'Solving ax²+bx+c=0',
+        learn:[
+          { heading:'The Quadratic Formula', body:'For any equation ax² + bx + c = 0, the solutions are:<br><strong>x = [−b ± √(b²−4ac)] / 2a</strong><br>This always works, even when factoring is hard.' },
+          { heading:'The Discriminant', body:'The part under the radical — <strong>b² − 4ac</strong> — is the discriminant (Δ).<br>• Δ > 0: two real solutions<br>• Δ = 0: one real solution (repeated)<br>• Δ < 0: no real solutions (complex)' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• Write the formula out every time until it\'s automatic.<br>• Identify a, b, c first — watch signs carefully!<br>• Simplify √ as much as possible.<br>• The ± gives you two answers; always write both.' },
+          { heading:'Examples', examples:[['x²−5x+6=0','x=2 or x=3'],['x²+4x+4=0','x=−2 (double)'],['2x²−4x−6=0','x=3 or x=−1'],['Δ of x²+2x+5','4−20=−16 (no real roots)']] }
+        ],
+        questions:[
+          { q:'In ax²+bx+c=0, what is a,b,c for: 2x²−3x+1=0?', a:'a=2, b=−3, c=1', choices:['a=2, b=3, c=1','a=2, b=−3, c=1','a=1, b=−3, c=2','a=−3, b=2, c=1'], explain:'Match to ax²+bx+c: 2x²+(−3)x+1. So a=2, b=−3, c=1.' },
+          { q:'What is the discriminant of x²+2x−3=0?', a:'16', choices:['−8','4','16','28'], explain:'b²−4ac = 4 − 4(1)(−3) = 4 + 12 = 16.' },
+          { q:'If the discriminant is negative, the equation has:', a:'No real solutions', choices:['One real solution','Two real solutions','No real solutions','Infinite solutions'], explain:'Negative discriminant → √(negative) → no real number solutions.' },
+          { q:'Solve x²−5x+6=0 using the quadratic formula', a:'x = 2 or x = 3', choices:['x = −2 or x = −3','x = 1 or x = 6','x = 2 or x = 3','x = −1 or x = 6'], explain:'a=1,b=−5,c=6. Δ=25−24=1. x=(5±1)/2 → x=3 or x=2.' },
+          { q:'Which formula solves any quadratic?', a:'x = [−b ± √(b²−4ac)] / 2a', choices:['x = −b/2a','x = (b ± √(b²−4ac)) / 2a','x = [−b ± √(b²−4ac)] / 2a','x = −b ± √(b²−4ac)'], explain:'The quadratic formula is x = [−b ± √(b²−4ac)] / 2a. The −b and 2a are both critical.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'geo', emoji:'📏', label:'Geometry',
+    sub:'Proofs, circles, area & volume',
+    topics:[
+      {
+        id:'circles', name:'Circles', sub:'Area, circumference, arcs, sectors',
+        learn:[
+          { heading:'Key Parts', body:'<strong>Radius (r):</strong> center to edge. <strong>Diameter (d = 2r):</strong> edge to edge through center. <strong>Chord:</strong> any segment with both endpoints on the circle.' },
+          { heading:'Circumference & Area', body:'<strong>Circumference = 2πr = πd</strong><br><strong>Area = πr²</strong><br>π ≈ 3.14159' },
+          { heading:'Arcs & Sectors', body:'An <strong>arc</strong> is part of the circumference. A <strong>sector</strong> is the "pie slice" region. Arc length = (θ/360) × 2πr. Sector area = (θ/360) × πr².' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>C before A:</strong> Circumference = 2πr, Area = πr² (the area formula has the square).<br>• If given diameter, halve it first!<br>• For arc/sector, think: what fraction of 360° is your angle?' },
+          { heading:'Examples', examples:[['C of circle r=5','10π ≈ 31.4'],['A of circle r=3','9π ≈ 28.3'],['Arc length, r=6, θ=60°','(60/360)×12π = 2π'],['Sector area r=4, θ=90°','(90/360)×16π = 4π']] }
+        ],
+        questions:[
+          { q:'What is the circumference of a circle with r = 7? (leave in terms of π)', a:'14π', choices:['7π','14π','49π','98π'], explain:'C = 2πr = 2π(7) = 14π.' },
+          { q:'What is the area of a circle with r = 5?', a:'25π', choices:['5π','10π','25π','50π'], explain:'A = πr² = π(5²) = 25π.' },
+          { q:'A circle has diameter 12. What is its radius?', a:'6', choices:['3','6','12','24'], explain:'Radius = diameter ÷ 2 = 12 ÷ 2 = 6.' },
+          { q:'An arc has a central angle of 90° in a circle with r = 8. What is the arc length?', a:'4π', choices:['2π','4π','8π','16π'], explain:'(90/360) × 2π(8) = (1/4) × 16π = 4π.' },
+          { q:'What is the area of a sector with r = 6 and θ = 60°?', a:'6π', choices:['2π','4π','6π','12π'], explain:'(60/360) × π(6²) = (1/6) × 36π = 6π.' },
+        ]
+      },
+      {
+        id:'proofs', name:'Geometric Proofs', sub:'Two-column proofs, congruence, logic',
+        learn:[
+          { heading:'What is a Proof?', body:'A proof is a logical argument that shows a geometric statement is always true. Each step must be justified with a <strong>definition, postulate, or theorem</strong>.' },
+          { heading:'Congruence Shortcuts', body:'<strong>SSS:</strong> three sides | <strong>SAS:</strong> two sides, included angle | <strong>ASA:</strong> two angles, included side | <strong>AAS:</strong> two angles, non-included side | <strong>HL:</strong> right triangles only (hypotenuse-leg)' },
+          { heading:'CPCTC', body:'Once triangles are proven congruent, <strong>Corresponding Parts of Congruent Triangles are Congruent</strong> — so any matching parts are equal.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Mark what you know:</strong> tick marks for equal sides, arcs for equal angles.<br>• Reflexive property: any segment or angle equals itself (shared sides!)<br>• If you see a midpoint, think two equal segments. Bisector → two equal angles.<br>• SSA is NOT a valid congruence shortcut (it\'s the ambiguous case).' },
+          { heading:'Examples', examples:[['Shared side in two triangles','Reflexive Property'],['Midpoint of AB','AM = MB'],['Two triangles congruent by SSS then...','CPCTC for any matching part'],['Vertical angles','Always congruent']] }
+        ],
+        questions:[
+          { q:'What does CPCTC stand for?', a:'Corresponding Parts of Congruent Triangles are Congruent', choices:['Congruent Parts Can Then be Canceled','Corresponding Parts of Congruent Triangles are Congruent','Congruent Pairs Create Triangle Congruency','Cross Products of Congruent Triangles are Congruent'], explain:'After proving triangles congruent, CPCTC lets you conclude any matching parts are equal.' },
+          { q:'Which congruence shortcut uses two sides and the INCLUDED angle?', a:'SAS', choices:['SSS','SAS','ASA','AAS'], explain:'SAS = Side-Angle-Side. The angle must be between the two sides.' },
+          { q:'Vertical angles are always:', a:'Congruent', choices:['Supplementary','Complementary','Congruent','Adjacent'], explain:'Vertical angles (opposite angles formed by intersecting lines) are always congruent.' },
+          { q:'A segment equals itself by the:', a:'Reflexive Property', choices:['Symmetric Property','Transitive Property','Reflexive Property','Addition Property'], explain:'Reflexive Property: any figure is congruent to itself. Used constantly for shared sides.' },
+          { q:'Which is NOT a valid triangle congruence shortcut?', a:'SSA', choices:['SAS','ASA','SSA','HL'], explain:'SSA (Side-Side-Angle) is not valid — it can produce two different triangles (ambiguous case).' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'alg2', emoji:'📊', label:'Algebra II',
+    sub:'Polynomials, logarithms, complex numbers',
+    topics:[
+      {
+        id:'logarithms', name:'Logarithms', sub:'Log rules, solving log equations',
+        learn:[
+          { heading:'What is a Logarithm?', body:'A logarithm answers: "what exponent do I need?" log_b(x) = y means b^y = x.<br>log₂(8) = 3 because 2³ = 8.' },
+          { heading:'Log Rules', body:'• <strong>Product:</strong> log(AB) = log A + log B<br>• <strong>Quotient:</strong> log(A/B) = log A − log B<br>• <strong>Power:</strong> log(Aⁿ) = n·log A<br>• <strong>log_b(b) = 1</strong> | <strong>log_b(1) = 0</strong>' },
+          { heading:'Natural Log & Common Log', body:'<strong>ln(x)</strong> = log base e (≈ 2.718). <strong>log(x)</strong> without base = log base 10. They follow the same rules.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Rewrite logs as exponentials to solve:</strong> log₂(x) = 5 → x = 2⁵ = 32.<br>• Change of base: log_b(x) = ln(x)/ln(b).<br>• When solving log equations, check for extraneous solutions (you can\'t log a negative number).' },
+          { heading:'Examples', examples:[['log₂(32)','5'],['log₃(1)','0'],['log(10⁴)','4'],['ln(e³)','3'],['log(A²B)','2logA+logB']] }
+        ],
+        questions:[
+          { q:'log₂(16) = ?', a:'4', choices:['2','4','8','16'], explain:'2⁴ = 16, so log₂(16) = 4.' },
+          { q:'log₅(1) = ?', a:'0', choices:['−1','0','1','5'], explain:'Any log of 1 is 0 because b⁰ = 1.' },
+          { q:'Expand: log(x³y)', a:'3log(x) + log(y)', choices:['3log(x)·log(y)','log(3x+y)','3log(x) + log(y)','log(x³) − log(y)'], explain:'Product rule: log(x³y) = log(x³) + log(y) = 3log(x) + log(y).' },
+          { q:'Solve: log₃(x) = 4', a:'x = 81', choices:['x = 12','x = 64','x = 81','x = 243'], explain:'Rewrite as 3⁴ = x → x = 81.' },
+          { q:'Which rule states log(A/B) = log A − log B?', a:'Quotient Rule', choices:['Product Rule','Power Rule','Quotient Rule','Change of Base'], explain:'The Quotient Rule: log(A/B) = log A − log B.' },
+          { q:'What is ln(e⁵)?', a:'5', choices:['e','5','5e','e⁵'], explain:'ln and e are inverses: ln(eⁿ) = n. So ln(e⁵) = 5.' },
+        ]
+      },
+      {
+        id:'complex_numbers', name:'Complex Numbers', sub:'i, standard form, arithmetic',
+        learn:[
+          { heading:'Imaginary Numbers', body:'i = √(−1), so i² = −1. This lets us handle square roots of negatives: √(−9) = 3i.' },
+          { heading:'Standard Form', body:'A complex number is written as <strong>a + bi</strong> where a is the real part and b is the imaginary part.' },
+          { heading:'Arithmetic with Complex Numbers', body:'<strong>Add/subtract:</strong> combine real and imaginary parts separately.<br><strong>Multiply:</strong> FOIL, then replace i² with −1.<br>(2+3i)(1−i) = 2−2i+3i−3i² = 2+i+3 = 5+i' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• i¹=i, i²=−1, i³=−i, i⁴=1, then repeats. Find iⁿ by taking n mod 4.<br>• To divide complex numbers, multiply by the conjugate (a−bi) of the denominator.<br>• The conjugate of a+bi is a−bi.' },
+          { heading:'Examples', examples:[['(3+2i)+(1+4i)','4+6i'],['(3+2i)(2−i)','6−3i+4i−2i²=8+i'],['i⁷','i⁷: 7 mod 4 = 3 → i³ = −i'],['|3+4i|','√(9+16)=5']] }
+        ],
+        questions:[
+          { q:'What is i²?', a:'−1', choices:['1','i','−1','−i'], explain:'By definition, i = √(−1), so i² = −1.' },
+          { q:'Simplify: (2+3i) + (4−i)', a:'6+2i', choices:['6+2i','6+4i','6−2i','8+3i'], explain:'Add real parts: 2+4=6. Add imaginary parts: 3i+(−i)=2i. Answer: 6+2i.' },
+          { q:'What is i⁴?', a:'1', choices:['−1','−i','i','1'], explain:'i¹=i, i²=−1, i³=−i, i⁴=1. The pattern repeats every 4 powers.' },
+          { q:'Simplify: (1+i)(1−i)', a:'2', choices:['0','2','1+2i','2i'], explain:'(1+i)(1−i) = 1−i+i−i² = 1−(−1) = 2. This is the conjugate pair formula: a²+b².' },
+          { q:'What is the conjugate of 3−5i?', a:'3+5i', choices:['−3+5i','3+5i','−3−5i','5−3i'], explain:'To get the conjugate, flip the sign of the imaginary part: 3−5i → 3+5i.' },
+        ]
+      }
+    ]
+  },
+  {
+    id:'precalc', emoji:'∞', label:'Pre-Calculus',
+    sub:'Domain/range, trig, limits intro',
+    topics:[
+      {
+        id:'domain_range', name:'Domain & Range', sub:'Finding domain/range, interval notation',
+        learn:[
+          { heading:'Domain', body:'The <strong>domain</strong> is the set of all valid input values (x-values) for a function. Ask: "what x values can I plug in without breaking math?"<br>Main restrictions: <strong>no division by zero, no square root of a negative.</strong>' },
+          { heading:'Range', body:'The <strong>range</strong> is all possible output values (y-values) the function can produce. Think: "what y values can actually come out?"' },
+          { heading:'Interval Notation', body:'( ) = open (excluded), [ ] = closed (included).<br>• Domain of √x: [0, ∞) — 0 is included, no upper bound.<br>• Domain of 1/x: (−∞, 0) ∪ (0, ∞) — everything except 0.' },
+          { heading:'Common Domains', body:'• f(x) = xⁿ (polynomials): (−∞, ∞) — all reals<br>• f(x) = √x: [0, ∞)<br>• f(x) = 1/x: x ≠ 0<br>• f(x) = ln(x): (0, ∞)<br>• f(x) = sin(x): (−∞, ∞), range [−1, 1]' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>Square root:</strong> set the inside ≥ 0 and solve.<br>• <strong>Fraction:</strong> set denominator ≠ 0 and solve.<br>• <strong>Log:</strong> set argument > 0.<br>• For range: find the minimum/maximum y the function can reach, or think about transformations.<br>• Graph it if you\'re stuck — the domain is the x-spread, range is the y-spread.' },
+          { heading:'Examples', examples:[['Domain of √(x−3)','[3, ∞)'],['Domain of 1/(x−2)','x ≠ 2: (−∞,2)∪(2,∞)'],['Range of x²','[0, ∞)'],['Range of sin(x)','[−1, 1]'],['Domain of ln(x+1)','(−1, ∞)']] }
+        ],
+        questions:[
+          { q:'What is the domain of f(x) = √(x − 4)?', a:'[4, ∞)', choices:['(−∞, 4)','(4, ∞)','[4, ∞)','all real numbers'], explain:'Set x − 4 ≥ 0 → x ≥ 4. Domain is [4, ∞) (bracket because 4 is included).' },
+          { q:'What is the domain of f(x) = 1/(x + 3)?', a:'x ≠ −3', choices:['x ≠ 3','x ≠ −3','x > −3','all real numbers'], explain:'Denominator cannot be zero: x + 3 ≠ 0 → x ≠ −3.' },
+          { q:'What is the range of f(x) = x²?', a:'[0, ∞)', choices:['(−∞, ∞)','(−∞, 0]','[0, ∞)','(0, ∞)'], explain:'x² is always ≥ 0, and can be any non-negative value. Range: [0, ∞).' },
+          { q:'What does (a, b) in interval notation mean?', a:'All values between a and b, not including a or b', choices:['All values between a and b, including a and b','Only the values a and b','All values between a and b, not including a or b','All values less than a or greater than b'], explain:'Parentheses ( ) indicate open endpoints — not included. Brackets [ ] include the endpoint.' },
+          { q:'What is the domain of f(x) = ln(x − 2)?', a:'(2, ∞)', choices:['(−∞, 2)','[2, ∞)','(2, ∞)','all reals'], explain:'Log requires argument > 0: x − 2 > 0 → x > 2. Open bracket because 2 is not included.' },
+          { q:'What is the range of f(x) = sin(x)?', a:'[−1, 1]', choices:['(0, ∞)','(−∞, ∞)','[0, 1]','[−1, 1]'], explain:'Sine always outputs values between −1 and 1, inclusive. Range: [−1, 1].' },
+          { q:'What is the domain of any polynomial like f(x) = x³ − 4x + 1?', a:'All real numbers (−∞, ∞)', choices:['[0, ∞)','x ≠ 0','All real numbers (−∞, ∞)','(−∞, 0)'], explain:'Polynomials have no restrictions — you can plug in any real number.' },
+        ]
+      },
+      {
+        id:'trig', name:'Trigonometry', sub:'SOH-CAH-TOA, unit circle, identities',
+        learn:[
+          { heading:'The Basic Ratios (SOH-CAH-TOA)', body:'In a right triangle:<br><strong>sin θ = Opposite/Hypotenuse</strong><br><strong>cos θ = Adjacent/Hypotenuse</strong><br><strong>tan θ = Opposite/Adjacent</strong>' },
+          { heading:'The Unit Circle', body:'A circle of radius 1 centered at the origin. At angle θ, the point on the circle is (cos θ, sin θ). Key angles: 0°, 30°, 45°, 60°, 90° and their equivalents in radians (0, π/6, π/4, π/3, π/2).' },
+          { heading:'Key Values', body:'sin(30°)=1/2, cos(30°)=√3/2<br>sin(45°)=√2/2, cos(45°)=√2/2<br>sin(60°)=√3/2, cos(60°)=1/2<br>sin(90°)=1, cos(90°)=0' },
+          { heading:'Pythagorean Identity', body:'<strong>sin²θ + cos²θ = 1</strong> (always true). Derived from the Pythagorean theorem on the unit circle.' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• <strong>SOH-CAH-TOA</strong> — say it as a word.<br>• Unit circle shortcut: <strong>1-2-3 pattern</strong> for sin values at 30°,45°,60°: √1/2, √2/2, √3/2.<br>• All Students Take Calculus: which functions are positive in each quadrant (All, Sin, Tan, Cos).<br>• Radians × (180/π) = degrees. Degrees × (π/180) = radians.' },
+          { heading:'Examples', examples:[['sin(30°)','1/2'],['cos(60°)','1/2'],['tan(45°)','1'],['π/3 in degrees','60°'],['sin²θ+cos²θ','1 (always)']] }
+        ],
+        questions:[
+          { q:'In a right triangle, sin θ = ?', a:'Opposite / Hypotenuse', choices:['Adjacent / Hypotenuse','Opposite / Adjacent','Opposite / Hypotenuse','Hypotenuse / Opposite'], explain:'SOH: Sin = Opposite / Hypotenuse.' },
+          { q:'What is sin(45°)?', a:'√2/2', choices:['1/2','√2/2','√3/2','1'], explain:'At 45°, sin = √2/2 ≈ 0.707. It\'s the same as cos(45°) since it\'s a 45-45-90 triangle.' },
+          { q:'On the unit circle, what is the point at 90°?', a:'(0, 1)', choices:['(1, 0)','(0, 1)','(0, −1)','(−1, 0)'], explain:'At 90°: cos(90°)=0, sin(90°)=1 → point (0, 1).' },
+          { q:'What does the identity sin²θ + cos²θ equal?', a:'1', choices:['0','sin(θ)','cos(θ)','1'], explain:'The fundamental Pythagorean identity: sin²θ + cos²θ = 1.' },
+          { q:'What is tan(45°)?', a:'1', choices:['0','1/2','√2/2','1'], explain:'tan = sin/cos. At 45°: (√2/2)/(√2/2) = 1.' },
+          { q:'Convert 180° to radians.', a:'π', choices:['π/2','π','2π','π/4'], explain:'180° × (π/180) = π radians.' },
+          { q:'Which quadrant has only cosine positive (sin and tan negative)?', a:'Quadrant IV', choices:['Quadrant I','Quadrant II','Quadrant III','Quadrant IV'], explain:'ASTC: All (I), Sin (II), Tan (III), Cos (IV). Cosine only positive = Quadrant IV.' },
+        ]
+      },
+      {
+        id:'limits_intro', name:'Limits (Intro)', sub:'What a limit is, basic evaluation, DNE',
+        learn:[
+          { heading:'What is a Limit?', body:'A limit describes what value a function <strong>approaches</strong> as x gets close to some number — not necessarily what f(x) equals there. Written: lim(x→a) f(x) = L.' },
+          { heading:'Evaluating Limits', body:'1. <strong>Direct substitution:</strong> try plugging in a. If you get a real number, you\'re done.<br>2. If you get 0/0 (indeterminate), try <strong>factoring</strong> or <strong>rationalizing</strong>.<br>3. Use a table of values or graph to estimate.' },
+          { heading:'One-Sided Limits', body:'lim(x→a⁺) = approaching from the right. lim(x→a⁻) = approaching from the left. If both sides approach the same value, the limit exists.' },
+          { heading:'When a Limit Does Not Exist (DNE)', body:'A limit DNE when: left and right limits differ, the function oscillates infinitely, or grows without bound (→ ±∞).' },
+          { heading:'💡 Tips & Tricks', tip:true, body:'• Always try direct substitution first — it works most of the time.<br>• 0/0 is indeterminate — factor and cancel to resolve it.<br>• ∞/∞, ∞·0 are also indeterminate forms — L\'Hôpital\'s rule handles these in Calc.<br>• The limit doesn\'t care what happens AT x=a — only what happens nearby.' },
+          { heading:'Examples', examples:[['lim(x→3) of x²+1','3²+1=10'],['lim(x→2) of (x²−4)/(x−2)','Factor: (x+2)(x−2)/(x−2)=x+2 → 4'],['f has a hole at x=1','Limit may still exist'],['Left ≠ Right','Limit DNE']] }
+        ],
+        questions:[
+          { q:'lim(x→5) of 2x + 3 = ?', a:'13', choices:['7','10','13','15'], explain:'Direct substitution: 2(5) + 3 = 13.' },
+          { q:'lim(x→2) of (x²−4)/(x−2) = ?', a:'4', choices:['0','2','4','undefined'], explain:'Factor: (x−2)(x+2)/(x−2) = x+2. As x→2: 2+2 = 4.' },
+          { q:'A limit exists only if:', a:'The left-hand and right-hand limits are equal', choices:['f(a) is defined','The function is continuous','The left-hand and right-hand limits are equal','The limit equals f(a)'], explain:'For lim(x→a) to exist, the left-side and right-side limits must both exist and be equal.' },
+          { q:'If lim(x→3⁻) = 5 and lim(x→3⁺) = 7, then lim(x→3) is:', a:'Does not exist (DNE)', choices:['5','7','6','Does not exist (DNE)'], explain:'Left limit (5) ≠ right limit (7), so the overall limit does not exist.' },
+          { q:'A "hole" in a graph at x = a means:', a:'The limit may still exist there', choices:['The limit is 0','The limit is undefined','The limit may still exist there','The function equals 0 at a'], explain:'A removable discontinuity (hole) means f(a) is undefined, but the limit can still exist — it\'s what the function approaches.' },
+          { q:'What do you get when direct substitution gives 0/0?', a:'An indeterminate form — factor or simplify', choices:['The limit is 0','The limit DNE','The limit is 1','An indeterminate form — factor or simplify'], explain:'0/0 is indeterminate — it doesn\'t tell you the limit. Try factoring, conjugates, or L\'Hôpital\'s rule.' },
+        ]
+      }
+    ]
+  }
+];
+
+// ── State ────────────────────────────────────────────────────
+let currentGrade = null;
+let currentTopic = null;
+
+// ── Hub rendering ─────────────────────────────────────────────
+function renderGradeGrid(){
+  const el = document.getElementById('math-grade-grid');
+  if(!el) return;
+  el.innerHTML = GRADES.map(g =>
+    `<div class="math-mode-card" onclick="mathOpenGrade('${g.id}')">
+      <span class="mc-emoji">${g.emoji}</span>
+      <span class="mc-label">${g.label}</span>
+      <span class="mc-sub">${g.sub}</span>
+    </div>`
+  ).join('');
+}
+
+window.mathOpenGrade = function(id){
+  currentGrade = GRADES.find(g=>g.id===id);
+  if(!currentGrade) return;
+  document.getElementById('math-grade-title').textContent = currentGrade.emoji + ' ' + currentGrade.label;
+  const body = document.getElementById('math-grade-body');
+  body.innerHTML = currentGrade.topics.map(t =>
+    `<div class="math-topic-row" onclick="mathOpenTopic('${t.id}')">
+      <div class="tr-left">
+        <div class="tr-name">${t.name}</div>
+        <div class="tr-sub">${t.sub}</div>
+      </div>
+      <span class="tr-arrow">›</span>
+    </div>`
+  ).join('');
+  document.getElementById('math-grade-screen').style.display = 'flex';
+};
+
+window.mathBackToHub = function(){
+  document.getElementById('math-grade-screen').style.display = 'none';
+};
+
+// ── Learn screen ──────────────────────────────────────────────
+window.mathOpenTopic = function(id){
+  currentTopic = currentGrade.topics.find(t=>t.id===id);
+  if(!currentTopic) return;
+  document.getElementById('math-learn-title').textContent = currentTopic.name;
+
+  const body = document.getElementById('math-learn-body');
+  body.innerHTML = currentTopic.learn.map(section => {
+    let inner = '';
+    if(section.examples){
+      inner = `<div class="math-example-list">${section.examples.map(([q,a])=>
+        `<div class="math-example-item"><span class="ex-q">${q}</span><span class="ex-a">= ${a}</span></div>`
+      ).join('')}</div>`;
+    } else if(section.tip){
+      inner = `<div class="math-tip-box"><strong>Tips:</strong> ${section.body}</div>`;
+    } else {
+      inner = `<p>${section.body}</p>`;
+    }
+    return `<div class="math-learn-section">
+      <h3>${section.heading}</h3>
+      ${inner}
+    </div>`;
+  }).join('');
+
+  document.getElementById('math-learn-screen').style.display = 'flex';
+};
+
+window.mathBackToGrade = function(){
+  document.getElementById('math-learn-screen').style.display = 'none';
+};
+
+// ── Practice ──────────────────────────────────────────────────
+let tpQuestions = [];
+let tpIdx = 0;
+let tpCorrect = 0;
+let tpWrong = 0;
+let tpAnswered = false;
+
+window.mathStartTopicPractice = function(){
+  if(!currentTopic || !currentTopic.questions.length) return;
+  // shuffle
+  tpQuestions = [...currentTopic.questions].sort(()=>Math.random()-.5);
+  tpIdx = 0; tpCorrect = 0; tpWrong = 0;
+  document.getElementById('math-tp-title').textContent = currentTopic.name + ' — Practice';
+  document.getElementById('math-tp-correct').textContent = '0';
+  document.getElementById('math-tp-wrong').textContent = '0';
+  document.getElementById('math-topic-practice').style.display = 'flex';
+  mathTPRenderQ();
+};
+
+function mathTPRenderQ(){
+  if(tpIdx >= tpQuestions.length){
+    mathTPShowEnd(); return;
+  }
+  tpAnswered = false;
+  const q = tpQuestions[tpIdx];
+  document.getElementById('math-tp-question').textContent = q.q;
+  const shuffled = [...q.choices].sort(()=>Math.random()-.5);
+  document.getElementById('math-tp-choices').innerHTML = shuffled.map(c =>
+    `<div class="math-tp-choice" onclick="mathTPAnswer(this,'${c.replace(/'/g,"\\'")}','${q.a.replace(/'/g,"\\'")}')">${c}</div>`
+  ).join('');
+  document.getElementById('math-tp-feedback').className = 'math-tp-feedback';
+  document.getElementById('math-tp-feedback').innerHTML = '';
+  document.getElementById('math-tp-next').className = 'math-tp-next';
+}
+
+window.mathTPAnswer = function(el, chosen, correct){
+  if(tpAnswered) return;
+  tpAnswered = true;
+  const q = tpQuestions[tpIdx];
+  const isCorrect = chosen === correct;
+  if(isCorrect){ tpCorrect++; el.classList.add('correct'); }
+  else {
+    el.classList.add('wrong');
+    tpWrong++;
+    // highlight correct
+    document.querySelectorAll('.math-tp-choice').forEach(c => {
+      if(c.textContent === correct) c.classList.add('correct');
+    });
+  }
+  document.getElementById('math-tp-correct').textContent = tpCorrect;
+  document.getElementById('math-tp-wrong').textContent = tpWrong;
+
+  const fb = document.getElementById('math-tp-feedback');
+  fb.innerHTML = `<strong>${isCorrect ? '✓ Correct!' : '✗ Not quite.'}</strong> ${q.explain}`;
+  fb.className = 'math-tp-feedback show';
+  document.getElementById('math-tp-next').className = 'math-tp-next show';
+};
+
+window.mathTPNext = function(){
+  tpIdx++;
+  mathTPRenderQ();
+};
+
+function mathTPShowEnd(){
+  const pct = tpQuestions.length > 0 ? Math.round((tpCorrect/tpQuestions.length)*100) : 0;
+  document.getElementById('math-tp-question').textContent = '✅ Round Complete!';
+  document.getElementById('math-tp-choices').innerHTML =
+    `<div style="grid-column:1/-1;text-align:center;color:#c8e0d4;font-size:14px;padding:10px 0">
+      ${tpCorrect} / ${tpQuestions.length} correct — ${pct}%
+    </div>`;
+  document.getElementById('math-tp-feedback').className = 'math-tp-feedback';
+  const nxt = document.getElementById('math-tp-next');
+  nxt.textContent = 'Try Again';
+  nxt.className = 'math-tp-next show';
+  nxt.onclick = () => {
+    tpQuestions = [...currentTopic.questions].sort(()=>Math.random()-.5);
+    tpIdx=0; tpCorrect=0; tpWrong=0;
+    document.getElementById('math-tp-correct').textContent='0';
+    document.getElementById('math-tp-wrong').textContent='0';
+    document.getElementById('math-tp-next').textContent='Next →';
+    document.getElementById('math-tp-next').onclick = window.mathTPNext;
+    mathTPRenderQ();
+  };
+}
+
+window.mathBackToLearn = function(){
+  document.getElementById('math-topic-practice').style.display = 'none';
+};
+
+// ── Hub back (go to Apps grid, bypass override) ──────────────
+window.mathHubBack = function(){
+  // Reset state
+  const view = document.getElementById('math-view');
+  if(view){ view.style.display = 'none'; }
+  document.getElementById('math-grade-screen').style.display = 'none';
+  document.getElementById('math-learn-screen').style.display = 'none';
+  document.getElementById('math-topic-practice').style.display = 'none';
+  // Go back to apps using original closeApp
+  if(window._mathOrigClose){ window._mathOrigClose('math'); }
+  else {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-apps') && document.getElementById('page-apps').classList.add('active');
+  }
+};
+
+// ── Arithmetic mode ───────────────────────────────────────────
+window.mathGoArithmetic = function(){
+  document.getElementById('math-hub').style.display = 'none';
+  const view = document.getElementById('math-view');
+  if(view){ view.style.display = 'flex'; }
+  mathInit();
+};
+
+// ── Override openApp for math to show hub ─────────────────────
+const _origOpenApp = window.openApp;
+window.openApp = function(name){
+  if(name === 'math'){
+    // Show page-math
+    _origOpenApp(name);
+    // Show hub, hide arithmetic view
+    const hub = document.getElementById('math-hub');
+    const view = document.getElementById('math-view');
+    if(hub){ hub.style.display = 'flex'; }
+    if(view){ view.style.display = 'none'; }
+    renderGradeGrid();
+    return;
+  }
+  _origOpenApp(name);
+};
+
+// ── Override closeApp for math sub-screens ────────────────────
+window._mathOrigClose = window.closeApp; // save for mathHubBack
+const _origCloseApp = window.closeApp;
+window.closeApp = function(name){
+  if(name === 'math'){
+    // Reset all sub-screens
+    const hub = document.getElementById('math-hub');
+    const view = document.getElementById('math-view');
+    if(hub){ hub.style.display = 'flex'; }
+    if(view){ view.style.display = 'none'; }
+    document.getElementById('math-grade-screen').style.display = 'none';
+    document.getElementById('math-learn-screen').style.display = 'none';
+    document.getElementById('math-topic-practice').style.display = 'none';
+  }
+  _origCloseApp(name);
+};
+
+// Also override the ← Apps button in the arithmetic topbar
+window.mathGoBackToHub = function(){
+  const hub = document.getElementById('math-hub');
+  const view = document.getElementById('math-view');
+  if(hub){ hub.style.display = 'flex'; }
+  if(view){ view.style.display = 'none'; }
+  document.getElementById('math-grade-screen').style.display = 'none';
+  document.getElementById('math-learn-screen').style.display = 'none';
+  document.getElementById('math-topic-practice').style.display = 'none';
+  renderGradeGrid();
+};
+
+})();
+// ═════════════════════════════════════════════════════════════
+
 // ════════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════════
@@ -2969,6 +4198,7 @@ renderHomeDailys();
 renderHomeProjects();
 renderTodayCard();
 chessInit();
+wordleRenderMini(); // populate mini wordle card on home
 document.getElementById('page-chess').querySelector('#chess-view').addEventListener('click',()=>{},true);
 
 // Re-render home daily bars when returning to home
@@ -3221,6 +4451,7 @@ function spEditCurrent() {
   document.getElementById('sp-edit-pron').value = w.pron||'';
   document.getElementById('sp-edit-example').value = w.example||'';
   document.getElementById('sp-edit-type').value = w.type;
+
   // Show delete only for custom words
   document.getElementById('sp-edit-delete-wrap').innerHTML = w.custom
     ? `<button class="sp-btn-delete" onclick="spDeleteWord('${w.id}')">Delete</button>` : '';
@@ -3360,9 +4591,515 @@ function spRenderGrammar() {
         <div class="sp-example">💡 Spanish uses ¿ at the start and ? at the end. Same for exclamations: ¡ … !</div>
       </div>
     </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">① Singular &amp; Plural (Número)</div>
+      <div class="sp-section-body">
+        Spanish nouns and adjectives change form based on <strong>number</strong> — whether they refer to one thing or many.
+        <table class="sp-table">
+          <tr><th>Rule</th><th>Singular</th><th>Plural</th></tr>
+          <tr><td>Ends in a vowel</td><td>gato (cat)</td><td>gatos (cats)</td></tr>
+          <tr><td>Ends in a consonant</td><td>ciudad (city)</td><td>ciudades (cities)</td></tr>
+          <tr><td>Ends in -z</td><td>luz (light)</td><td>luces (lights)</td></tr>
+          <tr><td>Ends in -s (unstressed)</td><td>el lunes (Monday)</td><td>los lunes (Mondays)</td></tr>
+        </table>
+        <div class="sp-example">💡 Articles also change: <em>el/la</em> (singular) → <em>los/las</em> (plural).</div>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">⚖️ Count &amp; Mass Nouns (Contables e Incontables)</div>
+      <div class="sp-section-body">
+        <strong>Count nouns</strong> refer to individual things you can count. <strong>Mass nouns</strong> (uncountable) refer to substances or concepts measured in bulk.
+        <table class="sp-table">
+          <tr><th>Type</th><th>Spanish</th><th>English</th><th>Notes</th></tr>
+          <tr><td>Count</td><td>un libro / dos libros</td><td>a book / two books</td><td>Can use numbers + plural</td></tr>
+          <tr><td>Count</td><td>una silla / tres sillas</td><td>a chair / three chairs</td><td>Has plural form</td></tr>
+          <tr><td>Mass</td><td>el agua / el arroz</td><td>water / rice</td><td>Usually singular only</td></tr>
+          <tr><td>Mass</td><td>la información</td><td>information</td><td>No natural plural</td></tr>
+        </table>
+        <div class="sp-example">💡 Mass nouns can be "countified" with a unit: <em>un vaso de agua</em> (a glass of water).</div>
+      </div>
+    </div>
+
+    <div class="sp-section-card">
+      <div class="sp-section-title">◇ Common &amp; Proper Nouns (Comunes y Propios)</div>
+      <div class="sp-section-body">
+        <strong>Common nouns</strong> name general things. <strong>Proper nouns</strong> name specific people, places, or things — and are capitalized.
+        <table class="sp-table">
+          <tr><th>Type</th><th>Spanish</th><th>English</th></tr>
+          <tr><td>Common</td><td>ciudad, río, perro</td><td>city, river, dog</td></tr>
+          <tr><td>Proper</td><td>Madrid, el Amazonas, Rover</td><td>Madrid, the Amazon, Rover</td></tr>
+          <tr><td>Common</td><td>presidente, rey</td><td>president, king</td></tr>
+          <tr><td>Proper</td><td>el Presidente López, el Rey Felipe</td><td>President López, King Felipe</td></tr>
+        </table>
+        <div class="sp-example">💡 Unlike English, Spanish does <em>not</em> capitalize days of the week, months, or languages: <em>lunes, enero, español</em>.</div>
+      </div>
+    </div>
   `;
 }
 
+
+// ════════════════════════════════════════════════
+//  BRAIN GAMES — shared helper
+// ════════════════════════════════════════════════
+function bgChoiceBtn(label, onclick, extra='') {
+  return `<button onclick="${onclick}" ${extra} style="background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:12px 10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s">${label}</button>`;
+}
+
+// ════════════════════════════════════════════════
+//  WORDLE  (daily — same puzzle all day, resets 4am)
+// ════════════════════════════════════════════════
+const WORDLE_WORDS = [
+  'crane','slate','audio','snare','plumb','crimp','flint','blaze','grout','swamp',
+  'viper','knoll','chime','proxy','quirk','fjord','expel','gloom','twirl','oxide',
+  'abbey','badge','cable','daisy','eagle','fable','gavel','hazel','inlet','joust',
+  'knave','latch','maple','noble','onset','plaid','quill','raven','swift','trove',
+  'umbra','vault','waltz','xenon','yacht','zonal','abyss','baker','camel','divan',
+  'ember','flair','gripe','haste','irony','jewel','karma','lemon','mirth','notch',
+  'olive','polka','quaff','remit','salvo','tango','ultra','virge','whelp','expat',
+  'bloom','clamp','drift','epoch','flank','growl','heist','icily','joker','kayak',
+  'lunge','maxim','nymph','optic','psalm','rajah','stomp','trawl','unfit','vapor',
+  'wrist','xylem','yearn','zesty','alpha','brash','chant','dowel','exert','froze',
+  'agile','blunt','croak','depot','expunge','fetch','gravel','hinge','index','jaunt',
+  'kiosk','lusty','mango','nerve','otter','perch','quota','rivet','skimp','tonic',
+  'usher','vigor','wispy','exact','yodel','zippy','amble','brood','cinch','depot',
+  'elbow','frond','girth','humps','inter','judge','kneel','local','murky','nitro'
+];
+const WORDLE_KEYBOARD_ROWS = [
+  ['Q','W','E','R','T','Y','U','I','O','P'],
+  ['A','S','D','F','G','H','J','K','L'],
+  ['ENTER','Z','X','C','V','B','N','M','⌫']
+];
+
+// ── Daily key: YYYY-MM-DD adjusted so day rolls at 4am local ──
+function wordleDayKey() {
+  const now = new Date();
+  const adj = new Date(now.getTime() - 4*60*60*1000); // subtract 4h so 4am = new day
+  return adj.toISOString().slice(0,10);
+}
+function wordleDailyWord() {
+  const key = wordleDayKey();
+  // deterministic pick from date string
+  let hash = 0;
+  for(let i=0;i<key.length;i++) hash = ((hash<<5)-hash)+key.charCodeAt(i);
+  hash = Math.abs(hash);
+  return WORDLE_WORDS[hash % WORDLE_WORDS.length].toUpperCase();
+}
+
+// ── State ──
+let wAnswer='', wGuesses=[], wCurrentGuess='', wGameOver=false, wDailyDone=false;
+
+function wordleInit() {
+  const key = wordleDayKey();
+  const saved = JSON.parse(localStorage.getItem('wordle_'+key)||'null');
+  wAnswer = wordleDailyWord();
+  if(saved) {
+    wGuesses = saved.guesses;
+    wGameOver = saved.gameOver;
+    wDailyDone = saved.gameOver;
+    wCurrentGuess = '';
+  } else {
+    wGuesses=[]; wGameOver=false; wDailyDone=false; wCurrentGuess='';
+  }
+}
+// alias so setPage hook still works
+function wordleNewGame() { wordleInit(); wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg(); wordleRenderMini(); }
+
+function wordleSave() {
+  localStorage.setItem('wordle_'+wordleDayKey(), JSON.stringify({guesses:wGuesses,gameOver:wGameOver}));
+}
+
+function wordleUpdateMsg() {
+  const el = document.getElementById('wordle-msg');
+  if(!el) return;
+  if(wGameOver && wGuesses.length && wGuesses[wGuesses.length-1].word===wAnswer)
+    el.textContent = '🎉 Genius!';
+  else if(wGameOver)
+    el.textContent = 'The word was ' + wAnswer;
+  else
+    el.textContent = '';
+  const nb = document.getElementById('wordle-new-btn');
+  if(nb) nb.style.display = wGameOver ? '' : 'none';
+}
+
+function wordleRenderBoard() {
+  const board = document.getElementById('wordle-board');
+  if(!board) return;
+  board.innerHTML='';
+  board.style.gridTemplateColumns='repeat(5,52px)';
+  for(let r=0;r<6;r++){
+    for(let c=0;c<5;c++){
+      const cell=document.createElement('div');
+      cell.style.cssText='width:52px;height:52px;border:2px solid #1f3a2a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#e8f0ed;background:#0f1f17;transition:background .3s';
+      const guess=wGuesses[r];
+      if(guess){
+        const ch=guess.result[c];
+        cell.textContent=ch.letter;
+        cell.style.background=ch.state==='correct'?'#538d4e':ch.state==='present'?'#b59f3b':'#3a3a3a';
+        cell.style.borderColor=ch.state==='correct'?'#538d4e':ch.state==='present'?'#b59f3b':'#3a3a3a';
+      } else if(r===wGuesses.length && !wGameOver){
+        cell.textContent=wCurrentGuess[c]||'';
+        if(wCurrentGuess[c]) cell.style.borderColor='#a0c9b8';
+      }
+      board.appendChild(cell);
+    }
+  }
+}
+
+function wordleRenderKeyboard() {
+  const kb=document.getElementById('wordle-keyboard');
+  if(!kb) return;
+  kb.innerHTML='';
+  WORDLE_KEYBOARD_ROWS.forEach(row=>{
+    const rowDiv=document.createElement('div');
+    rowDiv.style.cssText='display:flex;gap:5px';
+    row.forEach(key=>{
+      const btn=document.createElement('button');
+      btn.textContent=key;
+      btn.dataset.key=key;
+      const wide=key==='ENTER'||key==='⌫';
+      btn.style.cssText=`background:#1a3a28;color:#e8f0ed;border:none;border-radius:5px;padding:${wide?'14px 10px':'14px 0'};width:${wide?'58px':'36px'};font-size:${wide?'11px':'14px'};font-weight:700;cursor:pointer`;
+      btn.onclick=()=>wordleKey(key);
+      rowDiv.appendChild(btn);
+    });
+    kb.appendChild(rowDiv);
+  });
+  // Recolor keys from saved guesses
+  wGuesses.forEach(g=>g.result.forEach(r=>wordleUpdateKeyColor(r.letter,r.state)));
+}
+
+function wordleUpdateKeyColor(letter, state) {
+  const priority={correct:3,present:2,absent:1};
+  const btn=document.querySelector(`#wordle-keyboard button[data-key="${letter}"]`);
+  if(!btn) return;
+  const cur=btn.dataset.state||'';
+  if((priority[state]||0)>(priority[cur]||0)){
+    btn.dataset.state=state;
+    btn.style.background=state==='correct'?'#538d4e':state==='present'?'#b59f3b':'#3a3a3a';
+  }
+}
+
+function wordleKey(key) {
+  if(wGameOver) return;
+  if(key==='⌫'||key==='BACKSPACE'){ wCurrentGuess=wCurrentGuess.slice(0,-1); }
+  else if(key==='ENTER'){
+    if(wCurrentGuess.length<5){document.getElementById('wordle-msg').textContent='Not enough letters';return;}
+    const ans=wAnswer;
+    // count letters for present detection
+    const ansCount={};
+    ans.split('').forEach(l=>ansCount[l]=(ansCount[l]||0)+1);
+    const result=wCurrentGuess.split('').map((l,i)=>({letter:l,state:l===ans[i]?'correct':'_'}));
+    // second pass: present
+    result.forEach((r,i)=>{ if(r.state==='_'){ if(ansCount[r.letter]>0){r.state='present';ansCount[r.letter]--;} else r.state='absent'; } else ansCount[r.letter]--; });
+    wGuesses.push({word:wCurrentGuess,result});
+    result.forEach(r=>wordleUpdateKeyColor(r.letter,r.state));
+    if(wCurrentGuess===ans){ wGameOver=true; wDailyDone=true; }
+    else if(wGuesses.length===6){ wGameOver=true; wDailyDone=true; }
+    wCurrentGuess='';
+    wordleSave();
+    wordleUpdateMsg();
+    wordleRenderMini();
+  } else if(wCurrentGuess.length<5 && /^[A-Z]$/.test(key)){
+    wCurrentGuess+=key;
+  }
+  wordleRenderBoard();
+}
+
+document.addEventListener('keydown', e=>{
+  const wp=document.getElementById('page-wordle');
+  if(!wp||!wp.classList.contains('active')) return;
+  const k=e.key.toUpperCase();
+  if(k==='BACKSPACE') wordleKey('⌫');
+  else if(k==='ENTER') wordleKey('ENTER');
+  else if(/^[A-Z]$/.test(k)&&k.length===1) wordleKey(k);
+});
+
+// ── Mini Wordle on dashboard home ──
+function wordleRenderMini() {
+  const mini=document.getElementById('wordle-mini-board');
+  if(!mini) return;
+  mini.innerHTML='';
+  for(let r=0;r<6;r++){
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;gap:3px;margin-bottom:3px';
+    for(let c=0;c<5;c++){
+      const cell=document.createElement('div');
+      cell.style.cssText='width:18px;height:18px;border-radius:3px;background:#1a2e24;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#e8f0ed';
+      const guess=wGuesses[r];
+      if(guess){
+        const ch=guess.result[c];
+        cell.textContent=ch.letter;
+        cell.style.background=ch.state==='correct'?'#538d4e':ch.state==='present'?'#b59f3b':'#3a3a3a';
+      }
+      row.appendChild(cell);
+    }
+    mini.appendChild(row);
+  }
+  const lbl=document.getElementById('wordle-mini-label');
+  if(lbl){
+    if(wGameOver && wGuesses.length && wGuesses[wGuesses.length-1].word===wAnswer)
+      lbl.textContent='🎉 Solved! '+wGuesses.length+'/6';
+    else if(wGameOver) lbl.textContent='😬 '+wAnswer;
+    else lbl.textContent=wGuesses.length+'/6 guesses';
+  }
+}
+
+// Boot wordle on startup
+wordleInit();
+let _wordleReturnPage = 'home';
+function wordleOpen(from) { _wordleReturnPage = from||'home'; setPage('wordle'); }
+function wordleGoBack() { setPage(_wordleReturnPage); }
+
+// ════════════════════════════════════════════════
+//  MEMORY GRID
+// ════════════════════════════════════════════════
+let memLevel=1, memScore=0, memPattern=[], memPhase='idle', memSize=3;
+function memStart(){
+  memPattern=[];
+  memSize = 2 + Math.min(memLevel, 5);
+  const total=memSize*memSize;
+  const count=2+Math.min(memLevel+1,total-2);
+  while(memPattern.length<count){
+    const i=Math.floor(Math.random()*total);
+    if(!memPattern.includes(i)) memPattern.push(i);
+  }
+  document.getElementById('mem-msg').textContent='Memorize!';
+  document.getElementById('mem-btn').disabled=true;
+  memRenderGrid(true);
+  setTimeout(()=>{
+    memRenderGrid(false);
+    document.getElementById('mem-msg').textContent='Tap the highlighted cells!';
+    memPhase='recall'; memSelected=[];
+    document.getElementById('mem-btn').disabled=false;
+    document.getElementById('mem-btn').textContent='Give Up';
+    document.getElementById('mem-btn').onclick=()=>{memPhase='idle';memRenderGrid(false,true);document.getElementById('mem-msg').textContent='Better luck next time!';document.getElementById('mem-btn').textContent='Try Again';document.getElementById('mem-btn').onclick=memStart;};
+  }, 1200 + memLevel*200);
+}
+let memSelected=[];
+function memTap(i){
+  if(memPhase!=='recall') return;
+  const cells=document.getElementById('mem-grid').children;
+  if(memSelected.includes(i)){memSelected=memSelected.filter(x=>x!==i);cells[i].style.background='#1a2e24';}
+  else{
+    memSelected.push(i);
+    cells[i].style.background='#00d18c';
+    if(memSelected.length===memPattern.length){
+      const correct=memSelected.every(x=>memPattern.includes(x));
+      memPhase='idle';
+      if(correct){
+        memScore+=memLevel*10; memLevel++;
+        document.getElementById('mem-score').textContent=memScore;
+        document.getElementById('mem-level').textContent=memLevel;
+        document.getElementById('mem-msg').textContent='✅ Correct!';
+        document.getElementById('mem-btn').textContent='Next Level';
+        document.getElementById('mem-btn').onclick=memStart;
+        document.getElementById('mem-btn').disabled=false;
+      } else {
+        memRenderGrid(false,true);
+        document.getElementById('mem-msg').textContent='❌ Wrong! Watch again.';
+        document.getElementById('mem-btn').textContent='Retry';
+        document.getElementById('mem-btn').onclick=memStart;
+        document.getElementById('mem-btn').disabled=false;
+      }
+    }
+  }
+}
+function memRenderGrid(show, showAnswer=false){
+  const grid=document.getElementById('mem-grid');
+  const cols=memSize||3;
+  grid.style.gridTemplateColumns=`repeat(${cols},52px)`;
+  grid.innerHTML='';
+  const total=cols*cols;
+  for(let i=0;i<total;i++){
+    const c=document.createElement('div');
+    c.style.cssText='width:52px;height:52px;border-radius:8px;cursor:pointer;transition:background .2s';
+    const lit=memPattern.includes(i);
+    c.style.background= (show&&lit)?'#00d18c': (showAnswer&&lit)?'#e85d4a': '#1a2e24';
+    c.onclick=()=>memTap(i);
+    grid.appendChild(c);
+  }
+}
+
+// ════════════════════════════════════════════════
+//  ANALOGIES
+// ════════════════════════════════════════════════
+const ANA_DATA = [
+  {q:'Hot is to Cold as Fast is to',a:'Slow',d:['Quick','Warm','Speed']},
+  {q:'Dog is to Puppy as Cat is to',a:'Kitten',d:['Cub','Calf','Foal']},
+  {q:'Book is to Library as Painting is to',a:'Museum',d:['Gallery','Studio','Canvas']},
+  {q:'Foot is to Shoe as Hand is to',a:'Glove',d:['Ring','Mitten','Sleeve']},
+  {q:'Doctor is to Hospital as Teacher is to',a:'School',d:['Classroom','Office','Gym']},
+  {q:'Fish is to Water as Bird is to',a:'Sky',d:['Tree','Nest','Air']},
+  {q:'Pen is to Write as Knife is to',a:'Cut',d:['Stab','Slice','Scratch']},
+  {q:'Short is to Tall as Narrow is to',a:'Wide',d:['Long','Broad','Thick']},
+  {q:'Sun is to Day as Moon is to',a:'Night',d:['Dark','Star','Space']},
+  {q:'Piano is to Keys as Guitar is to',a:'Strings',d:['Frets','Neck','Picks']},
+  {q:'Eye is to See as Ear is to',a:'Hear',d:['Listen','Sound','Feel']},
+  {q:'Wool is to Sheep as Silk is to',a:'Silkworm',d:['Spider','Cotton','Worm']},
+  {q:'Chef is to Kitchen as Pilot is to',a:'Cockpit',d:['Plane','Airport','Runway']},
+  {q:'Map is to Geography as Ruler is to',a:'Measurement',d:['Drawing','Lines','Math']},
+  {q:'Glove is to Hand as Hat is to',a:'Head',d:['Hair','Face','Neck']},
+  {q:'Author is to Novel as Composer is to',a:'Symphony',d:['Poem','Song','Lyrics']},
+  {q:'Hammer is to Nail as Screwdriver is to',a:'Screw',d:['Bolt','Drill','Wrench']},
+  {q:'Lake is to Pond as Ocean is to',a:'Sea',d:['River','Bay','Gulf']},
+  {q:'Laugh is to Happy as Cry is to',a:'Sad',d:['Angry','Tired','Bored']},
+  {q:'Brick is to Wall as Tile is to',a:'Floor',d:['Roof','Ceiling','Patio']},
+  {q:'Cold is to Shiver as Hot is to',a:'Sweat',d:['Melt','Burn','Glow']},
+  {q:'Architect is to Blueprint as Chef is to',a:'Recipe',d:['Menu','Dish','Ingredients']},
+  {q:'Hour is to Clock as Mile is to',a:'Odometer',d:['Speedometer','Ruler','Map']},
+  {q:'Wool is to Knit as Clay is to',a:'Sculpt',d:['Paint','Mold','Carve']},
+  {q:'Astronaut is to Space as Diver is to',a:'Ocean',d:['Sea','Water','Reef']},
+];
+let anaScore=0, anaStreak=0, anaCurrent=null;
+function anaNext(){
+  const idx=Math.floor(Math.random()*ANA_DATA.length);
+  anaCurrent=ANA_DATA[idx];
+  document.getElementById('ana-question').textContent=anaCurrent.q+' ___?';
+  document.getElementById('ana-msg').textContent='';
+  const allOpts=[anaCurrent.a,...anaCurrent.d].sort(()=>Math.random()-.5);
+  const choicesEl=document.getElementById('ana-choices');
+  choicesEl.innerHTML='';
+  allOpts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.textContent=opt;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:15px;font-weight:600;cursor:pointer';
+    btn.onclick=()=>anaPick(opt,btn,choicesEl);
+    choicesEl.appendChild(btn);
+  });
+}
+function anaPick(opt, btn, choicesEl){
+  Array.from(choicesEl.children).forEach(b=>b.disabled=true);
+  if(opt===anaCurrent.a){
+    btn.style.background='#538d4e'; anaScore+=10; anaStreak++;
+    document.getElementById('ana-msg').textContent='✅ Correct!';
+  } else {
+    btn.style.background='#8d3a3a'; anaStreak=0;
+    document.getElementById('ana-msg').textContent=`❌ Answer: ${anaCurrent.a}`;
+    Array.from(choicesEl.children).forEach(b=>{if(b.textContent===anaCurrent.a)b.style.background='#538d4e';});
+  }
+  document.getElementById('ana-score').textContent=anaScore;
+  document.getElementById('ana-streak').textContent=anaStreak;
+  setTimeout(anaNext, 1200);
+}
+
+// ════════════════════════════════════════════════
+//  SPEED READ
+// ════════════════════════════════════════════════
+const SR_DATA = [
+  {text:'The quick brown fox jumps over the lazy dog near the river.',q:'What does the fox jump over?',a:'The lazy dog',d:['A fence','The river','A log']},
+  {text:'Scientists discovered a new species of deep sea fish glowing blue.',q:'What color does the fish glow?',a:'Blue',d:['Red','Green','Yellow']},
+  {text:'The ancient castle stood on a hill overlooking the misty valley below.',q:'Where was the castle located?',a:'On a hill',d:['In a valley','By a river','Near a forest']},
+  {text:'She solved the puzzle in record time and won the championship trophy.',q:'What did she win?',a:'Championship trophy',d:['Gold medal','A prize','A ribbon']},
+  {text:'The robot carefully placed each fragile glass ornament into the box.',q:'What did the robot place into the box?',a:'Glass ornaments',d:['Toys','Plates','Bottles']},
+  {text:'Every morning the baker arrived early to prepare fresh loaves of sourdough.',q:'What did the baker prepare?',a:'Sourdough loaves',d:['Pastries','Croissants','Muffins']},
+  {text:'The explorer mapped a hidden cave system beneath the volcanic island.',q:'Where was the cave system?',a:'Beneath the volcanic island',d:['In a mountain','Under a glacier','By the sea']},
+  {text:'Without warning the lights flickered and the entire city went dark for hours.',q:'How long did the city stay dark?',a:'Hours',d:['Minutes','Days','Seconds']},
+  {text:'The young pianist performed a flawless concerto to a standing ovation.',q:'What did the audience do?',a:'Standing ovation',d:['Sat quietly','Applauded briefly','Left early']},
+  {text:'Migrating whales travel thousands of miles each year to warmer waters.',q:'Why do whales migrate?',a:'Warmer waters',d:['Food','Safety','Breeding']},
+];
+let srScore=0, srWpm=0, srCurrent=null, srStartTime=0, srPhase='idle', srWordIdx=0, srWords=[], srFlashTimer=null;
+function srStart(){
+  srCurrent=SR_DATA[Math.floor(Math.random()*SR_DATA.length)];
+  srWords=srCurrent.text.split(' ');
+  srWordIdx=0; srPhase='reading';
+  document.getElementById('sr-question').textContent='';
+  document.getElementById('sr-choices').innerHTML='';
+  document.getElementById('sr-msg').textContent='';
+  document.getElementById('sr-start-btn').style.display='none';
+  const wpm=200+srScore*5;
+  const delay=Math.round(60000/wpm);
+  srStartTime=Date.now();
+  function flash(){
+    if(srWordIdx<srWords.length){
+      document.getElementById('sr-flash').textContent=srWords[srWordIdx++];
+      srFlashTimer=setTimeout(flash,delay);
+    } else {
+      srWpm=Math.round(srWords.length/(( Date.now()-srStartTime)/60000));
+      document.getElementById('sr-wpm').textContent=srWpm;
+      document.getElementById('sr-flash').textContent='';
+      srShowQuestion();
+    }
+  }
+  flash();
+}
+function srShowQuestion(){
+  srPhase='question';
+  document.getElementById('sr-question').textContent=srCurrent.q;
+  const opts=[srCurrent.a,...srCurrent.d].sort(()=>Math.random()-.5);
+  const ch=document.getElementById('sr-choices');
+  ch.innerHTML='';
+  opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.textContent=opt;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:12px 8px;font-size:14px;cursor:pointer';
+    btn.onclick=()=>srPick(opt,btn,ch);
+    ch.appendChild(btn);
+  });
+}
+function srPick(opt,btn,ch){
+  Array.from(ch.children).forEach(b=>b.disabled=true);
+  if(opt===srCurrent.a){
+    btn.style.background='#538d4e'; srScore++;
+    document.getElementById('sr-msg').textContent='✅ Correct!';
+  } else {
+    btn.style.background='#8d3a3a';
+    document.getElementById('sr-msg').textContent=`❌ Answer: ${srCurrent.a}`;
+    Array.from(ch.children).forEach(b=>{if(b.textContent===srCurrent.a)b.style.background='#538d4e';});
+  }
+  document.getElementById('sr-score').textContent=srScore;
+  document.getElementById('sr-start-btn').style.display='';
+  document.getElementById('sr-start-btn').textContent='Next →';
+}
+
+// ════════════════════════════════════════════════
+//  NUMBER SEQUENCE
+// ════════════════════════════════════════════════
+let nsScore=0, nsStreak=0, nsCurrent=null;
+const NS_TYPES = [
+  ()=>{ const s=Math.floor(Math.random()*5)+1, start=Math.floor(Math.random()*10); const seq=[start,start+s,start+2*s,start+3*s]; return{seq,ans:start+4*s,type:'arithmetic'}; },
+  ()=>{ const r=Math.floor(Math.random()*3)+2, start=Math.floor(Math.random()*3)+1; const seq=[start,start*r,start*r*r,start*r*r*r]; return{seq,ans:start*r*r*r*r,type:'geometric'}; },
+  ()=>{ const seq=[1,1]; for(let i=2;i<5;i++) seq.push(seq[i-1]+seq[i-2]); return{seq:seq.slice(0,4),ans:seq[4],type:'fibonacci'}; },
+  ()=>{ const sq=[1,4,9,16]; return{seq:sq,ans:25,type:'squares'}; },
+  ()=>{ const s=Math.floor(Math.random()*3)+1,start=Math.floor(Math.random()*5)+2; const seq=[start,start+s,start+2*s,start+3*s]; return{seq,ans:start+4*s,type:'arithmetic'}; },
+  ()=>{ const base=Math.floor(Math.random()*4)+2; const seq=[base,base*base,base*base*base,base*base*base*base]; return{seq,ans:base**5,type:'powers'}; },
+];
+function nsNext(){
+  nsCurrent=NS_TYPES[Math.floor(Math.random()*NS_TYPES.length)]();
+  document.getElementById('ns-sequence').textContent=nsCurrent.seq.join('  ,  ')+'  ,  ?';
+  document.getElementById('ns-msg').textContent='';
+  const ans=nsCurrent.ans;
+  const wrongs=new Set();
+  while(wrongs.size<3){ const w=ans+Math.floor(Math.random()*10)-5; if(w!==ans) wrongs.add(w); }
+  const opts=[ans,...wrongs].sort(()=>Math.random()-.5);
+  const ch=document.getElementById('ns-choices');
+  ch.innerHTML='';
+  opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.textContent=opt;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:18px;font-weight:700;cursor:pointer';
+    btn.onclick=()=>nsPick(opt,btn,ch);
+    ch.appendChild(btn);
+  });
+}
+function nsPick(opt,btn,ch){
+  Array.from(ch.children).forEach(b=>b.disabled=true);
+  if(opt===nsCurrent.ans){
+    btn.style.background='#538d4e'; nsScore+=10; nsStreak++;
+    document.getElementById('ns-msg').textContent='✅ Correct!';
+  } else {
+    btn.style.background='#8d3a3a'; nsStreak=0;
+    document.getElementById('ns-msg').textContent=`❌ Answer: ${nsCurrent.ans}`;
+    Array.from(ch.children).forEach(b=>{if(Number(b.textContent)===nsCurrent.ans)b.style.background='#538d4e';});
+  }
+  document.getElementById('ns-score').textContent=nsScore;
+  document.getElementById('ns-streak').textContent=nsStreak;
+  setTimeout(nsNext,1200);
+}
+
+
 </script>
-</body>
+
+
+    </body>
 </html>
