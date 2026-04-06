@@ -827,6 +827,14 @@
             <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
           </div>
 
+          <!-- Countdown Card -->
+          <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer" onclick="setPage('planner')">
+            <div class="section-label" style="margin-bottom:10px">⭐ UPCOMING</div>
+            <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
+            </div>
+          </div>
+
           <!-- Music Widget -->
           <div id="home-music-widget">
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
@@ -1416,6 +1424,26 @@
             <div class="app-icon" style="background:#1a2a1e">✍️</div>
             <span class="app-label">Fix It Up</span>
           </div>
+          <div class="app-tile" onclick="openBrainGame('spellingbee')">
+            <div class="app-icon" style="background:#2a2a1a">🐝</div>
+            <span class="app-label">Spelling Bee</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('scramble')">
+            <div class="app-icon" style="background:#1a1a2e">🔀</div>
+            <span class="app-label">Sentence Scramble</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('rhyme')">
+            <div class="app-icon" style="background:#2e1a2a">🎵</div>
+            <span class="app-label">Rhyme Time</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('pos')">
+            <div class="app-icon" style="background:#1a2e2a">📝</div>
+            <span class="app-label">Parts of Speech</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('wordproblem')">
+            <div class="app-icon" style="background:#2e2a1a">🧮</div>
+            <span class="app-label">Word Problems</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1587,6 +1615,105 @@
       </div>
     </div>
 
+
+    <!-- ══ SPELLING BEE ══ -->
+    <div id="page-bg-spellingbee" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🐝 Spelling Bee</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="sb-score">0</span> &nbsp;|&nbsp; Words: <span id="sb-found-count">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;flex:1;gap:12px;max-width:480px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div style="font-size:13px;color:#7a9e8e;text-align:center">Make words using the letters below. The center letter (gold) must be in every word. 4+ letters only.</div>
+        <div id="sb-hive" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0"></div>
+        <div style="display:flex;align-items:center;gap:10px;width:100%;max-width:360px">
+          <input id="sb-input" maxlength="20" placeholder="Type a word…" style="flex:1;background:#0f1f17;border:1px solid #1f3a2a;border-radius:8px;padding:10px 14px;color:#e8f0ed;font-size:16px;font-family:monospace;text-transform:uppercase;outline:none" onkeydown="if(event.key==='Enter')sbSubmit()">
+          <button onclick="sbSubmit()" style="background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer">Enter</button>
+          <button onclick="sbDelete()" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;font-size:14px;cursor:pointer">⌫</button>
+        </div>
+        <div id="sb-msg" style="font-size:13px;font-weight:600;color:#e8a020;min-height:20px"></div>
+        <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px;align-self:flex-start">Found Words</div>
+        <div id="sb-found-list" style="display:flex;flex-wrap:wrap;gap:6px;width:100%"></div>
+        <button onclick="sbNewPuzzle()" style="margin-top:8px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">New Puzzle</button>
+      </div>
+    </div>
+
+    <!-- ══ SENTENCE SCRAMBLE ══ -->
+    <div id="page-bg-scramble" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔀 Sentence Scramble</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="scr-score">0</span> &nbsp;|&nbsp; Streak: <span id="scr-streak">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div style="font-size:13px;color:#7a9e8e;text-align:center">Tap the words in the correct order to form a sentence.</div>
+        <div id="scr-selected" style="min-height:52px;background:#0f1f17;border:1px solid #1f3a2a;border-radius:10px;padding:12px 14px;width:100%;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:15px;color:#e8f0ed"></div>
+        <div id="scr-words" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%"></div>
+        <div style="display:flex;gap:10px;width:100%">
+          <button onclick="scrCheck()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:700;cursor:pointer">Check</button>
+          <button onclick="scrClear()" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:12px 18px;font-size:14px;cursor:pointer">Clear</button>
+          <button onclick="scrSkip()" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:12px 18px;font-size:14px;cursor:pointer">Skip →</button>
+        </div>
+        <div id="scr-msg" style="font-size:14px;font-weight:600;min-height:22px;text-align:center"></div>
+        <div id="scr-answer-reveal" style="display:none;background:#0f1f17;border:1px solid #1f3a2a;border-radius:10px;padding:14px 16px;width:100%;box-sizing:border-box">
+          <div style="font-size:11px;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Correct Order</div>
+          <div id="scr-correct-text" style="font-size:15px;color:#00d18c;font-weight:600"></div>
+          <button onclick="scrNext()" style="margin-top:10px;background:#1a2e24;color:#a0c9b8;border:1px solid #1f3a2a;border-radius:7px;padding:7px 20px;font-size:13px;cursor:pointer">Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RHYME TIME ══ -->
+    <div id="page-bg-rhyme" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🎵 Rhyme Time</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="rhyme-score">0</span> &nbsp;|&nbsp; Streak: <span id="rhyme-streak">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;overflow-y:auto;flex:1;gap:18px;max-width:420px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div style="font-size:13px;color:#7a9e8e">Which word rhymes with:</div>
+        <div id="rhyme-word" style="font-size:46px;font-weight:900;color:#e8f0ed;text-align:center"></div>
+        <div id="rhyme-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%"></div>
+        <div id="rhyme-msg" style="font-size:15px;font-weight:700;min-height:24px;text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- ══ PARTS OF SPEECH ══ -->
+    <div id="page-bg-pos" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">📝 Parts of Speech</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="pos-score">0</span> &nbsp;|&nbsp; Streak: <span id="pos-streak">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;overflow-y:auto;flex:1;gap:18px;max-width:460px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div id="pos-context" style="font-size:14px;color:#7a9e8e;text-align:center;font-style:italic;min-height:20px"></div>
+        <div style="font-size:14px;color:#a0c9b8">What part of speech is:</div>
+        <div id="pos-word" style="font-size:42px;font-weight:900;color:#e8f0ed;text-align:center"></div>
+        <div id="pos-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%"></div>
+        <div id="pos-msg" style="font-size:14px;font-weight:600;min-height:22px;text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- ══ WORD PROBLEMS ══ -->
+    <div id="page-bg-wordproblem" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🧮 Word Problems</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="wp-score">0</span> &nbsp;|&nbsp; Streak: <span id="wp-streak">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:500px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div id="wp-level-tabs" style="display:flex;gap:8px;background:#0f1a14;border-radius:10px;padding:4px">
+          <button id="wp-tab-easy" onclick="wpSetLevel('easy')" style="padding:7px 16px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:#00d18c;color:#0a1a12">Easy</button>
+          <button id="wp-tab-medium" onclick="wpSetLevel('medium')" style="padding:7px 16px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:#7a9e8e">Medium</button>
+          <button id="wp-tab-hard" onclick="wpSetLevel('hard')" style="padding:7px 16px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:#7a9e8e">Hard</button>
+        </div>
+        <div id="wp-question" style="font-size:16px;color:#e8f0ed;background:#0f1f17;border:1px solid #1f3a2a;border-radius:12px;padding:18px 20px;width:100%;box-sizing:border-box;line-height:1.7;min-height:80px"></div>
+        <div id="wp-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%"></div>
+        <div id="wp-msg" style="font-size:14px;font-weight:600;min-height:22px;text-align:center"></div>
+        <div id="wp-explanation" style="display:none;font-size:13px;color:#7a9e8e;background:#0f1f17;border:1px solid #1f3a2a;border-radius:8px;padding:12px 14px;width:100%;box-sizing:border-box"></div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /body -->
 
@@ -1620,6 +1747,12 @@
       <span style="font-size:12px;color:#7a9e8e">Color:</span>
       <div id="cal-color-swatches" style="display:flex;gap:6px"></div>
     </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#a0c9b8">
+        <input type="checkbox" id="cal-important-toggle" style="width:16px;height:16px;accent-color:#f7a94e;cursor:pointer">
+        ⭐ Mark as Important (adds to Countdown)
+      </label>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end">
       <button class="btn btn-ghost" onclick="calCloseModal()">Cancel</button>
       <button class="btn btn-accent" onclick="calSaveEvent()">Add</button>
@@ -1640,7 +1773,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup'];
+const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -1668,7 +1801,12 @@ function setPage(p) {
     document.getElementById('lang-score').textContent=0;
   }
   if(p==='bg-wordleditor') weLoad();
-  if(p==='bg-fixup' && typeof fixupNext!=='undefined') fixupStart();
+  if(p==='bg-fixup'       && typeof fixupStart!=='undefined')   fixupStart();
+  if(p==='bg-spellingbee' && typeof sbStart!=='undefined')    sbStart();
+  if(p==='bg-scramble'    && typeof scrNext!=='undefined')    scrStart();
+  if(p==='bg-rhyme'       && typeof rhymeNext!=='undefined')  rhymeStart();
+  if(p==='bg-pos'         && typeof posNext!=='undefined')    posStart();
+  if(p==='bg-wordproblem' && typeof wpNext!=='undefined')     wpStart();
   if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
   PAGES.forEach(id => {
     const el = document.getElementById('page-' + id);
@@ -1685,7 +1823,7 @@ function setPage(p) {
     renderPlannerSidebar();
     if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
-  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); }
+  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); renderCountdown(); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
   if (p === 'music') { musicInit(); hmwSyncState(); }
@@ -2435,6 +2573,7 @@ function calOpenModal(dateKey) {
   swatches.innerHTML = CAL_COLORS.map(c=>`
     <div class="color-swatch${c===calModalColor?' selected':''}" style="background:${c}" onclick="calSelectColor('${c}')"></div>
   `).join('');
+  const imp=document.getElementById('cal-important-toggle'); if(imp) imp.checked=false;
   document.getElementById('cal-modal').classList.add('open');
   setTimeout(()=>document.getElementById('cal-event-title').focus(),50);
 }
@@ -2451,19 +2590,22 @@ function calCloseModal() { document.getElementById('cal-modal').classList.remove
 function calSaveEvent() {
   const title = document.getElementById('cal-event-title').value.trim();
   if (!title) return;
-  const ev = { id: Date.now(), date: calModalDate, title, time: document.getElementById('cal-event-time').value, color: calModalColor };
+  const impEl=document.getElementById('cal-important-toggle');
+  const ev = { id: Date.now(), date: calModalDate, title, time: document.getElementById('cal-event-time').value, color: calModalColor, important: impEl?impEl.checked:false };
   const events = getCalEvents();
   events.push(ev);
   saveCalEvents(events);
   calCloseModal();
   renderCalendar();
   renderTodayCard();
+  renderCountdown();
 }
 
 function calDeleteEvent(id) {
   saveCalEvents(getCalEvents().filter(e=>e.id!==id));
   renderCalendar();
   renderTodayCard();
+  renderCountdown();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -5338,6 +5480,7 @@ function srPick(opt,btn,ch){
 // ── Wordle home card init (must run after all wordle vars/functions declared) ──
 (function(){
   try { wordleInit(); wordleRenderMini(); } catch(e) {}
+  try { renderCountdown(); } catch(e) {}
 })();
 
 
