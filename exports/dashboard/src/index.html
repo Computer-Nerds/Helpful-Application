@@ -5927,6 +5927,59 @@ const SB_PUZZLES = [
 ];
 let sbPuzzle=null, sbFoundWords=new Set(), sbScore=0;
 
+function sbGetCustom(puzzleKey){ try{return JSON.parse(localStorage.getItem('sb_custom_'+puzzleKey)||'{}');}catch{return {};} }
+function sbSaveCustom(puzzleKey,obj){ localStorage.setItem('sb_custom_'+puzzleKey, JSON.stringify(obj)); }
+function sbPuzzleKey(){ return sbPuzzle ? sbPuzzle.center+'_'+sbPuzzle.outer.join('') : ''; }
+function sbAddWord(word){
+  const key=sbPuzzleKey();
+  const custom=sbGetCustom(key);
+  const pts = word.length <= 4 ? 1 : word.length;
+  custom[word]=pts;
+  sbSaveCustom(key,custom);
+  // hide prompt
+  const p=document.getElementById('sb-add-prompt');
+  if(p) p.style.display='none';
+  const msg=document.getElementById('sb-msg');
+  msg.style.color='#4e9fd4'; msg.textContent=`"${word.toUpperCase()}" added (+${pts} pts)!`;
+  setTimeout(()=>{ if(msg.textContent.includes('added')) msg.textContent=''; },1200);
+  sbRenderCustomList();
+}
+function sbRenderCustomList(){
+  const key=sbPuzzleKey();
+  const custom=sbGetCustom(key);
+  const list=document.getElementById('sb-custom-list');
+  if(!list) return;
+  const entries=Object.entries(custom);
+  if(entries.length===0){ list.innerHTML='<span style="font-size:12px;color:#7a9e8e">No custom words yet.</span>'; return; }
+  list.innerHTML='';
+  entries.forEach(function(entry){
+    const w=entry[0], pts=entry[1];
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px';
+    const wordSpan=document.createElement('span');
+    wordSpan.style.cssText='font-family:monospace;font-weight:700;color:#e8f0ed;font-size:13px';
+    wordSpan.textContent=w.toUpperCase();
+    const ptsSpan=document.createElement('span');
+    ptsSpan.style.cssText='color:#00d18c;font-size:12px';
+    ptsSpan.textContent=pts+' pts';
+    const delBtn=document.createElement('button');
+    delBtn.style.cssText='margin-left:auto;background:none;border:none;color:#7a9e8e;cursor:pointer;font-size:14px;padding:0';
+    delBtn.textContent='✕';
+    delBtn.addEventListener('click',function(){ sbRemoveWord(w); });
+    row.appendChild(wordSpan);
+    row.appendChild(ptsSpan);
+    row.appendChild(delBtn);
+    list.appendChild(row);
+  });
+}
+function sbRemoveWord(word){
+  const key=sbPuzzleKey();
+  const custom=sbGetCustom(key);
+  delete custom[word];
+  sbSaveCustom(key,custom);
+  sbRenderCustomList();
+}
+
 function sbStart() {
   sbFoundWords=new Set(); sbScore=0;
   document.getElementById('sb-score').textContent=0;
@@ -5960,45 +6013,6 @@ function sbNewPuzzle() {
     };
     hive.appendChild(btn);
   });
-}
-function sbGetCustom(puzzleKey){ try{return JSON.parse(localStorage.getItem('sb_custom_'+puzzleKey)||'{}');}catch{return {};} }
-function sbSaveCustom(puzzleKey,obj){ localStorage.setItem('sb_custom_'+puzzleKey, JSON.stringify(obj)); }
-function sbPuzzleKey(){ return sbPuzzle ? sbPuzzle.center+'_'+sbPuzzle.outer.join('') : ''; }
-function sbAddWord(word){
-  const key=sbPuzzleKey();
-  const custom=sbGetCustom(key);
-  const pts = word.length <= 4 ? 1 : word.length;
-  custom[word]=pts;
-  sbSaveCustom(key,custom);
-  // hide prompt
-  const p=document.getElementById('sb-add-prompt');
-  if(p) p.style.display='none';
-  const msg=document.getElementById('sb-msg');
-  msg.style.color='#4e9fd4'; msg.textContent=`"${word.toUpperCase()}" added (+${pts} pts)!`;
-  setTimeout(()=>{ if(msg.textContent.includes('added')) msg.textContent=''; },1200);
-  sbRenderCustomList();
-}
-function sbRenderCustomList(){
-  const key=sbPuzzleKey();
-  const custom=sbGetCustom(key);
-  const list=document.getElementById('sb-custom-list');
-  if(!list) return;
-  const entries=Object.entries(custom);
-  if(entries.length===0){ list.innerHTML='<span style="font-size:12px;color:#7a9e8e">No custom words yet.</span>'; return; }
-  list.innerHTML='';
-  entries.forEach(([w,pts])=>{
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px';
-    row.innerHTML=`<span style="font-family:monospace;font-weight:700;color:#e8f0ed;font-size:13px">${w.toUpperCase()}</span><span style="color:#00d18c;font-size:12px">${pts} pts</span><button onclick="sbRemoveWord('${w}')" style="margin-left:auto;background:none;border:none;color:#7a9e8e;cursor:pointer;font-size:14px;padding:0">✕</button>`;
-    list.appendChild(row);
-  });
-}
-function sbRemoveWord(word){
-  const key=sbPuzzleKey();
-  const custom=sbGetCustom(key);
-  delete custom[word];
-  sbSaveCustom(key,custom);
-  sbRenderCustomList();
 }
 function sbSubmit() {
   const inp = document.getElementById('sb-input');
@@ -6212,37 +6226,37 @@ const POS_DEFS = {
   Adverb:    { color:'#00d18c', label:'Adverb',    icon:'🟢', desc:'Modifies a verb, adjective, or another adverb. Often ends in -ly.', tip:'Tip: Ask "how?" "when?" or "where?" about the verb — ran quickly, barely made it.' },
 };
 const POS_DATA = [
-  {word:'quickly',  answer:'Adverb',    context:'She ran quickly to the store.',                  def:'Done in a fast manner; with speed.'},
-  {word:'beautiful',answer:'Adjective', context:'The beautiful painting hung on the wall.',       def:'Pleasing to the senses; having qualities that delight.'},
-  {word:'elephant', answer:'Noun',      context:'The elephant splashed in the water.',            def:'A large mammal with a trunk, native to Africa and Asia.'},
-  {word:'jumped',   answer:'Verb',      context:'The frog jumped over the log.',                  def:'Moved suddenly off the ground by muscular effort.'},
-  {word:'happily',  answer:'Adverb',    context:'She happily accepted the gift.',                 def:'In a happy or joyful manner.'},
-  {word:'enormous', answer:'Adjective', context:'The enormous wave crashed on the shore.',        def:'Very large in size, quantity, or extent.'},
-  {word:'freedom',  answer:'Noun',      context:'Freedom is a fundamental right.',               def:'The power or right to act, speak, or think without restraint.'},
-  {word:'whispered',answer:'Verb',      context:'He whispered a secret in her ear.',              def:'Spoke very softly, using one's breath rather than one's throat.'},
-  {word:'softly',   answer:'Adverb',    context:'The wind blew softly through the trees.',       def:'In a quiet, gentle, or subdued manner.'},
-  {word:'ancient',  answer:'Adjective', context:'They discovered an ancient temple.',             def:'Belonging to the very distant past; extremely old.'},
-  {word:'curiosity',answer:'Noun',      context:'Curiosity led her to explore further.',          def:'A strong desire to know or learn something.'},
-  {word:'devoured', answer:'Verb',      context:'The dragon devoured the entire feast.',          def:'Ate something eagerly and in large amounts.'},
-  {word:'fiercely', answer:'Adverb',    context:'The competitors fiercely battled for first.',   def:'In an intensely aggressive or strong manner.'},
-  {word:'fragile',  answer:'Adjective', context:'Handle the fragile glassware carefully.',       def:'Easily broken or damaged; delicate.'},
-  {word:'justice',  answer:'Noun',      context:'The judge sought justice for all.',             def:'The quality of being fair and reasonable; the legal system.'},
-  {word:'stumbled', answer:'Verb',      context:'He stumbled on the dark staircase.',            def:'Tripped or lost one's balance while walking or running.'},
-  {word:'barely',   answer:'Adverb',    context:'She barely made it on time.',                   def:'Only just; by the smallest possible margin.'},
-  {word:'vibrant',  answer:'Adjective', context:'The vibrant mural decorated the entire wall.', def:'Full of energy and enthusiasm; bright and striking.'},
-  {word:'harvest',  answer:'Noun',      context:'The harvest this year was exceptional.',        def:'The process or period of gathering in crops; the season's yield.'},
-  {word:'glimmered',answer:'Verb',      context:'Stars glimmered in the clear night sky.',       def:'Shone with a faint or wavering light.'},
-  {word:'gracefully',answer:'Adverb',  context:'The dancer moved gracefully across the stage.', def:'In a smooth, elegant, and attractive manner.'},
-  {word:'wilderness',answer:'Noun',    context:'They hiked deep into the wilderness.',           def:'An uncultivated, uninhabited region; wild, natural land.'},
-  {word:'shattered',answer:'Verb',     context:'The vase shattered when it hit the floor.',     def:'Broke suddenly into many pieces.'},
-  {word:'mysterious',answer:'Adjective',context:'A mysterious figure stood in the fog.',        def:'Difficult to understand or explain; full of mystery.'},
-  {word:'gradually', answer:'Adverb',  context:'The fog gradually lifted in the morning.',      def:'In a way that happens slowly, by degrees, over time.'},
-  {word:'abundance', answer:'Noun',    context:'The garden grew in abundance this summer.',      def:'A very large quantity of something; more than enough.'},
-  {word:'collapsed', answer:'Verb',    context:'The old bridge collapsed during the storm.',     def:'Fell down or gave way suddenly.'},
-  {word:'elegant',   answer:'Adjective',context:'She wore an elegant gown to the gala.',        def:'Graceful and stylish in appearance or manner.'},
-  {word:'swiftly',   answer:'Adverb',  context:'The river swiftly carried the leaves away.',   def:'At high speed; quickly and without delay.'},
-  {word:'knowledge', answer:'Noun',    context:'Knowledge is the greatest gift of education.',  def:'Facts, information, and skills acquired through learning.'},
-  {word:'trembled',  answer:'Verb',    context:'Her hands trembled as she opened the letter.',  def:'Shook involuntarily, typically from fear or excitement.'},
+  {word:'quickly',   answer:'Adverb',    context:'She ran quickly to the store.',                 def:"Done in a fast manner; with speed."},
+  {word:'beautiful', answer:'Adjective', context:'The beautiful painting hung on the wall.',      def:"Pleasing to the senses; having qualities that delight."},
+  {word:'elephant',  answer:'Noun',      context:'The elephant splashed in the water.',           def:"A large mammal with a trunk, native to Africa and Asia."},
+  {word:'jumped',    answer:'Verb',      context:'The frog jumped over the log.',                 def:"Moved suddenly off the ground by muscular effort."},
+  {word:'happily',   answer:'Adverb',    context:'She happily accepted the gift.',                def:"In a happy or joyful manner."},
+  {word:'enormous',  answer:'Adjective', context:'The enormous wave crashed on the shore.',       def:"Very large in size, quantity, or extent."},
+  {word:'freedom',   answer:'Noun',      context:'Freedom is a fundamental right.',              def:"The power or right to act, speak, or think without restraint."},
+  {word:'whispered', answer:'Verb',      context:'He whispered a secret in her ear.',             def:"Spoke very softly, using one's breath rather than one's throat."},
+  {word:'softly',    answer:'Adverb',    context:'The wind blew softly through the trees.',      def:"In a quiet, gentle, or subdued manner."},
+  {word:'ancient',   answer:'Adjective', context:'They discovered an ancient temple.',            def:"Belonging to the very distant past; extremely old."},
+  {word:'curiosity', answer:'Noun',      context:'Curiosity led her to explore further.',         def:"A strong desire to know or learn something."},
+  {word:'devoured',  answer:'Verb',      context:'The dragon devoured the entire feast.',         def:"Ate something eagerly and in large amounts."},
+  {word:'fiercely',  answer:'Adverb',    context:'The competitors fiercely battled for first.',  def:"In an intensely aggressive or strong manner."},
+  {word:'fragile',   answer:'Adjective', context:'Handle the fragile glassware carefully.',      def:"Easily broken or damaged; delicate."},
+  {word:'justice',   answer:'Noun',      context:'The judge sought justice for all.',            def:"The quality of being fair and reasonable; the legal system."},
+  {word:'stumbled',  answer:'Verb',      context:'He stumbled on the dark staircase.',           def:"Tripped or lost one's balance while walking or running."},
+  {word:'barely',    answer:'Adverb',    context:'She barely made it on time.',                  def:"Only just; by the smallest possible margin."},
+  {word:'vibrant',   answer:'Adjective', context:'The vibrant mural decorated the entire wall.',def:"Full of energy and enthusiasm; bright and striking."},
+  {word:'harvest',   answer:'Noun',      context:'The harvest this year was exceptional.',       def:"The process of gathering crops; the season's yield."},
+  {word:'glimmered', answer:'Verb',      context:'Stars glimmered in the clear night sky.',      def:"Shone with a faint or wavering light."},
+  {word:'gracefully',answer:'Adverb',    context:'The dancer moved gracefully across the stage.',def:"In a smooth, elegant, and attractive manner."},
+  {word:'wilderness',answer:'Noun',      context:'They hiked deep into the wilderness.',         def:"An uncultivated, uninhabited region; wild, natural land."},
+  {word:'shattered', answer:'Verb',      context:'The vase shattered when it hit the floor.',   def:"Broke suddenly into many pieces."},
+  {word:'mysterious',answer:'Adjective', context:'A mysterious figure stood in the fog.',        def:"Difficult to understand or explain; full of mystery."},
+  {word:'gradually', answer:'Adverb',    context:'The fog gradually lifted in the morning.',     def:"In a way that happens slowly, by degrees, over time."},
+  {word:'abundance', answer:'Noun',      context:'The garden grew in abundance this summer.',    def:"A very large quantity of something; more than enough."},
+  {word:'collapsed', answer:'Verb',      context:'The old bridge collapsed during the storm.',   def:"Fell down or gave way suddenly."},
+  {word:'elegant',   answer:'Adjective', context:'She wore an elegant gown to the gala.',       def:"Graceful and stylish in appearance or manner."},
+  {word:'swiftly',   answer:'Adverb',    context:'The river swiftly carried the leaves away.',  def:"At high speed; quickly and without delay."},
+  {word:'knowledge', answer:'Noun',      context:'Knowledge is the greatest gift of education.',def:"Facts, information, and skills acquired through learning."},
+  {word:'trembled',  answer:'Verb',      context:'Her hands trembled as she opened the letter.',def:"Shook involuntarily, typically from fear or excitement."},
 ];
 let posScore=0, posStreak=0;
 function posStart(){ posScore=0; posStreak=0; document.getElementById('pos-score').textContent=0; document.getElementById('pos-streak').textContent=0; posNext(); }
