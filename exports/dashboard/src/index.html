@@ -635,6 +635,15 @@
               <div class="prog-track"><div class="prog-fill" id="typing-daily-bar" style="width:0%;background:#f7a94e"></div></div>
               <div class="daily-goal" id="typing-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
+
+            <div class="daily-row">
+              <div class="daily-header">
+                <div class="daily-label"><span>🧮</span> Math</div>
+                <span class="daily-time" id="math-daily-time">0m / 15m</span>
+              </div>
+              <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
+              <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
+            </div>
           </div>
 
           <!-- Projects -->
@@ -805,6 +814,8 @@
           <button class="btn btn-ghost" onclick="closeApp('math')">← Apps</button>
           <span style="font-size:16px;font-weight:800">🧮 Math</span>
           <div style="flex:1"></div>
+          <div id="math-timer-display" style="font-size:13px;font-weight:700;color:#e8a020;letter-spacing:1px;min-width:52px;text-align:center">0:00</div>
+          <button id="math-timer-btn" onclick="mathTimerToggle()" style="background:#e8a02022;border:1px solid #e8a02044;color:#e8a020;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;margin:0 4px">▶ Start</button>
           <button class="btn btn-ghost" onclick="mathReset()" style="font-size:13px;color:#3a5548">↺ Reset</button>
         </div>
 
@@ -1142,7 +1153,13 @@ function setPage(p) {
 }
 
 function openApp(app) { setPage(app); }
-function closeApp(app) { setPage('apps'); }
+function closeApp(app) {
+  if(app==='math' && typeof mathTimerRunning!=='undefined' && mathTimerRunning){
+    clearInterval(mathTimerInterval); mathTimerRunning=false;
+    if(document.getElementById('math-timer-btn')) document.getElementById('math-timer-btn').textContent='▶ Start';
+  }
+  setPage('apps');
+}
 
 // ════════════════════════════════════════════════════════════
 //  CLOCK + GREETING
@@ -1194,7 +1211,7 @@ async function fetchWeather() {
     tw.style.display = 'flex';
     document.getElementById('today-weather-icon').textContent = weatherEmoji(cd.weather[0].id);
     document.getElementById('today-temp').textContent = Math.round(cd.main.temp) + '°F';
-    document.getElementById('today-hilow').textContent = Math.round(cd.main.temp_max) + '° / ' + Math.round(cd.main.temp_min) + '°';
+    // hi/low will be filled in from forecast data below
     document.getElementById('today-desc').textContent = weatherLabel(cd.weather[0].id);
 
     const fr = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(CITY)}&appid=${WEATHER_KEY}&units=imperial`);
@@ -1211,6 +1228,11 @@ async function fetchWeather() {
       if(hour>=11&&hour<=14) days[key].noonId=item.weather[0].id;
     });
     const todayKey = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    // Fill today's hi/low from forecast data (more accurate than current weather endpoint)
+    if(days[todayKey]){
+      const td=days[todayKey];
+      document.getElementById('today-hilow').textContent=Math.round(Math.max(...td.temps))+'° / '+Math.round(Math.min(...td.temps))+'°';
+    }
     const fcast = Object.entries(days).filter(([k])=>k!==todayKey).slice(0,5).map(([,v])=>{
       // Use noon reading if available; otherwise use the best daytime (worst = cloudy = high id) reading
       let iconId = v.noonId;
@@ -1260,23 +1282,29 @@ function renderHomeDailys() {
   const cs = parseInt(localStorage.getItem('chessTimer')||'0');
   const ps = parseInt(localStorage.getItem('pianoTimer')||'0');
   const ts = parseInt(localStorage.getItem('typingTimer')||'0');
+  const ms = parseInt(localStorage.getItem('mathTimer')||'0');
 
   const ct = document.getElementById('chess-daily-time');
   const pt = document.getElementById('piano-daily-time');
   const tt = document.getElementById('typing-daily-time');
+  const mt = document.getElementById('math-daily-time');
   const cb = document.getElementById('chess-daily-bar');
   const pb = document.getElementById('piano-daily-bar');
   const tb = document.getElementById('typing-daily-bar');
+  const mb = document.getElementById('math-daily-bar');
 
   ct.textContent = Math.floor(cs/60)+'m / 30m'; ct.className = 'daily-time' + (cs>=1800?' done':'');
   pt.textContent = Math.floor(ps/60)+'m / 30m'; pt.className = 'daily-time' + (ps>=1800?' done':'');
   tt.textContent = Math.floor(ts/60)+'m / 15m'; tt.className = 'daily-time' + (ts>=900?' done':'');
+  mt.textContent = Math.floor(ms/60)+'m / 15m'; mt.className = 'daily-time' + (ms>=900?' done':'');
   cb.style.width = Math.min((cs/1800)*100,100)+'%'; cb.style.background = cs>=1800?'#00d18c':'#4e8ef7';
   pb.style.width = Math.min((ps/1800)*100,100)+'%'; pb.style.background = ps>=1800?'#00d18c':'#a855f7';
   tb.style.width = Math.min((ts/900)*100,100)+'%';  tb.style.background = ts>=900?'#00d18c':'#f7a94e';
+  mb.style.width = Math.min((ms/900)*100,100)+'%';  mb.style.background = ms>=900?'#00d18c':'#e8a020';
   document.getElementById('chess-daily-goal').style.display = cs>=1800?'block':'none';
   document.getElementById('piano-daily-goal').style.display = ps>=1800?'block':'none';
   document.getElementById('typing-daily-goal').style.display = ts>=900?'block':'none';
+  document.getElementById('math-daily-goal').style.display   = ms>=900?'block':'none';
 }
 
 function renderHomeProjects() {
@@ -2411,6 +2439,7 @@ function musicTogglePlay(){
   if(!audio.src&&musicTracks.length){musicCurrent=musicTracks[0].id;renderMusicTracks();musicLoadCurrent();}
   if(musicPlaying){audio.pause();musicPlaying=false;document.getElementById('music-play-btn').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';}
   else{audio.play().catch(()=>{});musicPlaying=true;document.getElementById('music-play-btn').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';}
+  hmwSyncState();
 }
 
 function musicNext(){
@@ -2553,6 +2582,47 @@ async function musicHandleArt(files){
       level:m.level,xp:m.xp,streak:m.streak,best:m.best,correct:m.correct,wrong:m.wrong,ops:m.ops
     }));
   }
+
+  // ── Timer ────────────────────────────────────────────────────
+  let mathTimerSecs = 0;
+  let mathTimerRunning = false;
+  let mathTimerInterval = null;
+
+  function mathTimerLoad(){
+    const today = new Date().toLocaleDateString();
+    const saved = JSON.parse(localStorage.getItem('mathTimerData')||'{}');
+    mathTimerSecs = saved.date===today ? (saved.secs||0) : 0;
+    localStorage.setItem('mathTimer', mathTimerSecs);
+  }
+  function mathTimerSave(){
+    const today = new Date().toLocaleDateString();
+    localStorage.setItem('mathTimerData', JSON.stringify({date:today,secs:mathTimerSecs}));
+    localStorage.setItem('mathTimer', mathTimerSecs);
+  }
+  function mathTimerRender(){
+    const m2=Math.floor(mathTimerSecs/60), s=mathTimerSecs%60;
+    const disp=document.getElementById('math-timer-display');
+    const btn=document.getElementById('math-timer-btn');
+    if(disp) disp.textContent=m2+':'+(s<10?'0':'')+s;
+    if(btn)  btn.textContent=mathTimerRunning?'⏸ Pause':'▶ Start';
+  }
+  window.mathTimerToggle=function(){
+    if(mathTimerRunning){
+      clearInterval(mathTimerInterval);
+      mathTimerRunning=false;
+    } else {
+      mathTimerRunning=true;
+      mathTimerInterval=setInterval(()=>{
+        mathTimerSecs++;
+        mathTimerSave();
+        mathTimerRender();
+        if(mathTimerSecs===900){ // 15 min goal reached
+          document.getElementById('math-timer-display').style.color='#00d18c';
+        }
+      },1000);
+    }
+    mathTimerRender();
+  };
 
   // ── XP & Levelling ──────────────────────────────────────────
   function mAddXP(amount){
@@ -2735,6 +2805,8 @@ async function musicHandleArt(files){
   // ── Init ─────────────────────────────────────────────────────
   window.mathInit=function(){
     mLoad();
+    mathTimerLoad();
+    mathTimerRender();
     // Restore op button states
     document.querySelectorAll('.math-op-btn').forEach(b=>{
       b.classList.toggle('active', m.ops.includes(b.dataset.op));
