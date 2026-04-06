@@ -719,39 +719,40 @@
     body.edit-mode #home-cards > *:hover {
       outline-color: #00d18c !important;
     }
-    /* OVERLAY system — one .card-ov per card injected by JS */
-    .card-ov {
-      display:none;
-      position:absolute;
-      z-index:500;
-      box-sizing:border-box;
-      border-radius:14px;
-      cursor:grab;
+    /* ── In-card drag/resize handles ── */
+    .card-drag-bar {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      margin: -4px -4px 8px -4px;
+      border-radius: 12px 12px 0 0;
+      background: rgba(0,209,140,0.08);
+      cursor: grab;
+      flex-shrink: 0;
     }
-    .card-ov:active { cursor:grabbing; }
-    body.edit-mode .card-ov { display:block; }
-    .card-ov-drag {
-      position:absolute; top:0; left:0; right:26px; height:26px;
-      cursor:grab; border-radius:12px 0 0 0;
-      display:flex; align-items:center; justify-content:center;
-      background:rgba(0,209,140,0.12);
+    body.edit-mode .card-drag-bar { display: flex; }
+    .card-drag-bar:hover { background: rgba(0,209,140,0.18); }
+    .card-drag-bar:active { cursor: grabbing; }
+    .card-drag-bar-dots {
+      width: 28px; height: 3px; border-radius: 2px;
+      background: rgba(0,209,140,0.4); pointer-events: none;
     }
-    .card-ov-drag:hover { background:rgba(0,209,140,0.22); }
-    .card-ov-drag:active { cursor:grabbing; }
-    .card-ov-dots {
-      width:24px; height:4px; border-radius:2px;
-      background:rgba(0,209,140,0.5); pointer-events:none;
+    .card-resize-handle {
+      display: none;
+      align-items: flex-end;
+      justify-content: flex-end;
+      position: absolute;
+      bottom: 4px; right: 4px;
+      width: 20px; height: 20px;
+      cursor: se-resize;
+      border-radius: 0 0 10px 0;
+      padding: 3px;
+      background: rgba(0,209,140,0.08);
     }
-    .card-ov-resize {
-      position:absolute; bottom:0; right:0;
-      width:26px; height:26px; cursor:se-resize;
-      display:flex; align-items:flex-end; justify-content:flex-end;
-      padding:5px; border-radius:0 0 12px 0;
-      background:rgba(0,209,140,0.12);
-    }
-    .card-ov-resize:hover { background:rgba(0,209,140,0.22); }
-    .card-ov-resize svg { pointer-events:none; }
-    .card-drag-bar, .card-resize-handle, .card-click-shield { display:none !important; }
+    body.edit-mode .card-resize-handle { display: flex; }
+    .card-resize-handle:hover { background: rgba(0,209,140,0.2); }
+    .card-resize-handle svg { pointer-events: none; }
 
     /* Quote card */
     #home-quote-card {
@@ -861,24 +862,21 @@
           <span id="home-edit-label">Edit</span>
         </button>
         <div id="home-cards">
-
           <!-- Today card -->
-          <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')">
-            
-            
+          <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')" style="position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:12px">TODAY</div>
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
             <div id="today-events"></div>
             <div id="today-nav-hint">Click to open calendar →</div>
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Dailys card -->
-          <div id="dailys-card">
-            
-            
+          <div id="dailys-card" style="position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:14px">Dailys</div>
-
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>♟️</span> Chess</div>
@@ -887,7 +885,6 @@
               <div class="prog-track"><div class="prog-fill" id="chess-daily-bar" style="width:0%;background:#4e8ef7"></div></div>
               <div class="daily-goal" id="chess-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
-
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>🎹</span> Piano</div>
@@ -896,7 +893,6 @@
               <div class="prog-track"><div class="prog-fill" id="piano-daily-bar" style="width:0%;background:#a855f7"></div></div>
               <div class="daily-goal" id="piano-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
-
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>⌨️</span> Typing</div>
@@ -905,7 +901,6 @@
               <div class="prog-track"><div class="prog-fill" id="typing-daily-bar" style="width:0%;background:#f7a94e"></div></div>
               <div class="daily-goal" id="typing-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
-
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>🧮</span> Math</div>
@@ -914,56 +909,54 @@
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Projects -->
-          <div id="home-projects">
-            
-            
+          <div id="home-projects" style="position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
-          
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Wordle Mini Card -->
-          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px">
-            
-            
+          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
             <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Countdown Card -->
-          <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer" onclick="setPage('planner')">
-            
-            
+          <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer;position:relative;display:flex;flex-direction:column" onclick="setPage('planner')">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:10px">⭐ UPCOMING</div>
             <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
             </div>
-          
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Fitness Card -->
-          <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
-            
-            
-            </div>
+          <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          </div>
 
           <!-- Quote of the Day Card -->
-          <div id="home-quote-card">
-            
-            
+          <div id="home-quote-card" style="position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
             <div id="quote-text" class="quote-text"></div>
             <div id="quote-author" class="quote-author"></div>
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Music Widget -->
-          <div id="home-music-widget">
-            
-            
+          <div id="home-music-widget" style="position:relative;display:flex;flex-direction:column">
+            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
             <div id="hmw-art-row">
               <div id="hmw-art">♪</div>
@@ -981,10 +974,10 @@
               <button class="hmw-btn" onclick="musicNext();hmwSyncState()" title="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
               <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
+            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
-            
-
-        </div>
+        
+        
       </div>
     </div>
 
@@ -2170,7 +2163,6 @@
 
 <script>
   // clear stale layout keys
-  ['homeCardLayout','homeCardLayoutV2','hcLayout3'].forEach(function(k){localStorage.removeItem(k);});
 // ════════════════════════════════════════════════════════════
 //  TITLEBAR
 // ════════════════════════════════════════════════════════════
@@ -7456,15 +7448,15 @@ function fitRenderHomeFitnessCard() {
 // ════════════════════════════════════════════════
 //  FREEFORM EDIT MODE  (overlay system v2)
 // ════════════════════════════════════════════════
+//  DASHBOARD DRAG & RESIZE
+// ════════════════════════════════════════════════
 var editModeActive = false;
-var _cardOverlays  = {};  // id -> overlay element
 
 var CARD_IDS = [
   'today-card','dailys-card','home-projects','home-wordle-card',
   'home-countdown-card','home-fitness-card','home-quote-card','home-music-widget'
 ];
 
-// ─── Toggle ───────────────────────────────────
 function toggleEditMode() {
   editModeActive = !editModeActive;
   document.body.classList.toggle('edit-mode', editModeActive);
@@ -7477,184 +7469,145 @@ function toggleEditMode() {
   if (!container) return;
 
   if (editModeActive) {
-    enterFreeform(container);
+    // Switch to freeform (absolute positioning)
+    container.classList.add('freeform');
+    var saved = _loadLayout();
+    var layout = saved || _autoLayout(container);
+    var maxBottom = 700;
+    CARD_IDS.forEach(function(id) {
+      var p = layout[id]; if (!p) return;
+      maxBottom = Math.max(maxBottom, p.top + p.height + 40);
+    });
+    container.style.minHeight = maxBottom + 'px';
+    CARD_IDS.forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      var p = layout[id] || {left:14, top:14, width:el.offsetWidth||220, height:el.offsetHeight||180};
+      el.style.left   = p.left   + 'px';
+      el.style.top    = p.top    + 'px';
+      el.style.width  = p.width  + 'px';
+      el.style.height = p.height + 'px';
+    });
+    _initDragResize(container);
   } else {
-    _saveFreeformLayout();          // capture positions while still absolute
-    exitFreeform(container);
-    _destroyOverlays(container);
+    // Save layout then restore flex
+    _saveLayout(container);
+    container.classList.remove('freeform');
+    container.style.minHeight = '';
+    CARD_IDS.forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      el.style.left = el.style.top = el.style.width = el.style.height = el.style.zIndex = '';
+    });
+    _teardownDragResize();
   }
 }
 
-// ─── Enter freeform ───────────────────────────
-function enterFreeform(container) {
-  container.classList.add('freeform');
-
-  var saved  = _loadFreeformLayout();
-  var layout = saved || _autoLayout(container);
-
-  // Size the canvas
-  var maxBottom = 700;
-  CARD_IDS.forEach(function(id) {
-    var p = layout[id]; if (!p) return;
-    maxBottom = Math.max(maxBottom, p.top + p.height + 40);
-  });
-  container.style.minHeight = maxBottom + 'px';
-
-  // Position every card
-  CARD_IDS.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var p = layout[id] || { left:14, top:14, width:240, height:200 };
-    el.style.left   = p.left   + 'px';
-    el.style.top    = p.top    + 'px';
-    el.style.width  = p.width  + 'px';
-    el.style.height = p.height + 'px';
-  });
-
-  // Build overlays (they sit in front and intercept drag/resize)
-  CARD_IDS.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var p = layout[id] || { left:14, top:14, width:240, height:200 };
-    var ov = _makeOverlay(id, p, el, container);
-    container.appendChild(ov);
-    _cardOverlays[id] = ov;
-  });
-}
-
-// ─── Exit freeform ────────────────────────────
-function exitFreeform(container) {
-  container.classList.remove('freeform');
-  container.style.minHeight = '';
-  CARD_IDS.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.style.position = '';
-    el.style.left     = '';
-    el.style.top      = '';
-    el.style.width    = '';
-    el.style.height   = '';
-    el.style.zIndex   = '';
-    el.style.overflow = '';
-  });
-}
-
-function _destroyOverlays(container) {
-  Object.keys(_cardOverlays).forEach(function(id) {
-    var ov = _cardOverlays[id];
-    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
-    delete _cardOverlays[id];
-  });
-}
-
-// ─── Build one overlay ─────────────────────────
-function _makeOverlay(id, pos, el, container) {
-  var ov = document.createElement('div');
-  ov.className = 'card-ov';
-  ov.setAttribute('data-for', id);
-  ov.style.left   = pos.left   + 'px';
-  ov.style.top    = pos.top    + 'px';
-  ov.style.width  = pos.width  + 'px';
-  ov.style.height = pos.height + 'px';
-
-  ov.innerHTML =
-    '<div class="card-ov-drag"><div class="card-ov-dots"></div></div>' +
-    '<div class="card-ov-resize">' +
-      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round">' +
-        '<line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/>' +
-      '</svg>' +
-    '</div>';
-
-  // DRAG
-  ov.querySelector('.card-ov-drag').onmousedown = function(e) {
-    e.preventDefault(); e.stopPropagation();
-    _bringToFront(el, ov);
-    var sx = e.clientX, sy = e.clientY;
-    var ol = parseFloat(el.style.left) || 0;
-    var ot = parseFloat(el.style.top)  || 0;
-    function mv(e2) {
-      var nl = Math.max(0, ol + e2.clientX - sx);
-      var nt = Math.max(0, ot + e2.clientY - sy);
-      el.style.left = nl + 'px'; ov.style.left = nl + 'px';
-      el.style.top  = nt + 'px'; ov.style.top  = nt + 'px';
-      var bot = nt + el.offsetHeight + 40;
-      if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
-    }
-    function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
-    document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
-  };
-
-  // RESIZE
-  ov.querySelector('.card-ov-resize').onmousedown = function(e) {
-    e.preventDefault(); e.stopPropagation();
-    _bringToFront(el, ov);
-    var sx = e.clientX, sy = e.clientY;
-    var sw = el.offsetWidth, sh = el.offsetHeight;
-    function mv(e2) {
-      var nw = Math.max(160, sw + e2.clientX - sx);
-      var nh = Math.max(100, sh + e2.clientY - sy);
-      el.style.width  = nw+'px'; ov.style.width  = nw+'px';
-      el.style.height = nh+'px'; ov.style.height = nh+'px';
-      var bot = parseFloat(el.style.top||0) + nh + 40;
-      if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
-    }
-    function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
-    document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
-  };
-
-  return ov;
-}
-
-function _bringToFront(el, ov) {
-  var maxZ = 10;
-  CARD_IDS.forEach(function(id) {
-    var e = document.getElementById(id); if(e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex||10));
-    var o = _cardOverlays[id]; if(o) maxZ = Math.max(maxZ, parseInt(o.style.zIndex||10));
-  });
-  el.style.zIndex = maxZ + 1;
-  if (ov) ov.style.zIndex = maxZ + 2;
-}
-
-// ─── Auto layout ──────────────────────────────
-function _autoLayout(container) {
-  var W    = container.offsetWidth || 900;
-  var cols = Math.max(2, Math.floor(W / 260));
-  var cardW = Math.floor((W - (cols+1)*14) / cols);
-  var layout = {}; var x=14, y=14, rowH=0, col=0;
+// Wire drag bars and resize handles
+var _dragCleanups = [];
+function _initDragResize(container) {
+  _teardownDragResize();
   CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
-    var h = Math.max(el.offsetHeight||180, 160);
-    layout[id] = { left:x, top:y, width:cardW, height:h };
-    rowH = Math.max(rowH, h); col++;
-    if (col >= cols) { col=0; x=14; y+=rowH+14; rowH=0; } else { x+=cardW+14; }
+    var dragBar    = el.querySelector('.card-drag-bar');
+    var resizeHdl  = el.querySelector('.card-resize-handle');
+
+    if (dragBar) {
+      var onDragDown = function(e) {
+        if (!editModeActive) return;
+        e.preventDefault(); e.stopPropagation();
+        _bringToFront(el);
+        var sx = e.clientX, sy = e.clientY;
+        var ol = parseFloat(el.style.left)||0, ot = parseFloat(el.style.top)||0;
+        function mv(e2) {
+          el.style.left = Math.max(0, ol + e2.clientX - sx) + 'px';
+          el.style.top  = Math.max(0, ot + e2.clientY - sy) + 'px';
+          var bot = parseFloat(el.style.top) + el.offsetHeight + 40;
+          if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
+        }
+        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+      };
+      dragBar.addEventListener('mousedown', onDragDown);
+      _dragCleanups.push(function(){ dragBar.removeEventListener('mousedown', onDragDown); });
+    }
+
+    if (resizeHdl) {
+      var onResizeDown = function(e) {
+        if (!editModeActive) return;
+        e.preventDefault(); e.stopPropagation();
+        _bringToFront(el);
+        var sx = e.clientX, sy = e.clientY;
+        var sw = el.offsetWidth, sh = el.offsetHeight;
+        function mv(e2) {
+          el.style.width  = Math.max(160, sw + e2.clientX - sx) + 'px';
+          el.style.height = Math.max(80,  sh + e2.clientY - sy) + 'px';
+          var bot = parseFloat(el.style.top||0) + el.offsetHeight + 40;
+          if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
+        }
+        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+      };
+      resizeHdl.addEventListener('mousedown', onResizeDown);
+      _dragCleanups.push(function(){ resizeHdl.removeEventListener('mousedown', onResizeDown); });
+    }
+  });
+}
+
+function _teardownDragResize() {
+  _dragCleanups.forEach(function(fn){ fn(); });
+  _dragCleanups = [];
+}
+
+function _bringToFront(el) {
+  var maxZ = 10;
+  CARD_IDS.forEach(function(id) {
+    var e = document.getElementById(id);
+    if (e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex||10));
+  });
+  el.style.zIndex = maxZ + 1;
+}
+
+function _autoLayout(container) {
+  var W = container.offsetWidth || 900;
+  var col = 14, row = 14, maxH = 0, layout = {};
+  var defaultSizes = {
+    'today-card':         {w:200, h:200},
+    'dailys-card':        {w:260, h:220},
+    'home-projects':      {w:280, h:200},
+    'home-wordle-card':   {w:220, h:180},
+    'home-countdown-card':{w:220, h:160},
+    'home-fitness-card':  {w:260, h:160},
+    'home-quote-card':    {w:280, h:140},
+    'home-music-widget':  {w:300, h:170}
+  };
+  CARD_IDS.forEach(function(id) {
+    var s = defaultSizes[id] || {w:240, h:180};
+    if (col + s.w + 14 > W) { col = 14; row += maxH + 14; maxH = 0; }
+    layout[id] = {left:col, top:row, width:s.w, height:s.h};
+    col += s.w + 14;
+    maxH = Math.max(maxH, s.h);
   });
   return layout;
 }
 
-// ─── Persist layout ───────────────────────────
-function _saveFreeformLayout() {
+function _saveLayout(container) {
   var layout = {};
   CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id); if (!el) return;
     layout[id] = {
-      left:   parseFloat(el.style.left)  || 0,
-      top:    parseFloat(el.style.top)   || 0,
-      width:  el.offsetWidth  || 240,
-      height: el.offsetHeight || 200
+      left:   parseFloat(el.style.left)||0,
+      top:    parseFloat(el.style.top)||0,
+      width:  el.offsetWidth,
+      height: el.offsetHeight
     };
   });
   localStorage.setItem('hcLayout3', JSON.stringify(layout));
 }
 
-function _loadFreeformLayout() {
+function _loadLayout() {
   try { return JSON.parse(localStorage.getItem('hcLayout3')); } catch(e) { return null; }
 }
 
-// compat stubs
-function saveCardLayout(){}
-function captureAndSaveLayout(){}
-function setCardSize(){}
-function loadCardLayout(){ return _loadFreeformLayout(); }
+function loadCardLayout() { return _loadLayout(); }
 
 
 // ════════════════════════════════════════════════
