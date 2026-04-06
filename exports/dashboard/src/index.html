@@ -684,7 +684,82 @@
     .math-tp-score { background:#141414; border:1px solid #1e2e28; border-radius:10px; padding:10px 18px; text-align:center; }
     .math-tp-score-val { font-size:20px; font-weight:800; color:#00d18c; }
     .math-tp-score-lbl { font-size:11px; color:#3a5548; margin-top:2px; }
-  </style>
+  
+    /* ── EDIT MODE ─────────────────────────────────── */
+    #home-edit-btn {
+      position:absolute; top:14px; right:16px;
+      background:#1a2e24; border:1px solid #1f3a2a; border-radius:8px;
+      padding:6px 12px; display:flex; align-items:center; gap:6px;
+      color:#7a9e8e; font-size:12px; font-weight:700; cursor:pointer; z-index:10;
+      transition: all 0.2s;
+    }
+    #home-edit-btn:hover { border-color:#00d18c; color:#00d18c; }
+    #home-edit-btn.active { background:rgba(0,209,140,0.15); border-color:#00d18c; color:#00d18c; }
+    #home-content { position:relative; }
+
+    body.edit-mode #home-cards > div, body.edit-mode #home-cards > [id] {
+      outline: 2px dashed #2a5040 !important;
+      outline-offset: 3px;
+      cursor: grab !important;
+      user-select: none;
+      position: relative;
+    }
+    body.edit-mode #home-cards > div:hover, body.edit-mode #home-cards > [id]:hover {
+      outline-color: #00d18c !important;
+    }
+    body.edit-mode #home-cards > div.drag-over, body.edit-mode #home-cards > [id].drag-over {
+      outline-color: #00d18c !important;
+      background: rgba(0,209,140,0.04) !important;
+    }
+    .card-resize-handle {
+      display:none;
+      position:absolute; bottom:4px; right:4px; width:16px; height:16px;
+      cursor:se-resize; z-index:20; color:#00d18c; opacity:0.6;
+    }
+    body.edit-mode .card-resize-handle { display:block; }
+    .card-drag-indicator {
+      display:none;
+      position:absolute; top:5px; right:5px;
+      background:rgba(0,209,140,0.15); border:1px solid #00d18c;
+      border-radius:5px; padding:2px 5px;
+      font-size:10px; color:#00d18c; font-weight:700; pointer-events:none;
+    }
+    body.edit-mode .card-drag-indicator { display:block; }
+
+    /* ── SIZE CLASSES ──────────────────────────────── */
+    .card-size-sm  { min-width:160px !important; max-width:200px !important; }
+    .card-size-md  { min-width:220px !important; max-width:280px !important; }
+    .card-size-lg  { min-width:320px !important; max-width:420px !important; }
+    .card-size-xl  { min-width:100% !important; max-width:100% !important; flex:1 0 100% !important; }
+
+    /* ── QUOTE CARD ────────────────────────────────── */
+    #home-quote-card {
+      background:#1a1f1d; border:1px solid #1f2e28; border-radius:14px;
+      padding:16px 18px; min-width:260px; flex:1; position:relative;
+    }
+    #home-quote-card .quote-text {
+      font-size:13px; color:#a0c9b8; line-height:1.6; font-style:italic;
+      margin-bottom:8px;
+    }
+    #home-quote-card .quote-author {
+      font-size:11px; color:#4a7060; text-align:right; font-weight:700;
+    }
+
+    /* ── SIZE PICKER TOOLTIP ───────────────────────── */
+    .size-picker {
+      display:none; position:absolute; top:30px; right:6px; z-index:100;
+      background:#0f1f17; border:1px solid #1f3a2a; border-radius:8px; padding:4px;
+      flex-direction:column; gap:2px; box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    }
+    body.edit-mode .size-picker { display:flex; }
+    .size-picker button {
+      background:none; border:none; color:#7a9e8e; font-size:11px; font-weight:700;
+      cursor:pointer; padding:5px 10px; border-radius:5px; text-align:left;
+      white-space:nowrap;
+    }
+    .size-picker button:hover { background:rgba(0,209,140,0.12); color:#00d18c; }
+    .size-picker button.active { color:#00d18c; }
+</style>
 </head>
 <body>
 
@@ -775,6 +850,10 @@
     <div class="page active" id="page-home">
       <div id="home-content">
         <div id="home-greeting"></div>
+        <button id="home-edit-btn" onclick="toggleEditMode()" title="Edit Dashboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span id="home-edit-label">Edit</span>
+        </button>
         <div id="home-cards">
 
           <!-- Today card -->
@@ -784,6 +863,13 @@
             <div id="today-date-day"></div>
             <div id="today-events"></div>
             <div id="today-nav-hint">Click to open calendar →</div>
+            <div class="card-drag-indicator">☰ drag</div>
+            <div class="size-picker" id="size-today-card">
+              <button onclick="setCardSize('today-card','sm')">Small</button>
+              <button onclick="setCardSize('today-card','md')">Medium</button>
+              <button onclick="setCardSize('today-card','lg')">Large</button>
+              <button onclick="setCardSize('today-card','xl')">Full width</button>
+            </div>
           </div>
 
           <!-- Dailys card -->
@@ -825,6 +911,14 @@
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
+          
+            <div class="card-drag-indicator">☰ drag</div>
+            <div class="size-picker" id="size-dailys-card">
+              <button onclick="setCardSize('dailys-card','sm')">Small</button>
+              <button onclick="setCardSize('dailys-card','md')">Medium</button>
+              <button onclick="setCardSize('dailys-card','lg')">Large</button>
+              <button onclick="setCardSize('dailys-card','xl')">Full width</button>
+            </div>
           </div>
 
           <!-- Projects -->
@@ -838,6 +932,13 @@
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
             <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
+            <div class="card-drag-indicator">☰ drag</div>
+            <div class="size-picker" id="size-home-wordle-card">
+              <button onclick="setCardSize('home-wordle-card','sm')">Small</button>
+              <button onclick="setCardSize('home-wordle-card','md')">Medium</button>
+              <button onclick="setCardSize('home-wordle-card','lg')">Large</button>
+              <button onclick="setCardSize('home-wordle-card','xl')">Full width</button>
+            </div>
           </div>
 
           <!-- Countdown Card -->
@@ -849,7 +950,28 @@
           </div>
 
           <!-- Fitness Card -->
-          <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px">
+          <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
+            <div class="card-drag-indicator">☰ drag</div>
+            <div class="size-picker" id="size-home-fitness-card">
+              <button onclick="setCardSize('home-fitness-card','sm')">Small</button>
+              <button onclick="setCardSize('home-fitness-card','md')">Medium</button>
+              <button onclick="setCardSize('home-fitness-card','lg')">Large</button>
+              <button onclick="setCardSize('home-fitness-card','xl')">Full width</button>
+            </div>
+          </div>
+
+          <!-- Quote of the Day Card -->
+          <div id="home-quote-card">
+            <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
+            <div id="quote-text" class="quote-text">Loading…</div>
+            <div id="quote-author" class="quote-author"></div>
+            <div class="card-drag-indicator">☰ drag</div>
+            <div class="size-picker" id="size-home-quote-card">
+              <button onclick="setCardSize('home-quote-card','sm')">Small</button>
+              <button onclick="setCardSize('home-quote-card','md')">Medium</button>
+              <button onclick="setCardSize('home-quote-card','lg')">Large</button>
+              <button onclick="setCardSize('home-quote-card','xl')">Full width</button>
+            </div>
           </div>
 
           <!-- Music Widget -->
@@ -2123,7 +2245,7 @@ function setPage(p) {
     renderPlannerSidebar();
     if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
-  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); renderCountdown(); fitRenderHomeFitnessCard(); }
+  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); renderCountdown(); fitRenderHomeFitnessCard(); renderQuoteOfDay(); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
   if (p === 'music') { musicInit(); hmwSyncState(); }
@@ -4765,7 +4887,9 @@ const _cv=document.getElementById('page-chess'); if(_cv&&_cv.querySelector('#che
 
 // Re-render home daily bars when returning to home
 window.addEventListener('storage', () => { renderHomeDailys();
-fitRenderHomeFitnessCard(); renderHomeProjects(); });
+fitRenderHomeFitnessCard();
+loadCardLayout();
+renderQuoteOfDay(); renderHomeProjects(); });
 
 // ═══════════════════════════════════════════════════════════════════
 //  SPANISH APP
@@ -6982,8 +7106,8 @@ function fitRenderFood() {
     }
     info.appendChild(nameRow); info.appendChild(macroRow);
     var editBtn = document.createElement('button');
-    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;font-size:14px;cursor:pointer;padding:2px 6px';
-    editBtn.textContent = '✏️';
+    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;cursor:pointer;padding:2px 6px;display:flex;align-items:center';
+    editBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     editBtn.addEventListener('click', function() { fitOpenEditFood(item.id); });
     var delBtn = document.createElement('button');
     delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:16px;cursor:pointer;padding:2px 6px';
@@ -7031,8 +7155,8 @@ function fitRenderWorkout() {
     detailEl.textContent = parts.join('  ·  ') || 'No details';
     info.appendChild(nameEl); info.appendChild(detailEl);
     var editBtn = document.createElement('button');
-    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;font-size:14px;cursor:pointer;padding:2px 6px';
-    editBtn.textContent = '✏️';
+    editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;cursor:pointer;padding:2px 6px;display:flex;align-items:center';
+    editBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
     editBtn.addEventListener('click', function() { fitOpenWorkoutModal(ex.id); });
     var delBtn = document.createElement('button');
     delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:16px;cursor:pointer;padding:2px 6px';
@@ -7197,7 +7321,7 @@ function fitRenderWeight() {
     w.textContent = pt.w+' lbs';
     var editBtn = document.createElement('button');
     editBtn.style.cssText = 'background:none;border:none;color:#7a9e8e;font-size:14px;cursor:pointer;padding:2px 5px';
-    editBtn.textContent = '✏️';
+    editBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'; editBtn.style.display='flex'; editBtn.style.alignItems='center';
     editBtn.addEventListener('click', function() { fitOpenEditWeight(pt.ts); });
     var delBtn = document.createElement('button');
     delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:14px;cursor:pointer;padding:2px 5px';
@@ -7333,6 +7457,224 @@ function fitRenderHomeFitnessCard() {
       card.appendChild(more2);
     }
   }
+}
+
+
+// ════════════════════════════════════════════════
+//  EDIT MODE — drag/drop cards + resize
+// ════════════════════════════════════════════════
+var editModeActive = false;
+var dragSrcEl = null;
+
+var CARD_IDS = [
+  'today-card','dailys-card','home-projects','home-wordle-card',
+  'home-countdown-card','home-fitness-card','home-quote-card','home-music-widget'
+];
+var SIZE_MAP = { sm:'card-size-sm', md:'card-size-md', lg:'card-size-lg', xl:'card-size-xl' };
+
+function toggleEditMode() {
+  editModeActive = !editModeActive;
+  document.body.classList.toggle('edit-mode', editModeActive);
+  var btn   = document.getElementById('home-edit-btn');
+  var label = document.getElementById('home-edit-label');
+  if (btn)   btn.classList.toggle('active', editModeActive);
+  if (label) label.textContent = editModeActive ? 'Done' : 'Edit';
+  if (editModeActive) {
+    initDragDrop();
+    highlightActiveSizes();
+  } else {
+    saveCardLayout();
+  }
+}
+
+function initDragDrop() {
+  var container = document.getElementById('home-cards');
+  if (!container) return;
+  Array.from(container.children).forEach(function(card) {
+    if (!card.id) return;
+    card.setAttribute('draggable', 'true');
+    card.addEventListener('dragstart', onDragStart);
+    card.addEventListener('dragover',  onDragOver);
+    card.addEventListener('dragleave', onDragLeave);
+    card.addEventListener('drop',      onDrop);
+    card.addEventListener('dragend',   onDragEnd);
+  });
+}
+
+function onDragStart(e) {
+  dragSrcEl = this;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.id);
+  setTimeout(function() { if (dragSrcEl) dragSrcEl.style.opacity = '0.4'; }, 0);
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  this.classList.add('drag-over');
+  return false;
+}
+function onDragLeave(e) {
+  this.classList.remove('drag-over');
+}
+function onDrop(e) {
+  e.stopPropagation();
+  this.classList.remove('drag-over');
+  if (dragSrcEl && dragSrcEl !== this) {
+    var container = document.getElementById('home-cards');
+    var children  = Array.from(container.children);
+    var srcIdx    = children.indexOf(dragSrcEl);
+    var tgtIdx    = children.indexOf(this);
+    if (srcIdx < tgtIdx) {
+      container.insertBefore(dragSrcEl, this.nextSibling);
+    } else {
+      container.insertBefore(dragSrcEl, this);
+    }
+  }
+  return false;
+}
+function onDragEnd(e) {
+  if (dragSrcEl) dragSrcEl.style.opacity = '';
+  var container = document.getElementById('home-cards');
+  if (container) {
+    Array.from(container.children).forEach(function(c) { c.classList.remove('drag-over'); });
+  }
+  dragSrcEl = null;
+  saveCardLayout();
+}
+
+function setCardSize(cardId, size) {
+  var el = document.getElementById(cardId);
+  if (!el) return;
+  Object.values(SIZE_MAP).forEach(function(cls) { el.classList.remove(cls); });
+  if (size && SIZE_MAP[size]) el.classList.add(SIZE_MAP[size]);
+  highlightActiveSizes();
+  saveCardLayout();
+}
+
+function highlightActiveSizes() {
+  CARD_IDS.forEach(function(id) {
+    var picker = document.getElementById('size-'+id);
+    if (!picker) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    var activeSize = null;
+    Object.entries(SIZE_MAP).forEach(function(entry) {
+      if (el.classList.contains(entry[1])) activeSize = entry[0];
+    });
+    Array.from(picker.querySelectorAll('button')).forEach(function(btn) {
+      var s = btn.textContent.toLowerCase().replace('full width','xl').replace(' ','');
+      btn.classList.toggle('active', s === activeSize || (s==='xl' && activeSize==='xl'));
+    });
+  });
+}
+
+function saveCardLayout() {
+  var container = document.getElementById('home-cards');
+  if (!container) return;
+  var order = Array.from(container.children).map(function(c) { return c.id; }).filter(Boolean);
+  var sizes = {};
+  CARD_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    Object.entries(SIZE_MAP).forEach(function(entry) {
+      if (el.classList.contains(entry[1])) sizes[id] = entry[0];
+    });
+  });
+  localStorage.setItem('homeCardOrder', JSON.stringify(order));
+  localStorage.setItem('homeCardSizes', JSON.stringify(sizes));
+}
+
+function loadCardLayout() {
+  var container = document.getElementById('home-cards');
+  if (!container) return;
+  // Restore sizes
+  try {
+    var sizes = JSON.parse(localStorage.getItem('homeCardSizes') || '{}');
+    Object.entries(sizes).forEach(function(entry) {
+      var el = document.getElementById(entry[0]);
+      if (!el) return;
+      Object.values(SIZE_MAP).forEach(function(cls) { el.classList.remove(cls); });
+      if (SIZE_MAP[entry[1]]) el.classList.add(SIZE_MAP[entry[1]]);
+    });
+  } catch(e) {}
+  // Restore order
+  try {
+    var order = JSON.parse(localStorage.getItem('homeCardOrder') || '[]');
+    order.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.parentElement === container) container.appendChild(el);
+    });
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════════
+//  QUOTE OF THE DAY
+// ════════════════════════════════════════════════
+var QUOTES = [
+  { text:"The only way to do great work is to love what you do.", author:"Steve Jobs" },
+  { text:"In the middle of every difficulty lies opportunity.", author:"Albert Einstein" },
+  { text:"It does not matter how slowly you go as long as you do not stop.", author:"Confucius" },
+  { text:"Life is what happens when you're busy making other plans.", author:"John Lennon" },
+  { text:"The future belongs to those who believe in the beauty of their dreams.", author:"Eleanor Roosevelt" },
+  { text:"Strive not to be a success, but rather to be of value.", author:"Albert Einstein" },
+  { text:"I have not failed. I've just found 10,000 ways that won't work.", author:"Thomas Edison" },
+  { text:"The mind is everything. What you think you become.", author:"Buddha" },
+  { text:"An unexamined life is not worth living.", author:"Socrates" },
+  { text:"Spread love everywhere you go. Let no one ever come to you without leaving happier.", author:"Mother Teresa" },
+  { text:"When you reach the end of your rope, tie a knot in it and hang on.", author:"Franklin D. Roosevelt" },
+  { text:"Always remember that you are absolutely unique. Just like everyone else.", author:"Margaret Mead" },
+  { text:"Do not go where the path may lead, go instead where there is no path and leave a trail.", author:"Ralph Waldo Emerson" },
+  { text:"You will face many defeats in life, but never let yourself be defeated.", author:"Maya Angelou" },
+  { text:"The greatest glory in living lies not in never falling, but in rising every time we fall.", author:"Nelson Mandela" },
+  { text:"In the end, it's not the years in your life that count. It's the life in your years.", author:"Abraham Lincoln" },
+  { text:"Never let the fear of striking out keep you from playing the game.", author:"Babe Ruth" },
+  { text:"Life is either a daring adventure or nothing at all.", author:"Helen Keller" },
+  { text:"Many of life's failures are people who did not realize how close they were to success when they gave up.", author:"Thomas Edison" },
+  { text:"You have brains in your head. You have feet in your shoes. You can steer yourself in any direction you choose.", author:"Dr. Seuss" },
+  { text:"If life were predictable it would cease to be life, and be without flavor.", author:"Eleanor Roosevelt" },
+  { text:"If you look at what you have in life, you'll always have more.", author:"Oprah Winfrey" },
+  { text:"If you set your goals ridiculously high and it's a failure, you will fail above everyone else's success.", author:"James Cameron" },
+  { text:"It is during our darkest moments that we must focus to see the light.", author:"Aristotle" },
+  { text:"Do not let making a living prevent you from making a life.", author:"John Wooden" },
+  { text:"Spread love everywhere you go.", author:"Mother Teresa" },
+  { text:"When you have a dream, you've got to grab it and never let go.", author:"Carol Burnett" },
+  { text:"Nothing is impossible. The word itself says 'I'm possible!'", author:"Audrey Hepburn" },
+  { text:"You only live once, but if you do it right, once is enough.", author:"Mae West" },
+  { text:"Be yourself; everyone else is already taken.", author:"Oscar Wilde" },
+  { text:"Two roads diverged in a wood, and I took the one less traveled by.", author:"Robert Frost" },
+  { text:"I am not afraid of storms, for I am learning how to sail my ship.", author:"Louisa May Alcott" },
+  { text:"I've learned that people will forget what you said, people will forget what you did, but people will never forget how you made them feel.", author:"Maya Angelou" },
+  { text:"Definiteness of purpose is the starting point of all achievement.", author:"W. Clement Stone" },
+  { text:"We generate fears while we sit. We overcome them by action.", author:"Dr. Henry Link" },
+  { text:"Whether you think you can or think you can't, you're right.", author:"Henry Ford" },
+  { text:"Security is mostly a superstition. Life is either a daring adventure or nothing.", author:"Helen Keller" },
+  { text:"The man who has confidence in himself gains the confidence of others.", author:"Hasidic Proverb" },
+  { text:"The only limit to our realization of tomorrow will be our doubts of today.", author:"Franklin D. Roosevelt" },
+  { text:"Creativity is intelligence having fun.", author:"Albert Einstein" },
+  { text:"What lies behind us and what lies before us are tiny matters compared to what lies within us.", author:"Ralph Waldo Emerson" },
+  { text:"You are never too old to set another goal or to dream a new dream.", author:"C.S. Lewis" },
+  { text:"To see what is right and not do it is a lack of courage.", author:"Confucius" },
+  { text:"Reading is to the mind what exercise is to the body.", author:"Joseph Addison" },
+  { text:"The secret of getting ahead is getting started.", author:"Mark Twain" },
+  { text:"It always seems impossible until it's done.", author:"Nelson Mandela" },
+  { text:"Don't watch the clock; do what it does. Keep going.", author:"Sam Levenson" },
+  { text:"Keep your face always toward the sunshine, and shadows will fall behind you.", author:"Walt Whitman" },
+  { text:"You do not find the happy life. You make it.", author:"Camilla Eyring Kimball" },
+  { text:"First, have a definite, clear practical ideal — a goal, an objective.", author:"Aristotle" }
+];
+
+function renderQuoteOfDay() {
+  var textEl   = document.getElementById('quote-text');
+  var authorEl = document.getElementById('quote-author');
+  if (!textEl) return;
+  // Use day of year as index so it changes daily but is consistent
+  var now   = new Date();
+  var start = new Date(now.getFullYear(), 0, 0);
+  var diff  = now - start;
+  var dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  var q = QUOTES[dayOfYear % QUOTES.length];
+  textEl.textContent   = '\u201c' + q.text + '\u201d';
+  authorEl.textContent = '\u2014 ' + q.author;
 }
 
 </script>
