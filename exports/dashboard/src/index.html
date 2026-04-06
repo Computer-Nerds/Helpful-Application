@@ -748,6 +748,13 @@
       </svg>
     </button>
     <div class="nav-spacer"></div>
+    <button class="nav-btn" id="nav-smarthome" title="Smart Home" onclick="setPage('smarthome')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <circle cx="12" cy="13" r="3"/>
+        <line x1="12" y1="10" x2="12" y2="7"/>
+      </svg>
+    </button>
     <button class="nav-btn" id="nav-security" title="Security" onclick="setPage('security')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -1114,6 +1121,43 @@
             <div class="math-stat"><div class="math-stat-val" id="math-stat-acc">—</div><div class="math-stat-lbl">Accuracy</div></div>
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SMART HOME ══ -->
+    <div id="page-smarthome" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3"/><line x1="12" y1="10" x2="12" y2="7"/></svg>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">Smart Home</span>
+        <button onclick="shAddDevice()" style="margin-left:auto;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">+ Add Device</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+        <!-- Room filter -->
+        <div id="sh-room-tabs" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <!-- Device grid -->
+        <div id="sh-device-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px"></div>
+        <!-- Add device modal -->
+        <div id="sh-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center">
+          <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:14px;padding:24px;width:min(90vw,360px);display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+            <div style="font-size:15px;font-weight:700;color:#e8f0ed">Add Device</div>
+            <input id="sh-modal-name" placeholder="Device name (e.g. Living Room Lamp)" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            <input id="sh-modal-room" placeholder="Room (e.g. Living Room)" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            <select id="sh-modal-type" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+              <option value="light">💡 Light</option>
+              <option value="fan">🌀 Fan</option>
+              <option value="thermostat">🌡️ Thermostat</option>
+              <option value="tv">📺 TV</option>
+              <option value="lock">🔒 Lock</option>
+              <option value="camera">📷 Camera</option>
+              <option value="outlet">🔌 Outlet</option>
+              <option value="speaker">🔊 Speaker</option>
+            </select>
+            <div style="display:flex;gap:10px">
+              <button onclick="shModalSave()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer">Add</button>
+              <button onclick="document.getElementById('sh-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1634,7 +1678,25 @@
         <div id="sb-msg" style="font-size:13px;font-weight:600;color:#e8a020;min-height:20px"></div>
         <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px;align-self:flex-start">Found Words</div>
         <div id="sb-found-list" style="display:flex;flex-wrap:wrap;gap:6px;width:100%"></div>
-        <button onclick="sbNewPuzzle()" style="margin-top:8px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">New Puzzle</button>
+        <!-- Add-word prompt -->
+        <div id="sb-add-prompt" style="display:none;flex-direction:column;gap:10px;width:100%;background:#0f1f17;border:1px solid #e8a020;border-radius:10px;padding:12px 14px;box-sizing:border-box">
+          <input type="hidden" id="sb-add-word-val">
+          <div id="sb-add-word-label" style="font-size:13px;color:#e8f0ed;font-weight:600"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <label style="font-size:13px;color:#7a9e8e">Points:</label>
+            <input id="sb-add-pts" type="number" min="1" max="99" value="5" style="width:60px;background:#1a2e24;border:1px solid #1f3a2a;border-radius:6px;padding:5px 8px;color:#e8f0ed;font-size:14px;font-weight:700;text-align:center">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="sbAddWord(document.getElementById('sb-add-word-val').value,parseInt(document.getElementById('sb-add-pts').value)||1)" style="flex:1;background:#4e9fd4;color:#0a1a12;border:none;border-radius:7px;padding:8px;font-size:13px;font-weight:700;cursor:pointer">✅ Yes, add it</button>
+            <button onclick="document.getElementById('sb-add-prompt').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:7px;padding:8px 14px;font-size:13px;cursor:pointer">Nope</button>
+          </div>
+        </div>
+        <button onclick="sbNewPuzzle()" style="margin-top:4px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">New Puzzle</button>
+        <!-- Custom word list -->
+        <details style="width:100%">
+          <summary style="font-size:12px;color:#7a9e8e;cursor:pointer;user-select:none;padding:4px 0">📋 My custom words for this puzzle</summary>
+          <div id="sb-custom-list" style="display:flex;flex-direction:column;gap:6px;padding:8px 0"></div>
+        </details>
       </div>
     </div>
 
@@ -1782,7 +1844,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem'];
+const PAGES = ['home','planner','apps','smarthome','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -5930,18 +5992,17 @@ let sbPuzzle=null, sbFoundWords=new Set(), sbScore=0;
 function sbGetCustom(puzzleKey){ try{return JSON.parse(localStorage.getItem('sb_custom_'+puzzleKey)||'{}');}catch{return {};} }
 function sbSaveCustom(puzzleKey,obj){ localStorage.setItem('sb_custom_'+puzzleKey, JSON.stringify(obj)); }
 function sbPuzzleKey(){ return sbPuzzle ? sbPuzzle.center+'_'+sbPuzzle.outer.join('') : ''; }
-function sbAddWord(word){
+function sbAddWord(word, pts){
   const key=sbPuzzleKey();
   const custom=sbGetCustom(key);
-  const pts = word.length <= 4 ? 1 : word.length;
+  pts = (pts && pts > 0) ? pts : (word.length <= 4 ? 1 : word.length);
   custom[word]=pts;
   sbSaveCustom(key,custom);
-  // hide prompt
   const p=document.getElementById('sb-add-prompt');
   if(p) p.style.display='none';
   const msg=document.getElementById('sb-msg');
-  msg.style.color='#4e9fd4'; msg.textContent=`"${word.toUpperCase()}" added (+${pts} pts)!`;
-  setTimeout(()=>{ if(msg.textContent.includes('added')) msg.textContent=''; },1200);
+  msg.style.color='#4e9fd4'; msg.textContent='"'+word.toUpperCase()+'" added (+'+pts+' pts)!';
+  setTimeout(function(){ if(msg.textContent.includes('added')) msg.textContent=''; },1200);
   sbRenderCustomList();
 }
 function sbRenderCustomList(){
@@ -6034,8 +6095,11 @@ function sbSubmit() {
     // Offer to add it
     msg.style.color='#e8a020'; msg.textContent='Not in word list.';
     if(addPrompt){
-      document.getElementById('sb-add-word-label').textContent=`"${word.toUpperCase()}" (${word.length <= 4 ? 1 : word.length} pts) — is this a real word?`;
+      const sugPts = word.length <= 4 ? 1 : word.length;
+      document.getElementById('sb-add-word-label').textContent='"'+word.toUpperCase()+'" — real word? Set your points:';
       document.getElementById('sb-add-word-val').value=word;
+      const ptsInp=document.getElementById('sb-add-pts');
+      if(ptsInp) ptsInp.value=sugPts;
       addPrompt.style.display='flex';
     }
     return;
@@ -6392,6 +6456,124 @@ function wpPick(choice,btn,ch){
   expEl.textContent='💡 '+wpCurrent.explain;
   expEl.style.display='';
   setTimeout(wpNext,2000);
+}
+
+
+// ════════════════════════════════════════════════
+//  SMART HOME
+// ════════════════════════════════════════════════
+const SH_ICONS = {light:'💡',fan:'🌀',thermostat:'🌡️',tv:'📺',lock:'🔒',camera:'📷',outlet:'🔌',speaker:'🔊'};
+
+function shLoad(){ return JSON.parse(localStorage.getItem('sh_devices')||'[]'); }
+function shSave(devs){ localStorage.setItem('sh_devices', JSON.stringify(devs)); }
+
+function shInit(){
+  shRender();
+}
+
+function shRender(){
+  const devs = shLoad();
+  // Room tabs
+  const rooms = ['All', ...new Set(devs.map(d=>d.room||'Other'))];
+  const tabEl = document.getElementById('sh-room-tabs');
+  if(!tabEl) return;
+  const activeRoom = tabEl.dataset.active || 'All';
+  tabEl.innerHTML='';
+  rooms.forEach(r=>{
+    const btn=document.createElement('button');
+    btn.textContent=r;
+    const isActive=r===activeRoom;
+    btn.style.cssText='padding:6px 14px;border-radius:20px;border:1px solid '+(isActive?'#00d18c':'#1f3a2a')+';background:'+(isActive?'#00d18c':'#1a2e24')+';color:'+(isActive?'#0a1a12':'#a0c9b8')+';font-size:13px;font-weight:600;cursor:pointer';
+    btn.onclick=function(){ tabEl.dataset.active=r; shRender(); };
+    tabEl.appendChild(btn);
+  });
+
+  const grid = document.getElementById('sh-device-grid');
+  grid.innerHTML='';
+  const filtered = activeRoom==='All' ? devs : devs.filter(d=>(d.room||'Other')===activeRoom);
+
+  if(filtered.length===0){
+    grid.innerHTML='<div style="color:#7a9e8e;font-size:14px;grid-column:1/-1;padding:20px 0">No devices yet. Hit + Add Device to get started.</div>';
+    return;
+  }
+
+  filtered.forEach(function(dev){
+    const card=document.createElement('div');
+    const on=dev.on;
+    card.style.cssText='background:'+(on?'#0f2e1f':'#111a15')+';border:1px solid '+(on?'#00d18c':'#1f3a2a')+';border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;position:relative;transition:border 0.2s';
+    // Icon
+    var iconDiv=document.createElement('div');
+    iconDiv.style.fontSize='28px';
+    iconDiv.textContent=SH_ICONS[dev.type||'outlet'];
+    card.appendChild(iconDiv);
+    // Name
+    var nameDiv=document.createElement('div');
+    nameDiv.style.cssText='font-size:13px;font-weight:700;color:#e8f0ed;line-height:1.3';
+    nameDiv.textContent=dev.name;
+    card.appendChild(nameDiv);
+    // Room
+    var roomDiv=document.createElement('div');
+    roomDiv.style.cssText='font-size:11px;color:#7a9e8e';
+    roomDiv.textContent=dev.room||'Other';
+    card.appendChild(roomDiv);
+    // Toggle row
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-top:2px';
+    var stateLabel=document.createElement('span');
+    stateLabel.style.cssText='font-size:12px;font-weight:700;color:'+(on?'#00d18c':'#7a9e8e');
+    stateLabel.textContent=on?'ON':'OFF';
+    var tog=document.createElement('div');
+    tog.style.cssText='width:36px;height:20px;border-radius:10px;background:'+(on?'#00d18c':'#1f3a2a')+';position:relative;cursor:pointer;transition:background 0.2s';
+    var knob=document.createElement('div');
+    knob.style.cssText='width:14px;height:14px;border-radius:50%;background:#e8f0ed;position:absolute;top:3px;'+(on?'right:3px':'left:3px')+';transition:all 0.2s';
+    tog.appendChild(knob);
+    tog.addEventListener('click',function(e){ e.stopPropagation(); shToggle(dev.id); });
+    row.appendChild(stateLabel);
+    row.appendChild(tog);
+    card.appendChild(row);
+    // Delete button
+    var delBtn=document.createElement('button');
+    delBtn.style.cssText='position:absolute;top:8px;right:8px;background:none;border:none;color:#3a5040;font-size:14px;cursor:pointer;padding:2px 5px';
+    delBtn.textContent='✕';
+    delBtn.addEventListener('click',function(e){ e.stopPropagation(); shDeleteDevice(dev.id); });
+    card.appendChild(delBtn);
+    card.onclick=function(){ shToggle(dev.id); };
+    grid.appendChild(card);
+  });
+}
+
+function shToggle(id){
+  const devs=shLoad();
+  const d=devs.find(x=>x.id===id);
+  if(d) d.on=!d.on;
+  shSave(devs);
+  shRender();
+}
+
+function shDeleteDevice(id){
+  const devs=shLoad().filter(x=>x.id!==id);
+  shSave(devs);
+  shRender();
+}
+
+function shAddDevice(){
+  document.getElementById('sh-modal-name').value='';
+  document.getElementById('sh-modal-room').value='';
+  document.getElementById('sh-modal-type').value='light';
+  document.getElementById('sh-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('sh-modal-name').focus(),50);
+}
+
+function shModalSave(){
+  const name=document.getElementById('sh-modal-name').value.trim();
+  const room=document.getElementById('sh-modal-room').value.trim()||'Other';
+  const type=document.getElementById('sh-modal-type').value;
+  if(!name) return;
+  const devs=shLoad();
+  devs.push({id:'sh_'+Date.now(),name,room,type,on:false});
+  shSave(devs);
+  document.getElementById('sh-modal').style.display='none';
+  shRender();
 }
 
 </script>
