@@ -697,45 +697,59 @@
     #home-edit-btn.active { background:rgba(0,209,140,0.15); border-color:#00d18c; color:#00d18c; }
     #home-content { position:relative; }
 
-    body.edit-mode #home-cards > div, body.edit-mode #home-cards > [id] {
-      outline: 2px dashed #2a5040 !important;
-      outline-offset: 3px;
-      cursor: grab !important;
+    /* Freeform canvas */
+    #home-cards.freeform {
+      position:relative;
+      display:block !important;
+      min-height:700px;
+    }
+    #home-cards.freeform > * {
+      position:absolute !important;
+      box-sizing:border-box;
+      margin:0 !important;
+      min-width:0 !important;
+      max-width:none !important;
+      flex:none !important;
+    }
+    /* Edit-mode card styling */
+    body.edit-mode #home-cards > * {
+      outline: 2px dashed #2a5040;
+      cursor: default;
       user-select: none;
-      position: relative;
     }
-    body.edit-mode #home-cards > div:hover, body.edit-mode #home-cards > [id]:hover {
-      outline-color: #00d18c !important;
+    body.edit-mode #home-cards > *:hover {
+      outline-color: #00d18c;
     }
-    body.edit-mode #home-cards > div.drag-over, body.edit-mode #home-cards > [id].drag-over {
-      outline-color: #00d18c !important;
-      background: rgba(0,209,140,0.04) !important;
+    /* Drag bar at top of each card */
+    .card-drag-bar {
+      display:none;
+      align-items:center; justify-content:center;
+      width:100%; height:20px;
+      cursor:grab; position:absolute; top:0; left:0;
+      z-index:30;
     }
+    .card-drag-bar:active { cursor:grabbing; }
+    body.edit-mode .card-drag-bar { display:flex; }
+    .card-drag-bar-dots {
+      width:28px; height:4px; border-radius:2px;
+      background:rgba(0,209,140,0.35);
+    }
+    /* Resize handle */
     .card-resize-handle {
       display:none;
-      position:absolute; bottom:4px; right:4px; width:16px; height:16px;
-      cursor:se-resize; z-index:20; color:#00d18c; opacity:0.6;
+      position:absolute; bottom:0; right:0;
+      width:18px; height:18px;
+      cursor:se-resize; z-index:30;
+      align-items:flex-end; justify-content:flex-end;
+      padding:3px;
     }
-    body.edit-mode .card-resize-handle { display:block; }
-    .card-drag-indicator {
-      display:none;
-      position:absolute; top:5px; right:5px;
-      background:rgba(0,209,140,0.15); border:1px solid #00d18c;
-      border-radius:5px; padding:2px 5px;
-      font-size:10px; color:#00d18c; font-weight:700; pointer-events:none;
-    }
-    body.edit-mode .card-drag-indicator { display:block; }
+    body.edit-mode .card-resize-handle { display:flex; }
+    .card-resize-handle svg { pointer-events:none; }
 
-    /* ── SIZE CLASSES ──────────────────────────────── */
-    .card-size-sm  { min-width:160px !important; max-width:200px !important; }
-    .card-size-md  { min-width:220px !important; max-width:280px !important; }
-    .card-size-lg  { min-width:320px !important; max-width:420px !important; }
-    .card-size-xl  { min-width:100% !important; max-width:100% !important; flex:1 0 100% !important; }
-
-    /* ── QUOTE CARD ────────────────────────────────── */
+    /* Quote card */
     #home-quote-card {
       background:#1a1f1d; border:1px solid #1f2e28; border-radius:14px;
-      padding:16px 18px; min-width:260px; flex:1; position:relative;
+      padding:16px 18px; min-width:200px; position:relative;
     }
     #home-quote-card .quote-text {
       font-size:13px; color:#a0c9b8; line-height:1.6; font-style:italic;
@@ -744,21 +758,6 @@
     #home-quote-card .quote-author {
       font-size:11px; color:#4a7060; text-align:right; font-weight:700;
     }
-
-    /* ── SIZE PICKER TOOLTIP ───────────────────────── */
-    .size-picker {
-      display:none; position:absolute; top:30px; right:6px; z-index:100;
-      background:#0f1f17; border:1px solid #1f3a2a; border-radius:8px; padding:4px;
-      flex-direction:column; gap:2px; box-shadow:0 4px 16px rgba(0,0,0,0.5);
-    }
-    body.edit-mode .size-picker { display:flex; }
-    .size-picker button {
-      background:none; border:none; color:#7a9e8e; font-size:11px; font-weight:700;
-      cursor:pointer; padding:5px 10px; border-radius:5px; text-align:left;
-      white-space:nowrap;
-    }
-    .size-picker button:hover { background:rgba(0,209,140,0.12); color:#00d18c; }
-    .size-picker button.active { color:#00d18c; }
 </style>
 </head>
 <body>
@@ -858,22 +857,17 @@
 
           <!-- Today card -->
           <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:12px">TODAY</div>
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
             <div id="today-events"></div>
-            <div id="today-nav-hint">Click to open calendar →</div>
-            <div class="card-drag-indicator">☰ drag</div>
-            <div class="size-picker" id="size-today-card">
-              <button onclick="setCardSize('today-card','sm')">Small</button>
-              <button onclick="setCardSize('today-card','md')">Medium</button>
-              <button onclick="setCardSize('today-card','lg')">Large</button>
-              <button onclick="setCardSize('today-card','xl')">Full width</button>
-            </div>
+            <div id="today-nav-hint">Click to open calendar →</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Dailys card -->
           <div id="dailys-card">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:14px">Dailys</div>
 
             <div class="daily-row">
@@ -910,72 +904,51 @@
               </div>
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
-            </div>
-          
-            <div class="card-drag-indicator">☰ drag</div>
-            <div class="size-picker" id="size-dailys-card">
-              <button onclick="setCardSize('dailys-card','sm')">Small</button>
-              <button onclick="setCardSize('dailys-card','md')">Medium</button>
-              <button onclick="setCardSize('dailys-card','lg')">Large</button>
-              <button onclick="setCardSize('dailys-card','xl')">Full width</button>
-            </div>
+            </div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Projects -->
           <div id="home-projects">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
+          <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Wordle Mini Card -->
           <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
-            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
-            <div class="card-drag-indicator">☰ drag</div>
-            <div class="size-picker" id="size-home-wordle-card">
-              <button onclick="setCardSize('home-wordle-card','sm')">Small</button>
-              <button onclick="setCardSize('home-wordle-card','md')">Medium</button>
-              <button onclick="setCardSize('home-wordle-card','lg')">Large</button>
-              <button onclick="setCardSize('home-wordle-card','xl')">Full width</button>
-            </div>
+            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Countdown Card -->
           <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer" onclick="setPage('planner')">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:10px">⭐ UPCOMING</div>
             <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
             </div>
+          <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Fitness Card -->
           <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
-            <div class="card-drag-indicator">☰ drag</div>
-            <div class="size-picker" id="size-home-fitness-card">
-              <button onclick="setCardSize('home-fitness-card','sm')">Small</button>
-              <button onclick="setCardSize('home-fitness-card','md')">Medium</button>
-              <button onclick="setCardSize('home-fitness-card','lg')">Large</button>
-              <button onclick="setCardSize('home-fitness-card','xl')">Full width</button>
-            </div>
-          </div>
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div></div>
 
           <!-- Quote of the Day Card -->
           <div id="home-quote-card">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
             <div id="quote-text" class="quote-text">Loading…</div>
-            <div id="quote-author" class="quote-author"></div>
-            <div class="card-drag-indicator">☰ drag</div>
-            <div class="size-picker" id="size-home-quote-card">
-              <button onclick="setCardSize('home-quote-card','sm')">Small</button>
-              <button onclick="setCardSize('home-quote-card','md')">Medium</button>
-              <button onclick="setCardSize('home-quote-card','lg')">Large</button>
-              <button onclick="setCardSize('home-quote-card','xl')">Full width</button>
-            </div>
+            <div id="quote-author" class="quote-author"></div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Music Widget -->
           <div id="home-music-widget">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
             <div id="hmw-art-row">
               <div id="hmw-art">♪</div>
@@ -4888,7 +4861,6 @@ const _cv=document.getElementById('page-chess'); if(_cv&&_cv.querySelector('#che
 // Re-render home daily bars when returning to home
 window.addEventListener('storage', () => { renderHomeDailys();
 fitRenderHomeFitnessCard();
-loadCardLayout();
 renderQuoteOfDay(); renderHomeProjects(); });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -7460,17 +7432,40 @@ function fitRenderHomeFitnessCard() {
 }
 
 
+
 // ════════════════════════════════════════════════
-//  EDIT MODE — drag/drop cards + resize
+//  FREEFORM EDIT MODE
 // ════════════════════════════════════════════════
 var editModeActive = false;
-var dragSrcEl = null;
 
 var CARD_IDS = [
   'today-card','dailys-card','home-projects','home-wordle-card',
   'home-countdown-card','home-fitness-card','home-quote-card','home-music-widget'
 ];
-var SIZE_MAP = { sm:'card-size-sm', md:'card-size-md', lg:'card-size-lg', xl:'card-size-xl' };
+
+// Default layout: auto-position cards in a grid on first use
+var DEFAULT_COLS = 4; // approx cards per row
+function getDefaultLayout(container) {
+  var W = container.offsetWidth || 900;
+  var cols = Math.max(2, Math.floor(W / 260));
+  var cardW = Math.floor((W - (cols+1)*14) / cols);
+  var positions = {};
+  var x = 14, y = 14, rowH = 0, col = 0;
+  CARD_IDS.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var h = Math.max(el.scrollHeight || 180, 160);
+    positions[id] = { left:x, top:y, width:cardW, height:h };
+    rowH = Math.max(rowH, h);
+    col++;
+    if (col >= cols) {
+      col = 0; x = 14; y += rowH + 14; rowH = 0;
+    } else {
+      x += cardW + 14;
+    }
+  });
+  return positions;
+}
 
 function toggleEditMode() {
   editModeActive = !editModeActive;
@@ -7479,133 +7474,180 @@ function toggleEditMode() {
   var label = document.getElementById('home-edit-label');
   if (btn)   btn.classList.toggle('active', editModeActive);
   if (label) label.textContent = editModeActive ? 'Done' : 'Edit';
+
+  var container = document.getElementById('home-cards');
+  if (!container) return;
+
   if (editModeActive) {
-    initDragDrop();
-    highlightActiveSizes();
+    enterFreeform(container);
   } else {
+    exitFreeform(container);
     saveCardLayout();
   }
 }
 
-function initDragDrop() {
-  var container = document.getElementById('home-cards');
-  if (!container) return;
-  Array.from(container.children).forEach(function(card) {
-    if (!card.id) return;
-    card.setAttribute('draggable', 'true');
-    card.addEventListener('dragstart', onDragStart);
-    card.addEventListener('dragover',  onDragOver);
-    card.addEventListener('dragleave', onDragLeave);
-    card.addEventListener('drop',      onDrop);
-    card.addEventListener('dragend',   onDragEnd);
-  });
-}
-
-function onDragStart(e) {
-  dragSrcEl = this;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', this.id);
-  setTimeout(function() { if (dragSrcEl) dragSrcEl.style.opacity = '0.4'; }, 0);
-}
-function onDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  this.classList.add('drag-over');
-  return false;
-}
-function onDragLeave(e) {
-  this.classList.remove('drag-over');
-}
-function onDrop(e) {
-  e.stopPropagation();
-  this.classList.remove('drag-over');
-  if (dragSrcEl && dragSrcEl !== this) {
-    var container = document.getElementById('home-cards');
-    var children  = Array.from(container.children);
-    var srcIdx    = children.indexOf(dragSrcEl);
-    var tgtIdx    = children.indexOf(this);
-    if (srcIdx < tgtIdx) {
-      container.insertBefore(dragSrcEl, this.nextSibling);
-    } else {
-      container.insertBefore(dragSrcEl, this);
-    }
-  }
-  return false;
-}
-function onDragEnd(e) {
-  if (dragSrcEl) dragSrcEl.style.opacity = '';
-  var container = document.getElementById('home-cards');
-  if (container) {
-    Array.from(container.children).forEach(function(c) { c.classList.remove('drag-over'); });
-  }
-  dragSrcEl = null;
-  saveCardLayout();
-}
-
-function setCardSize(cardId, size) {
-  var el = document.getElementById(cardId);
-  if (!el) return;
-  Object.values(SIZE_MAP).forEach(function(cls) { el.classList.remove(cls); });
-  if (size && SIZE_MAP[size]) el.classList.add(SIZE_MAP[size]);
-  highlightActiveSizes();
-  saveCardLayout();
-}
-
-function highlightActiveSizes() {
+function enterFreeform(container) {
+  container.classList.add('freeform');
+  var saved = loadCardLayout();
+  var layout = saved || getDefaultLayout(container);
+  // Set canvas height
+  var maxBottom = 0;
   CARD_IDS.forEach(function(id) {
-    var picker = document.getElementById('size-'+id);
-    if (!picker) return;
+    var pos = layout[id]; if (!pos) return;
+    maxBottom = Math.max(maxBottom, pos.top + pos.height + 20);
+  });
+  container.style.minHeight = Math.max(maxBottom, 700) + 'px';
+
+  CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    var activeSize = null;
-    Object.entries(SIZE_MAP).forEach(function(entry) {
-      if (el.classList.contains(entry[1])) activeSize = entry[0];
-    });
-    Array.from(picker.querySelectorAll('button')).forEach(function(btn) {
-      var s = btn.textContent.toLowerCase().replace('full width','xl').replace(' ','');
-      btn.classList.toggle('active', s === activeSize || (s==='xl' && activeSize==='xl'));
-    });
+    var pos = layout[id] || { left:14, top:14, width:240, height:200 };
+    applyPos(el, pos);
+    bindDragMove(el, container);
+    bindResizeHandle(el, container);
   });
 }
 
+function exitFreeform(container) {
+  container.classList.remove('freeform');
+  container.style.minHeight = '';
+  CARD_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.position = '';
+    el.style.left     = '';
+    el.style.top      = '';
+    el.style.width    = '';
+    el.style.height   = '';
+    el.style.zIndex   = '';
+    // Remove listeners by cloning
+    var clone = el.cloneNode(true);
+    el.parentNode.replaceChild(clone, el);
+    // Re-attach non-drag onclick if needed
+    reattachCardClicks();
+  });
+}
+
+function reattachCardClicks() {
+  var tc = document.getElementById('today-card');
+  if (tc) tc.onclick = function() { setPage('planner'); showPlannerSection('calendar'); };
+  var wc = document.getElementById('home-wordle-card');
+  if (wc) wc.onclick = function() { wordleOpen('home'); };
+  var fc = document.getElementById('home-fitness-card');
+  if (fc) fc.onclick = function() { setPage('fitness'); };
+  var cc = document.getElementById('home-countdown-card');
+  if (cc) cc.onclick = function() { setPage('planner'); };
+}
+
+function applyPos(el, pos) {
+  el.style.left   = pos.left   + 'px';
+  el.style.top    = pos.top    + 'px';
+  el.style.width  = pos.width  + 'px';
+  el.style.height = pos.height + 'px';
+}
+
+// ── Drag to move ──────────────────────────────
+function bindDragMove(el, container) {
+  var bar = el.querySelector('.card-drag-bar');
+  if (!bar) return;
+  bar.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    bringToFront(el);
+    var startX = e.clientX, startY = e.clientY;
+    var origL  = parseInt(el.style.left)  || 0;
+    var origT  = parseInt(el.style.top)   || 0;
+    function onMove(ev) {
+      var dx = ev.clientX - startX;
+      var dy = ev.clientY - startY;
+      var newL = Math.max(0, origL + dx);
+      var newT = Math.max(0, origT + dy);
+      el.style.left = newL + 'px';
+      el.style.top  = newT + 'px';
+      // Expand canvas if needed
+      var bottom = newT + el.offsetHeight + 20;
+      if (bottom > parseInt(container.style.minHeight || 700)) {
+        container.style.minHeight = bottom + 'px';
+      }
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      saveCardLayout();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+// ── Resize ────────────────────────────────────
+function bindResizeHandle(el, container) {
+  var handle = el.querySelector('.card-resize-handle');
+  if (!handle) return;
+  handle.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    bringToFront(el);
+    var startX = e.clientX, startY = e.clientY;
+    var startW = el.offsetWidth, startH = el.offsetHeight;
+    function onMove(ev) {
+      var newW = Math.max(160, startW + (ev.clientX - startX));
+      var newH = Math.max(120, startH + (ev.clientY - startY));
+      el.style.width  = newW + 'px';
+      el.style.height = newH + 'px';
+      el.style.overflow = 'auto';
+      // Expand canvas if needed
+      var bottom = parseInt(el.style.top || 0) + newH + 20;
+      if (bottom > parseInt(container.style.minHeight || 700)) {
+        container.style.minHeight = bottom + 'px';
+      }
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      saveCardLayout();
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+function bringToFront(el) {
+  var maxZ = 0;
+  CARD_IDS.forEach(function(id) {
+    var e = document.getElementById(id);
+    if (e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex || 0));
+  });
+  el.style.zIndex = maxZ + 1;
+}
+
+// ── Persist layout ────────────────────────────
 function saveCardLayout() {
   var container = document.getElementById('home-cards');
-  if (!container) return;
-  var order = Array.from(container.children).map(function(c) { return c.id; }).filter(Boolean);
-  var sizes = {};
+  if (!container || !container.classList.contains('freeform')) return;
+  var layout = {};
   CARD_IDS.forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
-    Object.entries(SIZE_MAP).forEach(function(entry) {
-      if (el.classList.contains(entry[1])) sizes[id] = entry[0];
-    });
+    layout[id] = {
+      left:   parseInt(el.style.left)   || 0,
+      top:    parseInt(el.style.top)    || 0,
+      width:  el.offsetWidth,
+      height: el.offsetHeight
+    };
   });
-  localStorage.setItem('homeCardOrder', JSON.stringify(order));
-  localStorage.setItem('homeCardSizes', JSON.stringify(sizes));
+  localStorage.setItem('homeCardLayoutV2', JSON.stringify(layout));
 }
 
 function loadCardLayout() {
-  var container = document.getElementById('home-cards');
-  if (!container) return;
-  // Restore sizes
   try {
-    var sizes = JSON.parse(localStorage.getItem('homeCardSizes') || '{}');
-    Object.entries(sizes).forEach(function(entry) {
-      var el = document.getElementById(entry[0]);
-      if (!el) return;
-      Object.values(SIZE_MAP).forEach(function(cls) { el.classList.remove(cls); });
-      if (SIZE_MAP[entry[1]]) el.classList.add(SIZE_MAP[entry[1]]);
-    });
-  } catch(e) {}
-  // Restore order
-  try {
-    var order = JSON.parse(localStorage.getItem('homeCardOrder') || '[]');
-    order.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el && el.parentElement === container) container.appendChild(el);
-    });
-  } catch(e) {}
+    var raw = localStorage.getItem('homeCardLayoutV2');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
 }
+
+function setCardSize() {} // no-op (old compat)
 
 // ════════════════════════════════════════════════
 //  QUOTE OF THE DAY
