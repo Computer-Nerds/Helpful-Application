@@ -1412,6 +1412,10 @@
             <div class="app-icon" style="background:#2e1a28">🗣️</div>
             <span class="app-label">Language</span>
           </div>
+          <div class="app-tile" onclick="openBrainGame('fixup')">
+            <div class="app-icon" style="background:#1a2a1e">✍️</div>
+            <span class="app-label">Fix It Up</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1427,7 +1431,7 @@
         <div id="wordle-msg" style="height:28px;font-size:15px;font-weight:600;color:#e8a020;margin-bottom:8px"></div>
         <div id="wordle-board" style="display:grid;grid-template-rows:repeat(6,1fr);gap:6px;margin-bottom:18px"></div>
         <div id="wordle-keyboard" style="display:flex;flex-direction:column;gap:6px;align-items:center"></div>
-        <button id="wordle-new-btn" onclick="wordleNewGame()" style="display:none;margin-top:18px;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 28px;font-size:15px;font-weight:700;cursor:pointer">New Game</button>
+        <button id="wordle-new-btn" onclick="wordleNewRandom()" style="display:none;margin-top:18px;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 28px;font-size:15px;font-weight:700;cursor:pointer">New Game</button>
       </div>
     </div>
 
@@ -1552,6 +1556,37 @@
       </div>
     </div>
 
+
+    <!-- ══ FIX IT UP ══ -->
+    <div id="page-bg-fixup" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">✍️ Fix It Up</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="fixup-score">0</span> &nbsp;|&nbsp; Streak: <span id="fixup-streak">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:28px 20px;overflow-y:auto;flex:1;gap:16px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div style="font-size:13px;color:#7a9e8e;text-align:center">Fix the capitalization and punctuation in the sentence below.</div>
+        <div id="fixup-mode-tabs" style="display:flex;gap:8px;background:#0f1a14;border-radius:10px;padding:4px">
+          <button id="fixup-tab-cap" onclick="fixupSetMode('cap')" style="padding:7px 18px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:#00d18c;color:#0a1a12">Capitalization</button>
+          <button id="fixup-tab-punc" onclick="fixupSetMode('punc')" style="padding:7px 18px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:#7a9e8e">Punctuation</button>
+          <button id="fixup-tab-both" onclick="fixupSetMode('both')" style="padding:7px 18px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:#7a9e8e">Both</button>
+        </div>
+        <div id="fixup-sentence-box" style="font-size:17px;color:#c8e0d4;background:#0f1f17;border:1px solid #1f3a2a;border-radius:12px;padding:18px 20px;width:100%;box-sizing:border-box;line-height:1.7;min-height:70px;text-align:left"></div>
+        <textarea id="fixup-input" rows="3" placeholder="Type the corrected sentence…" spellcheck="false" style="width:100%;box-sizing:border-box;background:#0f1f17;border:1px solid #1f3a2a;border-radius:10px;color:#e8f0ed;font-size:16px;padding:14px 16px;resize:none;outline:none;font-family:inherit"></textarea>
+        <div style="display:flex;gap:10px;width:100%">
+          <button onclick="fixupCheck()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:700;cursor:pointer">Check</button>
+          <button onclick="fixupSkip()" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:12px 20px;font-size:14px;cursor:pointer">Skip →</button>
+        </div>
+        <div id="fixup-msg" style="font-size:14px;font-weight:600;min-height:22px;text-align:center"></div>
+        <div id="fixup-answer-reveal" style="display:none;background:#0f1f17;border:1px solid #1f3a2a;border-radius:10px;padding:14px 16px;width:100%;box-sizing:border-box">
+          <div style="font-size:11px;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Correct Answer</div>
+          <div id="fixup-correct-text" style="font-size:15px;color:#00d18c;font-weight:600"></div>
+          <div id="fixup-explanation" style="font-size:12px;color:#7a9e8e;margin-top:6px"></div>
+          <button onclick="fixupNext()" style="margin-top:12px;background:#1a2e24;color:#a0c9b8;border:1px solid #1f3a2a;border-radius:7px;padding:7px 20px;font-size:13px;cursor:pointer">Next →</button>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /body -->
 
@@ -1605,7 +1640,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor'];
+const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -1633,6 +1668,7 @@ function setPage(p) {
     document.getElementById('lang-score').textContent=0;
   }
   if(p==='bg-wordleditor') weLoad();
+  if(p==='bg-fixup' && typeof fixupNext!=='undefined') fixupStart();
   if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
   PAGES.forEach(id => {
     const el = document.getElementById('page-' + id);
@@ -4904,12 +4940,14 @@ function wordleDailyWord() {
 }
 
 // ── State ──
-let wAnswer='', wGuesses=[], wCurrentGuess='', wGameOver=false, wDailyDone=false;
+let wAnswer='', wGuesses=[], wCurrentGuess='', wGameOver=false, wDailyDone=false, wIsDaily=true;
 
 function wordleInit() {
+  // Restore or start today's daily game
   const key = wordleDayKey();
   const saved = JSON.parse(localStorage.getItem('wordle_'+key)||'null');
   wAnswer = wordleDailyWord();
+  wIsDaily = true;
   if(saved) {
     wGuesses = saved.guesses;
     wGameOver = saved.gameOver;
@@ -4919,11 +4957,28 @@ function wordleInit() {
     wGuesses=[]; wGameOver=false; wDailyDone=false; wCurrentGuess='';
   }
 }
-// alias so setPage hook still works
+function wordleStartFresh(answer) {
+  // Start a brand-new game (free play or daily)
+  wAnswer = answer || wordleDailyWord();
+  wIsDaily = !answer;
+  wGuesses=[]; wGameOver=false; wCurrentGuess='';
+  if(!answer) { wDailyDone=false; }
+  wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg(); wordleRenderMini();
+}
+// Called by setPage — always re-render current state
 function wordleNewGame() { wordleInit(); wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg(); wordleRenderMini(); }
+// Called by New Game button — picks a random word from the full list (not daily)
+function wordleNewRandom() {
+  const allW = [...WORDLE_WORDS, ...JSON.parse(localStorage.getItem('wordle_custom_words')||'[]')];
+  const pick = allW[Math.floor(Math.random()*allW.length)].toUpperCase();
+  wAnswer = pick; wIsDaily=false;
+  wGuesses=[]; wGameOver=false; wDailyDone=false; wCurrentGuess='';
+  wordleRenderBoard(); wordleRenderKeyboard(); wordleUpdateMsg();
+  document.getElementById('wordle-new-btn').style.display='none';
+}
 
 function wordleSave() {
-  localStorage.setItem('wordle_'+wordleDayKey(), JSON.stringify({guesses:wGuesses,gameOver:wGameOver}));
+  if(wIsDaily) localStorage.setItem('wordle_'+wordleDayKey(), JSON.stringify({guesses:wGuesses,gameOver:wGameOver}));
 }
 
 function wordleUpdateMsg() {
@@ -5565,6 +5620,111 @@ function weRemove(w){
   const custom=JSON.parse(localStorage.getItem('wordle_custom_words')||'[]');
   custom.forEach(w=>{ if(typeof VALID_WORDS!=='undefined') VALID_WORDS.add(w); });
 })();
+
+
+// ════════════════════════════════════════════════
+//  FIX IT UP (Capitalization & Punctuation)
+// ════════════════════════════════════════════════
+let fixupMode='cap', fixupScore=0, fixupStreak=0, fixupCurrent=null;
+
+const FIXUP_DATA = {
+  cap: [
+    {broken:'my friend sarah lives in new york city.',correct:'My friend Sarah lives in New York City.',explanation:'Sentences start with a capital. Names of people and cities are proper nouns — always capitalized.'},
+    {broken:'every monday i go to the library with dr. jones.',correct:'Every Monday I go to the library with Dr. Jones.',explanation:'"I" is always capitalized. Days of the week and titles (Dr.) are capitalized.'},
+    {broken:'president lincoln gave the gettysburg address in november 1863.',correct:'President Lincoln gave the Gettysburg Address in November 1863.',explanation:'Titles before names, proper names, and months are all capitalized.'},
+    {broken:'we visited the eiffel tower in paris, france last summer.',correct:'We visited the Eiffel Tower in Paris, France last summer.',explanation:'Landmarks, cities, and countries are proper nouns — capitalize them.'},
+    {broken:'can you bring me a copy of the new york times?',correct:'Can you bring me a copy of the New York Times?',explanation:'Questions start with a capital. Newspaper names are proper nouns.'},
+    {broken:'on thanksgiving, aunt mary makes the best pumpkin pie.',correct:'On Thanksgiving, Aunt Mary makes the best pumpkin pie.',explanation:'Holidays are capitalized. Family titles used before a name act as proper nouns.'},
+    {broken:'the amazon river flows through brazil in south america.',correct:'The Amazon River flows through Brazil in South America.',explanation:'Named rivers, countries, and continents are all proper nouns.'},
+    {broken:'my teacher, ms. chen, teaches english and spanish.',correct:'My teacher, Ms. Chen, teaches English and Spanish.',explanation:'Titles before names are capitalized. Languages are always proper nouns.'},
+    {broken:'i want to read "the great gatsby" by f. scott fitzgerald.',correct:'I want to read "The Great Gatsby" by F. Scott Fitzgerald.',explanation:'Book titles follow title case. Author names are proper nouns.'},
+    {broken:'on saturday we watched the super bowl at uncle joe\'s house.',correct:'On Saturday we watched the Super Bowl at Uncle Joe\'s house.',explanation:'Days, event names, and family titles before names are capitalized.'},
+    {broken:'the pacific ocean is the largest ocean on earth.',correct:'The Pacific Ocean is the largest ocean on Earth.',explanation:'Named bodies of water and the proper name "Earth" are capitalized.'},
+    {broken:'she works at google headquarters in mountain view, california.',correct:'She works at Google headquarters in Mountain View, California.',explanation:'Company names and geographic locations are proper nouns.'},
+  ],
+  punc: [
+    {broken:'I love pizza but my sister prefers tacos',correct:'I love pizza, but my sister prefers tacos.',explanation:'Use a comma before a coordinating conjunction (but, and, or) joining two independent clauses. End with a period.'},
+    {broken:'Where are you going tonight',correct:'Where are you going tonight?',explanation:'Questions end with a question mark.'},
+    {broken:'Wow that was the most incredible game Ive ever seen',correct:'Wow, that was the most incredible game I\'ve ever seen!',explanation:'Interjections like "Wow" are followed by a comma. Contractions need apostrophes. Exclamation for emphasis.'},
+    {broken:'She bought apples oranges bananas and grapes',correct:'She bought apples, oranges, bananas, and grapes.',explanation:'Items in a list are separated by commas. The Oxford comma goes before "and".'},
+    {broken:'Its a beautiful day isnt it',correct:"It's a beautiful day, isn't it?",explanation:'"It\'s" and "isn\'t" need apostrophes. Use a comma before a tag question. End with a question mark.'},
+    {broken:'After the long hike we sat down for dinner',correct:'After the long hike, we sat down for dinner.',explanation:'Use a comma after an introductory phrase.'},
+    {broken:'The dog barked loudly however the cat ignored it',correct:'The dog barked loudly; however, the cat ignored it.',explanation:'Use a semicolon before "however" when connecting two related independent clauses, and a comma after.'},
+    {broken:'Please bring the following items a tent a sleeping bag and a flashlight',correct:'Please bring the following items: a tent, a sleeping bag, and a flashlight.',explanation:'Use a colon to introduce a list after a complete clause.'},
+    {broken:'My brother who lives in Boston is visiting next week',correct:'My brother, who lives in Boston, is visiting next week.',explanation:'Non-essential clauses (extra info) are set off with commas.'},
+    {broken:'She said I cant believe how fast time flies',correct:'She said, "I can\'t believe how fast time flies."',explanation:'Use a comma after "said" to introduce a quote. Quotes go inside quotation marks with an apostrophe in "can\'t".'},
+    {broken:'The year 1969 was historic Neil Armstrong walked on the moon',correct:'The year 1969 was historic: Neil Armstrong walked on the moon.',explanation:'Use a colon to connect a setup clause to its explanation.'},
+    {broken:'Did you know that Jupiter is the largest planet in our solar system',correct:'Did you know that Jupiter is the largest planet in our solar system?',explanation:'Indirect questions embedded in sentences still end with a question mark here because the overall sentence is a question.'},
+  ],
+  both: [
+    {broken:'yesterday i saw mr. johnson and he said hello how are you doing',correct:"Yesterday I saw Mr. Johnson and he said, \"Hello, how are you doing?\"",explanation:'Capitalize the start, "I", and titles. Add a comma after "said" and quotation marks around the spoken words.'},
+    {broken:'the doctor asked where does it hurt and i pointed to my shoulder',correct:'The doctor asked, "Where does it hurt?" and I pointed to my shoulder.',explanation:'Capitalize the start, "I", and the quote. Dialogue uses quotation marks and the question ends with "?".'},
+    {broken:'can you believe that mount everest is in the himalayas in asia',correct:'Can you believe that Mount Everest is in the Himalayas in Asia?',explanation:'Capitalize the start, proper nouns (Mount Everest, Himalayas, Asia), and end questions with "?".'},
+    {broken:'my mom said dont forget your lunch and i said i wont',correct:"My mom said, \"Don't forget your lunch,\" and I said, \"I won't.\"",explanation:'Capitalize the start and "I". Contractions need apostrophes. Quoted speech uses quotation marks.'},
+    {broken:'last tuesday dr. kim gave a lecture on climate change and its effects',correct:"Last Tuesday Dr. Kim gave a lecture on climate change and its effects.",explanation:'Capitalize days, titles before names, and the first word. No comma needed between short clauses here.'},
+    {broken:'we read a book called the hobbit in english class this semester',correct:'We read a book called The Hobbit in English class this semester.',explanation:'Capitalize the start, book titles (The Hobbit), and language names (English).'},
+    {broken:'have you ever been to washington d.c. its a beautiful city',correct:"Have you ever been to Washington D.C.? It's a beautiful city.",explanation:'Capitalize the start and the proper noun. Split into two sentences. Add apostrophe in "It\'s".'},
+  ]
+};
+
+function fixupSetMode(mode){
+  fixupMode=mode;
+  ['cap','punc','both'].forEach(m=>{
+    const btn=document.getElementById('fixup-tab-'+m);
+    if(!btn) return;
+    btn.style.background = m===mode ? '#00d18c' : 'transparent';
+    btn.style.color = m===mode ? '#0a1a12' : '#7a9e8e';
+  });
+  fixupNext();
+}
+function fixupStart(){
+  fixupScore=0; fixupStreak=0;
+  document.getElementById('fixup-score').textContent=0;
+  document.getElementById('fixup-streak').textContent=0;
+  fixupNext();
+}
+function fixupNext(){
+  const pool=FIXUP_DATA[fixupMode];
+  fixupCurrent=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('fixup-sentence-box').textContent=fixupCurrent.broken;
+  document.getElementById('fixup-input').value='';
+  document.getElementById('fixup-msg').textContent='';
+  document.getElementById('fixup-answer-reveal').style.display='none';
+  document.getElementById('fixup-input').focus();
+}
+function fixupSkip(){
+  document.getElementById('fixup-correct-text').textContent=fixupCurrent.correct;
+  document.getElementById('fixup-explanation').textContent=fixupCurrent.explanation;
+  document.getElementById('fixup-answer-reveal').style.display='';
+  document.getElementById('fixup-msg').textContent='';
+  fixupStreak=0;
+  document.getElementById('fixup-streak').textContent=0;
+}
+function fixupCheck(){
+  if(!fixupCurrent) return;
+  const userAns=document.getElementById('fixup-input').value.trim();
+  const correct=fixupCurrent.correct.trim();
+  const msg=document.getElementById('fixup-msg');
+  // Normalize comparison: ignore trailing whitespace differences
+  if(userAns===correct){
+    fixupScore+=10+(fixupStreak*3); fixupStreak++;
+    document.getElementById('fixup-score').textContent=fixupScore;
+    document.getElementById('fixup-streak').textContent=fixupStreak;
+    msg.style.color='#00d18c';
+    msg.textContent='✅ Perfect!';
+    document.getElementById('fixup-answer-reveal').style.display='none';
+    setTimeout(fixupNext,900);
+  } else {
+    // Check if close (ignoring case for partial feedback)
+    fixupStreak=0;
+    document.getElementById('fixup-streak').textContent=0;
+    msg.style.color='#e8a020';
+    msg.textContent='❌ Not quite — check the answer below.';
+    document.getElementById('fixup-correct-text').textContent=correct;
+    document.getElementById('fixup-explanation').textContent=fixupCurrent.explanation;
+    document.getElementById('fixup-answer-reveal').style.display='';
+  }
+}
 
 </script>
 
