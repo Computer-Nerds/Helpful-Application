@@ -838,7 +838,8 @@
 
             <div id="math-answer-row">
               <input id="math-answer-input" type="number" placeholder="?" autocomplete="off"
-                onkeydown="if(event.key==='Enter')mathSubmit()">
+                onkeydown="if(event.key==='Enter')mathSubmit()"
+                oninput="mathCheckAuto()">
               <button id="math-submit-btn" onclick="mathSubmit()">✓</button>
             </div>
             <div id="math-feedback"></div>
@@ -1202,16 +1203,26 @@ async function fetchWeather() {
     fd.list.forEach(item => {
       const d = new Date(item.dt * 1000);
       const key = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-      if (!days[key]) days[key] = { dayName: d.toLocaleDateString('en-US',{weekday:'short'}), temps:[], conditions:[] };
+      const hour = d.getHours();
+      if (!days[key]) days[key] = { dayName: d.toLocaleDateString('en-US',{weekday:'short'}), temps:[], conditions:[], noonId:null };
       days[key].temps.push(item.main.temp);
       days[key].conditions.push(item.weather[0].id);
+      // Prefer midday reading (11am-2pm) for the representative icon
+      if(hour>=11&&hour<=14) days[key].noonId=item.weather[0].id;
     });
     const todayKey = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     const fcast = Object.entries(days).filter(([k])=>k!==todayKey).slice(0,5).map(([,v])=>{
-      const freq={};
-      v.conditions.forEach(id=>{freq[id]=(freq[id]||0)+1;});
-      const domId = Object.entries(freq).sort((a,b)=>b[1]-a[1])[0][0];
-      return { day:v.dayName, low:Math.round(Math.min(...v.temps)), high:Math.round(Math.max(...v.temps)), icon:parseInt(domId) };
+      // Use noon reading if available; otherwise use the best daytime (worst = cloudy = high id) reading
+      let iconId = v.noonId;
+      if(!iconId){
+        // Pick the most severe/interesting condition from daytime readings — lowest id wins (sun < clouds < rain)
+        const freq={};
+        v.conditions.forEach(id=>{freq[id]=(freq[id]||0)+1;});
+        // Prefer sunniest: sort ascending by id, pick the one with most votes among the best 3
+        const sorted=Object.entries(freq).sort((a,b)=>a[0]-b[0]);
+        iconId=parseInt(sorted[0][0]);
+      }
+      return { day:v.dayName, low:Math.round(Math.min(...v.temps)), high:Math.round(Math.max(...v.temps)), icon:iconId };
     });
     const fc = document.getElementById('forecast');
     fc.innerHTML = fcast.map(d=>`
@@ -2625,6 +2636,15 @@ async function musicHandleArt(files){
   }
 
   // ── Submit answer ────────────────────────────────────────────
+  window.mathCheckAuto = function(){
+    if(!m.qVal) return;
+    const input=document.getElementById('math-answer-input');
+    const val=parseInt(input.value,10);
+    if(isNaN(val)) return;
+    // Auto-submit as soon as the typed value matches the answer
+    if(val===m.qVal.answer) mathSubmit();
+  };
+
   window.mathSubmit = function(){
     const input=document.getElementById('math-answer-input');
     const val=parseInt(input.value,10);
