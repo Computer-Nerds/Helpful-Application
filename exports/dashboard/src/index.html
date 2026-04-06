@@ -1404,9 +1404,13 @@
             <div class="app-icon" style="background:#2e2a1a">📖</div>
             <span class="app-label">Speed Read</span>
           </div>
-          <div class="app-tile" onclick="openBrainGame('numseq')">
-            <div class="app-icon" style="background:#1a2e2e">🔢</div>
-            <span class="app-label">Number Sequence</span>
+          <div class="app-tile" onclick="openBrainGame('focus')">
+            <div class="app-icon" style="background:#1a2a2e">🎯</div>
+            <span class="app-label">Focus</span>
+          </div>
+          <div class="app-tile" onclick="openBrainGame('language')">
+            <div class="app-icon" style="background:#2e1a28">🗣️</div>
+            <span class="app-label">Language</span>
           </div>
         </div>
       </div>
@@ -1417,6 +1421,7 @@
       <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
         <button class="btn btn-ghost" id="wordle-back-btn" onclick="wordleGoBack()">← Back</button>
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🟩 Daily Wordle</span>
+        <button onclick="setPage('bg-wordleditor')" style="margin-left:auto;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer">✏️ Word List</button>
       </div>
       <div id="wordle-wrap" style="display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;flex:1;overflow-y:auto">
         <div id="wordle-msg" style="height:28px;font-size:15px;font-weight:600;color:#e8a020;margin-bottom:8px"></div>
@@ -1471,19 +1476,79 @@
       </div>
     </div>
 
-    <!-- ══ NUMBER SEQUENCE ══ -->
-    <div id="page-bg-numseq" class="page" style="flex-direction:column">
+    <!-- ══ FOCUS GAME ══ -->
+    <div id="page-bg-focus" class="page" style="flex-direction:column">
       <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
         <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
-        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔢 Number Sequence</span>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🎯 Focus</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="focus-score">0</span> &nbsp;|&nbsp; Best: <span id="focus-best">0</span></span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;padding:32px 20px;overflow-y:auto;flex:1;overflow-y:auto">
-        <div style="font-size:13px;color:#7a9e8e;margin-bottom:8px">Score: <span id="ns-score">0</span> &nbsp;|&nbsp; Streak: <span id="ns-streak">0</span></div>
-        <div style="font-size:14px;color:#a0c9b8;margin-bottom:20px">What comes next?</div>
-        <div id="ns-sequence" style="font-size:28px;font-weight:700;color:#e8f0ed;letter-spacing:8px;margin-bottom:24px;text-align:center"></div>
-        <div id="ns-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;margin-bottom:12px"></div>
-        <div id="ns-msg" style="height:22px;font-size:14px;font-weight:600;color:#00d18c"></div>
-        <button onclick="nsNext()" style="margin-top:12px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">Skip →</button>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;overflow-y:auto;flex:1;gap:16px">
+        <div id="focus-instructions" style="font-size:13px;color:#7a9e8e;text-align:center;max-width:340px">A sequence of numbers will flash briefly. Remember them in order.<br><br>
+          <button onclick="focusStart()" style="background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 32px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px">Start</button>
+        </div>
+        <div id="focus-display" style="font-size:52px;font-weight:900;color:#00d18c;letter-spacing:10px;min-height:70px;display:flex;align-items:center;justify-content:center;display:none"></div>
+        <div id="focus-prompt" style="font-size:14px;color:#a0c9b8;display:none">Enter the sequence:</div>
+        <div id="focus-input-row" style="display:none;gap:10px;justify-content:center;flex-wrap:wrap"></div>
+        <div id="focus-numpad" style="display:none;display:grid;grid-template-columns:repeat(3,60px);gap:10px;margin-top:4px">
+          <!-- filled by JS -->
+        </div>
+        <div id="focus-msg" style="font-size:15px;font-weight:700;color:#e8a020;min-height:24px"></div>
+        <div id="focus-level-row" style="font-size:12px;color:#7a9e8e;display:none">Level: <span id="focus-level">1</span> &nbsp;|&nbsp; <span id="focus-seq-len">3</span> digits</div>
+      </div>
+    </div>
+
+    <!-- ══ LANGUAGE GAME ══ -->
+    <div id="page-bg-language" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🗣️ Language</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="lang-score">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:0">
+        <div id="lang-mode-select" style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:400px">
+          <div style="font-size:14px;color:#a0c9b8;margin-bottom:4px">Choose a mode:</div>
+          <button class="lang-mode-btn" onclick="langStartMode('synonym')" style="width:100%;background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:10px;padding:16px;font-size:14px;font-weight:600;cursor:pointer;text-align:left">
+            🔀 <strong>Synonym Match</strong> — Find the word closest in meaning
+          </button>
+          <button class="lang-mode-btn" onclick="langStartMode('antonym')" style="width:100%;background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:10px;padding:16px;font-size:14px;font-weight:600;cursor:pointer;text-align:left">
+            ↔️ <strong>Antonym Match</strong> — Find the opposite
+          </button>
+          <button class="lang-mode-btn" onclick="langStartMode('definition')" style="width:100%;background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:10px;padding:16px;font-size:14px;font-weight:600;cursor:pointer;text-align:left">
+            📖 <strong>Definition Match</strong> — Match the word to its definition
+          </button>
+          <button class="lang-mode-btn" onclick="langStartMode('fillblank')" style="width:100%;background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:10px;padding:16px;font-size:14px;font-weight:600;cursor:pointer;text-align:left">
+            ✏️ <strong>Fill in the Blank</strong> — Complete the sentence
+          </button>
+        </div>
+        <div id="lang-game-area" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;gap:12px">
+          <div id="lang-streak" style="font-size:12px;color:#7a9e8e;align-self:flex-start">Streak: <span id="lang-streak-val">0</span></div>
+          <div id="lang-question" style="font-size:18px;font-weight:700;color:#e8f0ed;text-align:center;padding:18px;background:#1a1f1d;border-radius:12px;width:100%;box-sizing:border-box;line-height:1.5"></div>
+          <div id="lang-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%"></div>
+          <div id="lang-msg" style="font-size:14px;font-weight:600;color:#00d18c;min-height:22px"></div>
+          <button onclick="setPage('braingames')" style="margin-top:8px;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:8px 22px;font-size:13px;cursor:pointer">← Back to Games</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ WORDLE WORD EDITOR ══ -->
+    <div id="page-bg-wordleditor" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('wordle')">← Wordle</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">✏️ Edit Word List</span>
+        <span style="margin-left:auto;font-size:12px;color:#7a9e8e"><span id="we-count">0</span> custom words</span>
+      </div>
+      <div style="display:flex;flex-direction:column;padding:20px;overflow-y:auto;flex:1;gap:16px;max-width:500px;width:100%;margin:0 auto;box-sizing:border-box">
+        <div style="font-size:13px;color:#7a9e8e">Add your own 5-letter words to the daily answer pool. They'll be treated as valid guesses too.</div>
+        <div style="display:flex;gap:10px">
+          <input id="we-input" maxlength="5" placeholder="5-letter word…" onkeydown="if(event.key==='Enter')weAdd()" style="flex:1;background:#0f1f17;border:1px solid #1f3a2a;border-radius:8px;padding:10px 14px;color:#e8f0ed;font-size:15px;font-family:monospace;text-transform:uppercase;outline:none">
+          <button onclick="weAdd()" style="background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer">Add</button>
+        </div>
+        <div id="we-error" style="font-size:13px;color:#e8a020;min-height:18px"></div>
+        <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px">Your Custom Words</div>
+        <div id="we-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px;margin-top:8px">Built-in Words (read-only)</div>
+        <div id="we-builtin-list" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
     </div>
 
@@ -1540,7 +1605,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-numseq'];
+const PAGES = ['home','planner','apps','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -1548,7 +1613,26 @@ function setPage(p) {
   // Brain game auto-init
   if(p==='wordle' && typeof wordleNewGame!=='undefined') wordleNewGame();
   if(p==='bg-analogies'&& typeof anaNext!=='undefined')       anaNext();
-  if(p==='bg-numseq'   && typeof nsNext!=='undefined')        nsNext();
+  if(p==='bg-focus'    && typeof focusStart!=='undefined'){
+    document.getElementById('focus-instructions').style.display='flex';
+    document.getElementById('focus-display').style.display='none';
+    document.getElementById('focus-prompt').style.display='none';
+    document.getElementById('focus-input-row').style.display='none';
+    document.getElementById('focus-numpad').style.display='none';
+    document.getElementById('focus-level-row').style.display='none';
+    document.getElementById('focus-msg').textContent='';
+    document.getElementById('focus-score').textContent=0;
+    document.getElementById('focus-best').textContent=localStorage.getItem('focus_best')||0;
+  }
+  if(p==='bg-language' && typeof langStartMode!=='undefined'){
+    document.getElementById('lang-mode-select').style.display='flex';
+    document.getElementById('lang-mode-select').style.flexDirection='column';
+    document.getElementById('lang-mode-select').style.alignItems='center';
+    document.getElementById('lang-game-area').style.display='none';
+    langStreak=0; langScoreVal=0;
+    document.getElementById('lang-score').textContent=0;
+  }
+  if(p==='bg-wordleditor') weLoad();
   if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
   PAGES.forEach(id => {
     const el = document.getElementById('page-' + id);
@@ -4651,21 +4735,153 @@ function bgChoiceBtn(label, onclick, extra='') {
 //  WORDLE  (daily — same puzzle all day, resets 4am)
 // ════════════════════════════════════════════════
 const WORDLE_WORDS = [
+  // — Common 5-letter words (used as daily answers) —
   'crane','slate','audio','snare','plumb','crimp','flint','blaze','grout','swamp',
   'viper','knoll','chime','proxy','quirk','fjord','expel','gloom','twirl','oxide',
   'abbey','badge','cable','daisy','eagle','fable','gavel','hazel','inlet','joust',
   'knave','latch','maple','noble','onset','plaid','quill','raven','swift','trove',
   'umbra','vault','waltz','xenon','yacht','zonal','abyss','baker','camel','divan',
   'ember','flair','gripe','haste','irony','jewel','karma','lemon','mirth','notch',
-  'olive','polka','quaff','remit','salvo','tango','ultra','virge','whelp','expat',
-  'bloom','clamp','drift','epoch','flank','growl','heist','icily','joker','kayak',
-  'lunge','maxim','nymph','optic','psalm','rajah','stomp','trawl','unfit','vapor',
-  'wrist','xylem','yearn','zesty','alpha','brash','chant','dowel','exert','froze',
-  'agile','blunt','croak','depot','expunge','fetch','gravel','hinge','index','jaunt',
-  'kiosk','lusty','mango','nerve','otter','perch','quota','rivet','skimp','tonic',
-  'usher','vigor','wispy','exact','yodel','zippy','amble','brood','cinch','depot',
-  'elbow','frond','girth','humps','inter','judge','kneel','local','murky','nitro'
+  'olive','polka','quaff','remit','salvo','tango','ultra','vigor','whelp','bloom',
+  'clamp','drift','epoch','flank','growl','heist','joker','kayak','lunge','maxim',
+  'nymph','optic','psalm','rajah','stomp','trawl','unfit','vapor','wrist','yearn',
+  'zesty','alpha','brash','chant','dowel','exert','froze','agile','blunt','croak',
+  'depot','fetch','hinge','index','jaunt','kiosk','lusty','mango','nerve','otter',
+  'perch','quota','rivet','skimp','tonic','usher','wispy','exact','yodel','zippy',
+  'amble','brood','cinch','elbow','frond','girth','inter','judge','kneel','local',
+  'murky','nitro','ozone','primp','quirky','ranch','shawl','tabby','ulcer','verge',
+  'whisk','xylem','zonal','adore','boxer','cello','dwarf','expat','fizzy','gusto',
+  'husky','icier','jolly','liner','moose','nudge','orbit','prawn','quake','roost',
+  'scone','tiger','untie','viola','weave','xenon','zippo','anvil','beige','crush',
+  'delta','envoy','frail','guile','hippo','ivory','jumpy','klutz','loopy','mauve',
+  'ninny','ovoid','pixel','query','rally','scald','talon','unwed','vying','whiff',
+  'abbot','brine','chops','dingo','easel','fetus','groan','hyena','ideal','jiffy',
+  'koala','leapt','mason','nasal','onset','pivot','roach','slunk','torso','ulnar',
+  'vexed','woven','yummy','zonal','askew','birch','carol','divan','expel','finch',
+  'gruel','hoard','igloo','jaded','knack','lapel','melee','notch','ovule','pasty',
+  'rebel','scuff','taboo','unfed','vireo','wormy','xxxxx','yacht','zoned'
 ];
+
+// ── Valid guess words (all words that can be typed as guesses) ──
+// Superset of WORDLE_WORDS plus common 5-letter English words
+const VALID_WORDS = new Set([
+  ...WORDLE_WORDS,
+  'aahed','aalii','abaci','aback','abaft','abase','abash','abate','abaya','abbey',
+  'abbot','abhor','abide','abler','abode','about','above','abuse','abyss','acids',
+  'ached','aches','acids','acorn','acres','acted','acute','adage','added','adder',
+  'adieu','admit','adobe','adopt','adore','adorn','adult','affix','afoot','after',
+  'again','agate','agave','aged','agile','aging','aglow','agony','agree','ahead',
+  'aided','aider','aimed','aired','aisle','alarm','album','alert','alibi','align',
+  'alike','allay','alley','allot','allow','alloy','aloft','alone','along','aloof',
+  'aloud','alter','amaze','amber','amend','amine','amino','amiss','amity','ample',
+  'amuse','angel','anger','angle','angry','angst','anime','annex','annoy','antic',
+  'anvil','aorta','aptly','ardor','arena','arise','armed','aroma','arose','array',
+  'arrow','ascot','ashen','aspen','assay','asset','atoll','atone','attic','audit',
+  'augur','avail','avant','avert','avian','avid','avoid','awake','award','aware',
+  'awful','awoke','axial','azure','babel','baked','baker','bales','balmy','banal',
+  'barge','baron','based','basil','basin','basis','baste','batch','bathe','bayou',
+  'beach','beady','beard','beast','began','begin','being','belle','bench','berth',
+  'birch','birth','bison','bitch','black','bland','blank','blast','bleat','bleed',
+  'bless','blimp','blind','blink','bliss','blitz','bloke','blond','blood','blown',
+  'board','boast','bogus','bolts','bonus','botch','bound','boxer','brace','braid',
+  'brain','brand','brave','bravo','brawl','brawn','break','breed','breve','bribe',
+  'bride','brief','brine','bring','broad','broil','broke','brook','broom','broth',
+  'brown','brush','buddy','buggy','build','built','bulge','bulky','bully','bumpy',
+  'bunch','bunny','butch','byway','cache','cairn','calve','cargo','carry','catch',
+  'cause','cedar','cellar','chair','chalk','champ','chaos','chard','charm','chart',
+  'chase','chasm','cheap','cheat','check','cheek','cheer','chess','chest','chick',
+  'chief','child','chill','chimp','china','choir','chord','chore','chose','chunk',
+  'civic','civil','clad','claim','clank','clash','clasp','class','clean','clear',
+  'clerk','click','cliff','climb','cling','cloak','clock','clone','close','cloud',
+  'cluck','clued','coils','comet','comic','comma','coral','could','count','court',
+  'cover','covet','craft','cramp','crash','crazy','creak','cream','creed','creek',
+  'creep','crest','crime','crisp','cross','crowd','crown','cruel','crush','crypt',
+  'cubic','curly','curry','curse','curve','cushy','cutie','cycle','daddy','daily',
+  'dance','dandy','dazed','death','debut','decry','defer','deity','delay','delta',
+  'dense','depot','derby','desks','devil','diary','digit','dingo','dirty','disco',
+  'dizzy','dodge','dogma','donor','doubt','dough','dowdy','dozen','draft','drain',
+  'drape','drawl','drawn','dread','dream','drear','dress','dried','drift','drill',
+  'drink','drive','drone','drool','drove','drown','drunk','dryer','duchy','dusky',
+  'dusty','dwelt','dying','early','earth','eaten','eerie','eight','eject','elite',
+  'empty','enact','endow','enjoy','ensue','enter','entry','equal','error','essay',
+  'ethos','evade','event','every','evict','evoke','exact','exist','extra','faint',
+  'faith','false','fancy','farce','fatal','fatigue','fault','favor','feast','feint',
+  'feral','ferry','fever','fewer','fiber','field','fiend','fiery','fifth','fifty',
+  'fight','final','first','fixed','fjord','flame','flask','flaunt','flesh','flick',
+  'flight','fling','flock','flood','floor','floss','flour','flout','flown','fluff',
+  'fluke','flung','flunk','flush','focal','foggy','folio','folly','found','frame',
+  'freed','fresh','frisk','front','frost','froth','frown','froze','fully','fungi',
+  'funky','funny','furor','furry','gavel','gauze','gecko','ghoul','given','gizmo',
+  'gland','glare','glass','gleam','glean','glint','gloat','globe','gloss','glove',
+  'gnome','golem','gorge','gouge','gourd','graft','graft','grain','grape','grasp',
+  'grass','grate','grave','gravy','graze','greed','greet','grief','grind','gripe',
+  'groan','groom','grove','gruel','gruff','guava','guile','guise','gully','gusts',
+  'habit','happy','harsh','haven','haunt','havoc','heart','heavy','hedge','hello',
+  'hence','herbs','hexed','hilts','hinge','hippo','hoary','hobby','holly','honor',
+  'horde','hotel','hotly','hound','house','howdy','human','humid','humor','hurdle',
+  'hurry','hyena','hyper','image','impel','impending','inane','incur','inept','inert',
+  'infer','ingot','inlay','inner','input','inset','inter','intro','inure','ionic',
+  'irate','irked','itchy','ivory','jazzy','jerky','jingo','joist','joker','jolly',
+  'joust','joyed','judge','jumbo','juror','karma','kayak','kebab','khaki','kitty',
+  'knack','kneel','knife','knock','known','kudos','label','lance','large','laser',
+  'latch','later','lathe','layer','leaky','leapt','learn','lease','leash','leave',
+  'legal','leger','light','limit','lithe','liver','livid','llama','lodge','lofty',
+  'logic','loopy','lorry','lowly','lucid','lucky','lunar','lying','magic','major',
+  'maker','manor','march','marry','match','mayor','mealy','melee','mercy','merit',
+  'messy','metal','might','mince','minim','mirth','miser','mitre','model','money',
+  'month','moody','mossy','motif','mound','mourn','moved','mucky','muddy','muggy',
+  'mulch','mummy','murky','mushy','musky','musty','naked','nanny','nasty','natty',
+  'naval','needy','newly','nicer','nifty','night','nihil','noble','noise','noisy',
+  'nominal','novel','nudge','nurse','nymph','oaken','oddly','offal','offer','often',
+  'onion','oozed','opaque','opera','opine','opted','order','outdo','outer','ovary',
+  'overdo','overt','owing','oxide','ozone','paddy','paint','panic','pansy','papal',
+  'party','paved','peach','pedal','penal','penny','perky','pesky','petty','phase',
+  'phone','photo','piano','piece','pilot','pinch','pithy','pixel','pizza','plank',
+  'plant','plate','plaza','plead','pleat','pluck','plume','plunk','plush','poach',
+  'podgy','poesy','point','poise','poker','pokey','polar','polka','poppy','porch',
+  'posed','pouty','power','prank','press','price','pride','primal','prime','primp',
+  'print','prism','prize','prone','proof','prose','proud','prowl','prude','prune',
+  'pudgy','pulse','punch','pupil','purge','purse','pushy','pygmy','qualm','quest',
+  'quick','quiet','quite','quota','quotient','rabbi','radar','raise','rally','ramen',
+  'range','rapid','raspy','ratty','reach','react','realm','rearm','rebut','recut',
+  'reedy','reeve','regal','reign','relax','relic','remix','renew','repay','repel',
+  'rerun','reset','reuse','revel','rhyme','rider','right','rigid','risky','rival',
+  'rivet','roast','robin','rocky','rogue','roman','roomy','rosary','rouge','rough',
+  'round','rouse','rowdy','ruddy','rugby','ruler','runny','rupee','rural','rusty',
+  'sadly','saint','sandy','sauce','savvy','scaly','scalp','scamp','scary','scent',
+  'scone','score','scout','screw','seamy','seedy','seize','serve','seven','sever',
+  'shady','shaft','shaky','shall','shame','shape','share','shark','sharp','sheaf',
+  'sheep','sheer','sheet','shelf','shell','shift','shire','shirt','shorn','short',
+  'shown','shred','shrew','shrug','shuck','shunt','sigma','silly','since','sinew',
+  'sixth','sixty','sized','skill','skull','slain','slant','slash','slave','sleek',
+  'sleet','sleek','slick','slide','slime','slimy','sling','slosh','sloth','slotted',
+  'slurp','smack','small','smash','smear','smelt','smirk','smock','smoky','snack',
+  'snaky','snare','snarl','sneak','snide','sniff','snore','snort','snowy','snuck',
+  'sodden','solar','solemn','solid','solve','sorry','sound','soupy','spare','spark',
+  'spasm','spear','speck','spell','spicy','spill','spine','spite','spook','spore',
+  'sport','spout','spray','spree','sprig','spunk','squad','squat','squid','stack',
+  'staff','stage','stain','stake','stale','stalk','stall','stamp','stand','stark',
+  'start','stash','state','stays','steam','steel','steep','steer','stern','stiff',
+  'still','sting','stock','stoic','stoke','stone','stood','store','storm','story',
+  'stout','stove','strap','straw','stray','strum','strut','study','stump','stung',
+  'style','suave','sugar','suite','sulky','sully','sunny','super','surge','surly',
+  'swear','sweat','sweep','sweet','swept','swill','swine','swipe','swirl','swoop',
+  'syrup','taboo','taunt','tawny','taxis','tasty','taxed','teach','teddy','tepid',
+  'terse','theft','there','these','thick','thing','think','thorn','three','threw',
+  'throw','thrum','thunk','tidbit','tidal','tithe','title','today','token','topaz',
+  'torso','total','touch','tough','towel','toxic','trace','track','trade','trail',
+  'train','tramp','trash','trend','trial','tribe','trick','tried','trill','tripe',
+  'trite','troll','troop','troth','trout','truce','truly','trump','trunk','truss',
+  'trust','truth','tulip','tumor','tuner','tunic','tutor','twang','tweak','tweed',
+  'twice','twill','twine','twist','tying','udder','under','undue','unfit','unite',
+  'unlit','until','upper','upset','urban','usurp','utter','vague','valid','valor',
+  'value','valve','venom','verse','vicar','vigil','viral','virus','visit','visor',
+  'vista','vital','vivid','vocal','vodka','vogue','voila','volley','vomit','voter',
+  'vouch','vowel','vulva','wacky','wager','waist','walky','waned','watch','water',
+  'weary','wedge','weedy','weird','well','whack','whale','whirl','wimpy','wince',
+  'windy','witty','woken','women','world','wormy','worst','worth','wrath','wrote',
+  'wryly','yawns','zappy','zealot','zebra','zoned'
+]);
 const WORDLE_KEYBOARD_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P'],
   ['A','S','D','F','G','H','J','K','L'],
@@ -4785,6 +5001,15 @@ function wordleKey(key) {
   if(key==='⌫'||key==='BACKSPACE'){ wCurrentGuess=wCurrentGuess.slice(0,-1); }
   else if(key==='ENTER'){
     if(wCurrentGuess.length<5){document.getElementById('wordle-msg').textContent='Not enough letters';return;}
+    // Validate word
+    const guess_lower = wCurrentGuess.toLowerCase();
+    const allWords = new Set([...(typeof VALID_WORDS!=='undefined'?VALID_WORDS:[]),...WORDLE_WORDS.map(w=>w.toLowerCase())]);
+    if(!allWords.has(guess_lower)){
+      const msg=document.getElementById('wordle-msg');
+      msg.textContent='Not a valid word';
+      setTimeout(()=>{if(msg.textContent==='Not a valid word')msg.textContent='';},1200);
+      return;
+    }
     const ans=wAnswer;
     // count letters for present detection
     const ansCount={};
@@ -5055,53 +5280,290 @@ function srPick(opt,btn,ch){
 // ════════════════════════════════════════════════
 //  NUMBER SEQUENCE
 // ════════════════════════════════════════════════
-let nsScore=0, nsStreak=0, nsCurrent=null;
-const NS_TYPES = [
-  ()=>{ const s=Math.floor(Math.random()*5)+1, start=Math.floor(Math.random()*10); const seq=[start,start+s,start+2*s,start+3*s]; return{seq,ans:start+4*s,type:'arithmetic'}; },
-  ()=>{ const r=Math.floor(Math.random()*3)+2, start=Math.floor(Math.random()*3)+1; const seq=[start,start*r,start*r*r,start*r*r*r]; return{seq,ans:start*r*r*r*r,type:'geometric'}; },
-  ()=>{ const seq=[1,1]; for(let i=2;i<5;i++) seq.push(seq[i-1]+seq[i-2]); return{seq:seq.slice(0,4),ans:seq[4],type:'fibonacci'}; },
-  ()=>{ const sq=[1,4,9,16]; return{seq:sq,ans:25,type:'squares'}; },
-  ()=>{ const s=Math.floor(Math.random()*3)+1,start=Math.floor(Math.random()*5)+2; const seq=[start,start+s,start+2*s,start+3*s]; return{seq,ans:start+4*s,type:'arithmetic'}; },
-  ()=>{ const base=Math.floor(Math.random()*4)+2; const seq=[base,base*base,base*base*base,base*base*base*base]; return{seq,ans:base**5,type:'powers'}; },
-];
-function nsNext(){
-  nsCurrent=NS_TYPES[Math.floor(Math.random()*NS_TYPES.length)]();
-  document.getElementById('ns-sequence').textContent=nsCurrent.seq.join('  ,  ')+'  ,  ?';
-  document.getElementById('ns-msg').textContent='';
-  const ans=nsCurrent.ans;
-  const wrongs=new Set();
-  while(wrongs.size<3){ const w=ans+Math.floor(Math.random()*10)-5; if(w!==ans) wrongs.add(w); }
-  const opts=[ans,...wrongs].sort(()=>Math.random()-.5);
-  const ch=document.getElementById('ns-choices');
-  ch.innerHTML='';
-  opts.forEach(opt=>{
-    const btn=document.createElement('button');
-    btn.textContent=opt;
-    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:18px;font-weight:700;cursor:pointer';
-    btn.onclick=()=>nsPick(opt,btn,ch);
-    ch.appendChild(btn);
-  });
-}
-function nsPick(opt,btn,ch){
-  Array.from(ch.children).forEach(b=>b.disabled=true);
-  if(opt===nsCurrent.ans){
-    btn.style.background='#538d4e'; nsScore+=10; nsStreak++;
-    document.getElementById('ns-msg').textContent='✅ Correct!';
-  } else {
-    btn.style.background='#8d3a3a'; nsStreak=0;
-    document.getElementById('ns-msg').textContent=`❌ Answer: ${nsCurrent.ans}`;
-    Array.from(ch.children).forEach(b=>{if(Number(b.textContent)===nsCurrent.ans)b.style.background='#538d4e';});
-  }
-  document.getElementById('ns-score').textContent=nsScore;
-  document.getElementById('ns-streak').textContent=nsStreak;
-  setTimeout(nsNext,1200);
-}
-
-
-
 // ── Wordle home card init (must run after all wordle vars/functions declared) ──
 (function(){
   try { wordleInit(); wordleRenderMini(); } catch(e) {}
+})();
+
+
+// ════════════════════════════════════════════════
+//  FOCUS GAME
+// ════════════════════════════════════════════════
+let focusLevel=1, focusScore=0, focusBest=parseInt(localStorage.getItem('focus_best')||'0'), focusSeq=[], focusUserSeq=[], focusActive=false;
+function focusStart(){
+  focusScore=0; focusLevel=1;
+  document.getElementById('focus-score').textContent=0;
+  document.getElementById('focus-best').textContent=focusBest;
+  document.getElementById('focus-instructions').style.display='none';
+  document.getElementById('focus-level-row').style.display='';
+  focusNextRound();
+}
+function focusNextRound(){
+  const len = 2 + focusLevel;
+  document.getElementById('focus-level').textContent=focusLevel;
+  document.getElementById('focus-seq-len').textContent=len;
+  document.getElementById('focus-msg').textContent='';
+  focusSeq = Array.from({length:len},()=>Math.floor(Math.random()*10));
+  focusUserSeq=[];
+  focusActive=false;
+  // Show sequence
+  document.getElementById('focus-display').style.display='flex';
+  document.getElementById('focus-display').textContent='';
+  document.getElementById('focus-prompt').style.display='none';
+  document.getElementById('focus-input-row').style.display='none';
+  document.getElementById('focus-numpad').style.display='none';
+  let i=0;
+  function showNext(){
+    if(i<focusSeq.length){
+      document.getElementById('focus-display').textContent=focusSeq[i];
+      i++;
+      setTimeout(()=>{
+        document.getElementById('focus-display').textContent='';
+        setTimeout(showNext,180);
+      },600);
+    } else {
+      // Now ask for input
+      document.getElementById('focus-display').style.display='none';
+      document.getElementById('focus-prompt').style.display='';
+      document.getElementById('focus-input-row').style.display='flex';
+      document.getElementById('focus-numpad').style.display='grid';
+      focusRenderInputRow();
+      focusBuildNumpad();
+      focusActive=true;
+    }
+  }
+  setTimeout(showNext, 600);
+}
+function focusRenderInputRow(){
+  const row=document.getElementById('focus-input-row');
+  row.innerHTML='';
+  const len=focusSeq.length;
+  for(let i=0;i<len;i++){
+    const box=document.createElement('div');
+    box.id='focus-box-'+i;
+    box.style.cssText='width:38px;height:38px;background:#0f1f17;border:2px solid #1f3a2a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#e8f0ed';
+    row.appendChild(box);
+  }
+}
+function focusBuildNumpad(){
+  const np=document.getElementById('focus-numpad');
+  np.innerHTML='';
+  [1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].forEach(k=>{
+    const btn=document.createElement('button');
+    btn.textContent=k;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:none;border-radius:8px;padding:0;width:60px;height:52px;font-size:20px;font-weight:700;cursor:pointer';
+    btn.onclick=()=>focusInput(String(k));
+    np.appendChild(btn);
+  });
+}
+function focusInput(k){
+  if(!focusActive) return;
+  if(k==='⌫'){ if(focusUserSeq.length){focusUserSeq.pop();focusRefreshBoxes();} return; }
+  if(k==='✓'){ focusCheck(); return; }
+  if(focusUserSeq.length<focusSeq.length){ focusUserSeq.push(parseInt(k)); focusRefreshBoxes(); }
+  if(focusUserSeq.length===focusSeq.length) focusCheck();
+}
+function focusRefreshBoxes(){
+  for(let i=0;i<focusSeq.length;i++){
+    const box=document.getElementById('focus-box-'+i);
+    if(!box) continue;
+    box.textContent = focusUserSeq[i]!==undefined ? focusUserSeq[i] : '';
+    box.style.borderColor = focusUserSeq[i]!==undefined ? '#00d18c' : '#1f3a2a';
+  }
+}
+function focusCheck(){
+  focusActive=false;
+  const correct = focusSeq.every((v,i)=>v===focusUserSeq[i]);
+  if(correct){
+    focusScore+=focusLevel*10; focusLevel++;
+    if(focusScore>focusBest){focusBest=focusScore;localStorage.setItem('focus_best',focusBest);}
+    document.getElementById('focus-score').textContent=focusScore;
+    document.getElementById('focus-best').textContent=focusBest;
+    document.getElementById('focus-msg').textContent='✅ Correct! Next level…';
+    setTimeout(focusNextRound,900);
+  } else {
+    // Show correct answer
+    for(let i=0;i<focusSeq.length;i++){
+      const box=document.getElementById('focus-box-'+i);
+      if(!box) continue;
+      box.textContent=focusSeq[i];
+      box.style.borderColor=focusUserSeq[i]===focusSeq[i]?'#538d4e':'#8d3a3a';
+      box.style.color=focusUserSeq[i]===focusSeq[i]?'#e8f0ed':'#ff8080';
+    }
+    document.getElementById('focus-msg').textContent='❌ Game over! Score: '+focusScore;
+    document.getElementById('focus-numpad').style.display='none';
+    setTimeout(()=>{
+      document.getElementById('focus-instructions').style.display='flex';
+      document.getElementById('focus-instructions').style.flexDirection='column';
+      document.getElementById('focus-instructions').style.alignItems='center';
+      document.getElementById('focus-display').style.display='none';
+      document.getElementById('focus-prompt').style.display='none';
+      document.getElementById('focus-input-row').style.display='none';
+      document.getElementById('focus-level-row').style.display='none';
+    },2000);
+  }
+}
+
+// ════════════════════════════════════════════════
+//  LANGUAGE GAME
+// ════════════════════════════════════════════════
+let langMode='', langStreak=0, langScoreVal=0;
+const LANG_DATA = {
+  synonym:[
+    {word:'Happy',choices:['Joyful','Angry','Tired','Confused'],answer:'Joyful'},
+    {word:'Big',choices:['Large','Tiny','Dark','Quick'],answer:'Large'},
+    {word:'Fast',choices:['Rapid','Slow','Cold','Soft'],answer:'Rapid'},
+    {word:'Smart',choices:['Clever','Silly','Loud','Heavy'],answer:'Clever'},
+    {word:'Begin',choices:['Start','End','Fall','Float'],answer:'Start'},
+    {word:'Angry',choices:['Furious','Calm','Bright','Empty'],answer:'Furious'},
+    {word:'Sad',choices:['Gloomy','Cheerful','Vast','Sharp'],answer:'Gloomy'},
+    {word:'Brave',choices:['Bold','Scared','Lazy','Quiet'],answer:'Bold'},
+    {word:'Strange',choices:['Odd','Normal','Warm','Dense'],answer:'Odd'},
+    {word:'Tired',choices:['Weary','Fresh','Loud','Pale'],answer:'Weary'},
+    {word:'Rich',choices:['Wealthy','Poor','Dull','Rough'],answer:'Wealthy'},
+    {word:'Cold',choices:['Frigid','Warm','Bright','Round'],answer:'Frigid'},
+    {word:'Small',choices:['Tiny','Huge','Heavy','Quick'],answer:'Tiny'},
+    {word:'Beautiful',choices:['Gorgeous','Ugly','Soft','Bland'],answer:'Gorgeous'},
+    {word:'Help',choices:['Assist','Hinder','Break','Ignore'],answer:'Assist'},
+  ],
+  antonym:[
+    {word:'Hot',choices:['Cold','Warm','Mild','Crisp'],answer:'Cold'},
+    {word:'Fast',choices:['Slow','Quick','Rapid','Brisk'],answer:'Slow'},
+    {word:'Happy',choices:['Sad','Glad','Merry','Jolly'],answer:'Sad'},
+    {word:'Big',choices:['Small','Large','Huge','Vast'],answer:'Small'},
+    {word:'Dark',choices:['Bright','Dim','Murky','Cloudy'],answer:'Bright'},
+    {word:'Strong',choices:['Weak','Tough','Firm','Solid'],answer:'Weak'},
+    {word:'Early',choices:['Late','Prompt','Swift','Soon'],answer:'Late'},
+    {word:'Loud',choices:['Quiet','Noisy','Booming','Blaring'],answer:'Quiet'},
+    {word:'Old',choices:['Young','Aged','Ancient','Matured'],answer:'Young'},
+    {word:'Rich',choices:['Poor','Wealthy','Lavish','Opulent'],answer:'Poor'},
+    {word:'Hard',choices:['Soft','Rigid','Tough','Dense'],answer:'Soft'},
+    {word:'Love',choices:['Hate','Like','Adore','Cherish'],answer:'Hate'},
+    {word:'Win',choices:['Lose','Beat','Triumph','Excel'],answer:'Lose'},
+    {word:'Begin',choices:['End','Start','Open','Launch'],answer:'End'},
+    {word:'Full',choices:['Empty','Packed','Stuffed','Loaded'],answer:'Empty'},
+  ],
+  definition:[
+    {word:'What is an "archipelago"?',choices:['A chain of islands','A mountain range','A type of cloud','A desert wind'],answer:'A chain of islands'},
+    {word:'What does "benevolent" mean?',choices:['Kind and generous','Cruel and harsh','Very wealthy','Deeply confused'],answer:'Kind and generous'},
+    {word:'What is "ambiguous"?',choices:['Having more than one meaning','Completely certain','Very small','Extremely fast'],answer:'Having more than one meaning'},
+    {word:'What does "eloquent" mean?',choices:['Fluent and persuasive','Loud and obnoxious','Shy and reserved','Weak and frail'],answer:'Fluent and persuasive'},
+    {word:'What is a "paradox"?',choices:['A self-contradictory statement','A type of bird','An ancient weapon','A math formula'],answer:'A self-contradictory statement'},
+    {word:'What does "meticulous" mean?',choices:['Very careful about detail','Extremely careless','Very generous','Deeply suspicious'],answer:'Very careful about detail'},
+    {word:'What is "ephemeral"?',choices:['Short-lived','Permanent','Very large','Deeply serious'],answer:'Short-lived'},
+    {word:'What does "sycophant" mean?',choices:['A flatterer who seeks favor','A skilled musician','A rare flower','A type of cloud'],answer:'A flatterer who seeks favor'},
+    {word:'What is "empirical"?',choices:['Based on observation','Based on theory','Based on tradition','Based on emotion'],answer:'Based on observation'},
+    {word:'What does "loquacious" mean?',choices:['Tending to talk a lot','Very quiet','Extremely logical','Deeply humble'],answer:'Tending to talk a lot'},
+  ],
+  fillblank:[
+    {word:'The _____ shone brightly in the night sky.',choices:['Moon','Shoe','Cloud','Bread'],answer:'Moon'},
+    {word:'She _____ the door and walked inside.',choices:['Opened','Painted','Dropped','Cooked'],answer:'Opened'},
+    {word:'The scientist made an important _____ in the lab.',choices:['Discovery','Sandwich','Mistake','Garden'],answer:'Discovery'},
+    {word:'He was so tired he could barely keep his _____ open.',choices:['Eyes','Hands','Books','Wallet'],answer:'Eyes'},
+    {word:'The _____ roared as the storm moved closer.',choices:['Thunder','Silence','Carpet','Flower'],answer:'Thunder'},
+    {word:'She read every _____ in the library.',choices:['Book','Cloud','Door','River'],answer:'Book'},
+    {word:'The _____ barked when a stranger approached.',choices:['Dog','Piano','Mountain','Ocean'],answer:'Dog'},
+    {word:'He practiced the _____ for hours every day.',choices:['Guitar','Window','Blanket','Desert'],answer:'Guitar'},
+    {word:'The _____ turned golden as autumn arrived.',choices:['Leaves','Bricks','Fences','Pillows'],answer:'Leaves'},
+    {word:'They watched the _____ set over the horizon.',choices:['Sun','Moon','Chair','Bottle'],answer:'Sun'},
+    {word:'The chef added _____ to make the dish spicy.',choices:['Pepper','Sugar','Butter','Flour'],answer:'Pepper'},
+    {word:'She wore a warm _____ to stay cozy in the cold.',choices:['Coat','Sandal','Bracelet','Pillow'],answer:'Coat'},
+  ]
+};
+function langStartMode(mode){
+  langMode=mode; langStreak=0; langScoreVal=0;
+  document.getElementById('lang-mode-select').style.display='none';
+  document.getElementById('lang-game-area').style.display='flex';
+  document.getElementById('lang-score').textContent=0;
+  document.getElementById('lang-streak-val').textContent=0;
+  langNext();
+}
+function langNext(){
+  const pool=LANG_DATA[langMode];
+  const item=pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('lang-question').textContent=item.word;
+  document.getElementById('lang-msg').textContent='';
+  const choices=[...item.choices].sort(()=>Math.random()-.5);
+  const ch=document.getElementById('lang-choices');
+  ch.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.textContent=c;
+    btn.style.cssText='background:#1a2e24;color:#e8f0ed;border:1px solid #1f3a2a;border-radius:8px;padding:14px 10px;font-size:14px;font-weight:600;cursor:pointer;text-align:center';
+    btn.onclick=()=>langPick(c,item.answer,btn,ch);
+    ch.appendChild(btn);
+  });
+}
+function langPick(choice,answer,btn,ch){
+  Array.from(ch.children).forEach(b=>{b.disabled=true;b.style.opacity='0.7';});
+  if(choice===answer){
+    btn.style.background='#538d4e'; btn.style.opacity='1';
+    langStreak++; langScoreVal+=10+(langStreak*2);
+    document.getElementById('lang-streak-val').textContent=langStreak;
+    document.getElementById('lang-score').textContent=langScoreVal;
+    document.getElementById('lang-msg').textContent='✅ Correct!';
+  } else {
+    btn.style.background='#8d3a3a'; btn.style.opacity='1';
+    Array.from(ch.children).forEach(b=>{if(b.textContent===answer){b.style.background='#538d4e';b.style.opacity='1';}});
+    langStreak=0;
+    document.getElementById('lang-streak-val').textContent=0;
+    document.getElementById('lang-msg').textContent='❌ Incorrect';
+  }
+  setTimeout(langNext,1200);
+}
+
+// ════════════════════════════════════════════════
+//  WORDLE WORD EDITOR
+// ════════════════════════════════════════════════
+function weLoad(){
+  const custom=JSON.parse(localStorage.getItem('wordle_custom_words')||'[]');
+  document.getElementById('we-count').textContent=custom.length;
+  const list=document.getElementById('we-list');
+  list.innerHTML='';
+  if(!custom.length){ list.innerHTML='<div style="font-size:13px;color:#4a6e5e;font-style:italic">No custom words yet.</div>'; }
+  custom.forEach(w=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;background:#0f1f17;border:1px solid #1f3a2a;border-radius:8px;padding:10px 14px';
+    row.innerHTML=`<span style="font-family:monospace;font-size:16px;font-weight:700;color:#e8f0ed;flex:1">${w.toUpperCase()}</span><button onclick="weRemove('${w}')" style="background:#3a1a1a;color:#ff8080;border:none;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer">Remove</button>`;
+    list.appendChild(row);
+  });
+  // Built-in list
+  const builtin=document.getElementById('we-builtin-list');
+  builtin.innerHTML='';
+  WORDLE_WORDS.forEach(w=>{
+    const chip=document.createElement('div');
+    chip.style.cssText='background:#1a2e24;color:#a0c9b8;border-radius:6px;padding:4px 10px;font-size:12px;font-family:monospace;font-weight:700';
+    chip.textContent=w.toUpperCase();
+    builtin.appendChild(chip);
+  });
+}
+function weAdd(){
+  const input=document.getElementById('we-input');
+  const w=input.value.trim().toLowerCase();
+  const err=document.getElementById('we-error');
+  if(w.length!==5){err.textContent='Word must be exactly 5 letters.';return;}
+  if(!/^[a-z]+$/.test(w)){err.textContent='Letters only.';return;}
+  const custom=JSON.parse(localStorage.getItem('wordle_custom_words')||'[]');
+  if(custom.includes(w)||WORDLE_WORDS.includes(w)){err.textContent='Word already in list.';return;}
+  custom.push(w);
+  localStorage.setItem('wordle_custom_words',JSON.stringify(custom));
+  // Also add to VALID_WORDS set
+  if(typeof VALID_WORDS!=='undefined') VALID_WORDS.add(w);
+  err.textContent='';
+  input.value='';
+  weLoad();
+}
+function weRemove(w){
+  let custom=JSON.parse(localStorage.getItem('wordle_custom_words')||'[]');
+  custom=custom.filter(x=>x!==w);
+  localStorage.setItem('wordle_custom_words',JSON.stringify(custom));
+  if(typeof VALID_WORDS!=='undefined') VALID_WORDS.delete(w);
+  weLoad();
+}
+// Load custom words into VALID_WORDS on startup
+(function(){
+  const custom=JSON.parse(localStorage.getItem('wordle_custom_words')||'[]');
+  custom.forEach(w=>{ if(typeof VALID_WORDS!=='undefined') VALID_WORDS.add(w); });
 })();
 
 </script>
