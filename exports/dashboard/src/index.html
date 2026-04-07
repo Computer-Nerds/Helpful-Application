@@ -2285,7 +2285,7 @@ function setPage(p) {
     renderPlannerSidebar();
     if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
-  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); renderCountdown(); fitRenderHomeFitnessCard(); renderQuoteOfDay(); }
+  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); renderCountdown(); fitRenderHomeFitnessCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
   if (p === 'music') { musicInit(); hmwSyncState(); }
@@ -2519,16 +2519,49 @@ function renderHomeProjects() {
 function renderTodayCard() {
   const now = new Date();
   const todayKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  const events = getCalEvents().filter(e => e.date === todayKey);
+  const allEvents = getCalEvents();
+  const todayEvents = allEvents.filter(e => e.date === todayKey);
   const el = document.getElementById('today-events');
-  if (!events.length) { el.innerHTML = '<div style="font-size:12px;color:#4a7060">No events today</div>'; return; }
-  el.innerHTML = events.map(ev => `
-    <div class="today-event">
-      <div class="today-event-dot" style="background:${ev.color||'#00d18c'}"></div>
-      <span class="today-event-title">${ev.title}</span>
-      ${ev.time?`<span class="today-event-time">${ev.time}</span>`:''}
-    </div>
-  `).join('');
+
+  // Today's events
+  let html = '';
+  if (!todayEvents.length) {
+    html += '<div style="font-size:12px;color:#4a7060;margin-bottom:8px">No events today</div>';
+  } else {
+    html += todayEvents.map(ev => `
+      <div class="today-event" style="margin-bottom:5px">
+        <div class="today-event-dot" style="background:${ev.color||'#00d18c'}"></div>
+        <span class="today-event-title">${ev.title}</span>
+        ${ev.time?`<span class="today-event-time">${ev.time}</span>`:''}
+      </div>
+    `).join('');
+  }
+
+  // Upcoming events (future dates only, up to 3)
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = allEvents
+    .filter(e => { const d = new Date(e.date + 'T00:00:00'); return d > today; })
+    .sort((a,b) => a.date.localeCompare(b.date))
+    .slice(0, 3);
+
+  if (upcoming.length) {
+    html += '<div style="border-top:1px solid #1a2e24;margin:6px 0 6px"></div>';
+    html += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:5px">UPCOMING</div>';
+    html += upcoming.map(ev => {
+      const d = new Date(ev.date + 'T00:00:00');
+      const diff = Math.round((d - today) / 86400000);
+      const diffStr = diff === 1 ? 'Tomorrow' : diff < 7 ? d.toLocaleDateString('en-US',{weekday:'short'}) : ev.date.slice(5).replace('-','/');
+      return `
+        <div class="today-event" style="margin-bottom:5px">
+          <div class="today-event-dot" style="background:${ev.color||'#00d18c'};opacity:0.6"></div>
+          <span class="today-event-title" style="color:#7a9e8e;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.title}</span>
+          <span class="today-event-time" style="color:#4a7060;font-size:10px;margin-left:4px;flex-shrink:0">${diffStr}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  el.innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -5741,8 +5774,10 @@ function wordleRenderMini() {
   mini.innerHTML='';
   // Scale cell size based on card width
   const card = document.getElementById('home-wordle-card');
-  const cardW = card ? card.offsetWidth : 220;
-  const cardH = card ? card.offsetHeight : 240;
+  // If card not visible (e.g. on wordle page), skip — will re-render when home is shown
+  if(!card || card.offsetWidth === 0) return;
+  const cardW = card.offsetWidth;
+  const cardH = card.offsetHeight;
   const gap = 3;
   // Available space: subtract padding (36px) and label (~28px) and drag bar (22px)
   const availW = Math.max(60, cardW - 36);
