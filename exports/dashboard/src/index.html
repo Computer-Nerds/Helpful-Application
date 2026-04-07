@@ -723,14 +723,36 @@
     }
     body.edit-mode #home-cards > *:hover { outline-color: #00d18c; }
     /* Block card clicks in edit mode; allow only handles */
+    /* Edit mode: full transparent overlay kills ALL clicks on card body */
     body.edit-mode #home-cards > * { pointer-events: none !important; }
     body.edit-mode #home-cards > * * { pointer-events: none !important; }
+    body.edit-mode #home-cards > * .edit-overlay { pointer-events: auto !important; }
     body.edit-mode #home-cards > * .card-drag-bar,
     body.edit-mode #home-cards > * .card-drag-bar *,
     body.edit-mode #home-cards > * .card-resize-handle,
     body.edit-mode #home-cards > * .card-resize-handle * {
       pointer-events: auto !important;
     }
+    /* Edit overlay: invisible full-size cover */
+    .edit-overlay {
+      display: none;
+      position: absolute; inset: 0; z-index: 20;
+      cursor: default;
+    }
+    body.edit-mode .edit-overlay { display: block; }
+    /* Cards default: no scrollbar */
+    #home-cards > * { overflow: hidden; }
+    /* Scroll toggle button (shown in edit mode) */
+    .card-scroll-toggle {
+      display: none;
+      position: absolute; top: 4px; right: 28px;
+      background: rgba(0,209,140,0.15); border: 1px solid rgba(0,209,140,0.35);
+      border-radius: 4px; color: #00d18c; font-size: 9px; font-weight: 700;
+      padding: 2px 5px; cursor: pointer; z-index: 41; line-height: 1.4;
+      pointer-events: auto !important; user-select: none;
+    }
+    body.edit-mode .card-scroll-toggle { display: block; }
+    .scroll-enabled { overflow: auto !important; }
     .card-resize-handle { z-index: 40 !important; }
     .card-drag-bar      { z-index: 40 !important; }
     /* Drag bar */
@@ -879,17 +901,20 @@
           <!-- Today card -->
           <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">TODAY</div>
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
             <div id="today-events"></div>
-            <div id="today-nav-hint">Click to open calendar →</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="today-nav-hint">Click to open calendar →</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Dailys card -->
           <div id="dailys-card">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:14px">Dailys</div>
 
@@ -927,56 +952,68 @@
               </div>
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
-            </div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            </div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Projects -->
           <div id="home-projects">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
-          <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Wordle Mini Card -->
           <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
-            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Countdown Card -->
           <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer" onclick="setPage('planner')">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">⭐ UPCOMING</div>
             <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
             </div>
-          <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Fitness Card -->
           <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div></div>
 
           <!-- Quote of the Day Card -->
           <div id="home-quote-card">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
             <div id="quote-text" class="quote-text"></div>
-            <div id="quote-author" class="quote-author"></div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="quote-author" class="quote-author"></div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Music Widget -->
           <div id="home-music-widget">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
             <div id="hmw-art-row">
@@ -996,6 +1033,7 @@
               <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
           </div>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
 
         </div>
@@ -5669,12 +5707,28 @@ function wordleRenderMini() {
   const mini=document.getElementById('wordle-mini-board');
   if(!mini) return;
   mini.innerHTML='';
+  // Scale cell size based on card width
+  const card = document.getElementById('home-wordle-card');
+  const cardW = card ? card.offsetWidth : 220;
+  const cardH = card ? card.offsetHeight : 240;
+  const gap = 3;
+  // Available space: subtract padding (36px) and label (~28px) and drag bar (22px)
+  const availW = Math.max(60, cardW - 36);
+  const availH = Math.max(60, cardH - 80);
+  // cell size fits 5 cols with gaps, or 6 rows with gaps, whichever is smaller
+  const cellByW = Math.floor((availW - gap*4) / 5);
+  const cellByH = Math.floor((availH - gap*5) / 6);
+  const cell_sz = Math.max(14, Math.min(cellByW, cellByH, 48));
+  const fontSize = Math.max(8, Math.floor(cell_sz * 0.44));
+
+  mini.style.cssText = 'display:flex;flex-direction:column;gap:'+gap+'px;align-items:center;width:100%';
+
   for(let r=0;r<6;r++){
     const row=document.createElement('div');
-    row.style.cssText='display:flex;gap:4px;margin-bottom:4px';
+    row.style.cssText='display:flex;gap:'+gap+'px';
     for(let c=0;c<5;c++){
       const cell=document.createElement('div');
-      cell.style.cssText='width:26px;height:26px;border-radius:4px;background:#1a2e24;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#e8f0ed';
+      cell.style.cssText='width:'+cell_sz+'px;height:'+cell_sz+'px;border-radius:3px;background:#1a2e24;display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;font-weight:800;color:#e8f0ed;flex-shrink:0';
       const guess=wGuesses[r];
       if(guess){
         const ch=guess.result[c];
@@ -7537,6 +7591,7 @@ function applyLayout(layout) {
 function initCardLayout() {
   var layout = loadLayout() || getDefaultLayout();
   applyLayout(layout);
+  applyScrollMap();
 }
 
 // ── Toggle edit mode ─────────────────────────────────────────────
@@ -7569,6 +7624,7 @@ function toggleEditMode() {
       el.parentNode.replaceChild(clone, el);
     });
     reattachCardClicks();
+    applyScrollMap();
   }
 }
 
@@ -7649,6 +7705,36 @@ function updateContainerHeight() {
     maxBottom = Math.max(maxBottom, el.offsetTop + el.offsetHeight + 30);
   });
   container.style.minHeight = maxBottom + 'px';
+}
+
+function toggleCardScroll(btn) {
+  var card = btn.closest('#home-cards > *');
+  if (!card) return;
+  var enabled = card.classList.toggle('scroll-enabled');
+  btn.textContent = enabled ? 'NO SCROLL' : 'SCROLL';
+  // persist per card
+  var id = card.id;
+  if (id) {
+    var scrollMap = JSON.parse(localStorage.getItem('cardScrollMap') || '{}');
+    scrollMap[id] = enabled;
+    localStorage.setItem('cardScrollMap', JSON.stringify(scrollMap));
+  }
+}
+
+function applyScrollMap() {
+  var scrollMap = JSON.parse(localStorage.getItem('cardScrollMap') || '{}');
+  Object.keys(scrollMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var btn = el.querySelector('.card-scroll-toggle');
+    if (scrollMap[id]) {
+      el.classList.add('scroll-enabled');
+      if (btn) btn.textContent = 'NO SCROLL';
+    } else {
+      el.classList.remove('scroll-enabled');
+      if (btn) btn.textContent = 'SCROLL';
+    }
+  });
 }
 
 // compat stubs
