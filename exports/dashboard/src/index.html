@@ -1249,11 +1249,17 @@
             <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
               <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Budgeted</div>
               <div id="mon-bud-total" style="font-size:18px;font-weight:900;color:#e8f0ed">$0</div>
+              <div style="font-size:9px;color:#4a7060;margin-top:3px">sum of category limits</div>
             </div>
             <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
               <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Budget Left</div>
               <div id="mon-bud-remaining" style="font-size:18px;font-weight:900;color:#00d18c">$0</div>
+              <div style="font-size:9px;color:#4a7060;margin-top:3px">budgeted − expenses</div>
             </div>
+          </div>
+          <!-- Explanation banner -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a9e8e;line-height:1.6">
+            💡 <strong style="color:#e8f0ed">How it works:</strong> Create categories (e.g. "Groceries $400") — then when you log a transaction, tag it with that category. <strong style="color:#00d18c">Budget Left</strong> = your category budgets minus all tagged expenses this month. <strong style="color:#00d18c">Income This Month</strong> comes from any transaction marked as Income.
           </div>
 
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -1306,6 +1312,24 @@
             </div>
             <div id="mon-credit-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:13px;color:#4a7060;padding:10px 0;text-align:center">No credit cards yet.</div>
+            </div>
+          </div>
+
+          <!-- Combined credit utilization -->
+          <div id="mon-combined-credit-section" style="display:none;margin-top:4px">
+            <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:14px 16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:11px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em">Combined Credit Utilization</span>
+                <span id="mon-combined-pct" style="font-size:15px;font-weight:900;color:#4e9fd4">0%</span>
+              </div>
+              <div style="background:#1a2e24;border-radius:6px;height:10px;overflow:hidden;margin-bottom:8px">
+                <div id="mon-combined-bar" style="height:100%;width:0%;background:#4e9fd4;border-radius:6px;transition:width 0.4s"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#4a7060">Used: <strong id="mon-combined-used" style="color:#e8f0ed">$0</strong></span>
+                <span style="font-size:11px;color:#4a7060">Total Limit: <strong id="mon-combined-limit" style="color:#e8f0ed">$0</strong></span>
+                <span style="font-size:11px;color:#4a7060">Available: <strong id="mon-combined-avail" style="color:#00d18c">$0</strong></span>
+              </div>
             </div>
           </div>
 
@@ -8649,30 +8673,69 @@ function monRenderAccounts() {
   if (creEl) { creEl.textContent = monFmt(totalCredit); }
   if (nwEl)  { nwEl.textContent = (netWorth<0?'-':'')+monFmt(Math.abs(netWorth)); nwEl.style.color=netWorth<0?'#e05c5c':'#00d18c'; }
 
-  // ── Bank accounts ──
+  // ── Bank accounts (with drag-to-reorder) ──
   if (bankList) {
     bankList.innerHTML = '';
     if (!d.bankAccounts.length) {
       bankList.innerHTML = '<div style="font-size:13px;color:#4a7060;padding:10px 0;text-align:center">No bank accounts yet.</div>';
     } else {
-      d.bankAccounts.forEach(function(acc) {
+      d.bankAccounts.forEach(function(acc, idx) {
         var row = document.createElement('div');
-        row.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px';
+        row.dataset.idx = idx;
+        row.draggable = true;
+        row.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:default;transition:opacity 0.15s,transform 0.15s';
+
+        // Drag handle — 3 lines
+        var handle = document.createElement('div');
+        handle.style.cssText = 'display:flex;flex-direction:column;gap:3px;cursor:grab;padding:2px 4px;flex-shrink:0;opacity:0.45';
+        handle.innerHTML = '<span style="display:block;width:14px;height:2px;background:#7a9e8e;border-radius:1px"></span><span style="display:block;width:14px;height:2px;background:#7a9e8e;border-radius:1px"></span><span style="display:block;width:14px;height:2px;background:#7a9e8e;border-radius:1px"></span>';
+        handle.title = 'Drag to reorder';
+
         var info = document.createElement('div');
         info.style.cssText = 'flex:1;min-width:0';
         info.innerHTML = '<div style="font-size:13px;font-weight:700;color:#e8f0ed">'+acc.bank+'</div><div style="font-size:11px;color:#7a9e8e;margin-top:2px">'+acc.name+'</div>';
+
         var amtEl = document.createElement('div');
         amtEl.style.cssText = 'font-size:16px;font-weight:900;color:#00d18c;flex-shrink:0';
         amtEl.textContent = monFmt(acc.balance);
+
         var editBtn = document.createElement('button');
         editBtn.style.cssText = 'background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center;flex-shrink:0';
         editBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
         (function(id){ editBtn.addEventListener('click', function(){ monOpenAddAccount('bank', id); }); })(acc.id);
+
         var delBtn = document.createElement('button');
         delBtn.style.cssText = 'background:none;border:none;color:#4a7060;font-size:15px;cursor:pointer;padding:0 4px;flex-shrink:0';
         delBtn.textContent = '\u00d7';
         (function(id){ delBtn.addEventListener('click', function(){ monDeleteBankAcc(id); }); })(acc.id);
-        row.appendChild(info); row.appendChild(amtEl); row.appendChild(editBtn); row.appendChild(delBtn);
+
+        row.appendChild(handle); row.appendChild(info); row.appendChild(amtEl); row.appendChild(editBtn); row.appendChild(delBtn);
+
+        // Drag events
+        row.addEventListener('dragstart', function(e) {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', this.dataset.idx);
+          setTimeout(function(){ row.style.opacity='0.4'; }, 0);
+        });
+        row.addEventListener('dragend', function() { row.style.opacity='1'; });
+        row.addEventListener('dragover', function(e) {
+          e.preventDefault(); e.dataTransfer.dropEffect='move';
+          row.style.borderColor = '#00d18c';
+        });
+        row.addEventListener('dragleave', function() { row.style.borderColor = '#1a2e24'; });
+        row.addEventListener('drop', function(e) {
+          e.preventDefault();
+          row.style.borderColor = '#1a2e24';
+          var fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+          var toIdx   = parseInt(this.dataset.idx);
+          if (fromIdx === toIdx) return;
+          var dd = monGetData();
+          var moved = dd.bankAccounts.splice(fromIdx, 1)[0];
+          dd.bankAccounts.splice(toIdx, 0, moved);
+          monSave(dd);
+          monRenderAccounts();
+        });
+
         bankList.appendChild(row);
       });
     }
@@ -8730,6 +8793,32 @@ function monRenderAccounts() {
         card.appendChild(topRow); card.appendChild(barTrack); card.appendChild(barLabels);
         creditList.appendChild(card);
       });
+    }
+  }
+
+  // ── Combined Credit Utilization ──
+  var ccSection = document.getElementById('mon-combined-credit-section');
+  var ccPct     = document.getElementById('mon-combined-pct');
+  var ccBar     = document.getElementById('mon-combined-bar');
+  var ccUsed    = document.getElementById('mon-combined-used');
+  var ccLim     = document.getElementById('mon-combined-limit');
+  var ccAvail   = document.getElementById('mon-combined-avail');
+  if (ccSection) {
+    var allCards = d.creditCards || [];
+    if (allCards.length > 0) {
+      ccSection.style.display = 'block';
+      var sumUsed  = allCards.reduce(function(s,c){ return s+(c.balance||0); }, 0);
+      var sumLim   = allCards.reduce(function(s,c){ return s+(c.limit||0); }, 0);
+      var sumAvail = Math.max(0, sumLim - sumUsed);
+      var util     = sumLim > 0 ? Math.min(100, Math.round((sumUsed/sumLim)*100)) : 0;
+      var barColor = util > 80 ? '#f74e4e' : util > 50 ? '#f7a94e' : '#4e9fd4';
+      if (ccPct) { ccPct.textContent = util+'%'; ccPct.style.color = barColor; }
+      if (ccBar) { ccBar.style.width = util+'%'; ccBar.style.background = barColor; }
+      if (ccUsed)  ccUsed.textContent  = monFmt(sumUsed);
+      if (ccLim)   ccLim.textContent   = monFmt(sumLim);
+      if (ccAvail) ccAvail.textContent = monFmt(sumAvail);
+    } else {
+      ccSection.style.display = 'none';
     }
   }
 
