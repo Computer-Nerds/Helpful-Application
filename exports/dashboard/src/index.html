@@ -800,7 +800,7 @@
       overflow-x: hidden !important;
     }
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="chart.min.js"></script>
 </head>
 <body>
 
@@ -8439,7 +8439,7 @@ window.monSetTab = function(tab) {
   if (tab==='transactions') monRenderTransactions();
   if (tab==='budget')       { monRenderBudget(); monSetGoalTab(monGoalTab); }
   if (tab==='accounts')     monRenderAccounts();
-  if (tab==='graphs')       monRenderGraphs();
+  if (tab==='graphs')       requestAnimationFrame(function(){ requestAnimationFrame(monRenderGraphs); });
 };
 
 window.monPrevMonth = function() { monViewMonth--; if(monViewMonth<0){monViewMonth=11;monViewYear--;} monRenderTransactions(); };
@@ -9655,14 +9655,12 @@ function monGetMonthLabels() {
 }
 
 function monRenderGraphs() {
+  if (typeof Chart === 'undefined') { console.error('Chart.js not loaded'); return; }
   var d = monGetData();
   var txs = d.transactions || [];
-  var { keys, labels } = monGetMonthLabels();
+  var _ml = monGetMonthLabels();
+  var keys = _ml.keys, labels = _ml.labels;
 
-  var chartDefaults = {
-    color: '#7a9e8e',
-    font: { family: 'inherit', size: 11 }
-  };
   Chart.defaults.color = '#7a9e8e';
   Chart.defaults.font.family = 'inherit';
   Chart.defaults.font.size = 11;
