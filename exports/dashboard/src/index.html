@@ -800,6 +800,7 @@
       overflow-x: hidden !important;
     }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -1169,6 +1170,7 @@
             <button id="mon-tab-transactions" onclick="monSetTab('transactions')" style="padding:5px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">💳 Transactions</button>
             <button id="mon-tab-budget" onclick="monSetTab('budget')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">📊 Budget</button>
             <button id="mon-tab-accounts" onclick="monSetTab('accounts')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">🏦 Accounts</button>
+            <button id="mon-tab-graphs" onclick="monSetTab('graphs')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">📈 Graphs</button>
           </div>
           <button onclick="monOpenAdd()" style="margin-left:auto;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer" id="mon-add-btn">+ Add</button>
         </div>
@@ -1335,6 +1337,71 @@
 
           <!-- legacy list kept hidden for compat -->
           <div id="mon-accounts-list" style="display:none"></div>
+        </div>
+
+
+        <!-- ══ GRAPHS PANEL ══ -->
+        <div id="mon-graphs-panel" style="display:none;flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:20px;box-sizing:border-box">
+
+          <!-- Time range selector -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em">Range:</span>
+            <button id="mgr-btn-6m" onclick="monGraphSetRange('6m')" style="padding:5px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">6 Months</button>
+            <button id="mgr-btn-1y" onclick="monGraphSetRange('1y')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">1 Year</button>
+            <button id="mgr-btn-all" onclick="monGraphSetRange('all')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">All Time</button>
+          </div>
+
+          <!-- 1. Income vs Expenses — Bar chart -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📊 Income vs Expenses</div>
+            <div style="position:relative;height:220px">
+              <canvas id="mgr-canvas-inex"></canvas>
+            </div>
+          </div>
+
+          <!-- 2. Net Savings per Month — Line chart -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📈 Net Savings per Month</div>
+            <div style="position:relative;height:200px">
+              <canvas id="mgr-canvas-net"></canvas>
+            </div>
+          </div>
+
+          <!-- 3. Spending by Category — Doughnut -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">🍩 Spending by Category</div>
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+              <div style="position:relative;width:200px;height:200px;flex-shrink:0">
+                <canvas id="mgr-canvas-cat"></canvas>
+              </div>
+              <div id="mgr-cat-legend" style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:140px"></div>
+            </div>
+          </div>
+
+          <!-- 4. Account Balances Over Time — Stacked Area -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💰 Account Balance Snapshot</div>
+            <div style="position:relative;height:200px">
+              <canvas id="mgr-canvas-acc"></canvas>
+            </div>
+          </div>
+
+          <!-- 5. Credit Utilization per Card — Horizontal Bar -->
+          <div id="mgr-credit-section" style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px;display:none">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💳 Credit Utilization per Card</div>
+            <div style="position:relative;height:160px">
+              <canvas id="mgr-canvas-credit"></canvas>
+            </div>
+          </div>
+
+          <!-- 6. Cumulative Spending — Line -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📉 Cumulative Expenses This Month</div>
+            <div style="position:relative;height:180px">
+              <canvas id="mgr-canvas-cum"></canvas>
+            </div>
+          </div>
+
         </div>
 
         <!-- Add Account Modal -->
@@ -8352,7 +8419,7 @@ var monEditId = null;
 
 window.monSetTab = function(tab) {
   monCurrentTab = tab;
-  ['transactions','budget','accounts'].forEach(t => {
+  ['transactions','budget','accounts','graphs'].forEach(function(t) {
     var panel = document.getElementById('mon-'+t+'-panel');
     var btn   = document.getElementById('mon-tab-'+t);
     if (!panel || !btn) return;
@@ -8364,13 +8431,15 @@ window.monSetTab = function(tab) {
   });
   var addBtn = document.getElementById('mon-add-btn');
   if (addBtn) {
-    if (tab==='transactions') { addBtn.style.display=''; addBtn.textContent='+ Add'; }
+    if (tab==='transactions') { addBtn.style.display=''; addBtn.textContent='+ Add'; addBtn.onclick=monOpenAdd; }
     else if (tab==='budget')  { addBtn.style.display='none'; }
-    else if (tab==='accounts'){ addBtn.style.display=''; addBtn.textContent='+ Bank Account'; addBtn.onclick=function(){ monOpenAddAccount('bank'); }; }
+    else if (tab==='accounts'){ addBtn.style.display=''; addBtn.textContent='+ Account'; addBtn.onclick=function(){ monOpenAddAccount('bank'); }; }
+    else if (tab==='graphs')  { addBtn.style.display='none'; }
   }
   if (tab==='transactions') monRenderTransactions();
   if (tab==='budget')       { monRenderBudget(); monSetGoalTab(monGoalTab); }
   if (tab==='accounts')     monRenderAccounts();
+  if (tab==='graphs')       monRenderGraphs();
 };
 
 window.monPrevMonth = function() { monViewMonth--; if(monViewMonth<0){monViewMonth=11;monViewYear--;} monRenderTransactions(); };
@@ -9540,6 +9609,288 @@ renderQuoteOfDay(); // run immediately on script parse
     setTimeout(tryInit, 80);
   }
 })();
+
+// ═══════════════════════════════════════════════════════════
+// GRAPHS MODULE
+// ═══════════════════════════════════════════════════════════
+var monGraphRange = '6m';
+var monChartInstances = {};
+
+var MON_GRAPH_PALETTE = [
+  '#00d18c','#4e9fd4','#f7a94e','#e05c5c','#a78bfa',
+  '#f472b6','#34d399','#60a5fa','#fbbf24','#f87171'
+];
+
+function monGraphSetRange(r) {
+  monGraphRange = r;
+  ['6m','1y','all'].forEach(function(v) {
+    var b = document.getElementById('mgr-btn-'+v);
+    if (!b) return;
+    var active = v === r;
+    b.style.background  = active ? '#00d18c' : '#1a2e24';
+    b.style.color        = active ? '#0a1a12' : '#7a9e8e';
+    b.style.borderColor  = active ? '#00d18c' : '#1f3a2a';
+  });
+  monRenderGraphs();
+}
+
+function monDestroyChart(key) {
+  if (monChartInstances[key]) {
+    try { monChartInstances[key].destroy(); } catch(e){}
+    delete monChartInstances[key];
+  }
+}
+
+function monGetMonthLabels() {
+  var now = new Date();
+  var count = monGraphRange === '6m' ? 6 : monGraphRange === '1y' ? 12 : 24;
+  var labels = [], keys = [];
+  for (var i = count-1; i >= 0; i--) {
+    var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    var key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    var label = d.toLocaleString('default',{month:'short', year:'2-digit'});
+    keys.push(key); labels.push(label);
+  }
+  return { keys: keys, labels: labels };
+}
+
+function monRenderGraphs() {
+  var d = monGetData();
+  var txs = d.transactions || [];
+  var { keys, labels } = monGetMonthLabels();
+
+  var chartDefaults = {
+    color: '#7a9e8e',
+    font: { family: 'inherit', size: 11 }
+  };
+  Chart.defaults.color = '#7a9e8e';
+  Chart.defaults.font.family = 'inherit';
+  Chart.defaults.font.size = 11;
+
+  var gridColor = 'rgba(255,255,255,0.05)';
+  var tickColor = '#4a7060';
+
+  // ── 1. Income vs Expenses Bar ──
+  monDestroyChart('inex');
+  var incomes  = keys.map(function(k){ return txs.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
+  var expenses = keys.map(function(k){ return txs.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
+  var ctxInex = document.getElementById('mgr-canvas-inex');
+  if (ctxInex) {
+    monChartInstances['inex'] = new Chart(ctxInex, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Income',   data: incomes,  backgroundColor: 'rgba(0,209,140,0.75)',  borderRadius: 5, borderSkipped: false },
+          { label: 'Expenses', data: expenses, backgroundColor: 'rgba(224,92,92,0.75)',  borderRadius: 5, borderSkipped: false }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color:'#7a9e8e', boxWidth:12 } }, tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } } },
+        scales: {
+          x: { ticks:{ color:tickColor }, grid:{ color:gridColor } },
+          y: { ticks:{ color:tickColor, callback: function(v){ return '$'+v; } }, grid:{ color:gridColor } }
+        }
+      }
+    });
+  }
+
+  // ── 2. Net Savings Line ──
+  monDestroyChart('net');
+  var nets = keys.map(function(k,i){ return incomes[i] - expenses[i]; });
+  var ctxNet = document.getElementById('mgr-canvas-net');
+  if (ctxNet) {
+    monChartInstances['net'] = new Chart(ctxNet, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Net',
+          data: nets,
+          borderColor: '#00d18c',
+          backgroundColor: 'rgba(0,209,140,0.12)',
+          tension: 0.35,
+          fill: true,
+          pointBackgroundColor: nets.map(function(v){ return v>=0?'#00d18c':'#e05c5c'; }),
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
+        },
+        scales: {
+          x: { ticks:{color:tickColor}, grid:{color:gridColor} },
+          y: { ticks:{color:tickColor, callback:function(v){ return '$'+v; }}, grid:{color:gridColor} }
+        }
+      }
+    });
+  }
+
+  // ── 3. Spending by Category Doughnut ──
+  monDestroyChart('cat');
+  var allCatExpenses = {};
+  txs.forEach(function(t) {
+    if (t.type!=='expense') return;
+    if (!keys.some(function(k){ return t.date && t.date.startsWith(k); })) return;
+    var cat = t.category || 'Uncategorized';
+    allCatExpenses[cat] = (allCatExpenses[cat]||0) + t.amount;
+  });
+  var catNames = Object.keys(allCatExpenses);
+  var catVals  = catNames.map(function(c){ return allCatExpenses[c]; });
+  var ctxCat = document.getElementById('mgr-canvas-cat');
+  if (ctxCat) {
+    if (catVals.length === 0) {
+      catVals  = [1]; catNames = ['No data'];
+    }
+    monChartInstances['cat'] = new Chart(ctxCat, {
+      type: 'doughnut',
+      data: {
+        labels: catNames,
+        datasets: [{ data: catVals, backgroundColor: MON_GRAPH_PALETTE.slice(0, catNames.length), borderWidth: 0, hoverOffset: 8 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
+        }
+      }
+    });
+    // Custom legend
+    var leg = document.getElementById('mgr-cat-legend');
+    if (leg) {
+      var total = catVals.reduce(function(s,v){ return s+v; },0);
+      leg.innerHTML = catNames.map(function(n,i){
+        var pct = total>0 ? Math.round(catVals[i]/total*100) : 0;
+        return '<div style="display:flex;align-items:center;gap:7px">'+
+          '<span style="width:10px;height:10px;border-radius:2px;background:'+MON_GRAPH_PALETTE[i%10]+';flex-shrink:0"></span>'+
+          '<span style="font-size:12px;color:#e8f0ed;flex:1">'+n+'</span>'+
+          '<span style="font-size:11px;color:#7a9e8e">'+pct+'%</span>'+
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // ── 4. Account Balances Horizontal Bar ──
+  monDestroyChart('acc');
+  var allAccs = (d.bankAccounts||[]).map(function(a){ return { name: (a.bank?a.bank+' ':'')+(a.name||''), bal: a.balance||0, color:'#00d18c' }; })
+    .concat((d.creditCards||[]).map(function(c){ return { name: (c.bank?c.bank+' ':'')+(c.name||''), bal: c.balance||0, color:'#e05c5c' }; }));
+  var ctxAcc = document.getElementById('mgr-canvas-acc');
+  if (ctxAcc) {
+    monChartInstances['acc'] = new Chart(ctxAcc, {
+      type: 'bar',
+      data: {
+        labels: allAccs.map(function(a){ return a.name; }),
+        datasets: [{
+          label: 'Balance / Debt',
+          data: allAccs.map(function(a){ return a.bal; }),
+          backgroundColor: allAccs.map(function(a){ return a.color+'bb'; }),
+          borderColor: allAccs.map(function(a){ return a.color; }),
+          borderWidth: 1,
+          borderRadius: 5
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
+        },
+        scales: {
+          x: { ticks:{color:tickColor, callback:function(v){return '$'+v;}}, grid:{color:gridColor} },
+          y: { ticks:{color:'#e8f0ed'}, grid:{display:false} }
+        }
+      }
+    });
+  }
+
+  // ── 5. Credit Utilization Horizontal Bar (only if cards exist) ──
+  monDestroyChart('credit');
+  var cards = d.creditCards || [];
+  var ccSection = document.getElementById('mgr-credit-section');
+  if (ccSection) ccSection.style.display = cards.length ? 'block' : 'none';
+  var ctxCredit = document.getElementById('mgr-canvas-credit');
+  if (ctxCredit && cards.length) {
+    var utilPcts = cards.map(function(c){ return c.limit>0 ? Math.min(100,Math.round((c.balance||0)/c.limit*100)) : 0; });
+    monChartInstances['credit'] = new Chart(ctxCredit, {
+      type: 'bar',
+      data: {
+        labels: cards.map(function(c){ return (c.bank?c.bank+' ':'')+c.name; }),
+        datasets: [
+          { label: 'Used %',      data: utilPcts,                          backgroundColor: utilPcts.map(function(p){ return p>80?'rgba(247,78,78,0.75)':p>50?'rgba(247,169,78,0.75)':'rgba(78,159,212,0.75)'; }), borderRadius:5, borderSkipped:false },
+          { label: 'Available %', data: utilPcts.map(function(p){ return 100-p; }), backgroundColor: 'rgba(255,255,255,0.05)', borderRadius:5, borderSkipped:false }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color:'#7a9e8e', boxWidth:12 } },
+          tooltip: { callbacks: { label: function(c){ return ' '+c.raw+'%'; } } }
+        },
+        scales: {
+          x: { stacked:true, max:100, ticks:{color:tickColor, callback:function(v){return v+'%';}}, grid:{color:gridColor} },
+          y: { stacked:true, ticks:{color:'#e8f0ed'}, grid:{display:false} }
+        }
+      }
+    });
+    // Resize canvas height proportionally for card count
+    ctxCredit.parentElement.style.height = Math.max(100, cards.length * 52)+'px';
+  }
+
+  // ── 6. Cumulative Expenses this month (day-by-day) ──
+  monDestroyChart('cum');
+  var now2 = new Date();
+  var thisMonthKey = now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0');
+  var daysInMonth = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
+  var dayLabels = [], cumVals = [], running = 0;
+  for (var d2 = 1; d2 <= daysInMonth; d2++) {
+    var dayKey = thisMonthKey+'-'+String(d2).padStart(2,'0');
+    var daySpend = txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; },0);
+    running += daySpend;
+    dayLabels.push(d2 <= 9 ? ''+d2 : ''+d2);
+    cumVals.push(running);
+  }
+  var ctxCum = document.getElementById('mgr-canvas-cum');
+  if (ctxCum) {
+    monChartInstances['cum'] = new Chart(ctxCum, {
+      type: 'line',
+      data: {
+        labels: dayLabels,
+        datasets: [{
+          label: 'Cumulative Spend',
+          data: cumVals,
+          borderColor: '#f7a94e',
+          backgroundColor: 'rgba(247,169,78,0.10)',
+          tension: 0.2,
+          fill: true,
+          pointRadius: 0,
+          pointHoverRadius: 5
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
+        },
+        scales: {
+          x: { ticks:{color:tickColor, maxTicksLimit:10}, grid:{color:gridColor} },
+          y: { ticks:{color:tickColor, callback:function(v){return '$'+v;}}, grid:{color:gridColor} }
+        }
+      }
+    });
+  }
+}
+
+window.monGraphSetRange = monGraphSetRange;
+window.monRenderGraphs  = monRenderGraphs;
 </script>
 
 
