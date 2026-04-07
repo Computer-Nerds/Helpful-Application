@@ -933,7 +933,10 @@
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>♟️</span> Chess</div>
-                <span class="daily-time" id="chess-daily-time">0m / 30m</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span id="chess-streak-badge" style="display:none;font-size:11px;font-weight:700;color:#f7a94e;background:rgba(247,169,78,0.15);border:1px solid rgba(247,169,78,0.3);border-radius:10px;padding:2px 7px"></span>
+                  <span class="daily-time" id="chess-daily-time">0m / 30m</span>
+                </div>
               </div>
               <div class="prog-track"><div class="prog-fill" id="chess-daily-bar" style="width:0%;background:#4e8ef7"></div></div>
               <div class="daily-goal" id="chess-daily-goal" style="display:none">✓ Goal complete!</div>
@@ -942,7 +945,10 @@
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>🎹</span> Piano</div>
-                <span class="daily-time" id="piano-daily-time">0m / 30m</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span id="piano-streak-badge" style="display:none;font-size:11px;font-weight:700;color:#a855f7;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);border-radius:10px;padding:2px 7px"></span>
+                  <span class="daily-time" id="piano-daily-time">0m / 30m</span>
+                </div>
               </div>
               <div class="prog-track"><div class="prog-fill" id="piano-daily-bar" style="width:0%;background:#a855f7"></div></div>
               <div class="daily-goal" id="piano-daily-goal" style="display:none">✓ Goal complete!</div>
@@ -951,7 +957,10 @@
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>⌨️</span> Typing</div>
-                <span class="daily-time" id="typing-daily-time">0m / 15m</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span id="typing-streak-badge" style="display:none;font-size:11px;font-weight:700;color:#f7a94e;background:rgba(247,169,78,0.15);border:1px solid rgba(247,169,78,0.3);border-radius:10px;padding:2px 7px"></span>
+                  <span class="daily-time" id="typing-daily-time">0m / 15m</span>
+                </div>
               </div>
               <div class="prog-track"><div class="prog-fill" id="typing-daily-bar" style="width:0%;background:#f7a94e"></div></div>
               <div class="daily-goal" id="typing-daily-goal" style="display:none">✓ Goal complete!</div>
@@ -960,7 +969,10 @@
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>🧮</span> Math</div>
-                <span class="daily-time" id="math-daily-time">0m / 15m</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span id="math-streak-badge" style="display:none;font-size:11px;font-weight:700;color:#e8a020;background:rgba(232,160,32,0.15);border:1px solid rgba(232,160,32,0.3);border-radius:10px;padding:2px 7px"></span>
+                  <span class="daily-time" id="math-daily-time">0m / 15m</span>
+                </div>
               </div>
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
@@ -1314,6 +1326,28 @@
       </div>
 
       <!-- Add Transaction Modal -->
+      <!-- Category Add Modal -->
+      <div id="mon-cat-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1001;align-items:center;justify-content:center">
+        <div style="background:#111a15;border:1px solid #1f3a2a;border-radius:16px;padding:24px;width:320px;max-width:92vw">
+          <div style="font-size:15px;font-weight:700;color:#e8f0ed;margin-bottom:16px">Add Category</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <input id="cat-inp-name" placeholder="Category name (e.g. Groceries)"
+              style="width:100%;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:16px;color:#7a9e8e">$</span>
+              <input id="cat-inp-budget" type="number" min="0" step="1" placeholder="Monthly budget"
+                style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <button onclick="document.getElementById('mon-cat-modal').style.display='none'"
+              style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#7a9e8e;padding:9px;font-size:13px;font-weight:700;cursor:pointer">Cancel</button>
+            <button onclick="monSaveCategory()"
+              style="flex:1;background:#00d18c;border:none;border-radius:8px;color:#0a1a12;padding:9px;font-size:13px;font-weight:700;cursor:pointer">Add</button>
+          </div>
+        </div>
+      </div>
+
       <div id="mon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
         <div style="background:#111a15;border:1px solid #1f3a2a;border-radius:16px;padding:24px;width:340px;max-width:92vw">
           <div style="font-size:15px;font-weight:700;color:#e8f0ed;margin-bottom:18px" id="mon-modal-title">Add Transaction</div>
@@ -2704,33 +2738,126 @@ function getHealth(p) {
   return { label:'Pending', color:'#7a9e8e', bg:'rgba(122,158,142,0.15)' };
 }
 
+// ── Streak helpers ───────────────────────────────────────────
+function streakTodayKey() {
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function streakYestKey() {
+  var d = new Date(); d.setDate(d.getDate()-1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function streakGetData() {
+  try { return JSON.parse(localStorage.getItem('dailyStreaks')||'{}'); } catch(e) { return {}; }
+}
+function streakSave(data) { localStorage.setItem('dailyStreaks', JSON.stringify(data)); }
+function streakMarkDone(activity) {
+  var data = streakGetData();
+  var today = streakTodayKey();
+  if (!data[activity]) data[activity] = { days: [], count: 0 };
+  if (data[activity].days.indexOf(today) === -1) {
+    data[activity].days.push(today);
+    // keep only last 400 days to prevent bloat
+    if (data[activity].days.length > 400) data[activity].days = data[activity].days.slice(-400);
+  }
+  // Recalculate current streak
+  data[activity].count = streakCalc(data[activity].days);
+  streakSave(data);
+  return data[activity].count;
+}
+function streakCalc(days) {
+  if (!days || !days.length) return 0;
+  var sorted = days.slice().sort();
+  var today = streakTodayKey();
+  var yest  = streakYestKey();
+  // streak must include today or yesterday (today not yet done)
+  var tip = sorted[sorted.length-1];
+  if (tip !== today && tip !== yest) return 0;
+  var count = 1;
+  for (var i = sorted.length-2; i >= 0; i--) {
+    var curr = new Date(sorted[i+1]+'T00:00:00');
+    var prev = new Date(sorted[i]+'T00:00:00');
+    var diff = Math.round((curr - prev) / 86400000);
+    if (diff === 1) count++;
+    else break;
+  }
+  return count;
+}
+function streakGetCount(activity) {
+  var data = streakGetData();
+  if (!data[activity]) return 0;
+  return streakCalc(data[activity].days);
+}
+function streakBadge(activity, count) {
+  var el = document.getElementById(activity+'-streak-badge');
+  if (!el) return;
+  if (count >= 2) {
+    el.textContent = '🔥 '+count+' day streak';
+    el.style.display = 'inline-block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── Daily timer auto-reset (new day detection) ────────────────
+function dailyCheckReset() {
+  var lastDay = localStorage.getItem('dailyLastDate') || '';
+  var today   = streakTodayKey();
+  if (lastDay !== today) {
+    // New day — reset all timers
+    localStorage.setItem('chessTimer',  '0');
+    localStorage.setItem('pianoTimer',  '0');
+    localStorage.setItem('typingTimer', '0');
+    localStorage.setItem('mathTimer',   '0');
+    localStorage.setItem('dailyLastDate', today);
+  }
+}
+
 function renderHomeDailys() {
-  const cs = parseInt(localStorage.getItem('chessTimer')||'0');
-  const ps = parseInt(localStorage.getItem('pianoTimer')||'0');
-  const ts = parseInt(localStorage.getItem('typingTimer')||'0');
-  const ms = parseInt(localStorage.getItem('mathTimer')||'0');
+  dailyCheckReset();
 
-  const ct = document.getElementById('chess-daily-time');
-  const pt = document.getElementById('piano-daily-time');
-  const tt = document.getElementById('typing-daily-time');
-  const mt = document.getElementById('math-daily-time');
-  const cb = document.getElementById('chess-daily-bar');
-  const pb = document.getElementById('piano-daily-bar');
-  const tb = document.getElementById('typing-daily-bar');
-  const mb = document.getElementById('math-daily-bar');
+  var cs = parseInt(localStorage.getItem('chessTimer')||'0');
+  var ps = parseInt(localStorage.getItem('pianoTimer')||'0');
+  var ts = parseInt(localStorage.getItem('typingTimer')||'0');
+  var ms = parseInt(localStorage.getItem('mathTimer')||'0');
 
-  ct.textContent = Math.floor(cs/60)+'m / 30m'; ct.className = 'daily-time' + (cs>=1800?' done':'');
-  pt.textContent = Math.floor(ps/60)+'m / 30m'; pt.className = 'daily-time' + (ps>=1800?' done':'');
-  tt.textContent = Math.floor(ts/60)+'m / 15m'; tt.className = 'daily-time' + (ts>=900?' done':'');
-  mt.textContent = Math.floor(ms/60)+'m / 15m'; mt.className = 'daily-time' + (ms>=900?' done':'');
-  cb.style.width = Math.min((cs/1800)*100,100)+'%'; cb.style.background = cs>=1800?'#00d18c':'#4e8ef7';
-  pb.style.width = Math.min((ps/1800)*100,100)+'%'; pb.style.background = ps>=1800?'#00d18c':'#a855f7';
-  tb.style.width = Math.min((ts/900)*100,100)+'%';  tb.style.background = ts>=900?'#00d18c':'#f7a94e';
-  mb.style.width = Math.min((ms/900)*100,100)+'%';  mb.style.background = ms>=900?'#00d18c':'#e8a020';
-  document.getElementById('chess-daily-goal').style.display = cs>=1800?'block':'none';
-  document.getElementById('piano-daily-goal').style.display = ps>=1800?'block':'none';
-  document.getElementById('typing-daily-goal').style.display = ts>=900?'block':'none';
-  document.getElementById('math-daily-goal').style.display   = ms>=900?'block':'none';
+  // Mark streaks when goals are hit
+  if (cs >= 1800) streakMarkDone('chess');
+  if (ps >= 1800) streakMarkDone('piano');
+  if (ts >= 900)  streakMarkDone('typing');
+  if (ms >= 900)  streakMarkDone('math');
+
+  // Update streak badges
+  streakBadge('chess',  streakGetCount('chess'));
+  streakBadge('piano',  streakGetCount('piano'));
+  streakBadge('typing', streakGetCount('typing'));
+  streakBadge('math',   streakGetCount('math'));
+
+  var ct = document.getElementById('chess-daily-time');
+  var pt = document.getElementById('piano-daily-time');
+  var tt = document.getElementById('typing-daily-time');
+  var mt = document.getElementById('math-daily-time');
+  var cb = document.getElementById('chess-daily-bar');
+  var pb = document.getElementById('piano-daily-bar');
+  var tb = document.getElementById('typing-daily-bar');
+  var mb = document.getElementById('math-daily-bar');
+
+  if(ct){ ct.textContent = Math.floor(cs/60)+'m / 30m'; ct.className = 'daily-time' + (cs>=1800?' done':''); }
+  if(pt){ pt.textContent = Math.floor(ps/60)+'m / 30m'; pt.className = 'daily-time' + (ps>=1800?' done':''); }
+  if(tt){ tt.textContent = Math.floor(ts/60)+'m / 15m'; tt.className = 'daily-time' + (ts>=900?' done':''); }
+  if(mt){ mt.textContent = Math.floor(ms/60)+'m / 15m'; mt.className = 'daily-time' + (ms>=900?' done':''); }
+  if(cb){ cb.style.width = Math.min((cs/1800)*100,100)+'%'; cb.style.background = cs>=1800?'#00d18c':'#4e8ef7'; }
+  if(pb){ pb.style.width = Math.min((ps/1800)*100,100)+'%'; pb.style.background = ps>=1800?'#00d18c':'#a855f7'; }
+  if(tb){ tb.style.width = Math.min((ts/900)*100,100)+'%';  tb.style.background = ts>=900?'#00d18c':'#f7a94e'; }
+  if(mb){ mb.style.width = Math.min((ms/900)*100,100)+'%';  mb.style.background = ms>=900?'#00d18c':'#e8a020'; }
+  var cg = document.getElementById('chess-daily-goal');
+  var pg = document.getElementById('piano-daily-goal');
+  var tg = document.getElementById('typing-daily-goal');
+  var mg = document.getElementById('math-daily-goal');
+  if(cg) cg.style.display = cs>=1800?'block':'none';
+  if(pg) pg.style.display = ps>=1800?'block':'none';
+  if(tg) tg.style.display = ts>=900?'block':'none';
+  if(mg) mg.style.display = ms>=900?'block':'none';
 }
 
 function renderHomeProjects() {
@@ -8382,12 +8509,24 @@ window.monDeleteAccount = function(id) {
 };
 
 window.monAddCategory = function() {
-  var name   = prompt('Category name (e.g. Groceries):'); if(!name) return;
-  var budget = parseFloat(prompt('Monthly budget for '+name+' ($):'));
-  if(isNaN(budget)) return;
+  var inp = document.getElementById('cat-inp-name');
+  var budInp = document.getElementById('cat-inp-budget');
+  if (inp) inp.value = '';
+  if (budInp) budInp.value = '';
+  document.getElementById('mon-cat-modal').style.display = 'flex';
+  if (inp) setTimeout(function(){ inp.focus(); }, 80);
+}
+
+window.monSaveCategory = function() {
+  var name   = (document.getElementById('cat-inp-name').value || '').trim();
+  var budget = parseFloat(document.getElementById('cat-inp-budget').value);
+  if (!name)        { alert('Please enter a category name.'); return; }
+  if (isNaN(budget) || budget < 0) { alert('Please enter a valid budget amount.'); return; }
   var d = monGetData();
-  d.categories.push({id:Date.now()+'', name:name.trim(), budget:budget});
-  monSave(d); monRenderBudget();
+  d.categories.push({id: Date.now()+'', name: name, budget: budget});
+  monSave(d);
+  document.getElementById('mon-cat-modal').style.display = 'none';
+  monRenderBudget();
 };
 
 window.monOpenAddAccount = function(accType, editId) {
