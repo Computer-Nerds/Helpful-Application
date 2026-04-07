@@ -2377,24 +2377,32 @@ async function fetchWeather() {
     const now = new Date();
     const todayKey = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     const todayYMD = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
-    // Collect ALL forecast slots for today using YMD comparison (robust to locale)
-    const todayTemps = fd.list
-      .filter(item => { const d=new Date(item.dt*1000); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()===todayYMD; })
-      .map(item => item.main.temp);
-    // Include current actual temp as a data point
-    todayTemps.push(cd.main.temp);
-    if (todayTemps.length >= 2) {
-      const hi=Math.round(Math.max(...todayTemps));
-      const lo=Math.round(Math.min(...todayTemps));
-      document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
+    // Build today's hi/lo: use localStorage cache so earlier-in-day temps are preserved
+    const hiloCacheKey = 'weather_hilow_' + todayYMD;
+    let cachedHiLo = JSON.parse(localStorage.getItem(hiloCacheKey) || 'null');
+    // Collect all forecast slots for today + current temp
+    const todaySlots = fd.list.filter(item => {
+      const d = new Date(item.dt*1000);
+      return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate() === todayYMD;
+    }).map(item => item.main.temp);
+    todaySlots.push(cd.main.temp);
+    const slotHi = Math.max(...todaySlots);
+    const slotLo = Math.min(...todaySlots);
+    // Merge with cache so we never lose a high or low from earlier in the day
+    let finalHi, finalLo;
+    if (cachedHiLo) {
+      finalHi = Math.max(cachedHiLo.hi, slotHi);
+      finalLo = Math.min(cachedHiLo.lo, slotLo);
     } else {
-      // Truly minimal data — use the 24h forecast range from all slots near today
-      const allTemps = fd.list.slice(0,8).map(i=>i.main.temp);
-      allTemps.push(cd.main.temp);
-      const hi=Math.round(Math.max(...allTemps));
-      const lo=Math.round(Math.min(...allTemps));
-      document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
+      finalHi = slotHi; finalLo = slotLo;
     }
+    // Cache for the rest of today (expires tomorrow)
+    localStorage.setItem(hiloCacheKey, JSON.stringify({hi: finalHi, lo: finalLo}));
+    // Clear yesterday's cache key
+    const yest = new Date(now - 864e5);
+    const yestYMD = yest.getFullYear()+'-'+(yest.getMonth()+1)+'-'+yest.getDate();
+    localStorage.removeItem('weather_hilow_' + yestYMD);
+    document.getElementById('today-hilow').textContent = Math.round(finalHi)+'° / '+Math.round(finalLo)+'°';
     const fcast = Object.entries(days).filter(([k])=>k!==todayKey).slice(0,5).map(([,v])=>{
       // Use noon reading if available; otherwise use the best daytime (worst = cloudy = high id) reading
       let iconId = v.noonId;
@@ -7627,9 +7635,9 @@ function toggleEditMode() {
     var homeCards = document.getElementById('home-cards');
     if (homeCards) {
       _editModeClickBlocker = function(e) {
-        // Allow clicks on drag-bar, resize-handle, scroll-toggle to pass through
+        // Only allow scroll-toggle clicks through; drag-bar and resize only need mousedown
         var t = e.target;
-        if (t.closest('.card-drag-bar') || t.closest('.card-resize-handle') || t.closest('.card-scroll-toggle')) return;
+        if (t.closest('.card-scroll-toggle')) return;
         e.stopPropagation();
         e.preventDefault();
       };
@@ -7677,6 +7685,7 @@ function bindDragMove(el) {
     function onUp() {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup',   onUp);
+      if (typeof wordleRenderMini === 'function' && el.id === 'home-wordle-card') wordleRenderMini();
     }
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup',   onUp);
@@ -7700,6 +7709,7 @@ function bindResizeHandle(el) {
     function onUp() {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup',   onUp);
+      if (typeof wordleRenderMini === 'function' && el.id === 'home-wordle-card') wordleRenderMini();
     }
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup',   onUp);
