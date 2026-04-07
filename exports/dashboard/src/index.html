@@ -546,6 +546,10 @@
     @keyframes mathShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 80%{transform:translateX(-3px)} }
     @keyframes mathPop { 0%{transform:scale(.4);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
     /* ── SPANISH ── */
+    /* Flashcard flip */
+    #sp-flash-card.flipped { border-color: #00d18c44; }
+    #sp-flash-card:hover { border-color: #1f3a2a; }
+
     #spanish-view { flex:1; display:flex; flex-direction:column; min-height:0; overflow:hidden; background:#111312; color:#e8f0ed; }
     #spanish-topbar { background:#0a0f0d; border-bottom:1px solid #1a2e24; padding:0 20px; height:52px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
     #spanish-tabs { display:flex; gap:0; border-bottom:1px solid #1a2e24; background:#0d1210; flex-shrink:0; padding:0 20px; }
@@ -1285,6 +1289,12 @@
             </div>
           </div>
 
+          <!-- Savings Interest section -->
+          <div id="mon-savings-interest-section" style="display:none">
+            <div style="font-size:12px;font-weight:800;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">💰 Savings Interest</div>
+            <div id="mon-savings-interest-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+
           <!-- Credit section -->
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1310,6 +1320,14 @@
               style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
             <input id="mon-acc-balance" type="number" min="0" placeholder="Current balance ($)"
               style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+            <!-- Savings-only fields -->
+            <div id="mon-acc-savings-fields" style="display:none;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <input id="mon-acc-apy" type="number" min="0" step="0.01" placeholder="Annual APY % (e.g. 4.5)"
+                  style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;box-sizing:border-box">
+                <span style="font-size:14px;color:#7a9e8e;flex-shrink:0">% APY</span>
+              </div>
+            </div>
             <!-- Credit-only fields -->
             <div id="mon-acc-credit-fields" style="display:none;flex-direction:column;gap:8px">
               <input id="mon-acc-limit" type="number" min="0" placeholder="Credit limit ($)"
@@ -2030,6 +2048,7 @@
         </div>
         <div id="spanish-tabs">
           <div class="sp-tab active" id="sp-tab-vocab" onclick="spSetTab('vocab')">📖 Vocabulary</div>
+          <div class="sp-tab" id="sp-tab-flash" onclick="spSetTab('flash')">🃏 Flashcards</div>
           <div class="sp-tab" id="sp-tab-grammar" onclick="spSetTab('grammar')">📚 Grammar</div>
         </div>
         <div id="spanish-body">
@@ -2043,6 +2062,53 @@
           </div>
           <!-- Grammar tab content -->
           <div id="sp-grammar-pane" style="display:none"></div>
+            <!-- Flashcard pane -->
+            <div id="sp-flash-pane" style="display:none;flex:1;overflow-y:auto;padding:20px;box-sizing:border-box">
+              <div id="sp-flash-stats-row" style="display:flex;gap:10px;margin-bottom:18px">
+                <div style="flex:1;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 14px;text-align:center">
+                  <div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">Due Today</div>
+                  <div id="sp-flash-due-count" style="font-size:20px;font-weight:900;color:#f7a94e">0</div>
+                </div>
+                <div style="flex:1;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 14px;text-align:center">
+                  <div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">Learned</div>
+                  <div id="sp-flash-learned-count" style="font-size:20px;font-weight:900;color:#00d18c">0</div>
+                </div>
+                <div style="flex:1;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 14px;text-align:center">
+                  <div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">Total</div>
+                  <div id="sp-flash-total-count" style="font-size:20px;font-weight:900;color:#7a9e8e">0</div>
+                </div>
+              </div>
+              <!-- Card area -->
+              <div id="sp-flash-card-area" style="display:flex;flex-direction:column;align-items:center;gap:16px">
+                <div id="sp-flash-card" onclick="spFlashFlip()" style="cursor:pointer;width:100%;max-width:440px;min-height:180px;background:#111a15;border:2px solid #1f3a2a;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;box-sizing:border-box;transition:border-color 0.2s;user-select:none">
+                  <div id="sp-flash-front" style="text-align:center">
+                    <div id="sp-flash-es" style="font-size:36px;font-weight:900;color:#e8f0ed;margin-bottom:6px"></div>
+                    <div id="sp-flash-pron" style="font-size:13px;color:#4a7060;font-style:italic;margin-bottom:8px"></div>
+                    <div style="font-size:11px;color:#3a5548;margin-top:12px">tap to reveal →</div>
+                  </div>
+                  <div id="sp-flash-back" style="display:none;text-align:center">
+                    <div id="sp-flash-en" style="font-size:22px;font-weight:700;color:#00d18c;margin-bottom:8px"></div>
+                    <div id="sp-flash-ex" style="font-size:12px;color:#7a9e8e;font-style:italic;max-width:320px;line-height:1.5"></div>
+                  </div>
+                </div>
+                <!-- Answer buttons (shown after flip) -->
+                <div id="sp-flash-btns" style="display:none;width:100%;max-width:440px;display:none">
+                  <div style="font-size:11px;color:#4a7060;text-align:center;margin-bottom:10px">Did you know it?</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                    <button onclick="spFlashAnswer(0)" style="background:rgba(247,78,78,0.15);border:1px solid rgba(247,78,78,0.3);border-radius:10px;color:#f74e4e;padding:11px 0;font-size:13px;font-weight:700;cursor:pointer">✗ Nope</button>
+                    <button onclick="spFlashAnswer(1)" style="background:rgba(247,169,78,0.15);border:1px solid rgba(247,169,78,0.3);border-radius:10px;color:#f7a94e;padding:11px 0;font-size:13px;font-weight:700;cursor:pointer">~ Kinda</button>
+                    <button onclick="spFlashAnswer(2)" style="background:rgba(0,209,140,0.15);border:1px solid rgba(0,209,140,0.3);border-radius:10px;color:#00d18c;padding:11px 0;font-size:13px;font-weight:700;cursor:pointer">✓ Got it</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Done screen -->
+              <div id="sp-flash-done" style="display:none;text-align:center;padding:40px 20px">
+                <div style="font-size:40px;margin-bottom:12px">🎉</div>
+                <div style="font-size:18px;font-weight:700;color:#e8f0ed;margin-bottom:6px">Session complete!</div>
+                <div id="sp-flash-done-msg" style="font-size:13px;color:#7a9e8e;margin-bottom:20px"></div>
+                <button onclick="spFlashInit()" style="background:#00d18c;border:none;border-radius:10px;color:#0a1a12;padding:11px 28px;font-size:14px;font-weight:700;cursor:pointer">Review Again</button>
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -5485,6 +5551,175 @@ function spSetRank(id, rank) {
   spSaveData(d);
 }
 
+// ── Flashcard (Anki-style SRS) Engine ────────────────────────
+// SRS intervals in days: [again, hard, good] by current interval
+// Level 0 = new, score 0,1,2 per answer
+var spFlashQueue = [];
+var spFlashIdx   = 0;
+var spFlashFlipped = false;
+var spFlashSession = { correct:0, again:0, total:0 };
+
+function spFlashGetSRS() {
+  try { return JSON.parse(localStorage.getItem('sp_srs') || '{}'); } catch(e){ return {}; }
+}
+function spFlashSaveSRS(d) { localStorage.setItem('sp_srs', JSON.stringify(d)); }
+
+function spFlashTodayStr() {
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function spFlashDue() {
+  var srs    = spFlashGetSRS();
+  var today  = spFlashTodayStr();
+  var words  = spAllWords();
+  return words.filter(function(w) {
+    var rec = srs[w.id];
+    if (!rec) return true;  // never seen = always due
+    return rec.nextReview <= today;
+  });
+}
+
+function spFlashInit() {
+  var srs   = spFlashGetSRS();
+  var today = spFlashTodayStr();
+  var words = spAllWords();
+  var due   = spFlashDue();
+  var learned = words.filter(function(w){ return srs[w.id] && srs[w.id].interval >= 1; }).length;
+
+  // Update stats
+  var dueEl  = document.getElementById('sp-flash-due-count');
+  var lrnEl  = document.getElementById('sp-flash-learned-count');
+  var totEl  = document.getElementById('sp-flash-total-count');
+  if(dueEl) dueEl.textContent = due.length;
+  if(lrnEl) lrnEl.textContent = learned;
+  if(totEl) totEl.textContent = words.length;
+
+  // Shuffle queue (new words first, then overdue)
+  spFlashQueue = due.slice().sort(function(a,b){
+    var ra = srs[a.id]; var rb = srs[b.id];
+    if (!ra && !rb) return 0;
+    if (!ra) return -1;
+    if (!rb) return 1;
+    return ra.nextReview.localeCompare(rb.nextReview);
+  });
+  spFlashIdx = 0;
+  spFlashSession = { correct:0, again:0, total:0 };
+  spFlashFlipped = false;
+
+  document.getElementById('sp-flash-done').style.display = 'none';
+  document.getElementById('sp-flash-card-area').style.display = '';
+
+  if (!spFlashQueue.length) {
+    spFlashShowDone();
+    return;
+  }
+  spFlashShowCard();
+}
+
+function spFlashShowCard() {
+  if (spFlashIdx >= spFlashQueue.length) { spFlashShowDone(); return; }
+  var w = spFlashQueue[spFlashIdx];
+  var card = document.getElementById('sp-flash-card');
+  var front = document.getElementById('sp-flash-front');
+  var back  = document.getElementById('sp-flash-back');
+  var btns  = document.getElementById('sp-flash-btns');
+  document.getElementById('sp-flash-es').textContent   = w.es;
+  document.getElementById('sp-flash-pron').textContent = w.pron ? '/'+w.pron+'/' : '';
+  document.getElementById('sp-flash-en').textContent   = w.en;
+  var exHtml = (w.example||'').replace(/\{(.+?)\}/g,'<em>$1</em>');
+  document.getElementById('sp-flash-ex').innerHTML = exHtml;
+  front.style.display = '';
+  back.style.display  = 'none';
+  btns.style.display  = 'none';
+  card.classList.remove('flipped');
+  spFlashFlipped = false;
+}
+
+window.spFlashFlip = function() {
+  if (spFlashFlipped) return;
+  spFlashFlipped = true;
+  var card  = document.getElementById('sp-flash-card');
+  var front = document.getElementById('sp-flash-front');
+  var back  = document.getElementById('sp-flash-back');
+  var btns  = document.getElementById('sp-flash-btns');
+  front.style.display = 'none';
+  back.style.display  = '';
+  btns.style.display  = '';
+  card.classList.add('flipped');
+}
+
+window.spFlashAnswer = function(score) {
+  // score: 0=Again, 1=Kinda, 2=Got it
+  if (!spFlashFlipped) return;
+  var w   = spFlashQueue[spFlashIdx];
+  var srs = spFlashGetSRS();
+  var rec = srs[w.id] || { interval:0, ease:2.5, reps:0 };
+
+  spFlashSession.total++;
+
+  // SM-2 inspired simple version
+  if (score === 0) {
+    // Nope — reset, see again in 1 day
+    rec.interval = 1;
+    rec.reps = 0;
+    rec.ease = Math.max(1.3, rec.ease - 0.2);
+    spFlashSession.again++;
+  } else if (score === 1) {
+    // Kinda — short interval boost
+    rec.interval = rec.interval < 1 ? 1 : Math.max(1, Math.round(rec.interval * 1.2));
+    rec.reps++;
+  } else {
+    // Got it — standard SM-2 progression
+    if (rec.reps === 0)      rec.interval = 1;
+    else if (rec.reps === 1) rec.interval = 3;
+    else                     rec.interval = Math.round(rec.interval * rec.ease);
+    rec.ease = Math.min(3.5, rec.ease + 0.1);
+    rec.reps++;
+    spFlashSession.correct++;
+    // Update vocab rank badge
+    var newRank = Math.min(6, Math.floor(rec.reps / 2) + 1);
+    spSetRank(w.id, newRank);
+  }
+
+  // Set next review date
+  var next = new Date();
+  next.setDate(next.getDate() + rec.interval);
+  rec.nextReview = next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0')+'-'+String(next.getDate()).padStart(2,'0');
+  srs[w.id] = rec;
+  spFlashSaveSRS(srs);
+
+  // Award XP for the math points system if it exists
+  if (typeof mathAwardXP === 'function' && score === 2) mathAwardXP(5);
+
+  spFlashIdx++;
+  // Update due count live
+  var dueEl = document.getElementById('sp-flash-due-count');
+  if(dueEl) dueEl.textContent = Math.max(0, spFlashQueue.length - spFlashIdx);
+  spFlashShowCard();
+}
+
+function spFlashShowDone() {
+  document.getElementById('sp-flash-card-area').style.display = 'none';
+  var done = document.getElementById('sp-flash-done');
+  done.style.display = '';
+  var msg = document.getElementById('sp-flash-done-msg');
+  if (spFlashSession.total === 0) {
+    msg.textContent = 'All caught up! No cards due right now. Come back tomorrow.';
+  } else {
+    msg.textContent = 'Reviewed '+spFlashSession.total+' cards — '+spFlashSession.correct+' correct, '+spFlashSession.again+' need more practice.';
+  }
+  // Refresh stats
+  var srs   = spFlashGetSRS();
+  var words = spAllWords();
+  var learned = words.filter(function(w){ return srs[w.id] && srs[w.id].interval >= 1; }).length;
+  var lrnEl = document.getElementById('sp-flash-learned-count');
+  if(lrnEl) lrnEl.textContent = learned;
+  // Refresh vocab to show updated rank colors
+  spRenderVocab();
+}
+
+
 // ── Init ──
 function spanishInit() {
   spSetTab('vocab');
@@ -5500,10 +5735,13 @@ function spSetTab(tab) {
   spCurrentTab = tab;
   document.getElementById('sp-tab-vocab').classList.toggle('active', tab==='vocab');
   document.getElementById('sp-tab-grammar').classList.toggle('active', tab==='grammar');
+  document.getElementById('sp-tab-flash').classList.toggle('active', tab==='flash');
   document.getElementById('sp-vocab-pane').style.display   = tab==='vocab'   ? '' : 'none';
   document.getElementById('sp-grammar-pane').style.display = tab==='grammar' ? '' : 'none';
+  document.getElementById('sp-flash-pane').style.display   = tab==='flash'   ? '' : 'none';
   const fab = document.getElementById('sp-add-btn');
   if(fab) fab.classList.toggle('visible', tab==='vocab');
+  if(tab==='flash') spFlashInit();
 }
 
 // ── Rank dots renderer ──
@@ -8470,12 +8708,67 @@ function monRenderAccounts() {
 
         var barLabels = document.createElement('div');
         barLabels.style.cssText = 'display:flex;justify-content:space-between;margin-top:4px';
-        barLabels.innerHTML = '<span style="font-size:10px;color:#4a7060">'+pct+'% used</span><span style="font-size:10px;color:#7a9e8e">'+monFmt(avail)+' available</span>';
+        barLabels.innerHTML = '<span style="font-size:10px;color:#4a7060">'+pct+'% used</span><span style="font-size:10pxcolor:#7a9e8e">'+ monFmt(avail)+' available</span>';
 
         card.appendChild(topRow); card.appendChild(barTrack); card.appendChild(barLabels);
         creditList.appendChild(card);
       });
     }
+  }
+
+  // ── Savings Interest Panel ──
+  var savingsAccounts = (d.bankAccounts||[]).filter(function(a){ return a.apy && a.apy > 0; });
+  var intSection = document.getElementById('mon-savings-interest-section');
+  var intList = document.getElementById('mon-savings-interest-list');
+  if (intSection) intSection.style.display = savingsAccounts.length ? 'block' : 'none';
+  if (intList && savingsAccounts.length) {
+    intList.innerHTML = savingsAccounts.map(function(acc) {
+      var apy = acc.apy || 0;
+      var bal = acc.balance || 0;
+      var monthly = bal * (apy / 100) / 12;
+      var daily   = bal * (apy / 100) / 365;
+      var yearly  = bal * (apy / 100);
+      // Compound growth projections
+      var bal6mo  = bal * Math.pow(1 + (apy/100)/12, 6);
+      var bal1yr  = bal * Math.pow(1 + (apy/100)/12, 12);
+      var bal5yr  = bal * Math.pow(1 + (apy/100)/12, 60);
+      return '<div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:14px 16px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+          '<div>' +
+            '<div style="font-size:13px;font-weight:700;color:#e8f0ed">' + acc.bank + ' — ' + acc.name + '</div>' +
+            '<div style="font-size:11px;color:#7a9e8e;margin-top:2px">' + monFmt(bal) + ' @ ' + apy + '% APY</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:18px;font-weight:900;color:#00d18c">+' + monFmt(monthly) + '</div>' +
+            '<div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.04em">per month</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
+          '<div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:8px;padding:9px;text-align:center">' +
+            '<div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Daily</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#4ed46a">+' + monFmt(daily) + '</div>' +
+          '</div>' +
+          '<div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:8px;padding:9px;text-align:center">' +
+            '<div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">Yearly</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#4ed46a">+' + monFmt(yearly) + '</div>' +
+          '</div>' +
+          '<div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:8px;padding:9px;text-align:center">' +
+            '<div style="font-size:10px;color:#4a7060;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:3px">5yr (compounded)</div>' +
+            '<div style="font-size:13px;font-weight:700;color:#00d18c">' + monFmt(bal5yr) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+          '<div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:8px;padding:9px;display:flex;align-items:center;justify-content:space-between">' +
+            '<span style="font-size:11px;color:#4a7060">After 6 months</span>' +
+            '<span style="font-size:13px;font-weight:700;color:#e8f0ed">' + monFmt(bal6mo) + ' <span style="font-size:10px;color:#4ed46a">(+' + monFmt(bal6mo-bal) + ')</span></span>' +
+          '</div>' +
+          '<div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:8px;padding:9px;display:flex;align-items:center;justify-content:space-between">' +
+            '<span style="font-size:11px;color:#4a7060">After 1 year</span>' +
+            '<span style="font-size:13px;font-weight:700;color:#e8f0ed">' + monFmt(bal1yr) + ' <span style="font-size:10px;color:#4ed46a">(+' + monFmt(bal1yr-bal) + ')</span></span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
   }
 }
 
@@ -8533,16 +8826,19 @@ window.monOpenAddAccount = function(accType, editId) {
   var modal = document.getElementById('mon-acc-modal');
   var titleEl = document.getElementById('mon-acc-modal-title');
   var creditFields = document.getElementById('mon-acc-credit-fields');
+  var savingsFields = document.getElementById('mon-acc-savings-fields');
   var editIdEl = document.getElementById('mon-acc-edit-id');
   var typeEl = document.getElementById('mon-acc-type-hidden');
   document.getElementById('mon-acc-bank').value = '';
   document.getElementById('mon-acc-name').value = '';
   document.getElementById('mon-acc-balance').value = '';
   document.getElementById('mon-acc-limit').value = '';
+  document.getElementById('mon-acc-apy').value = '';
   editIdEl.value = editId || '';
   typeEl.value = accType;
   var isCredit = accType === 'credit';
   creditFields.style.display = isCredit ? 'flex' : 'none';
+  savingsFields.style.display = (!isCredit) ? 'flex' : 'none';
   if (editId) {
     var d = monGetData();
     var list = isCredit ? d.creditCards : d.bankAccounts;
@@ -8552,6 +8848,7 @@ window.monOpenAddAccount = function(accType, editId) {
       document.getElementById('mon-acc-name').value    = item.name||'';
       document.getElementById('mon-acc-balance').value = item.balance||0;
       if (isCredit) document.getElementById('mon-acc-limit').value = item.limit||0;
+      if (!isCredit && item.apy) document.getElementById('mon-acc-apy').value = item.apy;
     }
     titleEl.textContent = isCredit ? 'Edit Credit Card' : 'Edit Bank Account';
   } else {
@@ -8565,6 +8862,7 @@ window.monSaveAccount = function() {
   var name    = document.getElementById('mon-acc-name').value.trim();
   var balance = parseFloat(document.getElementById('mon-acc-balance').value) || 0;
   var limit   = parseFloat(document.getElementById('mon-acc-limit').value) || 0;
+  var apy     = parseFloat(document.getElementById('mon-acc-apy').value) || 0;
   var accType = document.getElementById('mon-acc-type-hidden').value;
   var editId  = document.getElementById('mon-acc-edit-id').value;
   if (!bank || !name) { alert('Bank name and account name are required.'); return; }
@@ -8573,10 +8871,14 @@ window.monSaveAccount = function() {
   var list = isCredit ? d.creditCards : d.bankAccounts;
   if (editId) {
     var idx = list.findIndex(function(x){ return x.id===editId; });
-    if (idx !== -1) list[idx] = Object.assign(list[idx], {bank:bank, name:name, balance:balance, limit: isCredit?limit:undefined});
+    if (idx !== -1) {
+      list[idx] = Object.assign(list[idx], {bank:bank, name:name, balance:balance, limit: isCredit?limit:undefined});
+      if (!isCredit) list[idx].apy = apy;
+    }
   } else {
     var item = {id:Date.now()+'', bank:bank, name:name, balance:balance};
     if (isCredit) item.limit = limit;
+    if (!isCredit) item.apy = apy;
     list.push(item);
   }
   if (isCredit) d.creditCards = list; else d.bankAccounts = list;
