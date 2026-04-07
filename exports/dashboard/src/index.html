@@ -1359,7 +1359,7 @@
 
 
         <!-- ══ GRAPHS PANEL ══ -->
-        <div id="mon-graphs-panel" style="display:none;flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:20px;box-sizing:border-box">
+        <div id="mon-graphs-panel" style="display:none;flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:20px;box-sizing:border-box;width:100%">
 
           <!-- Time range selector -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
@@ -1372,7 +1372,7 @@
           <!-- 1. Income vs Expenses — Bar chart -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📊 Income vs Expenses</div>
-            <div style="position:relative;height:220px">
+            <div style="position:relative;height:220px;width:100%">
               <canvas id="mgr-canvas-inex"></canvas>
             </div>
           </div>
@@ -1380,7 +1380,7 @@
           <!-- 2. Net Savings per Month — Line chart -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📈 Net Savings per Month</div>
-            <div style="position:relative;height:200px">
+            <div style="position:relative;height:200px;width:100%">
               <canvas id="mgr-canvas-net"></canvas>
             </div>
           </div>
@@ -1399,7 +1399,7 @@
           <!-- 4. Account Balances Over Time — Stacked Area -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💰 Account Balance Snapshot</div>
-            <div style="position:relative;height:200px">
+            <div style="position:relative;height:200px;width:100%">
               <canvas id="mgr-canvas-acc"></canvas>
             </div>
           </div>
@@ -1407,7 +1407,7 @@
           <!-- 5. Credit Utilization per Card — Horizontal Bar -->
           <div id="mgr-credit-section" style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px;display:none">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💳 Credit Utilization per Card</div>
-            <div style="position:relative;height:160px">
+            <div style="position:relative;height:160px;width:100%">
               <canvas id="mgr-canvas-credit"></canvas>
             </div>
           </div>
@@ -1415,7 +1415,7 @@
           <!-- 6. Cumulative Spending — Line -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📉 Cumulative Expenses This Month</div>
-            <div style="position:relative;height:180px">
+            <div style="position:relative;height:180px;width:100%">
               <canvas id="mgr-canvas-cum"></canvas>
             </div>
           </div>
@@ -9742,6 +9742,17 @@ function monGetMonthLabels() {
   return { keys: keys, labels: labels };
 }
 
+function monSizeCanvas(el) {
+  if (!el) return;
+  var parent = el.parentElement;
+  var w = parent ? (parent.clientWidth || parent.offsetWidth || 600) : 600;
+  var h = parent ? (parent.clientHeight || parent.offsetHeight || 0) : 0;
+  if (w < 10) w = 600;
+  if (h < 10) h = parseInt(parent && parent.style.height) || 220;
+  el.width  = w;
+  el.height = h;
+}
+
 function monRenderGraphs() {
   if (typeof Chart === 'undefined') { console.error('Chart.js not loaded'); return; }
   var d = monGetData();
@@ -9761,6 +9772,7 @@ function monRenderGraphs() {
   var incomes  = keys.map(function(k){ return txs.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
   var expenses = keys.map(function(k){ return txs.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
   var ctxInex = document.getElementById('mgr-canvas-inex');
+  monSizeCanvas(ctxInex);
   if (ctxInex) {
     monChartInstances['inex'] = new Chart(ctxInex, {
       type: 'bar',
@@ -9772,7 +9784,7 @@ function monRenderGraphs() {
         ]
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: false, maintainAspectRatio: false,
         plugins: { legend: { labels: { color:'#7a9e8e', boxWidth:12 } }, tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } } },
         scales: {
           x: { ticks:{ color:tickColor }, grid:{ color:gridColor } },
@@ -9786,6 +9798,7 @@ function monRenderGraphs() {
   monDestroyChart('net');
   var nets = keys.map(function(k,i){ return incomes[i] - expenses[i]; });
   var ctxNet = document.getElementById('mgr-canvas-net');
+  monSizeCanvas(ctxNet);
   if (ctxNet) {
     monChartInstances['net'] = new Chart(ctxNet, {
       type: 'line',
@@ -9803,7 +9816,7 @@ function monRenderGraphs() {
         }]
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: false, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
@@ -9828,6 +9841,7 @@ function monRenderGraphs() {
   var catNames = Object.keys(allCatExpenses);
   var catVals  = catNames.map(function(c){ return allCatExpenses[c]; });
   var ctxCat = document.getElementById('mgr-canvas-cat');
+  monSizeCanvas(ctxCat);
   if (ctxCat) {
     if (catVals.length === 0) {
       catVals  = [1]; catNames = ['No data'];
@@ -9839,7 +9853,7 @@ function monRenderGraphs() {
         datasets: [{ data: catVals, backgroundColor: MON_GRAPH_PALETTE.slice(0, catNames.length), borderWidth: 0, hoverOffset: 8 }]
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: false, maintainAspectRatio: false,
         cutout: '65%',
         plugins: {
           legend: { display: false },
@@ -9867,6 +9881,7 @@ function monRenderGraphs() {
   var allAccs = (d.bankAccounts||[]).map(function(a){ return { name: (a.bank?a.bank+' ':'')+(a.name||''), bal: a.balance||0, color:'#00d18c' }; })
     .concat((d.creditCards||[]).map(function(c){ return { name: (c.bank?c.bank+' ':'')+(c.name||''), bal: c.balance||0, color:'#e05c5c' }; }));
   var ctxAcc = document.getElementById('mgr-canvas-acc');
+  monSizeCanvas(ctxAcc);
   if (ctxAcc) {
     monChartInstances['acc'] = new Chart(ctxAcc, {
       type: 'bar',
@@ -9883,7 +9898,7 @@ function monRenderGraphs() {
       },
       options: {
         indexAxis: 'y',
-        responsive: true, maintainAspectRatio: false,
+        responsive: false, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
@@ -9915,7 +9930,7 @@ function monRenderGraphs() {
       },
       options: {
         indexAxis: 'y',
-        responsive: true, maintainAspectRatio: false,
+        responsive: false, maintainAspectRatio: false,
         plugins: {
           legend: { labels: { color:'#7a9e8e', boxWidth:12 } },
           tooltip: { callbacks: { label: function(c){ return ' '+c.raw+'%'; } } }
@@ -9944,6 +9959,7 @@ function monRenderGraphs() {
     cumVals.push(running);
   }
   var ctxCum = document.getElementById('mgr-canvas-cum');
+  monSizeCanvas(ctxCum);
   if (ctxCum) {
     monChartInstances['cum'] = new Chart(ctxCum, {
       type: 'line',
@@ -9961,7 +9977,7 @@ function monRenderGraphs() {
         }]
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: false, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
