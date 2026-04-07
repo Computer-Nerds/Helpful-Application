@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Music</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0a0d0c;--surface:#111412;--surface2:#171c1a;--accent:#00d18c;--text:#e8f0ed;--muted:#7a9e8e;--border:#1a2e24;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none;}
+
+/* Toolbar */
+#toolbar{height:54px;background:#080c0a;border-bottom:1px solid #141e1a;display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;}
+#back-btn{background:#1a1f1d;border:1px solid #1f2e28;color:var(--muted);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px;}
+#back-btn:hover{border-color:var(--accent);color:var(--accent);}
+#toolbar-title{font-size:16px;font-weight:800;}
+.tb-spacer{flex:1;}
+#add-btn{background:#1a1f1d;border:1px solid #1f2e28;color:var(--muted);border-radius:8px;padding:5px 16px;cursor:pointer;font-size:13px;font-weight:600;}
+#add-btn.active{background:rgba(0,209,140,0.15);border-color:var(--accent);color:var(--accent);}
+#add-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Upload panel */
+#upload-panel{background:#0e1210;border-bottom:1px solid var(--border);padding:16px 24px;display:none;}
+#drop-zone{border:2px dashed #1f2e28;border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.2s;}
+#drop-zone.over{border-color:var(--accent);background:rgba(0,209,140,0.05);}
+#drop-zone:hover{border-color:#2a4a3a;}
+.dz-icon{font-size:28px;margin-bottom:8px;}
+.dz-text{font-size:14px;color:var(--muted);}
+.dz-sub{font-size:12px;color:#3a5548;margin-top:4px;}
+#upload-status{font-size:14px;color:var(--accent);}
+
+/* Track list */
+#track-list{flex:1;overflow-y:auto;padding:8px 0;}
+#empty-state{text-align:center;padding:60px 20px;color:#3a5548;}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.track-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;transition:background 0.15s;}
+.track-item:hover{background:var(--surface);}
+.track-item.active{background:var(--surface2);}
+.track-num{width:24px;text-align:center;font-size:12px;color:#3a5548;flex-shrink:0;}
+.track-wave{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.track-info{flex:1;min-width:0;}
+.track-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.track-title.active{color:var(--accent);}
+.track-meta{font-size:12px;color:#3a5548;margin-top:2px;}
+.track-dur{font-size:12px;color:#3a5548;width:40px;text-align:right;flex-shrink:0;}
+.track-del{background:none;border:none;color:#2a3a30;cursor:pointer;font-size:16px;padding:4px;border-radius:4px;flex-shrink:0;}
+.track-del:hover{color:#ff5f57;background:rgba(255,95,87,0.1);}
+
+/* Player */
+#player{background:#080c0a;border-top:1px solid var(--border);padding:14px 24px;flex-shrink:0;}
+#player-top{display:flex;align-items:center;gap:16px;margin-bottom:10px;}
+#player-info{flex:1;min-width:0;}
+#player-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#player-artist{font-size:12px;color:var(--muted);margin-top:2px;}
+#player-controls{display:flex;align-items:center;gap:10px;}
+.ctrl-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:4px 6px;border-radius:6px;opacity:0.5;transition:opacity 0.15s;}
+.ctrl-btn:hover{opacity:1;color:var(--text);}
+.ctrl-btn.active{color:var(--accent);opacity:1;}
+#play-btn{background:var(--accent);border:none;cursor:pointer;color:#003d2a;font-size:20px;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#play-btn:hover{opacity:0.9;}
+#player-vol{display:flex;align-items:center;gap:8px;}
+#player-vol span{font-size:14px;}
+#vol-slider{width:80px;accent-color:var(--accent);cursor:pointer;}
+
+/* Seek */
+#seek-row{display:flex;align-items:center;gap:8px;}
+#time-elapsed,#time-dur{font-size:11px;color:#3a5548;font-variant-numeric:tabular-nums;width:36px;flex-shrink:0;}
+#time-dur{text-align:right;}
+#seek-bar{flex:1;height:4px;background:#1a2e24;border-radius:2px;cursor:pointer;position:relative;}
+#seek-fill{height:100%;background:var(--accent);border-radius:2px;width:0%;}
+#seek-bar:hover #seek-fill{filter:brightness(1.2);}
+
+/* Wave bars animation */
+@keyframes w0{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}
+@keyframes w1{from{transform:scaleY(0.6)}to{transform:scaleY(0.2)}}
+@keyframes w2{from{transform:scaleY(0.2)}to{transform:scaleY(0.9)}}
+@keyframes w3{from{transform:scaleY(0.8)}to{transform:scaleY(0.3)}}
+@keyframes w4{from{transform:scaleY(0.4)}to{transform:scaleY(1)}}
+.wave-bar{display:inline-block;width:2px;height:14px;background:var(--accent);border-radius:1px;margin:0 1px;transform-origin:center;}
+</style>
+</head>
+<body>
+
+<audio id="audio"></audio>
+
+<div id="toolbar">
+  <button id="back-btn" onclick="goBack()">← Apps</button>
+  <span id="toolbar-title">🎵 Music</span>
+  <div class="tb-spacer"></div>
+  <button id="add-btn" onclick="toggleUpload()">+ Add Tracks</button>
+</div>
+
+<div id="upload-panel">
+  <div id="drop-zone" onclick="document.getElementById('file-input').click()"
+    ondragover="event.preventDefault();this.classList.add('over')"
+    ondragleave="this.classList.remove('over')"
+    ondrop="handleDrop(event)">
+    <div id="dz-content">
+      <div class="dz-icon">🎵</div>
+      <div class="dz-text">Drop <b>.wav</b> files here or <span style="color:#00d18c">click to browse</span></div>
+      <div class="dz-sub">Multiple files supported • Stored locally</div>
+    </div>
+    <div id="upload-status" style="display:none;"></div>
+  </div>
+  <input id="file-input" type="file" accept=".wav,.mp3,.ogg,.flac,audio/*" multiple style="display:none" onchange="handleFiles(this.files)">
+</div>
+
+<div id="track-list">
+  <div id="empty-state">
+    <div class="empty-icon">🎵</div>
+    <div style="font-size:15px;">No tracks yet</div>
+    <div style="font-size:13px;margin-top:6px;">Click "+ Add Tracks" to add music</div>
+  </div>
+</div>
+
+<div id="player" style="display:none;">
+  <div id="player-top">
+    <div id="player-info">
+      <div id="player-title">No track</div>
+      <div id="player-artist"></div>
+    </div>
+    <div id="player-controls">
+      <button class="ctrl-btn" id="shuffle-btn" onclick="toggleShuffle()" title="Shuffle">🔀</button>
+      <button class="ctrl-btn" onclick="prevTrack()" title="Previous">⏮</button>
+      <button id="play-btn" onclick="togglePlay()">▶</button>
+      <button class="ctrl-btn" onclick="nextTrack()" title="Next">⏭</button>
+      <button class="ctrl-btn" id="repeat-btn" onclick="toggleRepeat()" title="Repeat">🔁</button>
+    </div>
+    <div id="player-vol">
+      <span id="vol-icon">🔊</span>
+      <input id="vol-slider" type="range" min="0" max="1" step="0.01" value="0.8" oninput="setVol(this.value)">
+    </div>
+  </div>
+  <div id="seek-row">
+    <span id="time-elapsed">0:00</span>
+    <div id="seek-bar" onclick="seek(event)"><div id="seek-fill"></div></div>
+    <span id="time-dur">0:00</span>
+  </div>
+</div>
+
+<script>
+// ── Storage ──
+// Tracks stored as {id, title, artist, album, dataUrl, duration}
+function loadTracks(){return JSON.parse(localStorage.getItem('music_tracks')||'[]');}
+function saveTracks(t){localStorage.setItem('music_tracks',JSON.stringify(t));}
+
+let tracks=[],currentId=null,playing=false,shuffleOn=false,repeatOn=false,vol=0.8;
+const audio=document.getElementById('audio');
+
+function goBack(){try{require('electron').ipcRenderer.send('close-app');}catch(e){window.close();}}
+
+function toggleUpload(){
+  const panel=document.getElementById('upload-panel');
+  const btn=document.getElementById('add-btn');
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  btn.classList.toggle('active',!open);
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('over');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(files){
+  const arr=[...files].filter(f=>f.type.startsWith('audio/')||/\.(wav|mp3|ogg|flac|m4a)$/i.test(f.name));
+  if(!arr.length)return;
+  let i=0;
+  const statusEl=document.getElementById('upload-status');
+  const dzContent=document.getElementById('dz-content');
+  dzContent.style.display='none';statusEl.style.display='block';
+  function next(){
+    if(i>=arr.length){dzContent.style.display='block';statusEl.style.display='none';toggleUpload();renderList();return;}
+    const f=arr[i];
+    statusEl.textContent=`Loading ${i+1}/${arr.length}: ${f.name}`;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const t=loadTracks();
+      const title=f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+      t.push({id:Date.now().toString()+i,title,artist:'',album:'',dataUrl:ev.target.result});
+      saveTracks(t);i++;next();
+    };
+    reader.readAsDataURL(f);
+  }
+  next();
+}
+
+function fmtTime(s){if(!s||isNaN(s))return'0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
+
+function renderList(){
+  tracks=loadTracks();
+  const list=document.getElementById('track-list');
+  const empty=document.getElementById('empty-state');
+  list.innerHTML='';
+  if(!tracks.length){list.appendChild(empty);return;}
+  if(!currentId&&tracks.length)currentId=tracks[0].id;
+  tracks.forEach((t,idx)=>{
+    const isCurrent=t.id===currentId;
+    const div=document.createElement('div');
+    div.className='track-item'+(isCurrent?' active':'');
+    div.onclick=()=>selectTrack(t.id);
+    const numOrWave=isCurrent&&playing
+      ?`<div class="track-wave"><svg width="18" height="18" viewBox="0 0 18 18">
+          ${[2,5,8,11,14].map((x,i)=>`<rect x="${x}" y="0" width="2" height="18" fill="#00d18c" rx="1" style="transform-origin:${x+1}px 9px;animation:w${i} 0.8s ease-in-out ${i*0.12}s infinite alternate"/>`).join('')}
+        </svg></div>`
+      :`<div class="track-num">${idx+1}</div>`;
+    div.innerHTML=`
+      ${numOrWave}
+      <div class="track-info">
+        <div class="track-title${isCurrent?' active':''}">${esc(t.title||'Untitled')}</div>
+        <div class="track-meta">${esc(t.artist||'Unknown artist')}${t.album?' — '+esc(t.album):''}</div>
+      </div>
+      <div class="track-dur" id="dur-${t.id}">--:--</div>
+      <button class="track-del" onclick="delTrack('${t.id}',event)" title="Delete">×</button>
+    `;
+    list.appendChild(div);
+  });
+  updatePlayer();
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function selectTrack(id){
+  const wasPlaying=playing;
+  currentId=id;
+  playing=false;
+  audio.src='';
+  renderList();
+  loadAudio(wasPlaying);
+}
+
+function loadAudio(autoplay){
+  const t=tracks.find(x=>x.id===currentId);if(!t)return;
+  audio.src=t.dataUrl;
+  audio.volume=vol;
+  audio.load();
+  if(autoplay){audio.play().then(()=>{playing=true;renderList();updatePlayer();}).catch(()=>{});}
+}
+
+function togglePlay(){
+  if(!tracks.length)return;
+  if(!currentId){currentId=tracks[0].id;loadAudio(true);return;}
+  if(playing){audio.pause();playing=false;}
+  else{audio.play().then(()=>{playing=true;}).catch(()=>{});} 
+  updatePlayer();renderList();
+}
+
+function prevTrack(){
+  if(!tracks.length)return;
+  if(audio.currentTime>3){audio.currentTime=0;return;}
+  const idx=tracks.findIndex(t=>t.id===currentId);
+  currentId=tracks[(idx-1+tracks.length)%tracks.length].id;
+  loadAudio(playing);renderList();
+}
+
+function nextTrack(){
+  if(!tracks.length)return;
+  if(shuffleOn){
+    const others=tracks.filter(t=>t.id!==currentId);
+    if(others.length)currentId=others[Math.floor(Math.random()*others.length)].id;
+  }else{
+    const idx=tracks.findIndex(t=>t.id===currentId);
+    currentId=tracks[(idx+1)%tracks.length].id;
+  }
+  loadAudio(playing);renderList();
+}
+
+function toggleShuffle(){shuffleOn=!shuffleOn;document.getElementById('shuffle-btn').classList.toggle('active',shuffleOn);}
+function toggleRepeat(){repeatOn=!repeatOn;document.getElementById('repeat-btn').classList.toggle('active',repeatOn);}
+
+function setVol(v){
+  vol=parseFloat(v);audio.volume=vol;
+  document.getElementById('vol-icon').textContent=vol===0?'🔇':vol<0.5?'🔉':'🔊';
+}
+
+function seek(e){
+  const rect=document.getElementById('seek-bar').getBoundingClientRect();
+  const pct=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+  if(audio.duration)audio.currentTime=pct*audio.duration;
+}
+
+function delTrack(id,e){
+  e.stopPropagation();
+  let t=loadTracks().filter(x=>x.id!==id);
+  saveTracks(t);
+  if(currentId===id){
+    const idx=tracks.findIndex(x=>x.id===id);
+    const next=tracks[idx+1]||tracks[idx-1];
+    currentId=next?next.id:null;playing=false;audio.src='';
+    if(currentId)loadAudio(false);
+  }
+  renderList();
+}
+
+function updatePlayer(){
+  const t=tracks.find(x=>x.id===currentId);
+  const playerEl=document.getElementById('player');
+  playerEl.style.display=tracks.length?'block':'none';
+  if(!t)return;
+  document.getElementById('player-title').textContent=t.title||'Untitled';
+  document.getElementById('player-artist').textContent=t.artist||'';
+  document.getElementById('play-btn').textContent=playing?'⏸':'▶';
+}
+
+audio.addEventListener('timeupdate',()=>{
+  const e=audio.currentTime,d=audio.duration||0;
+  document.getElementById('time-elapsed').textContent=fmtTime(e);
+  document.getElementById('time-dur').textContent=fmtTime(d);
+  document.getElementById('seek-fill').style.width=(d>0?(e/d*100):0)+'%';
+});
+audio.addEventListener('loadedmetadata',()=>{
+  document.getElementById('time-dur').textContent=fmtTime(audio.duration);
+  const durEl=document.getElementById('dur-'+currentId);
+  if(durEl)durEl.textContent=fmtTime(audio.duration);
+});
+audio.addEventListener('play',()=>{playing=true;updatePlayer();renderList();});
+audio.addEventListener('pause',()=>{playing=false;updatePlayer();renderList();});
+audio.addEventListener('ended',()=>{
+  if(repeatOn){audio.currentTime=0;audio.play();return;}
+  nextTrack();
+});
+
+renderList();
+if(tracks.length&&currentId)loadAudio(false);
+</script>
+</body>
+</html>
