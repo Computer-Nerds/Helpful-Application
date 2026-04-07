@@ -905,7 +905,7 @@
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
             <div id="today-events"></div>
-            <div id="today-nav-hint">Click to open calendar →</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div id="today-nav-hint">Click to open calendar →</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -950,7 +950,7 @@
               </div>
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
-            </div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            </div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -961,7 +961,7 @@
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
-          <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+          <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -972,7 +972,7 @@
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
-            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -985,7 +985,7 @@
             <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
             </div>
-          <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+          <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -994,7 +994,7 @@
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
-            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
             <div id="home-fitness-content"></div></div>
 
@@ -1005,7 +1005,7 @@
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
             <div id="quote-text" class="quote-text"></div>
-            <div id="quote-author" class="quote-author"></div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div id="quote-author" class="quote-author"></div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -1031,7 +1031,7 @@
               <button class="hmw-btn" onclick="musicNext();hmwSyncState()" title="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
               <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
-            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
@@ -2381,10 +2381,20 @@ async function fetchWeather() {
     const hiloCacheKey = 'weather_hilow_' + todayYMD;
     let cachedHiLo = JSON.parse(localStorage.getItem(hiloCacheKey) || 'null');
     // Collect all forecast slots for today + current temp
-    const todaySlots = fd.list.filter(item => {
+    const todaySlots = [];
+    fd.list.forEach(item => {
       const d = new Date(item.dt*1000);
-      return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate() === todayYMD;
-    }).map(item => item.main.temp);
+      if (d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate() === todayYMD) {
+        todaySlots.push(item.main.temp);
+        todaySlots.push(item.main.temp_min);
+        todaySlots.push(item.main.temp_max);
+      }
+    });
+    // Also include next 8 slots (24hr) min/max for better hi/lo coverage
+    fd.list.slice(0, 8).forEach(item => {
+      todaySlots.push(item.main.temp_min);
+      todaySlots.push(item.main.temp_max);
+    });
     todaySlots.push(cd.main.temp);
     const slotHi = Math.max(...todaySlots);
     const slotLo = Math.min(...todaySlots);
@@ -7438,39 +7448,39 @@ function fitRenderHomeFitnessCard() {
   content.innerHTML = '';
   // Title row with day badge
   var titleRow = document.createElement('div');
-  titleRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
+  titleRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
   var titleEl = document.createElement('div');
   titleEl.className = 'section-label';
   titleEl.textContent = 'FITNESS';
   var dayBadge = document.createElement('div');
-  dayBadge.style.cssText = 'font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:'+(day.rest?'#1a2e24':'rgba(0,209,140,0.15)')+';color:'+(day.rest?'#7a9e8e':'#00d18c')+';border:1px solid '+(day.rest?'#1f3a2a':'#00d18c');
+  dayBadge.style.cssText = 'font-size:12px;font-weight:700;padding:4px 9px;border-radius:10px;background:'+(day.rest?'#1a2e24':'rgba(0,209,140,0.15)')+';color:'+(day.rest?'#7a9e8e':'#00d18c')+';border:1px solid '+(day.rest?'#1f3a2a':'#00d18c');
   dayBadge.textContent = day.emoji+' '+day.focus;
   titleRow.appendChild(titleEl); titleRow.appendChild(dayBadge);
   content.appendChild(titleRow);
   // Calorie bar
   var calRow = document.createElement('div');
-  calRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
+  calRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px';
   var calLabel = document.createElement('span');
   calLabel.style.cssText = 'font-size:12px;color:#7a9e8e';
   calLabel.textContent = 'Calories';
   var calVal = document.createElement('span');
-  calVal.style.cssText = 'font-size:12px;font-weight:700;color:'+(reached?'#f74e4e':'#00d18c');
+  calVal.style.cssText = 'font-size:13px;font-weight:700;color:'+(reached?'#f74e4e':'#00d18c');
   calVal.textContent = totalCal+' / '+goal;
   calRow.appendChild(calLabel); calRow.appendChild(calVal);
   content.appendChild(calRow);
   var track = document.createElement('div');
-  track.style.cssText = 'height:7px;background:#1a2e24;border-radius:4px;overflow:hidden;margin-bottom:8px';
+  track.style.cssText = 'height:8px;background:#1a2e24;border-radius:4px;overflow:hidden;margin-bottom:10px';
   var fill = document.createElement('div');
   fill.style.cssText = 'height:100%;width:'+pct+'%;border-radius:4px;background:'+(reached?'#f74e4e':'#00d18c')+';transition:width 0.4s';
   track.appendChild(fill); card.appendChild(track);
   // Weight row
   var wRow = document.createElement('div');
-  wRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:8px';
+  wRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
   var wLabel = document.createElement('span');
   wLabel.style.cssText = 'font-size:12px;color:#7a9e8e';
   wLabel.textContent = 'Latest weight';
   var wVal = document.createElement('span');
-  wVal.style.cssText = 'font-size:13px;font-weight:700;color:#e8f0ed';
+  wVal.style.cssText = 'font-size:14px;font-weight:700;color:#e8f0ed';
   wVal.textContent = latestW;
   wRow.appendChild(wLabel); wRow.appendChild(wVal);
   content.appendChild(wRow);
@@ -7490,7 +7500,7 @@ function fitRenderHomeFitnessCard() {
       en.style.cssText = 'font-size:12px;color:#a0c9b8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
       en.textContent = ex.name;
       var ed = document.createElement('span');
-      ed.style.cssText = 'font-size:12px;color:#7a9e8e;margin-left:8px;white-space:nowrap';
+      ed.style.cssText = 'font-size:13px;color:#7a9e8e;margin-left:8px;white-space:nowrap';
       var parts=[]; if(ex.sets) parts.push(ex.sets+'×'); if(ex.reps) parts.push(ex.reps);
       ed.textContent = parts.join('');
       eRow.appendChild(en); eRow.appendChild(ed);
@@ -7511,7 +7521,7 @@ function fitRenderHomeFitnessCard() {
   // Today food items
   if (arr.length > 0) {
     var sep2 = document.createElement('div');
-    sep2.style.cssText = 'border-top:1px solid #1a2e24;margin:8px 0 6px';
+    sep2.style.cssText = 'border-top:1px solid #1a2e24;margin:10px 0 7px';
     content.appendChild(sep2);
     var fTitle = document.createElement('div');
     fTitle.style.cssText = 'font-size:11px;color:#7a9e8e;margin-bottom:5px';
@@ -7524,7 +7534,7 @@ function fitRenderHomeFitnessCard() {
       fn.style.cssText = 'font-size:12px;color:#a0c9b8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
       fn.textContent = item.name;
       var fc = document.createElement('span');
-      fc.style.cssText = 'font-size:12px;font-weight:700;color:#00d18c;margin-left:8px';
+      fc.style.cssText = 'font-size:13px;font-weight:700;color:#00d18c;margin-left:8px';
       fc.textContent = item.cal+' kcal';
       fRow.appendChild(fn); fRow.appendChild(fc);
       content.appendChild(fRow);
