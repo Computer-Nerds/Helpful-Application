@@ -2524,11 +2524,11 @@ function renderTodayCard() {
   const el = document.getElementById('today-events');
 
   // Today's events
-  let html = '';
+  let out = '';
   if (!todayEvents.length) {
-    html += '<div style="font-size:12px;color:#4a7060;margin-bottom:8px">No events today</div>';
+    out += '<div style="font-size:12px;color:#4a7060;margin-bottom:8px">No events today</div>';
   } else {
-    html += todayEvents.map(ev => `
+    out += todayEvents.map(ev => `
       <div class="today-event" style="margin-bottom:5px">
         <div class="today-event-dot" style="background:${ev.color||'#00d18c'}"></div>
         <span class="today-event-title">${ev.title}</span>
@@ -2537,31 +2537,30 @@ function renderTodayCard() {
     `).join('');
   }
 
-  // Upcoming events (future dates only, up to 3)
+  // Upcoming IMPORTANT events only (e.important === true), future dates, up to 4
   const today = new Date(); today.setHours(0,0,0,0);
   const upcoming = allEvents
-    .filter(e => { const d = new Date(e.date + 'T00:00:00'); return d > today; })
-    .sort((a,b) => a.date.localeCompare(b.date))
-    .slice(0, 3);
+    .filter(e => e.important && new Date(e.date + 'T00:00:00') > today)
+    .map(e => { const d = new Date(e.date+'T00:00:00'); return {...e, diff: Math.round((d-today)/86400000)}; })
+    .sort((a,b) => a.diff - b.diff)
+    .slice(0, 4);
 
   if (upcoming.length) {
-    html += '<div style="border-top:1px solid #1a2e24;margin:6px 0 6px"></div>';
-    html += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:5px">UPCOMING</div>';
-    html += upcoming.map(ev => {
-      const d = new Date(ev.date + 'T00:00:00');
-      const diff = Math.round((d - today) / 86400000);
-      const diffStr = diff === 1 ? 'Tomorrow' : diff < 7 ? d.toLocaleDateString('en-US',{weekday:'short'}) : ev.date.slice(5).replace('-','/');
+    out += '<div style="border-top:1px solid #1a2e24;margin:7px 0 6px"></div>';
+    out += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:5px">UPCOMING</div>';
+    out += upcoming.map(ev => {
+      const diffStr = ev.diff === 1 ? 'Tomorrow' : ev.diff + ' days';
       return `
         <div class="today-event" style="margin-bottom:5px">
-          <div class="today-event-dot" style="background:${ev.color||'#00d18c'};opacity:0.6"></div>
-          <span class="today-event-title" style="color:#7a9e8e;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.title}</span>
-          <span class="today-event-time" style="color:#4a7060;font-size:10px;margin-left:4px;flex-shrink:0">${diffStr}</span>
+          <div class="today-event-dot" style="background:${ev.color||'#00d18c'};opacity:0.7"></div>
+          <span class="today-event-title" style="color:#9abfb0;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.title}</span>
+          <span class="today-event-time" style="color:#f7a94e;font-size:10px;margin-left:6px;flex-shrink:0;font-weight:700">${diffStr}</span>
         </div>
       `;
     }).join('');
   }
 
-  el.innerHTML = html;
+  el.innerHTML = out;
 }
 
 // ════════════════════════════════════════════════════════════
