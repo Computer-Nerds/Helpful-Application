@@ -559,11 +559,11 @@
     .sp-filter-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
     .sp-filter-btn { background:#1a1f1d; border:1px solid #1f2e28; color:#7a9e8e; border-radius:8px; padding:5px 12px; font-size:12px; cursor:pointer; transition:all .1s; }
     .sp-filter-btn.active { background:#00d18c22; border-color:#00d18c; color:#00d18c; }
-    .sp-word-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
-    .sp-word-card { background:#1a1f1d; border:1px solid #1f2e28; border-radius:12px; padding:14px; cursor:pointer; transition:all .15s; }
+    .sp-word-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; padding-bottom:20px; }
+    .sp-word-card { background:#161c19; border:2px solid #2a4035; border-radius:12px; padding:14px 14px 12px; cursor:pointer; transition:all .15s; min-height:80px; }
     .sp-word-card:hover { background:#1f2e28; border-color:#2a3e34; }
-    .sp-word-es { font-size:17px; font-weight:800; color:#e8f0ed; }
-    .sp-word-en { font-size:12px; color:#7a9e8e; margin-top:3px; }
+    .sp-word-es { font-size:18px; font-weight:900; color:#ffffff; letter-spacing:-0.2px; }
+    .sp-word-en { font-size:13px; color:#a0c0b0; margin-top:4px; }
     .sp-word-type { font-size:10px; color:#3a5548; margin-top:5px; text-transform:uppercase; letter-spacing:.5px; }
     /* Word detail modal */
     #sp-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; display:none; align-items:center; justify-content:center; }
@@ -580,8 +580,8 @@
     .sp-modal-speak-btn:hover { background:#00d18c33; }
     /* Grammar tab */
     .sp-section-card { background:#1a1f1d; border:1px solid #1f2e28; border-radius:14px; padding:18px; margin-bottom:14px; }
-    .sp-section-title { font-size:15px; font-weight:800; color:#00d18c; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
-    .sp-section-body { font-size:13px; color:#9ab8a8; line-height:1.7; }
+    .sp-section-title { font-size:15px; font-weight:800; color:#00d18c; margin-bottom:10px; display:flex; align-items:center; gap:8px; letter-spacing:-0.2px; }
+    .sp-section-body { font-size:13px; color:#b0ccbe; line-height:1.8; } .sp-section-body strong { color:#e8f0ed; } .sp-section-body em { color:#00d18c; font-style:normal; } .sp-section-body p { margin:8px 0; }
     .sp-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
     .sp-table th { color:#00d18c; font-weight:700; padding:6px 10px; border-bottom:1px solid #1f2e28; text-align:left; }
     .sp-table td { padding:6px 10px; border-bottom:1px solid #111712; color:#9ab8a8; }
@@ -1704,12 +1704,13 @@
           <div id="sp-vocab-pane">
             <div class="sp-search-row">
               <input class="sp-search" id="sp-search" placeholder="Search words..." oninput="spRenderVocab()">
+              <span id="sp-word-count" style="color:#4a7060;font-size:12px;white-space:nowrap;align-self:center;padding:0 4px"></span>
             </div>
             <div class="sp-filter-btns" id="sp-filters"></div>
             <div class="sp-word-grid" id="sp-word-grid"></div>
           </div>
           <!-- Grammar tab content -->
-          <div id="sp-grammar-pane" style="display:none"></div>
+          <div id="sp-grammar-pane" style="display:none;padding-bottom:20px"></div>
         </div>
       </div>
     </div>
@@ -5191,11 +5192,10 @@ function spSetRank(id, rank) {
 
 // ── Init ──
 function spanishInit() {
-  spSetTab('vocab');
-  spRenderFilters();
-  spRenderVocab();
-  spRenderGrammar();
-  // show FAB when on vocab tab
+  try { spSetTab('vocab'); } catch(e) { console.error('spSetTab',e); }
+  try { spRenderFilters(); } catch(e) { console.error('spRenderFilters',e); }
+  try { spRenderVocab(); } catch(e) { console.error('spRenderVocab',e); }
+  try { spRenderGrammar(); } catch(e) { console.error('spRenderGrammar',e); }
   const fab = document.getElementById('sp-add-btn');
   if(fab) fab.classList.add('visible');
 }
@@ -5255,6 +5255,8 @@ function spRenderVocab() {
     return rd !== 0 ? rd : a.es.localeCompare(b.es);
   });
   const el = document.getElementById('sp-word-grid');
+  const countEl = document.getElementById('sp-word-count');
+  if(countEl) countEl.textContent = words.length + ' word' + (words.length!==1?'s':'');
   if(!words.length){el.innerHTML='<div style="color:#3a5548;padding:20px">No words found.</div>';return;}
   const rank0color = SP_RANK_COLORS[0];
   el.innerHTML = words.map(w => {
