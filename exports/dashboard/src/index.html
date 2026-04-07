@@ -906,10 +906,11 @@
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
-            <div class="section-label" style="margin-bottom:8px">TODAY</div>
-            <div id="today-date-month" style="font-size:12px;color:#7a9e8e;font-weight:600;letter-spacing:0.05em;margin-bottom:2px"></div>
-            <div id="today-date-num"></div>
-            <div id="today-date-day"></div>
+            <div style="text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1a2e24">
+              <div id="today-date-month" style="font-size:11px;color:#7a9e8e;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px"></div>
+              <div id="today-date-num" style="font-size:48px;font-weight:900;color:#e8f0ed;line-height:1"></div>
+              <div id="today-date-day" style="font-size:12px;color:#7a9e8e;margin-top:3px"></div>
+            </div>
             <div id="today-events"></div>
             <div id="today-nav-hint">Click to open calendar →</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
@@ -988,6 +989,16 @@
           <!-- Fitness Card -->
           <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+
+          <!-- Money Graph Card -->
+          <div id="home-money-graph-card" onclick="setPage('money')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:220px;position:relative">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
+            <div class="card-click-shield"></div>
+            <div id="home-money-graph-content"></div>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          </div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div id="home-fitness-content"></div>
@@ -1401,8 +1412,11 @@
       <div id="fit-add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center">
         <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:14px;padding:24px;width:min(92vw,380px);display:flex;flex-direction:column;gap:12px;box-sizing:border-box">
           <div style="font-size:15px;font-weight:700;color:#e8f0ed">Log Food</div>
-          <input id="fit-modal-name" placeholder="Food name (e.g. Chicken Breast)"
+          <input id="fit-modal-name" placeholder="Food name (e.g. Chicken Breast)" list="fit-food-lib-list"
+            autocomplete="off"
+            oninput="fitFillFromLib(this.value)"
             style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+          <datalist id="fit-food-lib-list"></datalist>
           <div style="display:flex;gap:8px">
             <div style="flex:1;display:flex;flex-direction:column;gap:4px">
               <label style="font-size:11px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.5px">Calories</label>
@@ -2379,7 +2393,7 @@ function setPage(p) {
     renderPlannerSidebar();
     if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
-  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); fitRenderHomeFitnessCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }); }
+  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); fitRenderHomeFitnessCard(); renderMoneyGraphCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }); }
   if (p === 'money') { if(typeof monInit==='function') monInit(); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
@@ -2623,7 +2637,6 @@ function renderTodayCard() {
   let out = '';
 
   // ── TODAY section — styled like upcoming boxes ──
-  out += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:6px">TODAY</div>';
   if (!todayEvents.length) {
     out += '<div style="font-size:12px;color:#4a7060;font-style:italic;margin-bottom:6px">Nothing scheduled</div>';
   } else {
@@ -5097,6 +5110,8 @@ window.mathGoBackToHub = function(){
 renderHomeDailys();
 renderHomeProjects();
 renderTodayCard();
+try { fitRenderHomeFitnessCard(); } catch(e) {}
+try { renderMoneyGraphCard(); } catch(e) {}
 chessInit();
 // wordleRenderMini() is called after wordle vars init below
 const _cv=document.getElementById('page-chess'); if(_cv&&_cv.querySelector('#chess-view')) _cv.querySelector('#chess-view').addEventListener('click',()=>{},true);
@@ -7231,11 +7246,39 @@ function fitOpenAddModal() {
   document.getElementById('fit-modal-protein').value = '';
   document.getElementById('fit-modal-carbs').value   = '';
   document.getElementById('fit-modal-fat').value     = '';
+  fitRenderLibDropdown();
   document.getElementById('fit-add-modal').style.display = 'flex';
   setTimeout(function() { document.getElementById('fit-modal-name').focus(); }, 50);
 }
 
 // ── FOOD ─────────────────────────────────────
+function fitGetFoodLib() { try { return JSON.parse(localStorage.getItem('fitFoodLib')||'[]'); } catch(e) { return []; } }
+function fitSaveFoodLib(lib) { localStorage.setItem('fitFoodLib', JSON.stringify(lib)); }
+function fitAddToLib(item) {
+  var lib = fitGetFoodLib();
+  var exists = lib.find(function(x){ return x.name.toLowerCase()===item.name.toLowerCase(); });
+  if (!exists) { lib.unshift({name:item.name,cal:item.cal,protein:item.protein,carbs:item.carbs,fat:item.fat}); }
+  else { lib = lib.filter(function(x){ return x.name.toLowerCase()!==item.name.toLowerCase(); }); lib.unshift({name:item.name,cal:item.cal,protein:item.protein,carbs:item.carbs,fat:item.fat}); }
+  fitSaveFoodLib(lib);
+}
+function fitFillFromLib(name) {
+  var lib = fitGetFoodLib();
+  var item = lib.find(function(x){ return x.name===name; });
+  if (!item) return;
+  document.getElementById('fit-modal-cal').value     = item.cal||'';
+  document.getElementById('fit-modal-protein').value = item.protein||'';
+  document.getElementById('fit-modal-carbs').value   = item.carbs||'';
+  document.getElementById('fit-modal-fat').value     = item.fat||'';
+}
+function fitRenderLibDropdown() {
+  var lib = fitGetFoodLib();
+  var dd = document.getElementById('fit-food-lib-list');
+  if (!dd) return;
+  dd.innerHTML = '';
+  lib.forEach(function(item) {
+    var opt = document.createElement('option'); opt.value = item.name; dd.appendChild(opt);
+  });
+}
 function fitSaveFood() {
   var name = document.getElementById('fit-modal-name').value.trim();
   if (!name) return;
@@ -7243,9 +7286,11 @@ function fitSaveFood() {
   var protein = parseFloat(document.getElementById('fit-modal-protein').value) || 0;
   var carbs   = parseFloat(document.getElementById('fit-modal-carbs').value)   || 0;
   var fat     = parseFloat(document.getElementById('fit-modal-fat').value)     || 0;
+  var item = { id:'f'+Date.now(), name:name, cal:cal, protein:protein, carbs:carbs, fat:fat, time:Date.now() };
   var arr = fitLoadFood();
-  arr.push({ id:'f'+Date.now(), name:name, cal:cal, protein:protein, carbs:carbs, fat:fat, time:Date.now() });
+  arr.push(item);
   fitSaveFood2(arr);
+  fitAddToLib(item);
   document.getElementById('fit-add-modal').style.display = 'none';
   fitRenderFood();
   fitRenderHomeFitnessCard();
@@ -7765,7 +7810,7 @@ function monRenderTransactions() {
   list.innerHTML = txs.map(tx => {
     var isInc = tx.type==='income';
     var color = isInc ? '#00d18c' : '#e05c5c';
-    return `<div style="display:flex;align-items:center;gap:10px;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 12px">
+    return `<div style="display:flex;align-items:center;gap:8px;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 12px">
       <div style="width:4px;align-self:stretch;border-radius:2px;background:${color};flex-shrink:0"></div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:700;color:#e8f0ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tx.desc||'(no description)'}</div>
@@ -7774,6 +7819,7 @@ function monRenderTransactions() {
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:14px;font-weight:900;color:${color}">${isInc?'+':'-'}${monFmt(tx.amount)}</div>
       </div>
+      <button onclick="monOpenEdit('${tx.id}')" style="background:none;border:none;color:#4a7060;font-size:13px;cursor:pointer;padding:0 2px;line-height:1" title="Edit">✏️</button>
       <button onclick="monDeleteTx('${tx.id}')" style="background:none;border:none;color:#4a7060;font-size:16px;cursor:pointer;padding:0 2px;line-height:1" title="Delete">×</button>
     </div>`;
   }).join('');
@@ -7840,6 +7886,25 @@ function monRenderAccounts() {
 window.monDeleteTx = function(id) {
   var d = monGetData(); d.transactions = d.transactions.filter(t=>t.id!==id); monSave(d); monRenderTransactions();
 };
+window.monOpenEdit = function(id) {
+  var d = monGetData();
+  var tx = d.transactions.find(t=>t.id===id);
+  if (!tx) return;
+  monEditId = id;
+  monCurrentType = tx.type;
+  monSetType(tx.type);
+  document.getElementById('mon-inp-desc').value   = tx.desc||'';
+  document.getElementById('mon-inp-amount').value = tx.amount||'';
+  document.getElementById('mon-inp-date').value   = tx.date||'';
+  var catSel = document.getElementById('mon-inp-cat');
+  catSel.innerHTML = '<option value="">Category (optional)</option>' + d.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  catSel.value = tx.category||'';
+  var accSel = document.getElementById('mon-inp-account');
+  accSel.innerHTML = '<option value="">Account (optional)</option>' + d.accounts.map(a=>`<option value="${a.name}">${a.name}</option>`).join('');
+  accSel.value = tx.account||'';
+  document.getElementById('mon-modal-title').textContent = 'Edit Transaction';
+  document.getElementById('mon-modal').style.display='flex';
+};
 window.monDeleteCat = function(id) {
   var d = monGetData(); d.categories = d.categories.filter(c=>c.id!==id); monSave(d); monRenderBudget();
 };
@@ -7903,10 +7968,16 @@ window.monModalSave = function() {
   var acc    = document.getElementById('mon-inp-account').value;
   if (!desc || isNaN(amount) || amount<=0 || !date) { alert('Please fill in description, amount, and date.'); return; }
   var d = monGetData();
-  d.transactions.push({id:Date.now()+'', type:monCurrentType, desc:desc, amount:amount, date:date, category:cat, account:acc});
+  if (monEditId) {
+    d.transactions = d.transactions.map(t => t.id===monEditId ? {id:monEditId,type:monCurrentType,desc:desc,amount:amount,date:date,category:cat,account:acc} : t);
+    monEditId = null;
+  } else {
+    d.transactions.push({id:Date.now()+'', type:monCurrentType, desc:desc, amount:amount, date:date, category:cat, account:acc});
+  }
   monSave(d);
   monModalClose();
   monRenderTransactions();
+  try { renderMoneyGraphCard(); } catch(e) {}
 };
 
 // Init when money page is opened
@@ -7916,6 +7987,64 @@ window.monInit = function() {
 
 })();
 
+
+// ═══════════════════════════════════════════════════════════════
+//  MONEY GRAPH CARD (home dashboard)
+// ═══════════════════════════════════════════════════════════════
+function renderMoneyGraphCard() {
+  var el = document.getElementById('home-money-graph-content');
+  if (!el) return;
+  var d = (function(){ try { return JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); } catch(e){ return {transactions:[],categories:[],accounts:[]}; }})();
+
+  var now = new Date();
+  // Build last 6 months of income/expense data
+  var months = [];
+  for (var i = 5; i >= 0; i--) {
+    var d2 = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var key = d2.getFullYear()+'-'+String(d2.getMonth()+1).padStart(2,'0');
+    var label = d2.toLocaleDateString('en-US',{month:'short'});
+    var inc = 0, exp = 0;
+    d.transactions.forEach(function(t) {
+      if (!t.date || !t.date.startsWith(key)) return;
+      if (t.type==='income')  inc += t.amount;
+      if (t.type==='expense') exp += t.amount;
+    });
+    months.push({key:key, label:label, inc:inc, exp:exp});
+  }
+
+  var maxVal = Math.max.apply(null, months.map(function(m){ return Math.max(m.inc, m.exp); })) || 1;
+  var thisMonth = months[months.length-1];
+  var net = thisMonth.inc - thisMonth.exp;
+  var netColor = net >= 0 ? '#00d18c' : '#e05c5c';
+  var netSign  = net >= 0 ? '+' : '';
+
+  function fmtShort(n) { return n >= 1000 ? '$'+(n/1000).toFixed(1)+'k' : '$'+Math.round(n); }
+  function barH(v) { return Math.max(3, Math.round((v/maxVal)*54)); }
+
+  var barsHtml = months.map(function(m, idx) {
+    var isNow = idx === 5;
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">' +
+      '<div style="display:flex;align-items:flex-end;gap:2px;height:54px">' +
+        '<div style="width:7px;border-radius:3px 3px 0 0;background:#00d18c;opacity:'+(isNow?1:0.45)+';height:'+barH(m.inc)+'px" title="Income '+fmtShort(m.inc)+'"></div>' +
+        '<div style="width:7px;border-radius:3px 3px 0 0;background:#e05c5c;opacity:'+(isNow?1:0.45)+';height:'+barH(m.exp)+'px" title="Expenses '+fmtShort(m.exp)+'"></div>' +
+      '</div>' +
+      '<div style="font-size:9px;color:'+(isNow?'#e8f0ed':'#4a7060')+';font-weight:'+(isNow?700:400)+'">' + m.label + '</div>' +
+    '</div>';
+  }).join('');
+
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+      '<div class="section-label">SPENDING</div>' +
+      '<div style="font-size:13px;font-weight:900;color:'+netColor+'">' + netSign + fmtShort(net) + '<span style="font-size:9px;font-weight:400;color:#4a7060;margin-left:3px">net</span></div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:flex-end;gap:4px;margin-bottom:8px">' + barsHtml + '</div>' +
+    '<div style="display:flex;align-items:center;gap:12px">' +
+      '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:2px;background:#00d18c"></div><span style="font-size:10px;color:#7a9e8e">Income</span></div>' +
+      '<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:2px;background:#e05c5c"></div><span style="font-size:10px;color:#7a9e8e">Expenses</span></div>' +
+      '<div style="margin-left:auto;font-size:10px;color:#4a7060">this month: <span style="color:#e8f0ed;font-weight:700">'+fmtShort(thisMonth.exp)+'</span></div>' +
+    '</div>';
+}
+
 // ════════════════════════════════════════════════
 //  FREEFORM EDIT MODE
 // ════════════════════════════════════════════════
@@ -7923,7 +8052,7 @@ var editModeActive = false;
 
 var CARD_IDS = [
   'today-card','dailys-card','home-projects','home-wordle-card',
-  'home-fitness-card','home-quote-card','home-music-widget'
+  'home-fitness-card','home-money-graph-card','home-quote-card','home-music-widget'
 ];
 
 // ── Layout persistence ────────────────────────────────────────────
