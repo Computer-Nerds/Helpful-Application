@@ -723,33 +723,31 @@
     }
     body.edit-mode #home-cards > *:hover { outline-color: #00d18c; }
     /* Block card clicks in edit mode; allow only handles */
-    /* Edit mode: full transparent overlay kills ALL clicks on card body */
-    body.edit-mode #home-cards > * { pointer-events: none !important; }
+    /* ── Edit mode ── */
+    /* Step 1: kill pointer events on card and ALL its descendants */
+    body.edit-mode #home-cards > *,
     body.edit-mode #home-cards > * * { pointer-events: none !important; }
-    body.edit-mode #home-cards > * .edit-overlay { pointer-events: auto !important; }
+    /* Step 2: re-enable only the drag bar, resize handle, and scroll toggle */
     body.edit-mode #home-cards > * .card-drag-bar,
     body.edit-mode #home-cards > * .card-drag-bar *,
     body.edit-mode #home-cards > * .card-resize-handle,
-    body.edit-mode #home-cards > * .card-resize-handle * {
+    body.edit-mode #home-cards > * .card-resize-handle *,
+    body.edit-mode #home-cards > * .card-scroll-toggle {
       pointer-events: auto !important;
     }
-    /* Edit overlay: invisible full-size cover */
-    .edit-overlay {
-      display: none;
-      position: absolute; inset: 0; z-index: 20;
-      cursor: default;
-    }
-    body.edit-mode .edit-overlay { display: block; }
+    /* Edit overlay: NOT used for pointer blocking anymore — removed.
+       Blocking is handled purely by pointer-events CSS above. */
+    .edit-overlay { display: none; }
     /* Cards default: no scrollbar */
     #home-cards > * { overflow: hidden; }
-    /* Scroll toggle button (shown in edit mode) */
+    /* Scroll toggle button */
     .card-scroll-toggle {
       display: none;
       position: absolute; top: 4px; right: 28px;
-      background: rgba(0,209,140,0.15); border: 1px solid rgba(0,209,140,0.35);
+      background: rgba(0,209,140,0.18); border: 1px solid rgba(0,209,140,0.4);
       border-radius: 4px; color: #00d18c; font-size: 9px; font-weight: 700;
-      padding: 2px 5px; cursor: pointer; z-index: 41; line-height: 1.4;
-      pointer-events: auto !important; user-select: none;
+      padding: 2px 5px; cursor: pointer; z-index: 50; line-height: 1.4;
+      user-select: none;
     }
     body.edit-mode .card-scroll-toggle { display: block; }
     .scroll-enabled { overflow: auto !important; }
@@ -1012,7 +1010,10 @@
 
           <!-- Music Widget -->
           <div id="home-music-widget">
-            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          </div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
@@ -1032,6 +1033,8 @@
               <button class="hmw-btn" onclick="musicNext();hmwSyncState()" title="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
               <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
             <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
@@ -2377,9 +2380,16 @@ async function fetchWeather() {
     });
     const todayKey = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
     // Fill today's hi/low from forecast data (more accurate than current weather endpoint)
+    // Fallback to main.temp_min/max from current weather if today not in forecast
     if(days[todayKey]){
       const td=days[todayKey];
-      document.getElementById('today-hilow').textContent=Math.round(Math.max(...td.temps))+'° / '+Math.round(Math.min(...td.temps))+'°';
+      const hi=Math.round(Math.max(...td.temps));
+      const lo=Math.round(Math.min(...td.temps));
+      document.getElementById('today-hilow').textContent='H:'+hi+'° L:'+lo+'°';
+    } else {
+      const hi=Math.round(cd.main.temp_max);
+      const lo=Math.round(cd.main.temp_min);
+      document.getElementById('today-hilow').textContent='H:'+hi+'° L:'+lo+'°';
     }
     const fcast = Object.entries(days).filter(([k])=>k!==todayKey).slice(0,5).map(([,v])=>{
       // Use noon reading if available; otherwise use the best daytime (worst = cloudy = high id) reading
@@ -7610,21 +7620,8 @@ function toggleEditMode() {
     });
   } else {
     saveLayout();
-    CARD_IDS.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      var savedL = el.style.left, savedT = el.style.top;
-      var savedW = el.style.width, savedH = el.style.height;
-      var clone = el.cloneNode(true);
-      clone.style.left     = savedL;
-      clone.style.top      = savedT;
-      clone.style.width    = savedW;
-      clone.style.height   = savedH;
-      clone.style.overflow = 'auto';
-      el.parentNode.replaceChild(clone, el);
-    });
-    reattachCardClicks();
     applyScrollMap();
+    if (typeof wordleRenderMini === 'function') wordleRenderMini();
   }
 }
 
