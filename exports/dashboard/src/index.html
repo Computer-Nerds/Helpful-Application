@@ -990,6 +990,7 @@
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
+            <div id="home-fitness-content"></div>
             <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
             <div id="home-fitness-content"></div></div>
@@ -2619,21 +2620,27 @@ function renderTodayCard() {
   const todayEvents = allEvents.filter(e => e.date === todayKey);
   const el = document.getElementById('today-events');
 
-  // Today's events
   let out = '';
+
+  // ── TODAY section — styled like upcoming boxes ──
+  out += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:6px">TODAY</div>';
   if (!todayEvents.length) {
-    out += '<div style="font-size:12px;color:#4a7060;margin-bottom:8px">No events today</div>';
+    out += '<div style="font-size:12px;color:#4a7060;font-style:italic;margin-bottom:6px">Nothing scheduled</div>';
   } else {
-    out += todayEvents.map(ev => `
-      <div class="today-event" style="margin-bottom:5px">
-        <div class="today-event-dot" style="background:${ev.color||'#00d18c'}"></div>
-        <span class="today-event-title">${ev.title}</span>
-        ${ev.time?`<span class="today-event-time">${ev.time}</span>`:''}
-      </div>
-    `).join('');
+    out += todayEvents.map(ev => {
+      const c = ev.color || '#00d18c';
+      return `
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+          <div style="background:${c}22;border-left:3px solid ${c};border-radius:6px;padding:5px 8px;flex:1;min-width:0;overflow:hidden">
+            <div style="font-size:11px;font-weight:700;color:${c};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.title}</div>
+            ${ev.time?`<div style="font-size:10px;color:#7a9e8e;margin-top:1px">${ev.time}</div>`:''}
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
-  // Upcoming IMPORTANT events only (e.important === true), future dates, up to 4
+  // ── UPCOMING — important-only, future dates, up to 4 ──
   const today = new Date(); today.setHours(0,0,0,0);
   const upcoming = allEvents
     .filter(e => e.important && new Date(e.date + 'T00:00:00') > today)
@@ -2656,8 +2663,8 @@ function renderTodayCard() {
             <div style="font-size:10px;color:#7a9e8e;margin-top:1px">${dateLabel}${ev.time?' · '+ev.time:''}</div>
           </div>
           <div style="text-align:center;min-width:36px;flex-shrink:0">
-            <div style="font-size:13px;font-weight:900;color:#f7a94e;line-height:1">${ev.diff===0?'🎉':diffStr.split(' ')[0]}</div>
-            <div style="font-size:9px;color:#7a9e8e;line-height:1.3">${ev.diff===0?'Today':ev.diff===1?'':'days'}</div>
+            <div style="font-size:13px;font-weight:900;color:#f7a94e;line-height:1">${diffStr.split(' ')[0]}</div>
+            <div style="font-size:9px;color:#7a9e8e;line-height:1.3">${ev.diff===1?'':'days'}</div>
           </div>
         </div>
       `;
@@ -7610,7 +7617,7 @@ function fitRenderHomeFitnessCard() {
   track.style.cssText = 'height:8px;background:#1a2e24;border-radius:4px;overflow:hidden;margin-bottom:10px';
   var fill = document.createElement('div');
   fill.style.cssText = 'height:100%;width:'+pct+'%;border-radius:4px;background:'+(reached?'#f74e4e':'#00d18c')+';transition:width 0.4s';
-  track.appendChild(fill); card.appendChild(track);
+  track.appendChild(fill); content.appendChild(track);
   // Weight row
   var wRow = document.createElement('div');
   wRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
