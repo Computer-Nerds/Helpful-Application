@@ -1471,6 +1471,10 @@
                 style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
             </div>
           </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+            <input type="checkbox" id="fit-edit-save-lib" style="width:15px;height:15px;accent-color:#00d18c">
+            <span style="font-size:12px;color:#7a9e8e">Save to food library</span>
+          </label>
           <div style="display:flex;gap:10px;margin-top:4px">
             <button onclick="fitUpdateFood()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">Save Changes</button>
             <button onclick="document.getElementById('fit-edit-food-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer">Cancel</button>
@@ -1529,6 +1533,10 @@
                 style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 10px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
             </div>
           </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+            <input type="checkbox" id="fit-modal-save-lib" style="width:15px;height:15px;accent-color:#00d18c">
+            <span style="font-size:12px;color:#7a9e8e">Save to food library</span>
+          </label>
           <div style="display:flex;gap:10px;margin-top:4px">
             <button onclick="fitSaveFood()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">Add Food</button>
             <button onclick="document.getElementById('fit-add-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer">Cancel</button>
@@ -7373,9 +7381,12 @@ function fitSaveFood() {
   var arr = fitLoadFood();
   arr.push(item);
   fitSaveFood2(arr);
-  fitAddToLib(item);
+  // Only save to library if checkbox is ticked
+  var saveLibCb = document.getElementById('fit-modal-save-lib');
+  if (saveLibCb && saveLibCb.checked) { fitAddToLib(item); saveLibCb.checked = false; }
   document.getElementById('fit-add-modal').style.display = 'none';
   fitRenderFood();
+  fitRenderFoodLib();
   fitRenderHomeFitnessCard();
 }
 
@@ -7408,8 +7419,17 @@ function fitUpdateFood() {
   item.carbs   = parseFloat(document.getElementById('fit-edit-food-carbs').value)    || 0;
   item.fat     = parseFloat(document.getElementById('fit-edit-food-fat').value)      || 0;
   fitSaveFood2(arr);
+  // Optionally save updated version to library
+  var saveLibCb = document.getElementById('fit-edit-save-lib');
+  if (saveLibCb && saveLibCb.checked) {
+    var lib = fitGetFoodLib().filter(function(x){ return x.name !== item.name; });
+    lib.push({ name:item.name, cal:item.cal, protein:item.protein, carbs:item.carbs, fat:item.fat });
+    fitSaveFoodLib(lib);
+    saveLibCb.checked = false;
+  }
   document.getElementById('fit-edit-food-modal').style.display = 'none';
   fitRenderFood();
+  fitRenderFoodLib();
   fitRenderHomeFitnessCard();
 }
 
@@ -8028,73 +8048,86 @@ function monRenderAccounts() {
   if (creEl) { creEl.textContent = monFmt(totalCredit); }
   if (nwEl)  { nwEl.textContent = (netWorth<0?'-':'')+monFmt(Math.abs(netWorth)); nwEl.style.color=netWorth<0?'#e05c5c':'#00d18c'; }
 
-  // Bank accounts
+  // ── Bank accounts ──
   if (bankList) {
+    bankList.innerHTML = '';
     if (!d.bankAccounts.length) {
       bankList.innerHTML = '<div style="font-size:13px;color:#4a7060;padding:10px 0;text-align:center">No bank accounts yet.</div>';
     } else {
-      bankList.innerHTML = '';
       d.bankAccounts.forEach(function(acc) {
         var row = document.createElement('div');
         row.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px';
         var info = document.createElement('div');
         info.style.cssText = 'flex:1;min-width:0';
-        info.innerHTML = '<div style="font-size:13px;font-weight:700;color:#e8f0ed">'+acc.bank+'</div>' +
-          '<div style="font-size:11px;color:#7a9e8e;margin-top:2px">'+acc.name+'</div>';
+        info.innerHTML = '<div style="font-size:13px;font-weight:700;color:#e8f0ed">'+acc.bank+'</div><div style="font-size:11px;color:#7a9e8e;margin-top:2px">'+acc.name+'</div>';
         var amtEl = document.createElement('div');
         amtEl.style.cssText = 'font-size:16px;font-weight:900;color:#00d18c;flex-shrink:0';
         amtEl.textContent = monFmt(acc.balance);
         var editBtn = document.createElement('button');
         editBtn.style.cssText = 'background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center;flex-shrink:0';
         editBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-        editBtn.addEventListener('click', function(){ monOpenAddAccount('bank', acc.id); });
+        (function(id){ editBtn.addEventListener('click', function(){ monOpenAddAccount('bank', id); }); })(acc.id);
         var delBtn = document.createElement('button');
         delBtn.style.cssText = 'background:none;border:none;color:#4a7060;font-size:15px;cursor:pointer;padding:0 4px;flex-shrink:0';
-        delBtn.textContent = '×';
-        delBtn.addEventListener('click', function(){ monDeleteBankAcc(acc.id); });
+        delBtn.textContent = '\u00d7';
+        (function(id){ delBtn.addEventListener('click', function(){ monDeleteBankAcc(id); }); })(acc.id);
         row.appendChild(info); row.appendChild(amtEl); row.appendChild(editBtn); row.appendChild(delBtn);
         bankList.appendChild(row);
       });
     }
   }
 
-  // Credit cards
+  // ── Credit cards ──
   if (creditList) {
+    creditList.innerHTML = '';
     if (!d.creditCards.length) {
       creditList.innerHTML = '<div style="font-size:13px;color:#4a7060;padding:10px 0;text-align:center">No credit cards yet.</div>';
     } else {
-      creditList.innerHTML = '';
       d.creditCards.forEach(function(cc) {
-        var used = cc.balance||0;
-        var lim  = cc.limit||0;
+        var used  = cc.balance||0;
+        var lim   = cc.limit||0;
         var avail = Math.max(0, lim - used);
         var pct   = lim > 0 ? Math.min(100, Math.round((used/lim)*100)) : 0;
         var barColor = pct > 80 ? '#f74e4e' : pct > 50 ? '#f7a94e' : '#4e9fd4';
-        var row = document.createElement('div');
-        row.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:12px 14px';
-        row.innerHTML =
-          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">' +
-            '<div style="flex:1;min-width:0">' +
-              '<div style="font-size:13px;font-weight:700;color:#e8f0ed">'+cc.bank+'</div>' +
-              '<div style="font-size:11px;color:#7a9e8e;margin-top:1px">'+cc.name+'</div>' +
-            '</div>' +
-            '<div style="text-align:right;flex-shrink:0">' +
-              '<div style="font-size:12px;color:#e05c5c;font-weight:700">'+monFmt(used)+' used</div>' +
-              '<div style="font-size:10px;color:#7a9e8e">Limit: '+monFmt(lim)+'</div>' +
-            '</div>' +
-            '<button onclick="monOpenAddAccount('credit',''+cc.id+'')" style="background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center">' +
-              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
-            '</button>' +
-            '<button onclick="monDeleteCreditAcc(''+cc.id+'')" style="background:none;border:none;color:#4a7060;font-size:15px;cursor:pointer;padding:0 4px">×</button>' +
-          '</div>' +
-          '<div style="background:#1a2e24;border-radius:4px;height:6px;overflow:hidden">' +
-            '<div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:4px;transition:width 0.3s"></div>' +
-          '</div>' +
-          '<div style="display:flex;justify-content:space-between;margin-top:4px">' +
-            '<span style="font-size:10px;color:#4a7060">'+pct+'% used</span>' +
-            '<span style="font-size:10px;color:#7a9e8e">'+monFmt(avail)+' available</span>' +
-          '</div>';
-        creditList.appendChild(row);
+
+        var card = document.createElement('div');
+        card.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:12px 14px';
+
+        var topRow = document.createElement('div');
+        topRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px';
+
+        var info = document.createElement('div');
+        info.style.cssText = 'flex:1;min-width:0';
+        info.innerHTML = '<div style="font-size:13px;font-weight:700;color:#e8f0ed">'+cc.bank+'</div><div style="font-size:11px;color:#7a9e8e;margin-top:1px">'+cc.name+'</div>';
+
+        var amtInfo = document.createElement('div');
+        amtInfo.style.cssText = 'text-align:right;flex-shrink:0';
+        amtInfo.innerHTML = '<div style="font-size:12px;color:#e05c5c;font-weight:700">'+monFmt(used)+' used</div><div style="font-size:10px;color:#7a9e8e">Limit: '+monFmt(lim)+'</div>';
+
+        var editBtn = document.createElement('button');
+        editBtn.style.cssText = 'background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center;flex-shrink:0';
+        editBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+        (function(id){ editBtn.addEventListener('click', function(){ monOpenAddAccount('credit', id); }); })(cc.id);
+
+        var delBtn = document.createElement('button');
+        delBtn.style.cssText = 'background:none;border:none;color:#4a7060;font-size:15px;cursor:pointer;padding:0 4px;flex-shrink:0';
+        delBtn.textContent = '\u00d7';
+        (function(id){ delBtn.addEventListener('click', function(){ monDeleteCreditAcc(id); }); })(cc.id);
+
+        topRow.appendChild(info); topRow.appendChild(amtInfo); topRow.appendChild(editBtn); topRow.appendChild(delBtn);
+
+        var barTrack = document.createElement('div');
+        barTrack.style.cssText = 'background:#1a2e24;border-radius:4px;height:6px;overflow:hidden';
+        var barFill = document.createElement('div');
+        barFill.style.cssText = 'height:100%;width:'+pct+'%;background:'+barColor+';border-radius:4px;transition:width 0.3s';
+        barTrack.appendChild(barFill);
+
+        var barLabels = document.createElement('div');
+        barLabels.style.cssText = 'display:flex;justify-content:space-between;margin-top:4px';
+        barLabels.innerHTML = '<span style="font-size:10px;color:#4a7060">'+pct+'% used</span><span style="font-size:10px;color:#7a9e8e">'+monFmt(avail)+' available</span>';
+
+        card.appendChild(topRow); card.appendChild(barTrack); card.appendChild(barLabels);
+        creditList.appendChild(card);
       });
     }
   }
