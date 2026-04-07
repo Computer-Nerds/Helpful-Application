@@ -1010,20 +1010,17 @@
 
           <!-- Music Widget -->
           <div id="home-music-widget">
-            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div>
-            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
-            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
-          </div>
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
             <div id="hmw-art-row">
-              <div id="hmw-art">♪</div>
+              <div id="hmw-art">&#9834;</div>
               <div style="flex:1;min-width:0">
                 <div id="hmw-title">No track</div>
-                <div id="hmw-artist">—</div>
+                <div id="hmw-artist">&mdash;</div>
               </div>
-              <button id="hmw-open" onclick="openApp('music')" title="Open Music">Open ↗</button>
+              <button id="hmw-open" onclick="openApp('music')" title="Open Music">Open &#8599;</button>
             </div>
             <div id="hmw-seek" onclick="hmwSeek(event)"><div id="hmw-seek-fill"></div></div>
             <div id="hmw-controls">
@@ -2385,11 +2382,11 @@ async function fetchWeather() {
       const td=days[todayKey];
       const hi=Math.round(Math.max(...td.temps));
       const lo=Math.round(Math.min(...td.temps));
-      document.getElementById('today-hilow').textContent='H:'+hi+'° L:'+lo+'°';
+      document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
     } else {
       const hi=Math.round(cd.main.temp_max);
       const lo=Math.round(cd.main.temp_min);
-      document.getElementById('today-hilow').textContent='H:'+hi+'° L:'+lo+'°';
+      document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
     }
     const fcast = Object.entries(days).filter(([k])=>k!==todayKey).slice(0,5).map(([,v])=>{
       // Use noon reading if available; otherwise use the best daytime (worst = cloudy = high id) reading
@@ -7591,7 +7588,6 @@ function applyLayout(layout) {
     el.style.top      = pos.top    + 'px';
     el.style.width    = pos.width  + 'px';
     el.style.height   = pos.height + 'px';
-    el.style.overflow = 'auto';
     maxBottom = Math.max(maxBottom, pos.top + pos.height + 30);
   });
   container.style.minHeight = maxBottom + 'px';
