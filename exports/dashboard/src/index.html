@@ -751,10 +751,6 @@
       background: rgba(0,209,140,0.08);
     }
     body.edit-mode .card-resize-handle { display: flex; }
-    /* Prevent card onclick from firing during edit mode */
-    body.edit-mode #home-cards > * { pointer-events: none !important; }
-    body.edit-mode .card-drag-bar { pointer-events: all !important; cursor: grab !important; }
-    body.edit-mode .card-resize-handle { pointer-events: all !important; }
     .card-resize-handle:hover { background: rgba(0,209,140,0.2); }
     .card-resize-handle svg { pointer-events: none; }
 
@@ -7677,6 +7673,15 @@ function toggleEditMode() {
   if (!container) return;
 
   if (editModeActive) {
+    // Disable card onclick handlers so clicks don't navigate
+    CARD_IDS.forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      if (el.hasAttribute('onclick')) {
+        el.setAttribute('data-saved-onclick', el.getAttribute('onclick'));
+        el.removeAttribute('onclick');
+      }
+      el.style.cursor = 'default';
+    });
     // Switch to freeform (absolute positioning)
     container.classList.add('freeform');
     var saved = _loadLayout();
@@ -7697,6 +7702,16 @@ function toggleEditMode() {
     });
     _initDragResize(container);
   } else {
+    // Restore card onclick handlers
+    CARD_IDS.forEach(function(id) {
+      var el = document.getElementById(id); if (!el) return;
+      var saved = el.getAttribute('data-saved-onclick');
+      if (saved) {
+        el.setAttribute('onclick', saved);
+        el.removeAttribute('data-saved-onclick');
+      }
+      el.style.cursor = '';
+    });
     // Save layout then restore flex
     _saveLayout(container);
     container.classList.remove('freeform');
@@ -7708,6 +7723,7 @@ function toggleEditMode() {
     _teardownDragResize();
   }
 }
+
 
 // Wire drag bars and resize handles
 var _dragCleanups = [];
