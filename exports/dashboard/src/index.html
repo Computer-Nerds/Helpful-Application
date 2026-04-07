@@ -2374,12 +2374,25 @@ async function fetchWeather() {
       // Prefer midday reading (11am-2pm) for the representative icon
       if(hour>=11&&hour<=14) days[key].noonId=item.weather[0].id;
     });
-    const todayKey = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    // Use /weather endpoint temp_min/temp_max — these are daily hi/lo, never the same
-    // The forecast aggregation can show same hi/lo if only one slot matches today
-    {
-      const hi=Math.round(cd.main.temp_max);
-      const lo=Math.round(cd.main.temp_min);
+    const now = new Date();
+    const todayKey = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const todayYMD = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+    // Collect ALL forecast slots for today using YMD comparison (robust to locale)
+    const todayTemps = fd.list
+      .filter(item => { const d=new Date(item.dt*1000); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()===todayYMD; })
+      .map(item => item.main.temp);
+    // Include current actual temp as a data point
+    todayTemps.push(cd.main.temp);
+    if (todayTemps.length >= 2) {
+      const hi=Math.round(Math.max(...todayTemps));
+      const lo=Math.round(Math.min(...todayTemps));
+      document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
+    } else {
+      // Truly minimal data — use the 24h forecast range from all slots near today
+      const allTemps = fd.list.slice(0,8).map(i=>i.main.temp);
+      allTemps.push(cd.main.temp);
+      const hi=Math.round(Math.max(...allTemps));
+      const lo=Math.round(Math.min(...allTemps));
       document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
     }
     const fcast = Object.entries(days).filter(([k])=>k!==todayKey).slice(0,5).map(([,v])=>{
@@ -7596,6 +7609,7 @@ function initCardLayout() {
 }
 
 // ── Toggle edit mode ─────────────────────────────────────────────
+var _editModeClickBlocker = null;
 function toggleEditMode() {
   editModeActive = !editModeActive;
   document.body.classList.toggle('edit-mode', editModeActive);
@@ -7609,7 +7623,25 @@ function toggleEditMode() {
       var el = document.getElementById(id);
       if (el) { bindDragMove(el); bindResizeHandle(el); }
     });
+    // Block ALL click events on cards in edit mode (capture phase, before they reach onclick)
+    var homeCards = document.getElementById('home-cards');
+    if (homeCards) {
+      _editModeClickBlocker = function(e) {
+        // Allow clicks on drag-bar, resize-handle, scroll-toggle to pass through
+        var t = e.target;
+        if (t.closest('.card-drag-bar') || t.closest('.card-resize-handle') || t.closest('.card-scroll-toggle')) return;
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      homeCards.addEventListener('click', _editModeClickBlocker, true);
+    }
   } else {
+    // Remove the click blocker when leaving edit mode
+    var homeCards = document.getElementById('home-cards');
+    if (homeCards && _editModeClickBlocker) {
+      homeCards.removeEventListener('click', _editModeClickBlocker, true);
+      _editModeClickBlocker = null;
+    }
     saveLayout();
     applyScrollMap();
     if (typeof wordleRenderMini === 'function') wordleRenderMini();
