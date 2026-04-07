@@ -1234,6 +1234,24 @@
             </div>
             <!-- Progress display -->
             <div id="bud-goal-progress"></div>
+
+          <!-- ── Savings Goal ── -->
+          <div style="border-top:1px solid #1a2e24;padding-top:16px;margin-top:4px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div style="font-size:12px;font-weight:800;color:#4e8ef7;text-transform:uppercase;letter-spacing:0.06em">💰 Savings Goal</div>
+              <div style="display:flex;gap:6px">
+                <button id="sav-goal-tab-monthly" onclick="monSetSavGoalTab('monthly')" style="padding:4px 10px;border-radius:16px;border:1px solid #4e8ef7;background:#4e8ef7;color:#fff;font-size:11px;font-weight:700;cursor:pointer">Month</button>
+                <button id="sav-goal-tab-sixmonth" onclick="monSetSavGoalTab('sixmonth')" style="padding:4px 10px;border-radius:16px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:11px;font-weight:700;cursor:pointer">6 Mo</button>
+                <button id="sav-goal-tab-yearly" onclick="monSetSavGoalTab('yearly')" style="padding:4px 10px;border-radius:16px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:11px;font-weight:700;cursor:pointer">Year</button>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+              <input id="sav-goal-input" type="number" min="0" placeholder="Set savings target ($)&#x2026;"
+                style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
+              <button onclick="monSaveSavGoal()" style="background:#4e8ef7;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">Set</button>
+            </div>
+            <div id="sav-goal-progress"></div>
+          </div>
           </div>
 
           <!-- ── CATEGORIES SUMMARY ── -->
@@ -1474,6 +1492,7 @@
             <div style="display:flex;gap:8px">
               <button id="mon-type-expense" onclick="monSetType('expense')" style="flex:1;padding:7px;border-radius:8px;border:1px solid #e05c5c;background:#e05c5c;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Expense</button>
               <button id="mon-type-income" onclick="monSetType('income')" style="flex:1;padding:7px;border-radius:8px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">Income</button>
+              <button id="mon-type-saving" onclick="monSetType('saving')" style="flex:1;padding:7px;border-radius:8px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">💰 Saving</button>
             </div>
             <!-- Saved templates dropdown -->
             <select id="mon-saved-tx-select" onchange="monFillFromSaved(this.value)"
@@ -8408,7 +8427,7 @@ function fitRenderHomeFitnessCard() {
 // ═══════════════════════════════════════════════════════════════
 (function() {
 
-function monGetData() { try { var d=JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); if(!d.bankAccounts) d.bankAccounts=[]; if(!d.creditCards) d.creditCards=[]; if(!d.budgetGoals) d.budgetGoals={}; if(!d.savedTransactions) d.savedTransactions=[]; return d; } catch(e) { return {transactions:[],categories:[],accounts:[],bankAccounts:[],creditCards:[],budgetGoals:{},savedTransactions:[]}; } }
+function monGetData() { try { var d=JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); if(!d.bankAccounts) d.bankAccounts=[]; if(!d.creditCards) d.creditCards=[]; if(!d.budgetGoals) d.budgetGoals={}; if(!d.savingsGoals) d.savingsGoals={}; if(!d.savedTransactions) d.savedTransactions=[]; return d; } catch(e) { return {transactions:[],categories:[],accounts:[],bankAccounts:[],creditCards:[],budgetGoals:{},savingsGoals:{},savedTransactions:[]}; } }
 function monSave(d) { localStorage.setItem('monData', JSON.stringify(d)); }
 
 var monCurrentType = 'expense';
@@ -8437,7 +8456,7 @@ window.monSetTab = function(tab) {
     else if (tab==='graphs')  { addBtn.style.display='none'; }
   }
   if (tab==='transactions') monRenderTransactions();
-  if (tab==='budget')       { monRenderBudget(); monSetGoalTab(monGoalTab); }
+  if (tab==='budget')       { monRenderBudget(); monSetGoalTab(monGoalTab); monSetSavGoalTab(monSavGoalTab); }
   if (tab==='accounts')     monRenderAccounts();
   if (tab==='graphs')       requestAnimationFrame(function(){ requestAnimationFrame(monRenderGraphs); });
 };
@@ -8473,7 +8492,8 @@ function monRenderTransactions() {
     list.innerHTML = '';
     txs.forEach(function(tx) {
       var isInc = tx.type==='income';
-      var color = isInc ? '#00d18c' : '#e05c5c';
+      var isSav = tx.type==='saving';
+      var color = isInc ? '#00d18c' : isSav ? '#4e8ef7' : '#e05c5c';
       var row = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:center;gap:8px;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 12px';
       var bar = document.createElement('div');
@@ -8483,7 +8503,7 @@ function monRenderTransactions() {
       info.innerHTML = '<div style="font-size:13px;font-weight:700;color:#e8f0ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(tx.desc||'(no description)')+'</div><div style="font-size:11px;color:#4a7060;margin-top:2px">'+tx.date+(tx.category?' · '+tx.category:'')+(tx.account?' · '+tx.account:'')+'</div>';
       var amt = document.createElement('div');
       amt.style.cssText = 'text-align:right;flex-shrink:0;font-size:14px;font-weight:900;color:'+color;
-      amt.textContent = (isInc?'+':'-')+monFmt(tx.amount);
+      amt.textContent = (isInc?'+':isSav?'💰 ':'-')+monFmt(tx.amount);
       var editBtn = document.createElement('button');
       editBtn.style.cssText = 'background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center';
       editBtn.title='Edit';
@@ -8697,6 +8717,72 @@ function monRenderGoalProgress() {
     '<div style="background:#0f1f17;border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">' +
       '<span style="font-size:12px;color:#7a9e8e">Income this period</span>' +
       '<span style="font-size:14px;font-weight:700;color:#00d18c">+' + monFmt(totalIncome) + '</span>' +
+    '</div>';
+}
+
+
+// ─── Savings Goal Functions ──────────────────────────────────
+var monSavGoalTab = 'monthly';
+
+window.monSetSavGoalTab = function(tab) {
+  monSavGoalTab = tab;
+  ['monthly','sixmonth','yearly'].forEach(function(t) {
+    var btn = document.getElementById('sav-goal-tab-'+t);
+    if (!btn) return;
+    btn.style.background  = t===tab ? '#4e8ef7' : '#1a2e24';
+    btn.style.color       = t===tab ? '#fff'    : '#7a9e8e';
+    btn.style.borderColor = t===tab ? '#4e8ef7' : '#1f3a2a';
+  });
+  var d = monGetData();
+  var inp = document.getElementById('sav-goal-input');
+  if (inp) inp.value = (d.savingsGoals[tab] || '');
+  monRenderSavGoalProgress();
+};
+
+window.monSaveSavGoal = function() {
+  var val = parseFloat(document.getElementById('sav-goal-input').value);
+  if (isNaN(val) || val <= 0) { alert('Enter a valid dollar amount.'); return; }
+  var d = monGetData();
+  d.savingsGoals[monSavGoalTab] = val;
+  monSave(d);
+  monRenderSavGoalProgress();
+};
+
+function monRenderSavGoalProgress() {
+  var container = document.getElementById('sav-goal-progress');
+  if (!container) return;
+  var d = monGetData();
+  var goal = d.savingsGoals[monSavGoalTab] || 0;
+  var range = monGetGoalDateRange(monSavGoalTab);
+  var savings = d.transactions.filter(function(t) {
+    return t.type==='saving' && t.date && t.date >= range.start && t.date <= range.end;
+  });
+  var totalSaved = savings.reduce(function(s,t){ return s+t.amount; }, 0);
+  if (!goal) {
+    container.innerHTML = '<div style="font-size:12px;color:#4a7060;text-align:center;padding:8px 0">No savings target set. Enter an amount above and hit Set.</div>';
+    return;
+  }
+  var pct = Math.min(100, Math.round((totalSaved/goal)*100));
+  var remaining = goal - totalSaved;
+  var reached = totalSaved >= goal;
+  var barColor = reached ? '#00d18c' : pct>=80 ? '#7ab4ff' : '#4e8ef7';
+  var statusMsg, statusColor;
+  if (reached) { statusMsg = '🎉 Goal reached! '+monFmt(totalSaved)+' saved'; statusColor='#00d18c'; }
+  else if (pct>=50) { statusMsg = '💪 Halfway — '+monFmt(remaining)+' to go'; statusColor='#7ab4ff'; }
+  else { statusMsg = '🚀 '+monFmt(remaining)+' still to save'; statusColor='#7a9e8e'; }
+  container.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">'+
+      '<div><div style="font-size:11px;color:#7a9e8e;margin-bottom:2px">SAVED '+range.label.toUpperCase()+'</div>'+
+      '<div style="font-size:22px;font-weight:900;color:#4e8ef7">'+monFmt(totalSaved)+'</div></div>'+
+      '<div style="text-align:right"><div style="font-size:11px;color:#7a9e8e;margin-bottom:2px">TARGET</div>'+
+      '<div style="font-size:22px;font-weight:900;color:#7a9e8e">'+monFmt(goal)+'</div></div>'+
+    '</div>'+
+    '<div style="height:12px;background:#1a2e24;border-radius:6px;overflow:hidden;margin-bottom:8px">'+
+      '<div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:6px;transition:width 0.4s"></div>'+
+    '</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center">'+
+      '<span style="font-size:11px;color:#7a9e8e">'+pct+'% of target</span>'+
+      '<span style="font-size:12px;font-weight:700;color:'+statusColor+'">'+statusMsg+'</span>'+
     '</div>';
 }
 
@@ -9093,8 +9179,10 @@ window.monSetType = function(type) {
   monCurrentType = type;
   var eb = document.getElementById('mon-type-expense');
   var ib = document.getElementById('mon-type-income');
+  var sv = document.getElementById('mon-type-saving');
   if (eb) { eb.style.background=type==='expense'?'#e05c5c':'#1a2e24'; eb.style.color=type==='expense'?'#fff':'#7a9e8e'; eb.style.border=type==='expense'?'1px solid #e05c5c':'1px solid #1f3a2a'; }
   if (ib) { ib.style.background=type==='income'?'#00d18c':'#1a2e24'; ib.style.color=type==='income'?'#0a1a12':'#7a9e8e'; ib.style.border=type==='income'?'1px solid #00d18c':'1px solid #1f3a2a'; }
+  if (sv) { sv.style.background=type==='saving'?'#4e8ef7':'#1a2e24'; sv.style.color=type==='saving'?'#fff':'#7a9e8e'; sv.style.border=type==='saving'?'1px solid #4e8ef7':'1px solid #1f3a2a'; }
 };
 
 window.monOpenAdd = function() {
