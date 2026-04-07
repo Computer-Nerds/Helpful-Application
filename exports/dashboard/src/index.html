@@ -724,8 +724,11 @@
     body.edit-mode #home-cards > *:hover { outline-color: #00d18c; }
     /* Block card clicks in edit mode; allow only handles */
     body.edit-mode #home-cards > * { pointer-events: none !important; }
+    body.edit-mode #home-cards > * * { pointer-events: none !important; }
     body.edit-mode #home-cards > * .card-drag-bar,
-    body.edit-mode #home-cards > * .card-resize-handle {
+    body.edit-mode #home-cards > * .card-drag-bar *,
+    body.edit-mode #home-cards > * .card-resize-handle,
+    body.edit-mode #home-cards > * .card-resize-handle * {
       pointer-events: auto !important;
     }
     .card-resize-handle { z-index: 40 !important; }
@@ -7543,7 +7546,7 @@ function toggleEditMode() {
   var btn   = document.getElementById('home-edit-btn');
   var label = document.getElementById('home-edit-label');
   if (btn)   btn.classList.toggle('active', editModeActive);
-  if (label) label.textContent = editModeActive ? 'Done v' : 'Edit';
+  if (label) label.textContent = editModeActive ? 'Done' : 'Edit';
 
   if (editModeActive) {
     CARD_IDS.forEach(function(id) {
