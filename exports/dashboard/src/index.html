@@ -119,7 +119,7 @@
     #home-cards { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
 
     /* Today card */
-    #today-card { background: #1a1f1d; border: 1px solid #1f2e28; border-radius: 14px; padding: 20px; min-width: 160px; max-width: 200px; cursor: pointer; }
+    #today-card { background: #1a1f1d; border: 1px solid #1f2e28; border-radius: 14px; padding: 20px; min-width: 160px; cursor: pointer; }
     #today-card:hover { border-color: #2a3e34; }
     #today-date-num { font-size: 44px; font-weight: 800; color: #e8f0ed; line-height: 1; }
     #today-date-day { font-size: 12px; color: #7a9e8e; margin-top: 2px; }
@@ -901,7 +901,8 @@
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
-            <div class="section-label" style="margin-bottom:12px">TODAY</div>
+            <div class="section-label" style="margin-bottom:8px">TODAY</div>
+            <div id="today-date-month" style="font-size:12px;color:#7a9e8e;font-weight:600;letter-spacing:0.05em;margin-bottom:2px"></div>
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
             <div id="today-events"></div>
@@ -2323,6 +2324,8 @@ function tickClock() {
   if (todayNum) {
     todayNum.textContent = n.getDate();
     document.getElementById('today-date-day').textContent = n.toLocaleDateString('en-US', { weekday:'long' });
+    const todayMonth = document.getElementById('today-date-month');
+    if (todayMonth) todayMonth.textContent = n.toLocaleDateString('en-US', { month:'long' });
   }
 }
 tickClock(); setInterval(tickClock, 1000);
@@ -2546,15 +2549,23 @@ function renderTodayCard() {
     .slice(0, 4);
 
   if (upcoming.length) {
-    out += '<div style="border-top:1px solid #1a2e24;margin:7px 0 6px"></div>';
-    out += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:5px">UPCOMING</div>';
+    out += '<div style="border-top:1px solid #1a2e24;margin:8px 0 7px"></div>';
+    out += '<div style="font-size:10px;font-weight:700;color:#4a7060;letter-spacing:0.06em;margin-bottom:6px">UPCOMING</div>';
     out += upcoming.map(ev => {
+      const c = ev.color || '#00d18c';
       const diffStr = ev.diff === 1 ? 'Tomorrow' : ev.diff + ' days';
+      const evDate = new Date(ev.date+'T00:00:00');
+      const dateLabel = evDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
       return `
-        <div class="today-event" style="margin-bottom:5px">
-          <div class="today-event-dot" style="background:${ev.color||'#00d18c'};opacity:0.7"></div>
-          <span class="today-event-title" style="color:#9abfb0;font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ev.title}</span>
-          <span class="today-event-time" style="color:#f7a94e;font-size:10px;margin-left:6px;flex-shrink:0;font-weight:700">${diffStr}</span>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+          <div style="background:${c}22;border-left:3px solid ${c};border-radius:6px;padding:5px 8px;flex:1;min-width:0;overflow:hidden">
+            <div style="font-size:11px;font-weight:700;color:${c};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.title}</div>
+            <div style="font-size:10px;color:#7a9e8e;margin-top:1px">${dateLabel}${ev.time?' · '+ev.time:''}</div>
+          </div>
+          <div style="text-align:center;min-width:36px;flex-shrink:0">
+            <div style="font-size:13px;font-weight:900;color:#f7a94e;line-height:1">${ev.diff===0?'🎉':diffStr.split(' ')[0]}</div>
+            <div style="font-size:9px;color:#7a9e8e;line-height:1.3">${ev.diff===0?'Today':ev.diff===1?'':'days'}</div>
+          </div>
         </div>
       `;
     }).join('');
