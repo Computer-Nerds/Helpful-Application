@@ -7675,13 +7675,8 @@ function toggleEditMode() {
   if (!container) return;
 
   if (editModeActive) {
-    // Disable card onclick handlers so clicks don't navigate
     CARD_IDS.forEach(function(id) {
       var el = document.getElementById(id); if (!el) return;
-      if (el.hasAttribute('onclick')) {
-        el.setAttribute('data-saved-onclick', el.getAttribute('onclick'));
-        el.removeAttribute('onclick');
-      }
       el.style.cursor = 'default';
     });
     // Switch to freeform (absolute positioning)
@@ -7704,14 +7699,8 @@ function toggleEditMode() {
     });
     _initDragResize(container);
   } else {
-    // Restore card onclick handlers
     CARD_IDS.forEach(function(id) {
       var el = document.getElementById(id); if (!el) return;
-      var saved = el.getAttribute('data-saved-onclick');
-      if (saved) {
-        el.setAttribute('onclick', saved);
-        el.removeAttribute('data-saved-onclick');
-      }
       el.style.cursor = '';
     });
     // Save layout then restore flex
@@ -7736,6 +7725,13 @@ function _initDragResize(container) {
     var dragBar    = el.querySelector('.card-drag-bar');
     var resizeHdl  = el.querySelector('.card-resize-handle');
 
+    // Block ALL clicks on card when in edit mode (capture phase = fires before inner elements)
+    var blockClick = function(e) {
+      if (editModeActive) { e.stopPropagation(); e.preventDefault(); }
+    };
+    el.addEventListener('click', blockClick, true);
+    _dragCleanups.push(function(){ el.removeEventListener('click', blockClick, true); });
+
     if (dragBar) {
       var onDragDown = function(e) {
         if (!editModeActive) return;
@@ -7749,7 +7745,7 @@ function _initDragResize(container) {
           var bot = parseFloat(el.style.top) + el.offsetHeight + 40;
           if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
         }
-        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
+        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); _saveLayout(container); }
         document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
       };
       dragBar.addEventListener('mousedown', onDragDown);
@@ -7769,7 +7765,7 @@ function _initDragResize(container) {
           var bot = parseFloat(el.style.top||0) + el.offsetHeight + 40;
           if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
         }
-        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); }
+        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); _saveLayout(container); }
         document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
       };
       resizeHdl.addEventListener('mousedown', onResizeDown);
