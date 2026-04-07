@@ -995,7 +995,8 @@
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
             <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
-            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div></div>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="home-fitness-content"></div></div>
 
           <!-- Quote of the Day Card -->
           <div id="home-quote-card">
@@ -1033,8 +1034,6 @@
             <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
-            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this)">SCROLL</button>
-            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
 
         </div>
       </div>
@@ -2376,14 +2375,9 @@ async function fetchWeather() {
       if(hour>=11&&hour<=14) days[key].noonId=item.weather[0].id;
     });
     const todayKey = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    // Fill today's hi/low from forecast data (more accurate than current weather endpoint)
-    // Fallback to main.temp_min/max from current weather if today not in forecast
-    if(days[todayKey]){
-      const td=days[todayKey];
-      const hi=Math.round(Math.max(...td.temps));
-      const lo=Math.round(Math.min(...td.temps));
-      document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
-    } else {
+    // Use /weather endpoint temp_min/temp_max — these are daily hi/lo, never the same
+    // The forecast aggregation can show same hi/lo if only one slot matches today
+    {
       const hi=Math.round(cd.main.temp_max);
       const lo=Math.round(cd.main.temp_min);
       document.getElementById('today-hilow').textContent=hi+'° / '+lo+'°';
@@ -7409,6 +7403,7 @@ function fitInit() {
 function fitRenderHomeFitnessCard() {
   var card = document.getElementById('home-fitness-card');
   if (!card) return;
+  var content = document.getElementById('home-fitness-content') || card;
   var arr      = fitLoadFood();
   var goal     = fitGetGoal();
   var totalCal = arr.reduce(function(s,x) { return s+x.cal; }, 0);
@@ -7419,7 +7414,7 @@ function fitRenderHomeFitnessCard() {
   var exercises = fitLoadExercises();
   var dow      = new Date().getDay();
   var day      = FIT_DAYS[dow];
-  card.innerHTML = '';
+  content.innerHTML = '';
   // Title row with day badge
   var titleRow = document.createElement('div');
   titleRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:10px';
@@ -7430,7 +7425,7 @@ function fitRenderHomeFitnessCard() {
   dayBadge.style.cssText = 'font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:'+(day.rest?'#1a2e24':'rgba(0,209,140,0.15)')+';color:'+(day.rest?'#7a9e8e':'#00d18c')+';border:1px solid '+(day.rest?'#1f3a2a':'#00d18c');
   dayBadge.textContent = day.emoji+' '+day.focus;
   titleRow.appendChild(titleEl); titleRow.appendChild(dayBadge);
-  card.appendChild(titleRow);
+  content.appendChild(titleRow);
   // Calorie bar
   var calRow = document.createElement('div');
   calRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
@@ -7441,7 +7436,7 @@ function fitRenderHomeFitnessCard() {
   calVal.style.cssText = 'font-size:12px;font-weight:700;color:'+(reached?'#f74e4e':'#00d18c');
   calVal.textContent = totalCal+' / '+goal;
   calRow.appendChild(calLabel); calRow.appendChild(calVal);
-  card.appendChild(calRow);
+  content.appendChild(calRow);
   var track = document.createElement('div');
   track.style.cssText = 'height:7px;background:#1a2e24;border-radius:4px;overflow:hidden;margin-bottom:8px';
   var fill = document.createElement('div');
@@ -7457,16 +7452,16 @@ function fitRenderHomeFitnessCard() {
   wVal.style.cssText = 'font-size:13px;font-weight:700;color:#e8f0ed';
   wVal.textContent = latestW;
   wRow.appendChild(wLabel); wRow.appendChild(wVal);
-  card.appendChild(wRow);
+  content.appendChild(wRow);
   // Workout section
   if (!day.rest && exercises.length > 0) {
     var sep = document.createElement('div');
     sep.style.cssText = 'border-top:1px solid #1a2e24;margin:6px 0';
-    card.appendChild(sep);
+    content.appendChild(sep);
     var wTitle = document.createElement('div');
     wTitle.style.cssText = 'font-size:11px;color:#7a9e8e;margin-bottom:5px';
     wTitle.textContent = "Today's exercises ("+exercises.length+")";
-    card.appendChild(wTitle);
+    content.appendChild(wTitle);
     exercises.slice(0,3).forEach(function(ex) {
       var eRow = document.createElement('div');
       eRow.style.cssText = 'display:flex;justify-content:space-between;margin-bottom:3px';
@@ -7478,29 +7473,29 @@ function fitRenderHomeFitnessCard() {
       var parts=[]; if(ex.sets) parts.push(ex.sets+'×'); if(ex.reps) parts.push(ex.reps);
       ed.textContent = parts.join('');
       eRow.appendChild(en); eRow.appendChild(ed);
-      card.appendChild(eRow);
+      content.appendChild(eRow);
     });
     if (exercises.length > 3) {
       var more = document.createElement('div');
       more.style.cssText = 'font-size:11px;color:#7a9e8e;margin-top:2px';
       more.textContent = '+' + (exercises.length-3) + ' more';
-      card.appendChild(more);
+      content.appendChild(more);
     }
   } else if (day.rest) {
     var restMsg = document.createElement('div');
     restMsg.style.cssText = 'font-size:12px;color:#7a9e8e;margin-top:4px';
     restMsg.textContent = '😴 Rest & recover today';
-    card.appendChild(restMsg);
+    content.appendChild(restMsg);
   }
   // Today food items
   if (arr.length > 0) {
     var sep2 = document.createElement('div');
     sep2.style.cssText = 'border-top:1px solid #1a2e24;margin:8px 0 6px';
-    card.appendChild(sep2);
+    content.appendChild(sep2);
     var fTitle = document.createElement('div');
     fTitle.style.cssText = 'font-size:11px;color:#7a9e8e;margin-bottom:5px';
     fTitle.textContent = "Today's food";
-    card.appendChild(fTitle);
+    content.appendChild(fTitle);
     arr.slice(-3).reverse().forEach(function(item) {
       var fRow = document.createElement('div');
       fRow.style.cssText = 'display:flex;justify-content:space-between;margin-bottom:3px';
@@ -7511,13 +7506,13 @@ function fitRenderHomeFitnessCard() {
       fc.style.cssText = 'font-size:12px;font-weight:700;color:#00d18c;margin-left:8px';
       fc.textContent = item.cal+' kcal';
       fRow.appendChild(fn); fRow.appendChild(fc);
-      card.appendChild(fRow);
+      content.appendChild(fRow);
     });
     if (arr.length>3) {
       var more2 = document.createElement('div');
       more2.style.cssText = 'font-size:11px;color:#7a9e8e;margin-top:2px';
       more2.textContent = '+' + (arr.length-3) + ' more';
-      card.appendChild(more2);
+      content.appendChild(more2);
     }
   }
 }
