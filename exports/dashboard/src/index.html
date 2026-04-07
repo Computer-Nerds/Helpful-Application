@@ -121,7 +121,7 @@
     /* Today card */
     #today-card { background: #1a1f1d; border: 1px solid #1f2e28; border-radius: 14px; padding: 20px; min-width: 160px; cursor: pointer; }
     #today-card:hover { border-color: #2a3e34; }
-    #today-date-num { font-size: 44px; font-weight: 800; color: #e8f0ed; line-height: 1; }
+    #today-date-num { font-size: 36px; font-weight: 900; color: #e8f0ed; line-height: 1; }
     #today-date-day { font-size: 12px; color: #7a9e8e; margin-top: 2px; }
     #today-events { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
     .today-event { display: flex; align-items: center; gap: 6px; }
@@ -906,12 +906,16 @@
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
-            <div style="text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1a2e24">
-              <div id="today-date-month" style="font-size:11px;color:#7a9e8e;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px"></div>
-              <div id="today-date-num" style="font-size:48px;font-weight:900;color:#e8f0ed;line-height:1"></div>
-              <div id="today-date-day" style="font-size:12px;color:#7a9e8e;margin-top:3px"></div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <!-- Date pill -->
+              <div style="flex-shrink:0;background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:10px 14px;text-align:center;min-width:54px">
+                <div id="today-date-month" style="font-size:9px;color:#00d18c;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:2px"></div>
+                <div id="today-date-num" style="font-size:36px;font-weight:900;color:#e8f0ed;line-height:1"></div>
+                <div id="today-date-day" style="font-size:9px;color:#7a9e8e;margin-top:4px;letter-spacing:0.04em"></div>
+              </div>
+              <!-- Events -->
+              <div id="today-events" style="flex:1;min-width:0;padding-top:2px"></div>
             </div>
-            <div id="today-events"></div>
             <div id="today-nav-hint">Click to open calendar →</div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
@@ -989,6 +993,12 @@
           <!-- Fitness Card -->
           <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="edit-overlay"></div>
+            <div class="card-click-shield"></div>
+            <div id="home-fitness-content"></div>
+            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          </div>
 
           <!-- Money Graph Card -->
           <div id="home-money-graph-card" onclick="setPage('money')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:220px;position:relative">
@@ -999,12 +1009,6 @@
             <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
-            <div class="edit-overlay"></div>
-            <div class="card-click-shield"></div>
-            <div id="home-fitness-content"></div>
-            <button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
-            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
-            <div id="home-fitness-content"></div></div>
 
           <!-- Quote of the Day Card -->
           <div id="home-quote-card">
@@ -1285,6 +1289,16 @@
         <!-- Food list for today -->
         <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px">Today's Food Log</div>
         <div id="fit-food-list" style="display:flex;flex-direction:column;gap:8px"></div>
+
+        <!-- Saved food library -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid #1a2e24">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:1px">Saved Foods</div>
+            <input id="fit-lib-search" oninput="fitRenderFoodLib()" placeholder="Search…"
+              style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:20px;padding:4px 12px;color:#e8f0ed;font-size:12px;outline:none;width:140px">
+          </div>
+          <div id="fit-lib-list" style="display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto"></div>
+        </div>
       </div>
 
       <!-- WEIGHT TAB -->
@@ -7232,7 +7246,7 @@ function fitSetTab(tab) {
     if (tab === 'workout') addBtn.textContent = '+ Add Exercise';
     if (tab === 'weight')  addBtn.textContent = '+ Log Weight';
   }
-  if (tab === 'food')    fitRenderFood();
+  if (tab === 'food')    { fitRenderFood(); fitRenderFoodLib(); }
   if (tab === 'workout') fitRenderWorkout();
   if (tab === 'weight')  fitRenderWeight();
 }
@@ -7328,6 +7342,64 @@ function fitUpdateFood() {
   document.getElementById('fit-edit-food-modal').style.display = 'none';
   fitRenderFood();
   fitRenderHomeFitnessCard();
+}
+
+function fitRenderFoodLib() {
+  var lib = fitGetFoodLib();
+  var search = (document.getElementById('fit-lib-search')||{value:''}).value.toLowerCase().trim();
+  var filtered = search ? lib.filter(function(x){ return x.name.toLowerCase().includes(search); }) : lib;
+  var el = document.getElementById('fit-lib-list');
+  if (!el) return;
+  el.innerHTML = '';
+  if (!filtered.length) {
+    el.innerHTML = '<div style="color:#4a7060;font-size:12px;font-style:italic;padding:6px 0">'+(lib.length?'No matches.':'No saved foods yet. Log a food to save it here.')+'</div>';
+    return;
+  }
+  filtered.forEach(function(item) {
+    var row = document.createElement('div');
+    row.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px';
+    var info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    var nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:13px;font-weight:700;color:#e8f0ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    nameEl.textContent = item.name;
+    var macroEl = document.createElement('div');
+    macroEl.style.cssText = 'font-size:11px;color:#7a9e8e;margin-top:2px';
+    var parts = [item.cal+' kcal'];
+    if (item.protein) parts.push('P:'+item.protein+'g');
+    if (item.carbs)   parts.push('C:'+item.carbs+'g');
+    if (item.fat)     parts.push('F:'+item.fat+'g');
+    macroEl.textContent = parts.join('  ');
+    info.appendChild(nameEl); info.appendChild(macroEl);
+    // Add to today button
+    var addBtn = document.createElement('button');
+    addBtn.style.cssText = 'background:rgba(0,209,140,0.12);border:1px solid #00d18c;color:#00d18c;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0';
+    addBtn.textContent = '+ Today';
+    addBtn.addEventListener('click', function() {
+      var arr = fitLoadFood();
+      arr.push({ id:'f'+Date.now(), name:item.name, cal:item.cal||0, protein:item.protein||0, carbs:item.carbs||0, fat:item.fat||0, time:Date.now() });
+      fitSaveFood2(arr);
+      fitRenderFood();
+      fitRenderHomeFitnessCard();
+      // Flash feedback
+      addBtn.textContent = '✓ Added!';
+      addBtn.style.background = 'rgba(0,209,140,0.25)';
+      setTimeout(function(){ addBtn.textContent='+ Today'; addBtn.style.background='rgba(0,209,140,0.12)'; }, 1200);
+    });
+    // Delete from library
+    var delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;color:#3a5040;font-size:15px;cursor:pointer;padding:0 4px;flex-shrink:0';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Remove from saved';
+    delBtn.addEventListener('click', function() {
+      var lib2 = fitGetFoodLib().filter(function(x){ return x.name!==item.name; });
+      fitSaveFoodLib(lib2);
+      fitRenderFoodLib();
+      fitRenderLibDropdown();
+    });
+    row.appendChild(info); row.appendChild(addBtn); row.appendChild(delBtn);
+    el.appendChild(row);
+  });
 }
 
 function fitRenderFood() {
@@ -7819,7 +7891,7 @@ function monRenderTransactions() {
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:14px;font-weight:900;color:${color}">${isInc?'+':'-'}${monFmt(tx.amount)}</div>
       </div>
-      <button onclick="monOpenEdit('${tx.id}')" style="background:none;border:none;color:#4a7060;font-size:13px;cursor:pointer;padding:0 2px;line-height:1" title="Edit">✏️</button>
+      <button onclick="monOpenEdit('${tx.id}')" style="background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
       <button onclick="monDeleteTx('${tx.id}')" style="background:none;border:none;color:#4a7060;font-size:16px;cursor:pointer;padding:0 2px;line-height:1" title="Delete">×</button>
     </div>`;
   }).join('');
@@ -7954,11 +8026,12 @@ window.monOpenAdd = function() {
   catSel.innerHTML = '<option value="">Category (optional)</option>' + d.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
   var accSel = document.getElementById('mon-inp-account');
   accSel.innerHTML = '<option value="">Account (optional)</option>' + d.accounts.map(a=>`<option value="${a.name}">${a.name}</option>`).join('');
+  monEditId = null;
   document.getElementById('mon-modal-title').textContent = 'Add Transaction';
   document.getElementById('mon-modal').style.display='flex';
 };
 
-window.monModalClose = function() { document.getElementById('mon-modal').style.display='none'; };
+window.monModalClose = function() { document.getElementById('mon-modal').style.display='none'; monEditId=null; };
 
 window.monModalSave = function() {
   var desc   = document.getElementById('mon-inp-desc').value.trim();
@@ -8292,47 +8365,96 @@ var QUOTES = [
   { text:"I have not failed. I've just found 10,000 ways that won't work.", author:"Thomas Edison" },
   { text:"The mind is everything. What you think you become.", author:"Buddha" },
   { text:"An unexamined life is not worth living.", author:"Socrates" },
-  { text:"Spread love everywhere you go. Let no one ever come to you without leaving happier.", author:"Mother Teresa" },
+  { text:"Spread love everywhere you go.", author:"Mother Teresa" },
   { text:"When you reach the end of your rope, tie a knot in it and hang on.", author:"Franklin D. Roosevelt" },
-  { text:"Always remember that you are absolutely unique. Just like everyone else.", author:"Margaret Mead" },
-  { text:"Do not go where the path may lead, go instead where there is no path and leave a trail.", author:"Ralph Waldo Emerson" },
+  { text:"Always remember that you are absolutely unique.", author:"Margaret Mead" },
+  { text:"Do not go where the path may lead; go instead where there is no path and leave a trail.", author:"Ralph Waldo Emerson" },
   { text:"You will face many defeats in life, but never let yourself be defeated.", author:"Maya Angelou" },
   { text:"The greatest glory in living lies not in never falling, but in rising every time we fall.", author:"Nelson Mandela" },
   { text:"In the end, it's not the years in your life that count. It's the life in your years.", author:"Abraham Lincoln" },
   { text:"Never let the fear of striking out keep you from playing the game.", author:"Babe Ruth" },
   { text:"Life is either a daring adventure or nothing at all.", author:"Helen Keller" },
   { text:"Many of life's failures are people who did not realize how close they were to success when they gave up.", author:"Thomas Edison" },
-  { text:"You have brains in your head. You have feet in your shoes. You can steer yourself in any direction you choose.", author:"Dr. Seuss" },
+  { text:"You have brains in your head. You have feet in your shoes. You can steer yourself any direction you choose.", author:"Dr. Seuss" },
   { text:"If life were predictable it would cease to be life, and be without flavor.", author:"Eleanor Roosevelt" },
   { text:"If you look at what you have in life, you'll always have more.", author:"Oprah Winfrey" },
   { text:"If you set your goals ridiculously high and it's a failure, you will fail above everyone else's success.", author:"James Cameron" },
+  { text:"Life is not measured by the number of breaths we take, but by the moments that take our breath away.", author:"Maya Angelou" },
+  { text:"If you want to live a happy life, tie it to a goal, not to people or things.", author:"Albert Einstein" },
+  { text:"Never let the fear of striking out keep you from playing the game.", author:"Babe Ruth" },
+  { text:"Money and success don't change people; they merely amplify what is already there.", author:"Will Smith" },
+  { text:"Your time is limited, so don't waste it living someone else's life.", author:"Steve Jobs" },
+  { text:"Not how long, but how well you have lived is the main thing.", author:"Seneca" },
+  { text:"If life were predictable, it would cease to be life and be without flavor.", author:"Eleanor Roosevelt" },
+  { text:"The only impossible journey is the one you never begin.", author:"Tony Robbins" },
+  { text:"In this life we cannot do great things. We can only do small things with great love.", author:"Mother Teresa" },
   { text:"It is during our darkest moments that we must focus to see the light.", author:"Aristotle" },
-  { text:"Do not let making a living prevent you from making a life.", author:"John Wooden" },
-  { text:"Spread love everywhere you go.", author:"Mother Teresa" },
-  { text:"When you have a dream, you've got to grab it and never let go.", author:"Carol Burnett" },
-  { text:"Nothing is impossible. The word itself says 'I'm possible!'", author:"Audrey Hepburn" },
-  { text:"You only live once, but if you do it right, once is enough.", author:"Mae West" },
+  { text:"Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", author:"Buddha" },
   { text:"Be yourself; everyone else is already taken.", author:"Oscar Wilde" },
-  { text:"Two roads diverged in a wood, and I took the one less traveled by.", author:"Robert Frost" },
+  { text:"Two roads diverged in a wood, and I took the one less traveled by, and that has made all the difference.", author:"Robert Frost" },
+  { text:"You only live once, but if you do it right, once is enough.", author:"Mae West" },
+  { text:"In three words I can sum up everything I've learned about life: it goes on.", author:"Robert Frost" },
+  { text:"To live is the rarest thing in the world. Most people just exist.", author:"Oscar Wilde" },
+  { text:"Good friends, good books, and a sleepy conscience: this is the ideal life.", author:"Mark Twain" },
+  { text:"The best time to plant a tree was 20 years ago. The second best time is now.", author:"Chinese Proverb" },
+  { text:"An unexamined life is not worth living.", author:"Socrates" },
+  { text:"Spread love everywhere you go. Let no one ever come to you without leaving happier.", author:"Mother Teresa" },
+  { text:"It's not whether you get knocked down; it's whether you get up.", author:"Vince Lombardi" },
+  { text:"We know what we are, but not what we may be.", author:"William Shakespeare" },
+  { text:"Darkness cannot drive out darkness; only light can do that.", author:"Martin Luther King Jr." },
+  { text:"We must accept finite disappointment, but never lose infinite hope.", author:"Martin Luther King Jr." },
+  { text:"The most wasted of days is one without laughter.", author:"E. E. Cummings" },
+  { text:"You've gotta dance like there's nobody watching.", author:"William W. Purkey" },
+  { text:"Yesterday is history, tomorrow is a mystery, today is a gift of God, which is why we call it the present.", author:"Bill Keane" },
+  { text:"I am so clever that sometimes I don't understand a single word of what I am saying.", author:"Oscar Wilde" },
+  { text:"Success is not final, failure is not fatal: it is the courage to continue that counts.", author:"Winston Churchill" },
+  { text:"Happiness depends upon ourselves.", author:"Aristotle" },
+  { text:"Turn your wounds into wisdom.", author:"Oprah Winfrey" },
+  { text:"Change the world by being yourself.", author:"Amy Poehler" },
+  { text:"Every moment is a fresh beginning.", author:"T.S. Eliot" },
+  { text:"Never regret anything that made you smile.", author:"Mark Twain" },
+  { text:"Die with memories, not dreams.", author:"Unknown" },
+  { text:"Aspire to inspire before we expire.", author:"Unknown" },
+  { text:"Everything you can imagine is real.", author:"Pablo Picasso" },
+  { text:"Simplicity is the ultimate sophistication.", author:"Leonardo da Vinci" },
+  { text:"Whatever you do, do it well.", author:"Walt Disney" },
+  { text:"What we think, we become.", author:"Buddha" },
+  { text:"All limitations are self-imposed.", author:"Oliver Wendell Holmes" },
+  { text:"Tough times never last but tough people do.", author:"Robert H. Schuller" },
+  { text:"Problems are not stop signs, they are guidelines.", author:"Robert H. Schuller" },
+  { text:"One day the people that don't even believe in you will tell everyone how they knew you.", author:"Johnny Cash" },
+  { text:"If you tell the truth you don't have to remember anything.", author:"Mark Twain" },
+  { text:"Have enough courage to start and enough heart to finish.", author:"Jessica N. S. Yourko" },
+  { text:"Hate comes from intimidation, love comes from appreciation.", author:"Tyga" },
+  { text:"I could not, at any age, be content to take my place by the fireside and simply look on.", author:"Eleanor Roosevelt" },
+  { text:"The most common way people give up their power is by thinking they don't have any.", author:"Alice Walker" },
+  { text:"The most courageous act is still to think for yourself. Aloud.", author:"Coco Chanel" },
   { text:"I am not afraid of storms, for I am learning how to sail my ship.", author:"Louisa May Alcott" },
-  { text:"I've learned that people will forget what you said, people will forget what you did, but people will never forget how you made them feel.", author:"Maya Angelou" },
-  { text:"Definiteness of purpose is the starting point of all achievement.", author:"W. Clement Stone" },
-  { text:"We generate fears while we sit. We overcome them by action.", author:"Dr. Henry Link" },
-  { text:"Whether you think you can or think you can't, you're right.", author:"Henry Ford" },
-  { text:"Security is mostly a superstition. Life is either a daring adventure or nothing.", author:"Helen Keller" },
-  { text:"The man who has confidence in himself gains the confidence of others.", author:"Hasidic Proverb" },
-  { text:"The only limit to our realization of tomorrow will be our doubts of today.", author:"Franklin D. Roosevelt" },
-  { text:"Creativity is intelligence having fun.", author:"Albert Einstein" },
-  { text:"What lies behind us and what lies before us are tiny matters compared to what lies within us.", author:"Ralph Waldo Emerson" },
-  { text:"You are never too old to set another goal or to dream a new dream.", author:"C.S. Lewis" },
-  { text:"To see what is right and not do it is a lack of courage.", author:"Confucius" },
-  { text:"Reading is to the mind what exercise is to the body.", author:"Joseph Addison" },
+  { text:"A man is great by deeds, not by birth.", author:"Chanakya" },
+  { text:"Do anything, but let it produce joy.", author:"Walt Whitman" },
+  { text:"Whoever is happy will make others happy too.", author:"Anne Frank" },
+  { text:"Do not allow people to dim your shine because they are blinded by it.", author:"Lady Gaga" },
+  { text:"Let your life lightly dance on the edges of time like dew on the tip of a leaf.", author:"Rabindranath Tagore" },
+  { text:"Don't be afraid to give up the good to go for the great.", author:"John D. Rockefeller" },
+  { text:"Believe you can and you're halfway there.", author:"Theodore Roosevelt" },
   { text:"The secret of getting ahead is getting started.", author:"Mark Twain" },
+  { text:"Act as if what you do makes a difference. It does.", author:"William James" },
+  { text:"Success usually comes to those who are too busy to be looking for it.", author:"Henry David Thoreau" },
+  { text:"I find that the harder I work, the more luck I seem to have.", author:"Thomas Jefferson" },
+  { text:"The way to get started is to quit talking and begin doing.", author:"Walt Disney" },
+  { text:"Too many of us are not living our dreams because we are living our fears.", author:"Les Brown" },
+  { text:"Develop an attitude of gratitude, and give thanks for everything that happens to you.", author:"Brian Tracy" },
+  { text:"You don't have to be great to start, but you have to start to be great.", author:"Zig Ziglar" },
+  { text:"A successful man is one who can lay a firm foundation with the bricks others have thrown at him.", author:"David Brinkley" },
+  { text:"No one can make you feel inferior without your consent.", author:"Eleanor Roosevelt" },
   { text:"It always seems impossible until it's done.", author:"Nelson Mandela" },
-  { text:"Don't watch the clock; do what it does. Keep going.", author:"Sam Levenson" },
-  { text:"Keep your face always toward the sunshine, and shadows will fall behind you.", author:"Walt Whitman" },
-  { text:"You do not find the happy life. You make it.", author:"Camilla Eyring Kimball" },
-  { text:"First, have a definite, clear practical ideal — a goal, an objective.", author:"Aristotle" }
+  { text:"When everything seems to be going against you, remember that the airplane takes off against the wind.", author:"Henry Ford" },
+  { text:"Winning isn't everything, but wanting to win is.", author:"Vince Lombardi" },
+  { text:"I am thankful for all of those who said NO to me. It's because of them I did it myself.", author:"Albert Einstein" },
+  { text:"If you're going through hell, keep going.", author:"Winston Churchill" },
+  { text:"Wonder is the beginning of wisdom.", author:"Socrates" },
+  { text:"When the going gets tough, the tough get going.", author:"Joe Kennedy" },
+  { text:"A will finds a way.", author:"Orison Swett Marden" }
 ];
 
 function renderQuoteOfDay() {
