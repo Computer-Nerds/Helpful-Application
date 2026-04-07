@@ -546,69 +546,12 @@
     @keyframes mathShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 80%{transform:translateX(-3px)} }
     @keyframes mathPop { 0%{transform:scale(.4);opacity:0} 80%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
     /* ── SPANISH ── */
-    #spanish-view { flex:1; display:flex; flex-direction:column; min-height:0; overflow:hidden; background:#111312; color:#e8f0ed; }
-    #spanish-topbar { background:#0a0f0d; border-bottom:1px solid #1a2e24; padding:0 20px; height:52px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
-    #spanish-tabs { display:flex; gap:0; border-bottom:1px solid #1a2e24; background:#0d1210; flex-shrink:0; padding:0 20px; }
-    .sp-tab { padding:10px 18px; font-size:13px; font-weight:600; color:#4a7060; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; white-space:nowrap; }
-    .sp-tab.active { color:#00d18c; border-bottom-color:#00d18c; }
-    #spanish-body { flex:1; overflow-y:auto; padding:20px; }
     /* Vocab tab */
-    .sp-search-row { display:flex; gap:10px; margin-bottom:16px; }
-    .sp-search { flex:1; background:#1a1f1d; border:1px solid #1f2e28; color:#e8f0ed; border-radius:10px; padding:10px 14px; font-size:14px; outline:none; }
-    .sp-search:focus { border-color:#00d18c44; }
-    .sp-filter-btns { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
-    .sp-filter-btn { background:#1a1f1d; border:1px solid #1f2e28; color:#7a9e8e; border-radius:8px; padding:5px 12px; font-size:12px; cursor:pointer; transition:all .1s; }
-    .sp-filter-btn.active { background:#00d18c22; border-color:#00d18c; color:#00d18c; }
-    .sp-word-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; padding-bottom:20px; }
-    .sp-word-card { background:#161c19; border:2px solid #2a4035; border-radius:12px; padding:14px 14px 12px; cursor:pointer; transition:all .15s; min-height:80px; }
-    .sp-word-card:hover { background:#1f2e28; border-color:#2a3e34; }
-    .sp-word-es { font-size:18px; font-weight:900; color:#ffffff; letter-spacing:-0.2px; }
-    .sp-word-en { font-size:13px; color:#a0c0b0; margin-top:4px; }
-    .sp-word-type { font-size:10px; color:#3a5548; margin-top:5px; text-transform:uppercase; letter-spacing:.5px; }
     /* Word detail modal */
-    #sp-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; display:none; align-items:center; justify-content:center; }
-    #sp-modal-overlay.open { display:flex; }
-    #sp-modal { background:#151a17; border:1px solid #1f2e28; border-radius:20px; padding:32px; max-width:420px; width:90%; position:relative; }
-    #sp-modal-close { position:absolute; top:14px; right:14px; background:none; border:none; color:#4a7060; font-size:20px; cursor:pointer; }
-    #sp-modal-es { font-size:36px; font-weight:900; color:#e8f0ed; }
-    #sp-modal-pronun { font-size:15px; color:#7a9e8e; margin:4px 0 2px; font-style:italic; }
-    #sp-modal-type-badge { display:inline-block; background:#00d18c22; color:#00d18c; border-radius:6px; padding:2px 10px; font-size:11px; font-weight:700; letter-spacing:.5px; margin-bottom:12px; }
-    #sp-modal-en { font-size:18px; color:#c8e0d4; margin-bottom:12px; }
-    #sp-modal-example { background:#1a1f1d; border-radius:10px; padding:12px 14px; font-size:13px; color:#7a9e8e; line-height:1.6; }
-    #sp-modal-example strong { color:#c8e0d4; }
-    .sp-modal-speak-btn { margin-top:14px; background:#00d18c22; border:1px solid #00d18c44; color:#00d18c; border-radius:10px; padding:8px 18px; font-size:13px; cursor:pointer; width:100%; }
-    .sp-modal-speak-btn:hover { background:#00d18c33; }
     /* Grammar tab */
-    .sp-section-card { background:#1a1f1d; border:1px solid #1f2e28; border-radius:14px; padding:18px; margin-bottom:14px; }
-    .sp-section-title { font-size:15px; font-weight:800; color:#00d18c; margin-bottom:10px; display:flex; align-items:center; gap:8px; letter-spacing:-0.2px; }
-    .sp-section-body { font-size:13px; color:#b0ccbe; line-height:1.8; } .sp-section-body strong { color:#e8f0ed; } .sp-section-body em { color:#00d18c; font-style:normal; } .sp-section-body p { margin:8px 0; }
-    .sp-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
-    .sp-table th { color:#00d18c; font-weight:700; padding:6px 10px; border-bottom:1px solid #1f2e28; text-align:left; }
-    .sp-table td { padding:6px 10px; border-bottom:1px solid #111712; color:#9ab8a8; }
-    .sp-table tr:last-child td { border-bottom:none; }
-    .sp-example { background:#111712; border-left:3px solid #00d18c44; border-radius:4px; padding:8px 12px; margin-top:8px; font-size:12px; color:#7a9e8e; }
-    .sp-example em { color:#c8e0d4; font-style:normal; }
     /* Rank dots */
-    .sp-rank-row { display:flex; gap:5px; margin-top:8px; }
-    .sp-rank-dot { width:11px; height:11px; border-radius:50%; cursor:pointer; transition:all .15s; border:1.5px solid #1f2e28; }
-    .sp-rank-dot:hover { transform:scale(1.25); }
-    .sp-word-card .sp-rank-row { margin-top:6px; }
     /* Add word / edit modal */
-    #sp-edit-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:210; display:none; align-items:center; justify-content:center; }
-    #sp-edit-overlay.open { display:flex; }
-    #sp-edit-modal { background:#151a17; border:1px solid #1f2e28; border-radius:20px; padding:28px; max-width:400px; width:92%; }
-    #sp-edit-modal h3 { margin:0 0 18px; color:#e8f0ed; font-size:16px; }
-    .sp-field { margin-bottom:12px; }
-    .sp-field label { display:block; font-size:12px; color:#7a9e8e; margin-bottom:5px; }
-    .sp-field input, .sp-field select { width:100%; background:#1a1f1d; border:1px solid #1f2e28; color:#e8f0ed; border-radius:10px; padding:9px 12px; font-size:14px; outline:none; box-sizing:border-box; }
-    .sp-field input:focus, .sp-field select:focus { border-color:#00d18c44; }
-    .sp-edit-actions { display:flex; gap:8px; margin-top:16px; }
-    .sp-btn-save { flex:1; background:#00d18c22; border:1px solid #00d18c; color:#00d18c; border-radius:10px; padding:9px; font-size:14px; cursor:pointer; }
-    .sp-btn-cancel { background:#1a1f1d; border:1px solid #1f2e28; color:#7a9e8e; border-radius:10px; padding:9px 16px; font-size:14px; cursor:pointer; }
-    .sp-btn-delete { background:rgba(247,78,78,0.1); border:1px solid #f74e4e44; color:#f74e4e; border-radius:10px; padding:9px 16px; font-size:14px; cursor:pointer; }
     /* Add word FAB */
-    #sp-add-btn { position:fixed; bottom:72px; right:20px; background:#00d18c; color:#000; border:none; border-radius:50%; width:48px; height:48px; font-size:24px; cursor:pointer; display:none; box-shadow:0 4px 16px rgba(0,209,140,.35); z-index:100; }
-    #sp-add-btn.visible { display:flex; align-items:center; justify-content:center; }
     #math-answer-input::-webkit-outer-spin-button,
     #math-answer-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
     #math-answer-input[type=number] { -moz-appearance:textfield; }
@@ -699,60 +642,71 @@
 
     /* Freeform canvas */
     #home-cards.freeform {
-      position:relative !important;
+      position:relative;
       display:block !important;
       min-height:700px;
     }
     #home-cards.freeform > * {
       position:absolute !important;
-      box-sizing:border-box !important;
+      box-sizing:border-box;
       margin:0 !important;
       min-width:0 !important;
       max-width:none !important;
       flex:none !important;
-      overflow:auto !important;
+      overflow:hidden;
     }
-    /* Edit mode outline */
+    /* Normal view: restore saved width but flow naturally */
+    #home-cards:not(.freeform) > * {
+      position:relative !important;
+      left:auto !important; top:auto !important;
+    }
+    /* Edit-mode card styling */
     body.edit-mode #home-cards > * {
-      outline: 2px dashed #2a5040 !important;
+      outline: 2px dashed #2a5040;
+      cursor: default;
+      user-select: none;
     }
     body.edit-mode #home-cards > *:hover {
-      outline-color: #00d18c !important;
+      outline-color: #00d18c;
     }
-    /* ── In-card drag/resize handles ── */
+    /* BLOCK all click-through in edit mode — overlay on card body */
+    .card-click-shield { display:none; }
+    /* In edit mode: kill ALL pointer events on cards, then re-enable only drag+resize */
+    body.edit-mode #home-cards > * {
+      pointer-events: none !important;
+    }
+    body.edit-mode #home-cards > * .card-drag-bar,
+    body.edit-mode #home-cards > * .card-resize-handle {
+      pointer-events: auto !important;
+    }
+    /* Ensure handles are always on top */
+    .card-resize-handle { z-index:40 !important; }
+    .card-drag-bar      { z-index:40 !important; }
+    /* Drag bar at top of each card */
     .card-drag-bar {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      height: 22px;
-      margin: -4px -4px 8px -4px;
-      border-radius: 12px 12px 0 0;
-      background: rgba(0,209,140,0.08);
-      cursor: grab;
-      flex-shrink: 0;
+      display:none;
+      align-items:center; justify-content:center;
+      width:100%; height:20px;
+      cursor:grab; position:absolute; top:0; left:0;
+      z-index:30;
     }
-    body.edit-mode .card-drag-bar { display: flex; }
-    .card-drag-bar:hover { background: rgba(0,209,140,0.18); }
-    .card-drag-bar:active { cursor: grabbing; }
+    .card-drag-bar:active { cursor:grabbing; }
+    body.edit-mode .card-drag-bar { display:flex; }
     .card-drag-bar-dots {
-      width: 28px; height: 3px; border-radius: 2px;
-      background: rgba(0,209,140,0.4); pointer-events: none;
+      width:28px; height:4px; border-radius:2px;
+      background:rgba(0,209,140,0.35);
     }
+    /* Resize handle */
     .card-resize-handle {
-      display: none;
-      align-items: flex-end;
-      justify-content: flex-end;
-      position: absolute;
-      bottom: 4px; right: 4px;
-      width: 20px; height: 20px;
-      cursor: se-resize;
-      border-radius: 0 0 10px 0;
-      padding: 3px;
-      background: rgba(0,209,140,0.08);
+      display:none;
+      position:absolute; bottom:0; right:0;
+      width:18px; height:18px;
+      cursor:se-resize; z-index:30;
+      align-items:flex-end; justify-content:flex-end;
+      padding:3px;
     }
-    body.edit-mode .card-resize-handle { display: flex; }
-    .card-resize-handle:hover { background: rgba(0,209,140,0.2); }
-    .card-resize-handle svg { pointer-events: none; }
+    body.edit-mode .card-resize-handle { display:flex; }
+    .card-resize-handle svg { pointer-events:none; }
 
     /* Quote card */
     #home-quote-card {
@@ -765,6 +719,21 @@
     }
     #home-quote-card .quote-author {
       font-size:11px; color:#4a7060; text-align:right; font-weight:700;
+    }
+
+    /* All home cards: position relative for overlays */
+    #home-cards > * { position: relative; }
+    /* Card content fills available space when resized */
+    #home-cards.freeform #today-card,
+    #home-cards.freeform #dailys-card,
+    #home-cards.freeform #home-projects,
+    #home-cards.freeform #home-wordle-card,
+    #home-cards.freeform #home-countdown-card,
+    #home-cards.freeform #home-fitness-card,
+    #home-cards.freeform #home-quote-card,
+    #home-cards.freeform #home-music-widget {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
     }
 </style>
 </head>
@@ -862,21 +831,24 @@
           <span id="home-edit-label">Edit</span>
         </button>
         <div id="home-cards">
+
           <!-- Today card -->
-          <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')" style="position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="today-card" onclick="setPage('planner');showPlannerSection('calendar')">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">TODAY</div>
             <div id="today-date-num"></div>
             <div id="today-date-day"></div>
             <div id="today-events"></div>
-            <div id="today-nav-hint">Click to open calendar →</div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="today-nav-hint">Click to open calendar →</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Dailys card -->
-          <div id="dailys-card" style="position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="dailys-card">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:14px">Dailys</div>
+
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>♟️</span> Chess</div>
@@ -885,6 +857,7 @@
               <div class="prog-track"><div class="prog-fill" id="chess-daily-bar" style="width:0%;background:#4e8ef7"></div></div>
               <div class="daily-goal" id="chess-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
+
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>🎹</span> Piano</div>
@@ -893,6 +866,7 @@
               <div class="prog-track"><div class="prog-fill" id="piano-daily-bar" style="width:0%;background:#a855f7"></div></div>
               <div class="daily-goal" id="piano-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
+
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>⌨️</span> Typing</div>
@@ -901,6 +875,7 @@
               <div class="prog-track"><div class="prog-fill" id="typing-daily-bar" style="width:0%;background:#f7a94e"></div></div>
               <div class="daily-goal" id="typing-daily-goal" style="display:none">✓ Goal complete!</div>
             </div>
+
             <div class="daily-row">
               <div class="daily-header">
                 <div class="daily-label"><span>🧮</span> Math</div>
@@ -908,55 +883,57 @@
               </div>
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
-            </div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            </div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Projects -->
-          <div id="home-projects" style="position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="home-projects">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:12px">Projects</div>
             <div id="home-project-list"></div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Wordle Mini Card -->
-          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="home-wordle-card" onclick="wordleOpen('home')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:8px">DAILY WORDLE</div>
             <div id="wordle-mini-board" style="margin-bottom:8px"></div>
-            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="wordle-mini-label" style="font-size:12px;color:#7a9e8e">Loading…</div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Countdown Card -->
-          <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer;position:relative;display:flex;flex-direction:column" onclick="setPage('planner')">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="home-countdown-card" style="background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;cursor:pointer" onclick="setPage('planner')">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">⭐ UPCOMING</div>
             <div id="countdown-list" style="display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12px;color:#4a6e5e;font-style:italic">No important events</div>
             </div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+          <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Fitness Card -->
-          <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
-          </div>
+          <div id="home-fitness-card" onclick="setPage('fitness')" style="cursor:pointer;background:#1a1f1d;border:1px solid #1f2e28;border-radius:14px;padding:16px 18px;min-width:200px;max-width:260px;position:relative">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div></div>
 
           <!-- Quote of the Day Card -->
-          <div id="home-quote-card" style="position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="home-quote-card">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:10px">QUOTE OF THE DAY</div>
             <div id="quote-text" class="quote-text"></div>
-            <div id="quote-author" class="quote-author"></div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+            <div id="quote-author" class="quote-author"></div><div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
 
           <!-- Music Widget -->
-          <div id="home-music-widget" style="position:relative;display:flex;flex-direction:column">
-            <div class="card-drag-bar"><div class="card-drag-bar-dots"></div></div>
+          <div id="home-music-widget">
+            <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
+            <div class="card-click-shield"></div>
             <div class="section-label" style="margin-bottom:2px">NOW PLAYING</div>
             <div id="hmw-art-row">
               <div id="hmw-art">♪</div>
@@ -974,14 +951,12 @@
               <button class="hmw-btn" onclick="musicNext();hmwSyncState()" title="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
               <button class="hmw-btn" id="hmw-repeat" onclick="musicToggleRepeat();hmwSyncState()" title="Repeat"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
             </div>
-            <div class="card-resize-handle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
-        
-        
+            <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
+
+        </div>
       </div>
     </div>
-
-    </div><!-- /page-home -->
 
     <!-- ══ PLANNER ══ -->
     <div class="page" id="page-planner">
@@ -1686,82 +1661,8 @@
       </div>
     </div>
 
-    <!-- ══ SPANISH ══ -->
-    <div class="page" id="page-spanish">
-      <div id="spanish-view">
-        <div id="spanish-topbar">
-          <button class="btn btn-ghost" onclick="closeApp('spanish')">← Apps</button>
-          <span style="font-size:16px;font-weight:800">🇪🇸 Spanish</span>
-          <div style="flex:1"></div>
-          <button onclick="spOpenAddWord()" style="background:rgba(0,209,140,.15);border:1px solid #00d18c;color:#00d18c;border-radius:8px;padding:5px 16px;font-size:13px;font-weight:700;cursor:pointer">+ Add Word</button>
-        </div>
-        <div id="spanish-tabs">
-          <div class="sp-tab active" id="sp-tab-vocab" onclick="spSetTab('vocab')">📖 Vocabulary</div>
-          <div class="sp-tab" id="sp-tab-grammar" onclick="spSetTab('grammar')">📚 Grammar</div>
-        </div>
-        <div id="spanish-body">
-          <!-- Vocab tab content -->
-          <div id="sp-vocab-pane">
-            <div class="sp-search-row">
-              <input class="sp-search" id="sp-search" placeholder="Search words..." oninput="spRenderVocab()">
-              <span id="sp-word-count" style="color:#4a7060;font-size:12px;white-space:nowrap;align-self:center;padding:0 4px"></span>
-            </div>
-            <div class="sp-filter-btns" id="sp-filters"></div>
-            <div class="sp-word-grid" id="sp-word-grid"></div>
-          </div>
-          <!-- Grammar tab content -->
-          <div id="sp-grammar-pane" style="display:none;padding-bottom:20px"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Spanish word modal -->
-    <div id="sp-modal-overlay" onclick="if(event.target===this)spCloseModal()">
-      <div id="sp-modal">
-        <button id="sp-modal-close" onclick="spCloseModal()">✕</button>
-        <div id="sp-modal-es"></div>
-        <div id="sp-modal-pronun"></div>
-        <div id="sp-modal-type-badge"></div>
-        <div id="sp-modal-en"></div>
-        <div id="sp-modal-example"></div>
-        <div id="sp-modal-rank-row" style="margin:14px 0 6px">
-          <div style="font-size:11px;color:#4a7060;margin-bottom:6px">How well do you know this word?</div>
-          <div class="sp-rank-row" id="sp-modal-rank-dots"></div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="sp-modal-speak-btn" onclick="spSpeak()" style="flex:1">🔊 Hear</button>
-          <button class="sp-modal-speak-btn" onclick="spEditCurrent()" style="flex:1;background:#4e8ef722;border-color:#4e8ef7;color:#4e8ef7">✏️ Edit</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add / Edit word modal -->
-    <div id="sp-edit-overlay" onclick="if(event.target===this)spCancelEdit()">
-      <div id="sp-edit-modal">
-        <h3 id="sp-edit-title">➕ Add Word</h3>
-        <div class="sp-field"><label>Spanish word *</label><input id="sp-edit-es" placeholder="e.g. gato"></div>
-        <div class="sp-field"><label>English meaning *</label><input id="sp-edit-en" placeholder="e.g. cat"></div>
-        <div class="sp-field"><label>Pronunciation (phonetic)</label><input id="sp-edit-pron" placeholder="e.g. GAH-toh"></div>
-        <div class="sp-field"><label>Example sentence (wrap key word in {curly braces})</label><input id="sp-edit-example" placeholder="e.g. El {gato} duerme. (The cat sleeps.)"></div>
-        <div class="sp-field"><label>Word type</label>
-          <select id="sp-edit-type">
-            <option value="noun">Noun</option>
-            <option value="verb">Verb</option>
-            <option value="adjective">Adjective</option>
-            <option value="phrase">Phrase</option>
-            <option value="number">Number</option>
-          </select>
-        </div>
-        <div class="sp-edit-actions">
-          <button class="sp-btn-cancel" onclick="spCancelEdit()">Cancel</button>
-          <div id="sp-edit-delete-wrap"></div>
-          <button class="sp-btn-save" onclick="spSaveEdit()">Save</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Floating add button -->
-    <button id="sp-add-btn" onclick="spOpenAddWord()">+</button>
+    <!-- ══ SPANISH — now in spanish.html ══ -->
+    <div class="page" id="page-spanish"></div>
 
     <!-- ══ BRAIN GAMES HUB ══ -->
     <div id="page-braingames" class="page" style="flex-direction:column">
@@ -2165,7 +2066,6 @@
 </div>
 
 <script>
-  // clear stale layout keys
 // ════════════════════════════════════════════════════════════
 //  TITLEBAR
 // ════════════════════════════════════════════════════════════
@@ -2240,7 +2140,10 @@ function setPage(p) {
   if (p === 'spanish') spanishInit();
 }
 
-function openApp(app) { setPage(app); }
+function openApp(app) {
+  if (app === 'spanish') { window.location.href = 'spanish.html'; return; }
+  setPage(app);
+}
 function openBrainGame(game) {
   if (game === 'wordle') setPage('wordle');
   else setPage('bg-' + game);
@@ -4867,8 +4770,6 @@ window.mathGoBackToHub = function(){
 renderHomeDailys();
 renderHomeProjects();
 renderTodayCard();
-fitRenderHomeFitnessCard();
-renderCountdown();
 chessInit();
 // wordleRenderMini() is called after wordle vars init below
 const _cv=document.getElementById('page-chess'); if(_cv&&_cv.querySelector('#chess-view')) _cv.querySelector('#chess-view').addEventListener('click',()=>{},true);
@@ -4883,639 +4784,8 @@ renderQuoteOfDay(); renderHomeProjects(); });
 // ═══════════════════════════════════════════════════════════════════
 
 // ── Rank color scale (0=red … 6=bright green) ──
-const SP_RANK_COLORS = ['#f74e4e','#f77a3a','#f7c84e','#d4d44e','#90d44e','#4ed46a','#00d18c'];
-const SP_RANK_LABELS = ['Unknown','Barely','Familiar','Learning','Know it','Strong','Mastered'];
 
-const SP_TYPE_COLORS = {
-  noun:'#4e8ef7', verb:'#a855f7', adjective:'#f7a94e', phrase:'#00d18c', number:'#e8a020'
-};
-const SP_TYPES = ['all','noun','verb','adjective','phrase','number'];
-
-// ── Built-in vocab (immutable originals) ──
-const SP_BUILTIN = [
-  {id:'b0',es:'casa',en:'house',pron:'KAH-sah',type:'noun',example:'La {casa} es grande. (The house is big.)'},
-  {id:'b1',es:'perro',en:'dog',pron:'PEH-rroh',type:'noun',example:'El {perro} corre rápido. (The dog runs fast.)'},
-  {id:'b2',es:'gato',en:'cat',pron:'GAH-toh',type:'noun',example:'El {gato} duerme. (The cat sleeps.)'},
-  {id:'b3',es:'agua',en:'water',pron:'AH-gwah',type:'noun',example:'Quiero {agua}. (I want water.)'},
-  {id:'b4',es:'pan',en:'bread',pron:'PAHN',type:'noun',example:'El {pan} está fresco. (The bread is fresh.)'},
-  {id:'b5',es:'libro',en:'book',pron:'LEE-broh',type:'noun',example:'Leo un {libro}. (I read a book.)'},
-  {id:'b6',es:'ciudad',en:'city',pron:'syoo-DAHD',type:'noun',example:'La {ciudad} es bonita. (The city is beautiful.)'},
-  {id:'b7',es:'coche',en:'car',pron:'KOH-cheh',type:'noun',example:'El {coche} es rojo. (The car is red.)'},
-  {id:'b8',es:'mesa',en:'table',pron:'MEH-sah',type:'noun',example:'La {mesa} es de madera. (The table is made of wood.)'},
-  {id:'b9',es:'silla',en:'chair',pron:'SEE-yah',type:'noun',example:'Siéntate en la {silla}. (Sit in the chair.)'},
-  {id:'b10',es:'ventana',en:'window',pron:'ven-TAH-nah',type:'noun',example:'Abre la {ventana}. (Open the window.)'},
-  {id:'b11',es:'puerta',en:'door',pron:'PWEHR-tah',type:'noun',example:'Cierra la {puerta}. (Close the door.)'},
-  {id:'b12',es:'amigo',en:'friend',pron:'ah-MEE-goh',type:'noun',example:'Él es mi {amigo}. (He is my friend.)'},
-  {id:'b13',es:'familia',en:'family',pron:'fah-MEE-lyah',type:'noun',example:'Mi {familia} es grande. (My family is big.)'},
-  {id:'b14',es:'tiempo',en:'time / weather',pron:'TYEM-poh',type:'noun',example:'No tengo {tiempo}. (I don\'t have time.)'},
-  {id:'b15',es:'dinero',en:'money',pron:'dee-NEH-roh',type:'noun',example:'No tengo {dinero}. (I don\'t have money.)'},
-  {id:'b16',es:'trabajo',en:'work / job',pron:'trah-BAH-hoh',type:'noun',example:'Voy al {trabajo}. (I\'m going to work.)'},
-  {id:'b17',es:'comida',en:'food',pron:'koh-MEE-dah',type:'noun',example:'La {comida} está deliciosa. (The food is delicious.)'},
-  {id:'b18',es:'escuela',en:'school',pron:'es-KWEH-lah',type:'noun',example:'Voy a la {escuela}. (I go to school.)'},
-  {id:'b19',es:'año',en:'year',pron:'AH-nyoh',type:'noun',example:'Este {año} aprendo español. (This year I\'m learning Spanish.)'},
-  {id:'b20',es:'ser',en:'to be (permanent)',pron:'SEHR',type:'verb',example:'Yo {soy} americano. (I am American.)'},
-  {id:'b21',es:'estar',en:'to be (temporary)',pron:'es-TAHR',type:'verb',example:'Yo {estoy} cansado. (I am tired.)'},
-  {id:'b22',es:'tener',en:'to have',pron:'teh-NEHR',type:'verb',example:'Yo {tengo} un perro. (I have a dog.)'},
-  {id:'b23',es:'hacer',en:'to do / make',pron:'ah-SEHR',type:'verb',example:'¿Qué {haces}? (What are you doing?)'},
-  {id:'b24',es:'ir',en:'to go',pron:'EER',type:'verb',example:'Voy a {ir} al mercado. (I\'m going to the market.)'},
-  {id:'b25',es:'poder',en:'to be able to / can',pron:'poh-DEHR',type:'verb',example:'¿{Puedes} ayudarme? (Can you help me?)'},
-  {id:'b26',es:'querer',en:'to want / love',pron:'keh-REHR',type:'verb',example:'{Quiero} aprender español. (I want to learn Spanish.)'},
-  {id:'b27',es:'hablar',en:'to speak',pron:'ah-BLAHR',type:'verb',example:'Yo {hablo} español. (I speak Spanish.)'},
-  {id:'b28',es:'comer',en:'to eat',pron:'koh-MEHR',type:'verb',example:'Voy a {comer} pizza. (I\'m going to eat pizza.)'},
-  {id:'b29',es:'vivir',en:'to live',pron:'bee-BEER',type:'verb',example:'Yo {vivo} en Oklahoma. (I live in Oklahoma.)'},
-  {id:'b30',es:'saber',en:'to know (facts)',pron:'sah-BEHR',type:'verb',example:'Yo {sé} la respuesta. (I know the answer.)'},
-  {id:'b31',es:'ver',en:'to see / watch',pron:'BEHR',type:'verb',example:'¿{Ves} eso? (Do you see that?)'},
-  {id:'b32',es:'venir',en:'to come',pron:'beh-NEER',type:'verb',example:'¿{Vienes} conmigo? (Are you coming with me?)'},
-  {id:'b33',es:'dar',en:'to give',pron:'DAHR',type:'verb',example:'Te {doy} un regalo. (I give you a gift.)'},
-  {id:'b34',es:'llamar',en:'to call',pron:'yah-MAHR',type:'verb',example:'Voy a {llamar} a mi mamá. (I\'m going to call my mom.)'},
-  {id:'b35',es:'grande',en:'big / great',pron:'GRAHN-deh',type:'adjective',example:'La ciudad es {grande}. (The city is big.)'},
-  {id:'b36',es:'pequeño',en:'small',pron:'peh-KEH-nyoh',type:'adjective',example:'El gato es {pequeño}. (The cat is small.)'},
-  {id:'b37',es:'bueno',en:'good',pron:'BWEH-noh',type:'adjective',example:'¡Eso es {bueno}! (That is good!)'},
-  {id:'b38',es:'malo',en:'bad',pron:'MAH-loh',type:'adjective',example:'El tiempo está {malo}. (The weather is bad.)'},
-  {id:'b39',es:'nuevo',en:'new',pron:'NWEH-boh',type:'adjective',example:'Tengo un coche {nuevo}. (I have a new car.)'},
-  {id:'b40',es:'viejo',en:'old',pron:'BYEH-hoh',type:'adjective',example:'Es un edificio {viejo}. (It\'s an old building.)'},
-  {id:'b41',es:'rápido',en:'fast / quick',pron:'RAH-pee-doh',type:'adjective',example:'El coche es {rápido}. (The car is fast.)'},
-  {id:'b42',es:'bonito',en:'pretty / nice',pron:'boh-NEE-toh',type:'adjective',example:'Es una ciudad {bonita}. (It\'s a pretty city.)'},
-  {id:'b43',es:'fácil',en:'easy',pron:'FAH-seel',type:'adjective',example:'El examen es {fácil}. (The exam is easy.)'},
-  {id:'b44',es:'difícil',en:'difficult',pron:'dee-FEE-seel',type:'adjective',example:'El español no es {difícil}. (Spanish is not difficult.)'},
-  {id:'b45',es:'hola',en:'hello',pron:'OH-lah',type:'phrase',example:'{Hola}, ¿cómo estás? (Hello, how are you?)'},
-  {id:'b46',es:'gracias',en:'thank you',pron:'GRAH-syahs',type:'phrase',example:'Muchas {gracias}. (Thank you very much.)'},
-  {id:'b47',es:'por favor',en:'please',pron:'por fah-BOHR',type:'phrase',example:'Habla más despacio, {por favor}. (Speak slower, please.)'},
-  {id:'b48',es:'lo siento',en:'I\'m sorry',pron:'loh SYEHN-toh',type:'phrase',example:'{Lo siento}, no entiendo. (I\'m sorry, I don\'t understand.)'},
-  {id:'b49',es:'de nada',en:'you\'re welcome',pron:'deh NAH-dah',type:'phrase',example:'—Gracias. —{De nada}. (—Thanks. —You\'re welcome.)'},
-  {id:'b50',es:'¿cómo estás?',en:'how are you?',pron:'KOH-moh es-TAHS',type:'phrase',example:'¡Hola! ¿{Cómo estás}? (Hi! How are you?)'},
-  {id:'b51',es:'no entiendo',en:'I don\'t understand',pron:'noh en-TYEN-doh',type:'phrase',example:'{No entiendo} esta palabra. (I don\'t understand this word.)'},
-  {id:'b52',es:'¿hablas inglés?',en:'do you speak English?',pron:'AH-blahs een-GLEHS',type:'phrase',example:'Perdón, ¿{hablas inglés}? (Excuse me, do you speak English?)'},
-  {id:'b53',es:'uno',en:'one',pron:'OO-noh',type:'number',example:'Tengo {un} hermano. (I have one brother.)'},
-  {id:'b54',es:'dos',en:'two',pron:'DOHS',type:'number',example:'Son las {dos}. (It\'s two o\'clock.)'},
-  {id:'b55',es:'tres',en:'three',pron:'TREHS',type:'number',example:'Tengo {tres} gatos. (I have three cats.)'},
-  {id:'b56',es:'diez',en:'ten',pron:'DYEHS',type:'number',example:'Son {diez} dólares. (That\'s ten dollars.)'},
-  {id:'b57',es:'cien',en:'one hundred',pron:'SYEHN',type:'number',example:'Cuesta {cien} dólares. (It costs one hundred dollars.)'},
-
-  {id:'b58',es:'hombre',en:'man',pron:'OM-breh',type:'noun',example:'El {hombre} trabaja mucho. (The man works a lot.)'},
-  {id:'b59',es:'mujer',en:'woman',pron:'moo-HEHR',type:'noun',example:'La {mujer} es inteligente. (The woman is intelligent.)'},
-  {id:'b60',es:'niño',en:'boy/child',pron:'NEE-nyoh',type:'noun',example:'El {niño} juega afuera. (The boy plays outside.)'},
-  {id:'b61',es:'niña',en:'girl',pron:'NEE-nyah',type:'noun',example:'La {niña} lee un libro. (The girl reads a book.)'},
-  {id:'b62',es:'familia',en:'family',pron:'fah-MEE-lyah',type:'noun',example:'Mi {familia} es grande. (My family is big.)'},
-  {id:'b63',es:'amigo',en:'friend (m)',pron:'ah-MEE-goh',type:'noun',example:'Mi {amigo} es simpático. (My friend is nice.)'},
-  {id:'b64',es:'amiga',en:'friend (f)',pron:'ah-MEE-gah',type:'noun',example:'Mi {amiga} vive cerca. (My friend lives nearby.)'},
-  {id:'b65',es:'maestro',en:'teacher (m)',pron:'mah-EHS-troh',type:'noun',example:'El {maestro} explica bien. (The teacher explains well.)'},
-  {id:'b66',es:'escuela',en:'school',pron:'ehs-KWEH-lah',type:'noun',example:'La {escuela} abre a las ocho. (The school opens at eight.)'},
-  {id:'b67',es:'trabajo',en:'work/job',pron:'trah-BAH-hoh',type:'noun',example:'Mi {trabajo} es interesante. (My job is interesting.)'},
-  {id:'b68',es:'dinero',en:'money',pron:'dee-NEH-roh',type:'noun',example:'Necesito {dinero}. (I need money.)'},
-  {id:'b69',es:'tiempo',en:'time/weather',pron:'TYEHM-poh',type:'noun',example:'No tengo {tiempo}. (I don\'t have time.)'},
-  {id:'b70',es:'día',en:'day',pron:'DEE-ah',type:'noun',example:'Hoy es un buen {día}. (Today is a good day.)'},
-  {id:'b71',es:'noche',en:'night',pron:'NOH-cheh',type:'noun',example:'La {noche} es tranquila. (The night is peaceful.)'},
-  {id:'b72',es:'mañana',en:'morning/tomorrow',pron:'mah-NYAH-nah',type:'noun',example:'Nos vemos {mañana}. (See you tomorrow.)'},
-  {id:'b73',es:'año',en:'year',pron:'AH-nyoh',type:'noun',example:'Este {año} es importante. (This year is important.)'},
-  {id:'b74',es:'mes',en:'month',pron:'MEHS',type:'noun',example:'Este {mes} es octubre. (This month is October.)'},
-  {id:'b75',es:'semana',en:'week',pron:'seh-MAH-nah',type:'noun',example:'La próxima {semana}. (Next week.)'},
-  {id:'b76',es:'hora',en:'hour',pron:'OH-rah',type:'noun',example:'¿Qué {hora} es? (What time is it?)'},
-  {id:'b77',es:'minuto',en:'minute',pron:'mee-NOO-toh',type:'noun',example:'Dame un {minuto}. (Give me a minute.)'},
-  {id:'b78',es:'número',en:'number',pron:'NOO-meh-roh',type:'noun',example:'¿Cuál es tu {número}? (What is your number?)'},
-  {id:'b79',es:'nombre',en:'name',pron:'NOM-breh',type:'noun',example:'¿Cuál es tu {nombre}? (What is your name?)'},
-  {id:'b80',es:'palabra',en:'word',pron:'pah-LAH-brah',type:'noun',example:'No sé esa {palabra}. (I don\'t know that word.)'},
-  {id:'b81',es:'pregunta',en:'question',pron:'preh-GOON-tah',type:'noun',example:'Tengo una {pregunta}. (I have a question.)'},
-  {id:'b82',es:'respuesta',en:'answer',pron:'rehs-PWEHS-tah',type:'noun',example:'La {respuesta} es correcta. (The answer is correct.)'},
-  {id:'b83',es:'idea',en:'idea',pron:'ee-DEH-ah',type:'noun',example:'Es una buena {idea}. (It\'s a good idea.)'},
-  {id:'b84',es:'problema',en:'problem',pron:'proh-BLEH-mah',type:'noun',example:'No hay {problema}. (No problem.)'},
-  {id:'b85',es:'verdad',en:'truth',pron:'behr-DAHD',type:'noun',example:'Eso es la {verdad}. (That is the truth.)'},
-  {id:'b86',es:'lugar',en:'place',pron:'loo-GAHR',type:'noun',example:'Es un buen {lugar}. (It\'s a good place.)'},
-  {id:'b87',es:'país',en:'country',pron:'pah-EES',type:'noun',example:'Mi {país} es hermoso. (My country is beautiful.)'},
-  {id:'b88',es:'ciudad',en:'city',pron:'syoo-DAHD',type:'noun',example:'Vivo en una {ciudad} grande. (I live in a big city.)'},
-  {id:'b89',es:'calle',en:'street',pron:'KAH-yeh',type:'noun',example:'Vive en esta {calle}. (He lives on this street.)'},
-  {id:'b90',es:'puerta',en:'door',pron:'PWEHR-tah',type:'noun',example:'Abre la {puerta}. (Open the door.)'},
-  {id:'b91',es:'ventana',en:'window',pron:'behn-TAH-nah',type:'noun',example:'La {ventana} está abierta. (The window is open.)'},
-  {id:'b92',es:'cocina',en:'kitchen',pron:'koh-SEE-nah',type:'noun',example:'La {cocina} huele bien. (The kitchen smells good.)'},
-  {id:'b93',es:'baño',en:'bathroom',pron:'BAH-nyoh',type:'noun',example:'¿Dónde está el {baño}? (Where is the bathroom?)'},
-  {id:'b94',es:'cama',en:'bed',pron:'KAH-mah',type:'noun',example:'Me voy a la {cama}. (I\'m going to bed.)'},
-  {id:'b95',es:'ropa',en:'clothes',pron:'ROH-pah',type:'noun',example:'La {ropa} está sucia. (The clothes are dirty.)'},
-  {id:'b96',es:'zapato',en:'shoe',pron:'sah-PAH-toh',type:'noun',example:'Mi {zapato} izquierdo. (My left shoe.)'},
-  {id:'b97',es:'camisa',en:'shirt',pron:'kah-MEE-sah',type:'noun',example:'Llevo una {camisa} azul. (I\'m wearing a blue shirt.)'},
-  {id:'b98',es:'comida',en:'food',pron:'koh-MEE-dah',type:'noun',example:'La {comida} está deliciosa. (The food is delicious.)'},
-  {id:'b99',es:'bebida',en:'drink',pron:'beh-BEE-dah',type:'noun',example:'¿Qué {bebida} quieres? (What drink do you want?)'},
-  {id:'b100',es:'leche',en:'milk',pron:'LEH-cheh',type:'noun',example:'Un vaso de {leche}. (A glass of milk.)'},
-  {id:'b101',es:'jugo',en:'juice',pron:'HOO-goh',type:'noun',example:'Quiero {jugo} de naranja. (I want orange juice.)'},
-  {id:'b102',es:'café',en:'coffee',pron:'kah-FEH',type:'noun',example:'Me gusta el {café}. (I like coffee.)'},
-  {id:'b103',es:'fruta',en:'fruit',pron:'FROO-tah',type:'noun',example:'Como {fruta} cada día. (I eat fruit every day.)'},
-  {id:'b104',es:'manzana',en:'apple',pron:'mahn-SAH-nah',type:'noun',example:'Una {manzana} al día. (An apple a day.)'},
-  {id:'b105',es:'naranja',en:'orange',pron:'nah-RAHN-hah',type:'noun',example:'La {naranja} es dulce. (The orange is sweet.)'},
-  {id:'b106',es:'pollo',en:'chicken',pron:'POH-yoh',type:'noun',example:'El {pollo} está bien cocido. (The chicken is well cooked.)'},
-  {id:'b107',es:'carne',en:'meat',pron:'KAR-neh',type:'noun',example:'No como {carne}. (I don\'t eat meat.)'},
-  {id:'b108',es:'arroz',en:'rice',pron:'ah-RROHS',type:'noun',example:'El {arroz} es mi favorito. (Rice is my favorite.)'},
-  {id:'b109',es:'frijol',en:'bean',pron:'free-HOHL',type:'noun',example:'Los {frijoles} son ricos. (Beans are delicious.)'},
-  {id:'b110',es:'huevo',en:'egg',pron:'WEH-boh',type:'noun',example:'Un {huevo} frito. (A fried egg.)'},
-  {id:'b111',es:'queso',en:'cheese',pron:'KEH-soh',type:'noun',example:'Me encanta el {queso}. (I love cheese.)'},
-  {id:'b112',es:'verdura',en:'vegetable',pron:'behr-DOO-rah',type:'noun',example:'Come tus {verduras}. (Eat your vegetables.)'},
-  {id:'b113',es:'sol',en:'sun',pron:'SOHL',type:'noun',example:'El {sol} brilla hoy. (The sun is shining today.)'},
-  {id:'b114',es:'luna',en:'moon',pron:'LOO-nah',type:'noun',example:'La {luna} está llena. (The moon is full.)'},
-  {id:'b115',es:'estrella',en:'star',pron:'ehs-TREH-yah',type:'noun',example:'Las {estrellas} son bonitas. (The stars are pretty.)'},
-  {id:'b116',es:'cielo',en:'sky',pron:'SYEH-loh',type:'noun',example:'El {cielo} es azul. (The sky is blue.)'},
-  {id:'b117',es:'mar',en:'sea',pron:'MAHR',type:'noun',example:'El {mar} está calmado. (The sea is calm.)'},
-  {id:'b118',es:'río',en:'river',pron:'RREE-oh',type:'noun',example:'El {río} es largo. (The river is long.)'},
-  {id:'b119',es:'montaña',en:'mountain',pron:'mohn-TAH-nyah',type:'noun',example:'La {montaña} es alta. (The mountain is tall.)'},
-  {id:'b120',es:'flor',en:'flower',pron:'FLOHR',type:'noun',example:'La {flor} es hermosa. (The flower is beautiful.)'},
-  {id:'b121',es:'árbol',en:'tree',pron:'AHR-bohl',type:'noun',example:'El {árbol} da sombra. (The tree provides shade.)'},
-  {id:'b122',es:'animal',en:'animal',pron:'ah-nee-MAHL',type:'noun',example:'El {animal} es salvaje. (The animal is wild.)'},
-  {id:'b123',es:'pájaro',en:'bird',pron:'PAH-hah-roh',type:'noun',example:'El {pájaro} canta. (The bird sings.)'},
-  {id:'b124',es:'pez',en:'fish',pron:'PEHS',type:'noun',example:'El {pez} nada rápido. (The fish swims fast.)'},
-  {id:'b125',es:'caballo',en:'horse',pron:'kah-BAH-yoh',type:'noun',example:'El {caballo} galopa. (The horse gallops.)'},
-  {id:'b126',es:'carro',en:'car (LA)',pron:'KAH-rroh',type:'noun',example:'Mi {carro} es rojo. (My car is red.)'},
-  {id:'b127',es:'avión',en:'airplane',pron:'ah-BYOHN',type:'noun',example:'El {avión} sale tarde. (The plane leaves late.)'},
-  {id:'b128',es:'tren',en:'train',pron:'TREHN',type:'noun',example:'El {tren} llegó a tiempo. (The train arrived on time.)'},
-  {id:'b129',es:'autobús',en:'bus',pron:'ow-toh-BOOS',type:'noun',example:'Tomo el {autobús}. (I take the bus.)'},
-  {id:'b130',es:'teléfono',en:'phone',pron:'teh-LEH-foh-noh',type:'noun',example:'Llama por {teléfono}. (Call by phone.)'},
-  {id:'b131',es:'computadora',en:'computer',pron:'kohm-poo-tah-DOH-rah',type:'noun',example:'Uso mi {computadora}. (I use my computer.)'},
-  {id:'b132',es:'música',en:'music',pron:'MOO-see-kah',type:'noun',example:'Me encanta la {música}. (I love music.)'},
-  {id:'b133',es:'deporte',en:'sport',pron:'deh-POR-teh',type:'noun',example:'El {deporte} es bueno. (Sport is good.)'},
-  {id:'b134',es:'fútbol',en:'soccer',pron:'FOOT-bohl',type:'noun',example:'Juego {fútbol} los domingos. (I play soccer on Sundays.)'},
-  {id:'b135',es:'medicina',en:'medicine',pron:'meh-dee-SEE-nah',type:'noun',example:'Toma tu {medicina}. (Take your medicine.)'},
-  {id:'b136',es:'hospital',en:'hospital',pron:'ohs-pee-TAHL',type:'noun',example:'Voy al {hospital}. (I\'m going to the hospital.)'},
-  {id:'b137',es:'mercado',en:'market',pron:'mehr-KAH-doh',type:'noun',example:'Voy al {mercado}. (I\'m going to the market.)'},
-  {id:'b138',es:'tienda',en:'store',pron:'TYEHN-dah',type:'noun',example:'La {tienda} cierra a las nueve. (The store closes at nine.)'},
-  {id:'b139',es:'precio',en:'price',pron:'PREH-syoh',type:'noun',example:'¿Cuál es el {precio}? (What is the price?)'},
-  {id:'b140',es:'regalo',en:'gift',pron:'reh-GAH-loh',type:'noun',example:'Es un {regalo} para ti. (It\'s a gift for you.)'},
-  {id:'v0',es:'hablar',en:'to speak',pron:'ah-BLAHR',type:'verb',example:'Quiero {hablar} español. (I want to speak Spanish.)'},
-  {id:'v1',es:'comer',en:'to eat',pron:'koh-MEHR',type:'verb',example:'Voy a {comer} ahora. (I\'m going to eat now.)'},
-  {id:'v2',es:'beber',en:'to drink',pron:'beh-BEHR',type:'verb',example:'Quiero {beber} agua. (I want to drink water.)'},
-  {id:'v3',es:'ir',en:'to go',pron:'EER',type:'verb',example:'Voy a {ir} al mercado. (I\'m going to go to the market.)'},
-  {id:'v4',es:'venir',en:'to come',pron:'beh-NEER',type:'verb',example:'Puedes {venir} a mi casa. (You can come to my house.)'},
-  {id:'v5',es:'hacer',en:'to do/make',pron:'ah-SEHR',type:'verb',example:'¿Qué vas a {hacer}? (What are you going to do?)'},
-  {id:'v6',es:'querer',en:'to want/love',pron:'keh-REHR',type:'verb',example:'Yo te {quiero}. (I love/want you.)'},
-  {id:'v7',es:'poder',en:'to be able',pron:'poh-DEHR',type:'verb',example:'¿Puedes {poder} venir? (Can you come?)'},
-  {id:'v8',es:'tener',en:'to have',pron:'teh-NEHR',type:'verb',example:'Yo {tengo} un perro. (I have a dog.)'},
-  {id:'v9',es:'ser',en:'to be (perm)',pron:'SEHR',type:'verb',example:'Yo {soy} estudiante. (I am a student.)'},
-  {id:'v10',es:'estar',en:'to be (temp)',pron:'ehs-TAHR',type:'verb',example:'Yo {estoy} cansado. (I am tired.)'},
-  {id:'v11',es:'saber',en:'to know (fact)',pron:'sah-BEHR',type:'verb',example:'Yo {sé} la respuesta. (I know the answer.)'},
-  {id:'v12',es:'conocer',en:'to know (person)',pron:'koh-noh-SEHR',type:'verb',example:'Yo {conozco} a María. (I know María.)'},
-  {id:'v13',es:'ver',en:'to see',pron:'BEHR',type:'verb',example:'Quiero {ver} la película. (I want to see the movie.)'},
-  {id:'v14',es:'escuchar',en:'to listen',pron:'ehs-koo-CHAHR',type:'verb',example:'Voy a {escuchar} música. (I\'m going to listen to music.)'},
-  {id:'v15',es:'leer',en:'to read',pron:'leh-EHR',type:'verb',example:'Me gusta {leer}. (I like to read.)'},
-  {id:'v16',es:'escribir',en:'to write',pron:'ehs-kree-BEER',type:'verb',example:'Necesito {escribir} una carta. (I need to write a letter.)'},
-  {id:'v17',es:'trabajar',en:'to work',pron:'trah-bah-HAHR',type:'verb',example:'Tengo que {trabajar} hoy. (I have to work today.)'},
-  {id:'v18',es:'estudiar',en:'to study',pron:'ehs-too-DYAHR',type:'verb',example:'Debo {estudiar} más. (I should study more.)'},
-  {id:'v19',es:'jugar',en:'to play',pron:'hoo-GAHR',type:'verb',example:'Los niños {juegan} afuera. (The kids play outside.)'},
-  {id:'v20',es:'correr',en:'to run',pron:'koh-REHR',type:'verb',example:'Me gusta {correr}. (I like to run.)'},
-  {id:'v21',es:'caminar',en:'to walk',pron:'kah-mee-NAHR',type:'verb',example:'Vamos a {caminar}. (Let\'s walk.)'},
-  {id:'v22',es:'dormir',en:'to sleep',pron:'dohr-MEER',type:'verb',example:'Necesito {dormir}. (I need to sleep.)'},
-  {id:'v23',es:'despertar',en:'to wake up',pron:'dehs-pehr-TAHR',type:'verb',example:'Me {despierto} temprano. (I wake up early.)'},
-  {id:'v24',es:'abrir',en:'to open',pron:'ah-BREER',type:'verb',example:'Abre la {puerta}. (Open the door.)'},
-  {id:'v25',es:'cerrar',en:'to close',pron:'seh-RRAHR',type:'verb',example:'Cierra la {ventana}. (Close the window.)'},
-  {id:'v26',es:'comprar',en:'to buy',pron:'kohm-PRAHR',type:'verb',example:'Quiero {comprar} esto. (I want to buy this.)'},
-  {id:'v27',es:'vender',en:'to sell',pron:'behn-DEHR',type:'verb',example:'Vendo mi coche. (I\'m selling my car.)'},
-  {id:'v28',es:'ayudar',en:'to help',pron:'ah-yoo-DAHR',type:'verb',example:'¿Me puedes {ayudar}? (Can you help me?)'},
-  {id:'v29',es:'llamar',en:'to call',pron:'yah-MAHR',type:'verb',example:'Te voy a {llamar}. (I\'m going to call you.)'},
-  {id:'v30',es:'preguntar',en:'to ask',pron:'preh-goon-TAHR',type:'verb',example:'Voy a {preguntar}. (I\'m going to ask.)'},
-  {id:'v31',es:'contestar',en:'to answer',pron:'kohn-tehs-TAHR',type:'verb',example:'Debes {contestar}. (You should answer.)'},
-  {id:'v32',es:'entender',en:'to understand',pron:'ehn-tehn-DEHR',type:'verb',example:'No {entiendo}. (I don\'t understand.)'},
-  {id:'v33',es:'aprender',en:'to learn',pron:'ah-prehn-DEHR',type:'verb',example:'Quiero {aprender} español. (I want to learn Spanish.)'},
-  {id:'v34',es:'enseñar',en:'to teach',pron:'ehn-seh-NYAHR',type:'verb',example:'Me gusta {enseñar}. (I like to teach.)'},
-  {id:'v35',es:'vivir',en:'to live',pron:'bee-BEER',type:'verb',example:'Vivo en Texas. (I live in Texas.)'},
-  {id:'v36',es:'morir',en:'to die',pron:'moh-REER',type:'verb',example:'Las plantas {mueren} sin agua. (Plants die without water.)'},
-  {id:'v37',es:'nacer',en:'to be born',pron:'nah-SEHR',type:'verb',example:'Nací en mayo. (I was born in May.)'},
-  {id:'v38',es:'crecer',en:'to grow',pron:'kreh-SEHR',type:'verb',example:'Los niños {crecen} rápido. (Kids grow fast.)'},
-  {id:'v39',es:'dar',en:'to give',pron:'DAHR',type:'verb',example:'Dame el libro. (Give me the book.)'},
-  {id:'v40',es:'recibir',en:'to receive',pron:'reh-see-BEER',type:'verb',example:'Voy a {recibir} un regalo. (I\'m going to receive a gift.)'},
-  {id:'v41',es:'pagar',en:'to pay',pron:'pah-GAHR',type:'verb',example:'Tengo que {pagar} la renta. (I have to pay the rent.)'},
-  {id:'v42',es:'cocinar',en:'to cook',pron:'koh-see-NAHR',type:'verb',example:'Me gusta {cocinar}. (I like to cook.)'},
-  {id:'v43',es:'limpiar',en:'to clean',pron:'leem-PYAHR',type:'verb',example:'Hay que {limpiar} la casa. (We need to clean the house.)'},
-  {id:'v44',es:'esperar',en:'to wait/hope',pron:'ehs-peh-RAHR',type:'verb',example:'Tengo que {esperar}. (I have to wait.)'},
-  {id:'v45',es:'llegar',en:'to arrive',pron:'yeh-GAHR',type:'verb',example:'¿Cuándo {llegas}? (When do you arrive?)'},
-  {id:'v46',es:'salir',en:'to leave/go out',pron:'sah-LEER',type:'verb',example:'Voy a {salir} ahora. (I\'m going to leave now.)'},
-  {id:'v47',es:'entrar',en:'to enter',pron:'ehn-TRAHR',type:'verb',example:'Puedes {entrar}. (You can come in.)'},
-  {id:'v48',es:'buscar',en:'to search/look for',pron:'boos-KAHR',type:'verb',example:'Estoy {buscando} mi llave. (I\'m looking for my key.)'},
-  {id:'v49',es:'encontrar',en:'to find',pron:'ehn-kohn-TRAHR',type:'verb',example:'No puedo {encontrar} mi llave. (I can\'t find my key.)'},
-  {id:'a0',es:'bueno',en:'good',pron:'BWEH-noh',type:'adjective',example:'Es un {buen} día. (It\'s a good day.)'},
-  {id:'a1',es:'malo',en:'bad',pron:'MAH-loh',type:'adjective',example:'Eso es {malo}. (That is bad.)'},
-  {id:'a2',es:'grande',en:'big/great',pron:'GRAHN-deh',type:'adjective',example:'Una casa {grande}. (A big house.)'},
-  {id:'a3',es:'pequeño',en:'small',pron:'peh-KEH-nyoh',type:'adjective',example:'Un perro {pequeño}. (A small dog.)'},
-  {id:'a4',es:'nuevo',en:'new',pron:'NWEH-boh',type:'adjective',example:'Un coche {nuevo}. (A new car.)'},
-  {id:'a5',es:'viejo',en:'old',pron:'BYEH-hoh',type:'adjective',example:'Un libro {viejo}. (An old book.)'},
-  {id:'a6',es:'bonito',en:'pretty',pron:'boh-NEE-toh',type:'adjective',example:'Una flor {bonita}. (A pretty flower.)'},
-  {id:'a7',es:'feo',en:'ugly',pron:'FEH-oh',type:'adjective',example:'Qué {feo}. (How ugly.)'},
-  {id:'a8',es:'rápido',en:'fast',pron:'RRAH-pee-doh',type:'adjective',example:'Un carro {rápido}. (A fast car.)'},
-  {id:'a9',es:'lento',en:'slow',pron:'LEHN-toh',type:'adjective',example:'Va muy {lento}. (It goes very slow.)'},
-  {id:'a10',es:'caliente',en:'hot',pron:'kah-LYEHN-teh',type:'adjective',example:'El café está {caliente}. (The coffee is hot.)'},
-  {id:'a11',es:'frío',en:'cold',pron:'FREE-oh',type:'adjective',example:'El agua está {fría}. (The water is cold.)'},
-  {id:'a12',es:'difícil',en:'difficult',pron:'dee-FEE-seel',type:'adjective',example:'Es muy {difícil}. (It is very difficult.)'},
-  {id:'a13',es:'fácil',en:'easy',pron:'FAH-seel',type:'adjective',example:'Es muy {fácil}. (It is very easy.)'},
-  {id:'a14',es:'caro',en:'expensive',pron:'KAH-roh',type:'adjective',example:'Está muy {caro}. (It is very expensive.)'},
-  {id:'a15',es:'barato',en:'cheap',pron:'bah-RAH-toh',type:'adjective',example:'Está muy {barato}. (It is very cheap.)'},
-  {id:'a16',es:'feliz',en:'happy',pron:'feh-LEES',type:'adjective',example:'Estoy muy {feliz}. (I am very happy.)'},
-  {id:'a17',es:'triste',en:'sad',pron:'TREES-teh',type:'adjective',example:'Estoy {triste}. (I am sad.)'},
-  {id:'a18',es:'cansado',en:'tired',pron:'kahn-SAH-doh',type:'adjective',example:'Estoy muy {cansado}. (I am very tired.)'},
-  {id:'a19',es:'ocupado',en:'busy',pron:'oh-koo-PAH-doh',type:'adjective',example:'Estoy muy {ocupado}. (I am very busy.)'},
-  {id:'a20',es:'seguro',en:'safe/sure',pron:'seh-GOO-roh',type:'adjective',example:'Estoy {seguro}. (I am sure.)'},
-  {id:'a21',es:'importante',en:'important',pron:'eem-pohr-TAHN-teh',type:'adjective',example:'Es muy {importante}. (It is very important.)'},
-  {id:'a22',es:'interesante',en:'interesting',pron:'een-teh-reh-SAHN-teh',type:'adjective',example:'Es muy {interesante}. (It is very interesting.)'},
-  {id:'a23',es:'aburrido',en:'boring',pron:'ah-boo-RREE-doh',type:'adjective',example:'Está muy {aburrido}. (It is very boring.)'},
-  {id:'a24',es:'limpio',en:'clean',pron:'LEEM-pyoh',type:'adjective',example:'La cocina está {limpia}. (The kitchen is clean.)'},
-  {id:'a25',es:'sucio',en:'dirty',pron:'SOO-syoh',type:'adjective',example:'El piso está {sucio}. (The floor is dirty.)'},
-  {id:'p0',es:'por favor',en:'please',pron:'pohr fah-BOHR',type:'phrase',example:'{Por favor}, ayúdame. (Please, help me.)'},
-  {id:'p1',es:'gracias',en:'thank you',pron:'GRAH-syahs',type:'phrase',example:'¡{Gracias} por todo! (Thank you for everything!)'},
-  {id:'p2',es:'de nada',en:'you\'re welcome',pron:'deh NAH-dah',type:'phrase',example:'{De nada}, fue un placer. (You\'re welcome, it was a pleasure.)'},
-  {id:'p3',es:'lo siento',en:'I\'m sorry',pron:'loh SYEHN-toh',type:'phrase',example:'{Lo siento} mucho. (I\'m very sorry.)'},
-  {id:'p4',es:'perdón',en:'pardon/excuse me',pron:'pehr-DOHN',type:'phrase',example:'{Perdón}, ¿puedes repetir? (Pardon, can you repeat?)'},
-  {id:'p5',es:'con permiso',en:'excuse me (passing)',pron:'kohn pehr-MEE-soh',type:'phrase',example:'{Con permiso}, voy a pasar. (Excuse me, I\'m going to pass.)'},
-  {id:'p6',es:'¿cómo estás?',en:'how are you?',pron:'KOH-moh ehs-TAHS',type:'phrase',example:'{¿Cómo estás?} - Bien, ¿y tú? (How are you? - Fine, and you?)'},
-  {id:'p7',es:'muy bien',en:'very well',pron:'MWEE BYEHN',type:'phrase',example:'Estoy {muy bien}, gracias. (I am very well, thank you.)'},
-  {id:'p8',es:'más o menos',en:'more or less',pron:'MAHS oh MEH-nohs',type:'phrase',example:'{Más o menos}, no muy bien. (More or less, not very well.)'},
-  {id:'p9',es:'no sé',en:'I don\'t know',pron:'noh SEH',type:'phrase',example:'{No sé} la respuesta. (I don\'t know the answer.)'},
-  {id:'p10',es:'no entiendo',en:'I don\'t understand',pron:'noh ehn-TYEHN-doh',type:'phrase',example:'{No entiendo}. ¿Puedes explicar? (I don\'t understand. Can you explain?)'},
-  {id:'p11',es:'¿hablas inglés?',en:'do you speak English?',pron:'AH-blahs een-GLEHS',type:'phrase',example:'{¿Hablas inglés?} (Do you speak English?)'},
-  {id:'p12',es:'un poco',en:'a little',pron:'oon POH-koh',type:'phrase',example:'Hablo {un poco} de español. (I speak a little Spanish.)'},
-  {id:'p13',es:'mucho gusto',en:'nice to meet you',pron:'MOO-choh GOOS-toh',type:'phrase',example:'{Mucho gusto}, me llamo Ana. (Nice to meet you, my name is Ana.)'},
-  {id:'p14',es:'buenas noches',en:'good night',pron:'BWEH-nahs NOH-chehs',type:'phrase',example:'{Buenas noches}, nos vemos mañana. (Good night, see you tomorrow.)'},
-  {id:'p15',es:'buenos días',en:'good morning',pron:'BWEH-nohs DEE-ahs',type:'phrase',example:'{Buenos días}, ¿cómo amaneciste? (Good morning, how did you wake up?)'},
-  {id:'p16',es:'buenas tardes',en:'good afternoon',pron:'BWEH-nahs TAR-dehs',type:'phrase',example:'{Buenas tardes}, ¿en qué puedo ayudar? (Good afternoon, how can I help?)'},
-  {id:'p17',es:'hasta luego',en:'goodbye (see you later)',pron:'AHS-tah LWEH-goh',type:'phrase',example:'{Hasta luego}, cuídate. (Goodbye, take care.)'},
-  {id:'p18',es:'hasta mañana',en:'see you tomorrow',pron:'AHS-tah mah-NYAH-nah',type:'phrase',example:'{Hasta mañana}, que descanses. (See you tomorrow, rest well.)'},
-  {id:'p19',es:'¿dónde está?',en:'where is it?',pron:'DOHN-deh ehs-TAH',type:'phrase',example:'{¿Dónde está} el banco? (Where is the bank?)'},
-  {id:'p20',es:'¿cuánto cuesta?',en:'how much does it cost?',pron:'KWAHN-toh KWEHS-tah',type:'phrase',example:'{¿Cuánto cuesta} esto? (How much does this cost?)'},
-  {id:'p21',es:'tengo hambre',en:'I am hungry',pron:'TEHN-goh AHM-breh',type:'phrase',example:'{Tengo hambre}, vamos a comer. (I\'m hungry, let\'s eat.)'},
-  {id:'p22',es:'tengo sed',en:'I am thirsty',pron:'TEHN-goh SEHD',type:'phrase',example:'{Tengo sed}. (I\'m thirsty.)'},
-  {id:'p23',es:'me llamo',en:'my name is',pron:'meh YAH-moh',type:'phrase',example:'{Me llamo} Carlos. (My name is Carlos.)'},
-  {id:'n0',es:'cuatro',en:'four',pron:'KWAH-troh',type:'number',example:'Tengo {cuatro} hermanos. (I have four siblings.)'},
-  {id:'n1',es:'cinco',en:'five',pron:'SEEN-koh',type:'number',example:'Son las {cinco} de la tarde. (It\'s five in the afternoon.)'},
-  {id:'n2',es:'seis',en:'six',pron:'SEHYS',type:'number',example:'Hay {seis} manzanas. (There are six apples.)'},
-  {id:'n3',es:'siete',en:'seven',pron:'SYEH-teh',type:'number',example:'Tengo {siete} días. (I have seven days.)'},
-  {id:'n4',es:'ocho',en:'eight',pron:'OH-choh',type:'number',example:'Son las {ocho}. (It\'s eight o\'clock.)'},
-  {id:'n5',es:'nueve',en:'nine',pron:'NWEH-beh',type:'number',example:'Son las {nueve} de la mañana. (It\'s nine in the morning.)'},
-  {id:'n6',es:'veinte',en:'twenty',pron:'BEYN-teh',type:'number',example:'Tengo {veinte} años. (I am twenty years old.)'},
-  {id:'n7',es:'treinta',en:'thirty',pron:'TREYN-tah',type:'number',example:'Hay {treinta} días en septiembre. (There are thirty days in September.)'},
-  {id:'n8',es:'cuarenta',en:'forty',pron:'kwah-REHN-tah',type:'number',example:'Tengo {cuarenta} dólares. (I have forty dollars.)'},
-  {id:'n9',es:'cincuenta',en:'fifty',pron:'seen-KWEHN-tah',type:'number',example:'Hay {cincuenta} estados. (There are fifty states.)'},
-  {id:'n10',es:'sesenta',en:'sixty',pron:'seh-SEHN-tah',type:'number',example:'Hay {sesenta} minutos. (There are sixty minutes.)'},
-  {id:'n11',es:'setenta',en:'seventy',pron:'seh-TEHN-tah',type:'number',example:'{Setenta} y cinco. (Seventy-five.)'},
-  {id:'n12',es:'ochenta',en:'eighty',pron:'oh-CHEHN-tah',type:'number',example:'{Ochenta} por ciento. (Eighty percent.)'},
-  {id:'n13',es:'noventa',en:'ninety',pron:'noh-BEHN-tah',type:'number',example:'{Noventa} grados. (Ninety degrees.)'},
-  {id:'n14',es:'mil',en:'thousand',pron:'MEEL',type:'number',example:'Un {mil} personas. (One thousand people.)'},
-  {id:'n15',es:'primero',en:'first',pron:'pree-MEH-roh',type:'number',example:'Llegué {primero}. (I arrived first.)'},
-  {id:'n16',es:'segundo',en:'second',pron:'seh-GOON-doh',type:'number',example:'Soy el {segundo}. (I am the second.)'},
-  {id:'n17',es:'tercero',en:'third',pron:'tehr-SEH-roh',type:'number',example:'Es el {tercero}. (It\'s the third.)'},
-];
-
-// ── State ──
-let spCurrentTab = 'vocab';
-let spCurrentFilter = 'all';
-let spCurrentWordId = null;
-let spEditingId = null; // null = adding new, else id of word being edited
-
-// ── Persistence ──
-function spLoadData() {
-  return JSON.parse(localStorage.getItem('sp_data') || '{"custom":[],"ranks":{},"overrides":{}}');
-}
-function spSaveData(d) {
-  localStorage.setItem('sp_data', JSON.stringify(d));
-}
-// Get all words (built-in + custom), with any overrides applied
-function spAllWords() {
-  const d = spLoadData();
-  const customs = d.custom || [];
-  const overrides = d.overrides || {};
-  const builtins = SP_BUILTIN.map(w => {
-    const ov = overrides[w.id] || {};
-    return Object.assign({}, w, ov, {custom: false});
-  });
-  const customWords = customs.map(w => Object.assign({}, w, {custom: true}));
-  return [...builtins, ...customWords];
-}
-function spGetRank(id) {
-  const d = spLoadData();
-  return d.ranks[id] || 0;
-}
-function spSetRank(id, rank) {
-  const d = spLoadData();
-  d.ranks[id] = rank;
-  spSaveData(d);
-}
-
-// ── Init ──
-function spanishInit() {
-  try { spSetTab('vocab'); } catch(e) { console.error('spSetTab',e); }
-  try { spRenderFilters(); } catch(e) { console.error('spRenderFilters',e); }
-  try { spRenderVocab(); } catch(e) { console.error('spRenderVocab',e); }
-  try { spRenderGrammar(); } catch(e) { console.error('spRenderGrammar',e); }
-  const fab = document.getElementById('sp-add-btn');
-  if(fab) fab.classList.add('visible');
-}
-
-function spSetTab(tab) {
-  spCurrentTab = tab;
-  document.getElementById('sp-tab-vocab').classList.toggle('active', tab==='vocab');
-  document.getElementById('sp-tab-grammar').classList.toggle('active', tab==='grammar');
-  document.getElementById('sp-vocab-pane').style.display   = tab==='vocab'   ? '' : 'none';
-  document.getElementById('sp-grammar-pane').style.display = tab==='grammar' ? '' : 'none';
-  const fab = document.getElementById('sp-add-btn');
-  if(fab) fab.classList.toggle('visible', tab==='vocab');
-}
-
-// ── Rank dots renderer ──
-function spRankDotsHtml(id, size=11) {
-  const r = spGetRank(id);
-  return SP_RANK_COLORS.map((c,i) => {
-    const filled = i <= r;
-    const bg = filled ? c : '#1a1f1d';
-    return `<div class="sp-rank-dot" style="width:${size}px;height:${size}px;background:${bg};border-color:${c}44"
-      onclick="event.stopPropagation();spRankSet('${id}',${i})" title="${SP_RANK_LABELS[i]}"></div>`;
-  }).join('');
-}
-
-function spRankSet(id, rank) {
-  spSetRank(id, rank);
-  spRenderVocab();
-  // update modal dots if open
-  const dots = document.getElementById('sp-modal-rank-dots');
-  if(dots && spCurrentWordId === id) dots.innerHTML = spRankDotsHtml(id, 14);
-}
-
-// ── Vocab list ──
-function spRenderFilters() {
-  const el = document.getElementById('sp-filters');
-  el.innerHTML = SP_TYPES.map(t => `
-    <button class="sp-filter-btn${t===spCurrentFilter?' active':''}" onclick="spSetFilter('${t}')">
-      ${t==='all'?'🔤 All':t.charAt(0).toUpperCase()+t.slice(1)+'s'}
-    </button>`).join('');
-}
-
-function spSetFilter(t) {
-  spCurrentFilter = t;
-  spRenderFilters();
-  spRenderVocab();
-}
-
-function spRenderVocab() {
-  const q = (document.getElementById('sp-search')?.value||'').toLowerCase();
-  let words = spAllWords();
-  if(spCurrentFilter!=='all') words = words.filter(w=>w.type===spCurrentFilter);
-  if(q) words = words.filter(w=>w.es.toLowerCase().includes(q)||w.en.toLowerCase().includes(q));
-  // sort by rank desc then alpha
-  words.sort((a,b) => {
-    const rd = spGetRank(b.id) - spGetRank(a.id);
-    return rd !== 0 ? rd : a.es.localeCompare(b.es);
-  });
-  const el = document.getElementById('sp-word-grid');
-  const countEl = document.getElementById('sp-word-count');
-  if(countEl) countEl.textContent = words.length + ' word' + (words.length!==1?'s':'');
-  if(!words.length){el.innerHTML='<div style="color:#3a5548;padding:20px">No words found.</div>';return;}
-  const rank0color = SP_RANK_COLORS[0];
-  el.innerHTML = words.map(w => {
-    const r = spGetRank(w.id);
-    const borderCol = SP_RANK_COLORS[r];
-    return `<div class="sp-word-card" onclick="spOpenWord('${w.id}')" style="border-color:${borderCol}55">
-      <div class="sp-word-es">${w.es}</div>
-      <div class="sp-word-en">${w.en}</div>
-      <div class="sp-word-type" style="color:${SP_TYPE_COLORS[w.type]||'#3a5548'}">${w.type}</div>
-      <div class="sp-rank-row">${spRankDotsHtml(w.id)}</div>
-    </div>`;
-  }).join('');
-}
-
-// ── Word detail modal ──
-function spOpenWord(id) {
-  const w = spAllWords().find(x=>x.id===id);
-  if(!w) return;
-  spCurrentWordId = id;
-  document.getElementById('sp-modal-es').textContent = w.es;
-  document.getElementById('sp-modal-pronun').textContent = '/' + (w.pron||'') + '/';
-  const badge = document.getElementById('sp-modal-type-badge');
-  badge.textContent = w.type.toUpperCase();
-  badge.style.background = (SP_TYPE_COLORS[w.type]||'#00d18c')+'22';
-  badge.style.color = SP_TYPE_COLORS[w.type]||'#00d18c';
-  document.getElementById('sp-modal-en').textContent = w.en;
-  const exHtml = (w.example||'').replace(/\{(.+?)\}/g,'<em>$1</em>');
-  document.getElementById('sp-modal-example').innerHTML = '<strong>Example:</strong><br>' + exHtml;
-  document.getElementById('sp-modal-rank-dots').innerHTML = spRankDotsHtml(id, 14);
-  document.getElementById('sp-modal-overlay').classList.add('open');
-  spSpeak(w.es);
-}
-
-function spCloseModal() {
-  document.getElementById('sp-modal-overlay').classList.remove('open');
-  spCurrentWordId = null;
-}
-
-function spSpeak(text) {
-  const t = text || (spCurrentWordId ? spAllWords().find(x=>x.id===spCurrentWordId)?.es : null);
-  if(!t) return;
-  const u = new SpeechSynthesisUtterance(t);
-  u.lang = 'es-ES'; u.rate = 0.85;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-}
-
-// ── Add / Edit word ──
-function spOpenAddWord() {
-  spEditingId = null;
-  document.getElementById('sp-edit-title').textContent = '➕ Add Word';
-  document.getElementById('sp-edit-es').value = '';
-  document.getElementById('sp-edit-en').value = '';
-  document.getElementById('sp-edit-pron').value = '';
-  document.getElementById('sp-edit-example').value = '';
-  document.getElementById('sp-edit-type').value = 'noun';
-  document.getElementById('sp-edit-delete-wrap').innerHTML = '';
-  document.getElementById('sp-edit-overlay').classList.add('open');
-}
-
-function spEditCurrent() {
-  if(!spCurrentWordId) return;
-  const w = spAllWords().find(x=>x.id===spCurrentWordId);
-  if(!w) return;
-  spEditingId = w.id;
-  document.getElementById('sp-edit-title').textContent = w.custom ? '✏️ Edit Word' : '✏️ Edit Word (built-in)';
-  document.getElementById('sp-edit-es').value = w.es;
-  document.getElementById('sp-edit-en').value = w.en;
-  document.getElementById('sp-edit-pron').value = w.pron||'';
-  document.getElementById('sp-edit-example').value = w.example||'';
-  document.getElementById('sp-edit-type').value = w.type;
-
-  // Show delete only for custom words
-  document.getElementById('sp-edit-delete-wrap').innerHTML = w.custom
-    ? `<button class="sp-btn-delete" onclick="spDeleteWord('${w.id}')">Delete</button>` : '';
-  document.getElementById('sp-edit-overlay').classList.add('open');
-}
-
-function spCancelEdit() {
-  document.getElementById('sp-edit-overlay').classList.remove('open');
-}
-
-function spSaveEdit() {
-  const es = document.getElementById('sp-edit-es').value.trim();
-  const en = document.getElementById('sp-edit-en').value.trim();
-  if(!es || !en) { alert('Spanish word and English meaning are required.'); return; }
-  const pron = document.getElementById('sp-edit-pron').value.trim();
-  const example = document.getElementById('sp-edit-example').value.trim();
-  const type = document.getElementById('sp-edit-type').value;
-  const d = spLoadData();
-
-  if(spEditingId === null) {
-    // Adding new custom word
-    const id = 'c' + Date.now();
-    d.custom = d.custom || [];
-    d.custom.push({id, es, en, pron, example, type});
-  } else {
-    const isBuiltin = spEditingId.startsWith('b');
-    if(isBuiltin) {
-      // Save as override
-      d.overrides = d.overrides || {};
-      d.overrides[spEditingId] = {es, en, pron, example, type};
-    } else {
-      // Edit custom word
-      const idx = (d.custom||[]).findIndex(w=>w.id===spEditingId);
-      if(idx >= 0) Object.assign(d.custom[idx], {es, en, pron, example, type});
-    }
-  }
-  spSaveData(d);
-  document.getElementById('sp-edit-overlay').classList.remove('open');
-  spCloseModal();
-  spRenderVocab();
-}
-
-function spDeleteWord(id) {
-  if(!confirm('Delete this word?')) return;
-  const d = spLoadData();
-  d.custom = (d.custom||[]).filter(w=>w.id!==id);
-  spSaveData(d);
-  document.getElementById('sp-edit-overlay').classList.remove('open');
-  spCloseModal();
-  spRenderVocab();
-}
-
-
-function spRenderGrammar() {
-  const el = document.getElementById('sp-grammar-pane');
-  el.innerHTML = `
-    <div class="sp-section-card">
-      <div class="sp-section-title">🔵 Nouns (Sustantivos)</div>
-      <div class="sp-section-body">
-        Every Spanish noun has a <strong>gender</strong> — either masculine or feminine. This affects the article (the/a) used with it.
-        <table class="sp-table">
-          <tr><th>Gender</th><th>Singular "the"</th><th>Plural "the"</th><th>Example</th></tr>
-          <tr><td>Masculine</td><td>el</td><td>los</td><td><em>el perro</em> → <em>los perros</em></td></tr>
-          <tr><td>Feminine</td><td>la</td><td>las</td><td><em>la casa</em> → <em>las casas</em></td></tr>
-        </table>
-        <div class="sp-example">💡 Tip: Nouns ending in <em>-o</em> are usually masculine; nouns ending in <em>-a</em> are usually feminine.</div>
-      </div>
-    </div>
-    <div class="sp-section-card">
-      <div class="sp-section-title">🟣 Verbs (Verbos)</div>
-      <div class="sp-section-body">
-        Spanish verbs are conjugated depending on the subject. The ending changes for each person.
-        <table class="sp-table">
-          <tr><th>Person</th><th>-AR (hablar)</th><th>-ER (comer)</th><th>-IR (vivir)</th></tr>
-          <tr><td>Yo (I)</td><td>hablo</td><td>como</td><td>vivo</td></tr>
-          <tr><td>Tú (you)</td><td>hablas</td><td>comes</td><td>vives</td></tr>
-          <tr><td>Él/Ella (he/she)</td><td>habla</td><td>come</td><td>vive</td></tr>
-          <tr><td>Nosotros (we)</td><td>hablamos</td><td>comemos</td><td>vivimos</td></tr>
-          <tr><td>Ellos (they)</td><td>hablan</td><td>comen</td><td>viven</td></tr>
-        </table>
-        <div class="sp-example">💡 <em>Ser</em> and <em>estar</em> both mean "to be" — <em>ser</em> is for permanent traits, <em>estar</em> is for temporary states.</div>
-      </div>
-    </div>
-    <div class="sp-section-card">
-      <div class="sp-section-title">🟠 Adjectives (Adjetivos)</div>
-      <div class="sp-section-body">
-        Adjectives <strong>agree</strong> with the noun in gender and number.
-        <table class="sp-table">
-          <tr><th></th><th>Masculine</th><th>Feminine</th></tr>
-          <tr><td>Singular</td><td>el perro <em>rápido</em></td><td>la chica <em>rápida</em></td></tr>
-          <tr><td>Plural</td><td>los perros <em>rápidos</em></td><td>las chicas <em>rápidas</em></td></tr>
-        </table>
-        <div class="sp-example">💡 Adjectives usually come <em>after</em> the noun: <em>un coche rojo</em> (a red car).</div>
-      </div>
-    </div>
-    <div class="sp-section-card">
-      <div class="sp-section-title">🟡 Pronouns (Pronombres)</div>
-      <div class="sp-section-body">
-        Subject pronouns are often <strong>dropped</strong> — the verb ending tells you who is speaking.
-        <table class="sp-table">
-          <tr><th>Spanish</th><th>English</th></tr>
-          <tr><td>Yo</td><td>I</td></tr>
-          <tr><td>Tú</td><td>You (informal)</td></tr>
-          <tr><td>Él / Ella / Usted</td><td>He / She / You (formal)</td></tr>
-          <tr><td>Nosotros</td><td>We</td></tr>
-          <tr><td>Ellos / Ellas / Ustedes</td><td>They / You all</td></tr>
-        </table>
-        <div class="sp-example">💡 In Latin America, <em>ustedes</em> is used for both formal and informal "you all."</div>
-      </div>
-    </div>
-    <div class="sp-section-card">
-      <div class="sp-section-title">🟢 Common Phrases (Frases Comunes)</div>
-      <div class="sp-section-body">
-        <table class="sp-table">
-          <tr><th>Spanish</th><th>English</th><th>Pronunciation</th></tr>
-          <tr><td>¿Cómo te llamas?</td><td>What's your name?</td><td>KOH-moh teh YAH-mahs</td></tr>
-          <tr><td>Me llamo...</td><td>My name is...</td><td>meh YAH-moh</td></tr>
-          <tr><td>¿De dónde eres?</td><td>Where are you from?</td><td>deh DON-deh EH-rehs</td></tr>
-          <tr><td>No hablo bien español</td><td>I don't speak Spanish well</td><td>noh AH-bloh BYEHN</td></tr>
-          <tr><td>¿Puedes repetir?</td><td>Can you repeat that?</td><td>PWEH-dehs reh-peh-TEER</td></tr>
-        </table>
-      </div>
-    </div>
-    <div class="sp-section-card">
-      <div class="sp-section-title">🔴 Questions (Preguntas)</div>
-      <div class="sp-section-body">
-        Spanish question words always carry an accent mark:
-        <table class="sp-table">
-          <tr><th>Word</th><th>Meaning</th><th>Example</th></tr>
-          <tr><td>¿Qué?</td><td>What?</td><td>¿Qué quieres? (What do you want?)</td></tr>
-          <tr><td>¿Quién?</td><td>Who?</td><td>¿Quién es? (Who is it?)</td></tr>
-          <tr><td>¿Dónde?</td><td>Where?</td><td>¿Dónde está? (Where is it?)</td></tr>
-          <tr><td>¿Cuándo?</td><td>When?</td><td>¿Cuándo llegas? (When do you arrive?)</td></tr>
-          <tr><td>¿Por qué?</td><td>Why?</td><td>¿Por qué estudias? (Why are you studying?)</td></tr>
-          <tr><td>¿Cómo?</td><td>How?</td><td>¿Cómo se dice? (How do you say it?)</td></tr>
-        </table>
-        <div class="sp-example">💡 Spanish uses ¿ at the start and ? at the end. Same for exclamations: ¡ … !</div>
-      </div>
-    </div>
-
-    <div class="sp-section-card">
-      <div class="sp-section-title">① Singular &amp; Plural (Número)</div>
-      <div class="sp-section-body">
-        Spanish nouns and adjectives change form based on <strong>number</strong> — whether they refer to one thing or many.
-        <table class="sp-table">
-          <tr><th>Rule</th><th>Singular</th><th>Plural</th></tr>
-          <tr><td>Ends in a vowel</td><td>gato (cat)</td><td>gatos (cats)</td></tr>
-          <tr><td>Ends in a consonant</td><td>ciudad (city)</td><td>ciudades (cities)</td></tr>
-          <tr><td>Ends in -z</td><td>luz (light)</td><td>luces (lights)</td></tr>
-          <tr><td>Ends in -s (unstressed)</td><td>el lunes (Monday)</td><td>los lunes (Mondays)</td></tr>
-        </table>
-        <div class="sp-example">💡 Articles also change: <em>el/la</em> (singular) → <em>los/las</em> (plural).</div>
-      </div>
-    </div>
-
-    <div class="sp-section-card">
-      <div class="sp-section-title">⚖️ Count &amp; Mass Nouns (Contables e Incontables)</div>
-      <div class="sp-section-body">
-        <strong>Count nouns</strong> refer to individual things you can count. <strong>Mass nouns</strong> (uncountable) refer to substances or concepts measured in bulk.
-        <table class="sp-table">
-          <tr><th>Type</th><th>Spanish</th><th>English</th><th>Notes</th></tr>
-          <tr><td>Count</td><td>un libro / dos libros</td><td>a book / two books</td><td>Can use numbers + plural</td></tr>
-          <tr><td>Count</td><td>una silla / tres sillas</td><td>a chair / three chairs</td><td>Has plural form</td></tr>
-          <tr><td>Mass</td><td>el agua / el arroz</td><td>water / rice</td><td>Usually singular only</td></tr>
-          <tr><td>Mass</td><td>la información</td><td>information</td><td>No natural plural</td></tr>
-        </table>
-        <div class="sp-example">💡 Mass nouns can be "countified" with a unit: <em>un vaso de agua</em> (a glass of water).</div>
-      </div>
-    </div>
-
-    <div class="sp-section-card">
-      <div class="sp-section-title">◇ Common &amp; Proper Nouns (Comunes y Propios)</div>
-      <div class="sp-section-body">
-        <strong>Common nouns</strong> name general things. <strong>Proper nouns</strong> name specific people, places, or things — and are capitalized.
-        <table class="sp-table">
-          <tr><th>Type</th><th>Spanish</th><th>English</th></tr>
-          <tr><td>Common</td><td>ciudad, río, perro</td><td>city, river, dog</td></tr>
-          <tr><td>Proper</td><td>Madrid, el Amazonas, Rover</td><td>Madrid, the Amazon, Rover</td></tr>
-          <tr><td>Common</td><td>presidente, rey</td><td>president, king</td></tr>
-          <tr><td>Proper</td><td>el Presidente López, el Rey Felipe</td><td>President López, King Felipe</td></tr>
-        </table>
-        <div class="sp-example">💡 Unlike English, Spanish does <em>not</em> capitalize days of the week, months, or languages: <em>lunes, enero, español</em>.</div>
-      </div>
-    </div>
-  `;
-}
-
+// Spanish logic moved to spanish.html
 
 // ════════════════════════════════════════════════
 //  BRAIN GAMES — shared helper
@@ -7652,9 +6922,7 @@ function fitRenderHomeFitnessCard() {
 
 
 // ════════════════════════════════════════════════
-//  FREEFORM EDIT MODE  (overlay system v2)
-// ════════════════════════════════════════════════
-//  DASHBOARD DRAG & RESIZE
+//  FREEFORM EDIT MODE
 // ════════════════════════════════════════════════
 var editModeActive = false;
 
@@ -7662,6 +6930,25 @@ var CARD_IDS = [
   'today-card','dailys-card','home-projects','home-wordle-card',
   'home-countdown-card','home-fitness-card','home-quote-card','home-music-widget'
 ];
+
+function getDefaultLayout(container) {
+  var W    = container.offsetWidth || 900;
+  var cols = Math.max(2, Math.floor(W / 260));
+  var cardW = Math.floor((W - (cols + 1) * 14) / cols);
+  var layout = {};
+  var x = 14, y = 14, rowH = 0, col = 0;
+  CARD_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var h = Math.max(el.scrollHeight || 180, 160);
+    layout[id] = { left: x, top: y, width: cardW, height: h };
+    rowH = Math.max(rowH, h);
+    col++;
+    if (col >= cols) { col = 0; x = 14; y += rowH + 14; rowH = 0; }
+    else             { x += cardW + 14; }
+  });
+  return layout;
+}
 
 function toggleEditMode() {
   editModeActive = !editModeActive;
@@ -7675,161 +6962,167 @@ function toggleEditMode() {
   if (!container) return;
 
   if (editModeActive) {
-    CARD_IDS.forEach(function(id) {
-      var el = document.getElementById(id); if (!el) return;
-      el.style.cursor = 'default';
-    });
-    // Switch to freeform (absolute positioning)
-    container.classList.add('freeform');
-    var saved = _loadLayout();
-    var layout = saved || _autoLayout(container);
-    var maxBottom = 700;
-    CARD_IDS.forEach(function(id) {
-      var p = layout[id]; if (!p) return;
-      maxBottom = Math.max(maxBottom, p.top + p.height + 40);
-    });
-    container.style.minHeight = maxBottom + 'px';
-    CARD_IDS.forEach(function(id) {
-      var el = document.getElementById(id); if (!el) return;
-      var p = layout[id] || {left:14, top:14, width:el.offsetWidth||220, height:el.offsetHeight||180};
-      el.style.left   = p.left   + 'px';
-      el.style.top    = p.top    + 'px';
-      el.style.width  = p.width  + 'px';
-      el.style.height = p.height + 'px';
-    });
-    _initDragResize(container);
+    enterFreeform(container);
   } else {
-    CARD_IDS.forEach(function(id) {
-      var el = document.getElementById(id); if (!el) return;
-      el.style.cursor = '';
-    });
-    // Save layout then restore flex
-    _saveLayout(container);
-    container.classList.remove('freeform');
-    container.style.minHeight = '';
-    CARD_IDS.forEach(function(id) {
-      var el = document.getElementById(id); if (!el) return;
-      el.style.left = el.style.top = el.style.width = el.style.height = el.style.zIndex = '';
-    });
-    _teardownDragResize();
+    // Save FIRST while cards still have absolute positions
+    captureAndSaveLayout();
+    exitFreeform(container);
   }
 }
 
-
-// Wire drag bars and resize handles
-var _dragCleanups = [];
-function _initDragResize(container) {
-  _teardownDragResize();
-  CARD_IDS.forEach(function(id) {
-    var el = document.getElementById(id); if (!el) return;
-    var dragBar    = el.querySelector('.card-drag-bar');
-    var resizeHdl  = el.querySelector('.card-resize-handle');
-
-    // Block ALL clicks on card when in edit mode (capture phase = fires before inner elements)
-    var blockClick = function(e) {
-      if (editModeActive) { e.stopPropagation(); e.preventDefault(); }
-    };
-    el.addEventListener('click', blockClick, true);
-    _dragCleanups.push(function(){ el.removeEventListener('click', blockClick, true); });
-
-    if (dragBar) {
-      var onDragDown = function(e) {
-        if (!editModeActive) return;
-        e.preventDefault(); e.stopPropagation();
-        _bringToFront(el);
-        var sx = e.clientX, sy = e.clientY;
-        var ol = parseFloat(el.style.left)||0, ot = parseFloat(el.style.top)||0;
-        function mv(e2) {
-          el.style.left = Math.max(0, ol + e2.clientX - sx) + 'px';
-          el.style.top  = Math.max(0, ot + e2.clientY - sy) + 'px';
-          var bot = parseFloat(el.style.top) + el.offsetHeight + 40;
-          if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
-        }
-        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); _saveLayout(container); }
-        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
-      };
-      dragBar.addEventListener('mousedown', onDragDown);
-      _dragCleanups.push(function(){ dragBar.removeEventListener('mousedown', onDragDown); });
-    }
-
-    if (resizeHdl) {
-      var onResizeDown = function(e) {
-        if (!editModeActive) return;
-        e.preventDefault(); e.stopPropagation();
-        _bringToFront(el);
-        var sx = e.clientX, sy = e.clientY;
-        var sw = el.offsetWidth, sh = el.offsetHeight;
-        function mv(e2) {
-          el.style.width  = Math.max(160, sw + e2.clientX - sx) + 'px';
-          el.style.height = Math.max(80,  sh + e2.clientY - sy) + 'px';
-          var bot = parseFloat(el.style.top||0) + el.offsetHeight + 40;
-          if (bot > parseInt(container.style.minHeight||700)) container.style.minHeight = bot+'px';
-        }
-        function up() { document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); _saveLayout(container); }
-        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
-      };
-      resizeHdl.addEventListener('mousedown', onResizeDown);
-      _dragCleanups.push(function(){ resizeHdl.removeEventListener('mousedown', onResizeDown); });
-    }
-  });
-}
-
-function _teardownDragResize() {
-  _dragCleanups.forEach(function(fn){ fn(); });
-  _dragCleanups = [];
-}
-
-function _bringToFront(el) {
-  var maxZ = 10;
-  CARD_IDS.forEach(function(id) {
-    var e = document.getElementById(id);
-    if (e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex||10));
-  });
-  el.style.zIndex = maxZ + 1;
-}
-
-function _autoLayout(container) {
-  var W = container.offsetWidth || 900;
-  var col = 14, row = 14, maxH = 0, layout = {};
-  var defaultSizes = {
-    'today-card':         {w:200, h:200},
-    'dailys-card':        {w:260, h:220},
-    'home-projects':      {w:280, h:200},
-    'home-wordle-card':   {w:220, h:180},
-    'home-countdown-card':{w:220, h:160},
-    'home-fitness-card':  {w:260, h:160},
-    'home-quote-card':    {w:280, h:140},
-    'home-music-widget':  {w:300, h:170}
-  };
-  CARD_IDS.forEach(function(id) {
-    var s = defaultSizes[id] || {w:240, h:180};
-    if (col + s.w + 14 > W) { col = 14; row += maxH + 14; maxH = 0; }
-    layout[id] = {left:col, top:row, width:s.w, height:s.h};
-    col += s.w + 14;
-    maxH = Math.max(maxH, s.h);
-  });
-  return layout;
-}
-
-function _saveLayout(container) {
+function captureAndSaveLayout() {
+  // Read live DOM positions — must be called while freeform is still active
   var layout = {};
   CARD_IDS.forEach(function(id) {
-    var el = document.getElementById(id); if (!el) return;
+    var el = document.getElementById(id);
+    if (!el) return;
     layout[id] = {
-      left:   parseFloat(el.style.left)||0,
-      top:    parseFloat(el.style.top)||0,
+      left:   el.offsetLeft,
+      top:    el.offsetTop,
       width:  el.offsetWidth,
       height: el.offsetHeight
     };
   });
-  localStorage.setItem('hcLayout3', JSON.stringify(layout));
+  localStorage.setItem('homeCardLayoutV2', JSON.stringify(layout));
+  console.log('[EditMode] Layout saved:', layout);
 }
 
-function _loadLayout() {
-  try { return JSON.parse(localStorage.getItem('hcLayout3')); } catch(e) { return null; }
+function enterFreeform(container) {
+  container.classList.add('freeform');
+  var saved  = loadCardLayout();
+  var layout = saved || getDefaultLayout(container);
+
+  var maxBottom = 700;
+  CARD_IDS.forEach(function(id) {
+    var pos = layout[id]; if (!pos) return;
+    maxBottom = Math.max(maxBottom, pos.top + pos.height + 30);
+  });
+  container.style.minHeight = maxBottom + 'px';
+
+  CARD_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var pos = layout[id] || { left: 14, top: 14, width: 240, height: 200 };
+    el.style.left   = pos.left   + 'px';
+    el.style.top    = pos.top    + 'px';
+    el.style.width  = pos.width  + 'px';
+    el.style.height = pos.height + 'px';
+    el.style.overflow = 'auto';
+    bindDragMove(el, container);
+    bindResizeHandle(el, container);
+  });
 }
 
-function loadCardLayout() { return _loadLayout(); }
+function exitFreeform(container) {
+  container.classList.remove('freeform');
+  container.style.minHeight = '';
+
+  CARD_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    // Keep width so card retains roughly the same size in flex
+    var w = el.offsetWidth;
+    // Clear absolute positioning
+    el.style.position = '';
+    el.style.left     = '';
+    el.style.top      = '';
+    el.style.zIndex   = '';
+    el.style.overflow = '';
+    if (w > 0) el.style.width = w + 'px';
+    // Remove drag/resize listeners by replacing node
+    var clone = el.cloneNode(true);
+    el.parentNode.replaceChild(clone, el);
+  });
+  reattachCardClicks();
+}
+
+function reattachCardClicks() {
+  var tc = document.getElementById('today-card');
+  if (tc) tc.onclick = function() { setPage('planner'); showPlannerSection('calendar'); };
+  var wc = document.getElementById('home-wordle-card');
+  if (wc) wc.onclick = function() { wordleOpen('home'); };
+  var fc = document.getElementById('home-fitness-card');
+  if (fc) fc.onclick = function() { setPage('fitness'); };
+  var cc = document.getElementById('home-countdown-card');
+  if (cc) cc.onclick = function() { setPage('planner'); };
+}
+
+// ─── Drag to move ─────────────────────────────
+function bindDragMove(el, container) {
+  var bar = el.querySelector('.card-drag-bar');
+  if (!bar) return;
+  bar.onmousedown = function(e) {
+    e.preventDefault(); e.stopPropagation();
+    bringToFront(el);
+    var startX = e.clientX, startY = e.clientY;
+    var origL  = el.offsetLeft;
+    var origT  = el.offsetTop;
+    function onMove(ev) {
+      var newL = Math.max(0, origL + ev.clientX - startX);
+      var newT = Math.max(0, origT + ev.clientY - startY);
+      el.style.left = newL + 'px';
+      el.style.top  = newT + 'px';
+      var bottom = newT + el.offsetHeight + 30;
+      if (bottom > parseInt(container.style.minHeight || 700)) {
+        container.style.minHeight = bottom + 'px';
+      }
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  };
+}
+
+// ─── Resize by corner ─────────────────────────
+function bindResizeHandle(el, container) {
+  var handle = el.querySelector('.card-resize-handle');
+  if (!handle) return;
+  handle.onmousedown = function(e) {
+    e.preventDefault(); e.stopPropagation();
+    bringToFront(el);
+    var startX = e.clientX, startY = e.clientY;
+    var startW = el.offsetWidth, startH = el.offsetHeight;
+    function onMove(ev) {
+      var newW = Math.max(160, startW + ev.clientX - startX);
+      var newH = Math.max(100, startH + ev.clientY - startY);
+      el.style.width  = newW + 'px';
+      el.style.height = newH + 'px';
+      var bottom = el.offsetTop + newH + 30;
+      if (bottom > parseInt(container.style.minHeight || 700)) {
+        container.style.minHeight = bottom + 'px';
+      }
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup',   onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup',   onUp);
+  };
+}
+
+function bringToFront(el) {
+  var maxZ = 1;
+  CARD_IDS.forEach(function(id) {
+    var e = document.getElementById(id);
+    if (e) maxZ = Math.max(maxZ, parseInt(e.style.zIndex || 1));
+  });
+  el.style.zIndex = maxZ + 1;
+}
+
+function saveCardLayout() {} // compat no-op — use captureAndSaveLayout()
+function setCardSize()    {} // compat no-op
+
+function loadCardLayout() {
+  try {
+    var raw = localStorage.getItem('homeCardLayoutV2');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
 
 
 // ════════════════════════════════════════════════
