@@ -1188,11 +1188,40 @@
           </div>
           <!-- Transaction list -->
           <div id="mon-tx-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <!-- Saved templates section -->
+          <div style="margin-top:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:11px;font-weight:800;color:#4a7060;text-transform:uppercase;letter-spacing:0.06em">📋 Saved Templates</span>
+            </div>
+            <div id="mon-saved-templates-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          </div>
         </div>
 
         <!-- BUDGET TAB -->
-        <div id="mon-budget-panel" style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;display:none">
-          <!-- Summary row -->
+        <div id="mon-budget-panel" style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;display:none">
+
+          <!-- ── SPENDING GOAL SECTION ── -->
+          <div style="background:#111a15;border:1px solid #1a2e24;border-radius:14px;padding:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-size:12px;font-weight:800;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.06em">🎯 Spending Goal</div>
+              <div style="display:flex;gap:6px">
+                <button id="bud-goal-tab-monthly" onclick="monSetGoalTab('monthly')" style="padding:4px 10px;border-radius:16px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:11px;font-weight:700;cursor:pointer">Month</button>
+                <button id="bud-goal-tab-sixmonth" onclick="monSetGoalTab('sixmonth')" style="padding:4px 10px;border-radius:16px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:11px;font-weight:700;cursor:pointer">6 Mo</button>
+                <button id="bud-goal-tab-yearly" onclick="monSetGoalTab('yearly')" style="padding:4px 10px;border-radius:16px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:11px;font-weight:700;cursor:pointer">Year</button>
+              </div>
+            </div>
+            <!-- Goal input row -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <span style="font-size:18px;color:#7a9e8e">$</span>
+              <input id="bud-goal-input" type="number" min="0" placeholder="Set spending limit…"
+                style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:16px;font-weight:700;outline:none;box-sizing:border-box">
+              <button onclick="monSaveGoal()" style="background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">Set</button>
+            </div>
+            <!-- Progress display -->
+            <div id="bud-goal-progress"></div>
+          </div>
+
+          <!-- ── CATEGORIES SUMMARY ── -->
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
             <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
               <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Budgeted</div>
@@ -1207,6 +1236,7 @@
               <div id="mon-bud-remaining" style="font-size:18px;font-weight:900;color:#00d18c">$0</div>
             </div>
           </div>
+
           <div style="display:flex;align-items:center;justify-content:space-between">
             <span style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em">Categories</span>
             <button onclick="monAddCategory()" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#00d18c;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">+ Category</button>
@@ -1292,6 +1322,11 @@
               <button id="mon-type-expense" onclick="monSetType('expense')" style="flex:1;padding:7px;border-radius:8px;border:1px solid #e05c5c;background:#e05c5c;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Expense</button>
               <button id="mon-type-income" onclick="monSetType('income')" style="flex:1;padding:7px;border-radius:8px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">Income</button>
             </div>
+            <!-- Saved templates dropdown -->
+            <select id="mon-saved-tx-select" onchange="monFillFromSaved(this.value)"
+              style="width:100%;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#7a9e8e;font-size:13px;box-sizing:border-box">
+              <option value="">📋 Use a saved transaction…</option>
+            </select>
             <input id="mon-inp-desc" placeholder="Description" style="width:100%;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
             <input id="mon-inp-amount" placeholder="Amount ($)" type="number" min="0" step="0.01" style="width:100%;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
             <input id="mon-inp-date" type="date" style="width:100%;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
@@ -1301,6 +1336,11 @@
             <select id="mon-inp-account" style="width:100%;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:9px 12px;color:#e8f0ed;font-size:13px;box-sizing:border-box">
               <option value="">Account (optional)</option>
             </select>
+            <!-- Save as template checkbox -->
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding-top:2px">
+              <input type="checkbox" id="mon-save-template" style="width:15px;height:15px;accent-color:#00d18c">
+              <span style="font-size:12px;color:#7a9e8e">Save as reusable template</span>
+            </label>
           </div>
           <div style="display:flex;gap:10px;margin-top:18px">
             <button onclick="monModalClose()" style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#7a9e8e;padding:9px;font-size:13px;font-weight:700;cursor:pointer">Cancel</button>
@@ -5194,15 +5234,11 @@ window.mathGoBackToHub = function(){
 renderHomeDailys();
 renderHomeProjects();
 renderTodayCard();
-// Fitness & money graph — defer until after all JS is parsed
-(function tryFitInit(attempts) {
-  if (typeof fitRenderHomeFitnessCard === 'function') {
-    try { fitRenderHomeFitnessCard(); } catch(e) {}
-    try { renderMoneyGraphCard(); } catch(e) {}
-  } else if (attempts > 0) {
-    setTimeout(function(){ tryFitInit(attempts-1); }, 80);
-  }
-})(15);
+// Fitness & money graph rendered after full script eval via setTimeout(0)
+setTimeout(function() {
+  try { fitRenderHomeFitnessCard(); } catch(e) { console.warn('fitRender err:', e); }
+  try { renderMoneyGraphCard(); } catch(e) {}
+}, 0);
 chessInit();
 // wordleRenderMini() is called after wordle vars init below
 const _cv=document.getElementById('page-chess'); if(_cv&&_cv.querySelector('#chess-view')) _cv.querySelector('#chess-view').addEventListener('click',()=>{},true);
@@ -7907,7 +7943,7 @@ function fitRenderHomeFitnessCard() {
 // ═══════════════════════════════════════════════════════════════
 (function() {
 
-function monGetData() { try { var d=JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); if(!d.bankAccounts) d.bankAccounts=[]; if(!d.creditCards) d.creditCards=[]; return d; } catch(e) { return {transactions:[],categories:[],accounts:[],bankAccounts:[],creditCards:[]}; } }
+function monGetData() { try { var d=JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); if(!d.bankAccounts) d.bankAccounts=[]; if(!d.creditCards) d.creditCards=[]; if(!d.budgetGoals) d.budgetGoals={}; if(!d.savedTransactions) d.savedTransactions=[]; return d; } catch(e) { return {transactions:[],categories:[],accounts:[],bankAccounts:[],creditCards:[],budgetGoals:{},savedTransactions:[]}; } }
 function monSave(d) { localStorage.setItem('monData', JSON.stringify(d)); }
 
 var monCurrentType = 'expense';
@@ -7935,7 +7971,7 @@ window.monSetTab = function(tab) {
     else if (tab==='accounts'){ addBtn.style.display=''; addBtn.textContent='+ Bank Account'; addBtn.onclick=function(){ monOpenAddAccount('bank'); }; }
   }
   if (tab==='transactions') monRenderTransactions();
-  if (tab==='budget')       monRenderBudget();
+  if (tab==='budget')       { monRenderBudget(); monSetGoalTab(monGoalTab); }
   if (tab==='accounts')     monRenderAccounts();
 };
 
@@ -7966,24 +8002,66 @@ function monRenderTransactions() {
   if (!list) return;
   if (!txs.length) {
     list.innerHTML = '<div style="font-size:13px;color:#4a7060;padding:20px 0;text-align:center">No transactions this month.<br><span style="font-size:11px">Hit + Add to log one.</span></div>';
-    return;
+  } else {
+    list.innerHTML = '';
+    txs.forEach(function(tx) {
+      var isInc = tx.type==='income';
+      var color = isInc ? '#00d18c' : '#e05c5c';
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 12px';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'width:4px;align-self:stretch;border-radius:2px;background:'+color+';flex-shrink:0';
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+      info.innerHTML = '<div style="font-size:13px;font-weight:700;color:#e8f0ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(tx.desc||'(no description)')+'</div><div style="font-size:11px;color:#4a7060;margin-top:2px">'+tx.date+(tx.category?' · '+tx.category:'')+(tx.account?' · '+tx.account:'')+'</div>';
+      var amt = document.createElement('div');
+      amt.style.cssText = 'text-align:right;flex-shrink:0;font-size:14px;font-weight:900;color:'+color;
+      amt.textContent = (isInc?'+':'-')+monFmt(tx.amount);
+      var editBtn = document.createElement('button');
+      editBtn.style.cssText = 'background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center';
+      editBtn.title='Edit';
+      editBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+      (function(id){ editBtn.addEventListener('click', function(){ monOpenEdit(id); }); })(tx.id);
+      var delBtn = document.createElement('button');
+      delBtn.style.cssText = 'background:none;border:none;color:#4a7060;font-size:16px;cursor:pointer;padding:0 2px;line-height:1';
+      delBtn.textContent = '×';
+      (function(id){ delBtn.addEventListener('click', function(){ monDeleteTx(id); }); })(tx.id);
+      row.appendChild(bar); row.appendChild(info); row.appendChild(amt); row.appendChild(editBtn); row.appendChild(delBtn);
+      list.appendChild(row);
+    });
   }
-  list.innerHTML = txs.map(tx => {
-    var isInc = tx.type==='income';
-    var color = isInc ? '#00d18c' : '#e05c5c';
-    return `<div style="display:flex;align-items:center;gap:8px;background:#111a15;border:1px solid #1a2e24;border-radius:10px;padding:10px 12px">
-      <div style="width:4px;align-self:stretch;border-radius:2px;background:${color};flex-shrink:0"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:700;color:#e8f0ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tx.desc||'(no description)'}</div>
-        <div style="font-size:11px;color:#4a7060;margin-top:2px">${tx.date}${tx.category?' · '+tx.category:''}${tx.account?' · '+tx.account:''}</div>
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:14px;font-weight:900;color:${color}">${isInc?'+':'-'}${monFmt(tx.amount)}</div>
-      </div>
-      <button onclick="monOpenEdit('${tx.id}')" style="background:none;border:none;color:#4a7060;cursor:pointer;padding:0 4px;display:flex;align-items:center" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-      <button onclick="monDeleteTx('${tx.id}')" style="background:none;border:none;color:#4a7060;font-size:16px;cursor:pointer;padding:0 2px;line-height:1" title="Delete">×</button>
-    </div>`;
-  }).join('');
+
+  // Render saved templates list
+  var stList = document.getElementById('mon-saved-templates-list');
+  if (stList) {
+    if (!d.savedTransactions.length) {
+      stList.innerHTML = '<div style="font-size:12px;color:#4a7060;font-style:italic">None yet — tick "Save as template" when adding a transaction.</div>';
+    } else {
+      stList.innerHTML = '';
+      d.savedTransactions.forEach(function(st, i) {
+        var isInc = st.type==='income';
+        var color = isInc ? '#00d18c' : '#e05c5c';
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;background:#0f1f17;border:1px solid #1a2e24;border-radius:8px;padding:8px 10px';
+        var left = document.createElement('div');
+        left.style.cssText = 'flex:1;min-width:0';
+        left.innerHTML = '<span style="font-size:12px;font-weight:700;color:'+color+'">'+(isInc?'↑':'↓')+'</span> <span style="font-size:12px;color:#e8f0ed">'+st.desc+'</span> <span style="font-size:11px;color:#7a9e8e">— '+monFmt(st.amount)+(st.category?' ('+st.category+')':'')+'</span>';
+        var useBtn = document.createElement('button');
+        useBtn.style.cssText = 'background:#1a2e24;border:1px solid #1f3a2a;border-radius:6px;color:#00d18c;font-size:11px;font-weight:700;padding:3px 9px;cursor:pointer;flex-shrink:0';
+        useBtn.textContent = 'Use';
+        (function(idx){ useBtn.addEventListener('click', function(){
+          monOpenAdd();
+          setTimeout(function(){ monFillFromSaved(String(idx)); }, 50);
+        }); })(i);
+        var delBtn = document.createElement('button');
+        delBtn.style.cssText = 'background:none;border:none;color:#4a7060;font-size:15px;cursor:pointer;padding:0 2px;flex-shrink:0';
+        delBtn.textContent = '×';
+        (function(idx){ delBtn.addEventListener('click', function(){ monDeleteSavedTx(idx); monRenderTransactions(); }); })(i);
+        row.appendChild(left); row.appendChild(useBtn); row.appendChild(delBtn);
+        stList.appendChild(row);
+      });
+    }
+  }
 }
 
 function monRenderBudget() {
@@ -8030,6 +8108,147 @@ function monRenderBudget() {
     </div>`;
   }).join('');
 }
+
+// ─── Budget Goal Functions ────────────────────────────────────
+var monGoalTab = 'monthly';
+
+window.monSetGoalTab = function(tab) {
+  monGoalTab = tab;
+  ['monthly','sixmonth','yearly'].forEach(function(t) {
+    var btn = document.getElementById('bud-goal-tab-'+t);
+    if (!btn) return;
+    btn.style.background   = t===tab ? '#00d18c' : '#1a2e24';
+    btn.style.color        = t===tab ? '#0a1a12' : '#7a9e8e';
+    btn.style.borderColor  = t===tab ? '#00d18c' : '#1f3a2a';
+  });
+  var d = monGetData();
+  var inp = document.getElementById('bud-goal-input');
+  if (inp) inp.value = (d.budgetGoals[tab] || '');
+  monRenderGoalProgress();
+};
+
+window.monSaveGoal = function() {
+  var val = parseFloat(document.getElementById('bud-goal-input').value);
+  if (isNaN(val) || val <= 0) { alert('Enter a valid dollar amount.'); return; }
+  var d = monGetData();
+  d.budgetGoals[monGoalTab] = val;
+  monSave(d);
+  monRenderGoalProgress();
+};
+
+function monGetGoalDateRange(tab) {
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth(); // 0-indexed
+  if (tab === 'monthly') {
+    var start = year+'-'+String(month+1).padStart(2,'0')+'-01';
+    var end   = year+'-'+String(month+1).padStart(2,'0')+'-31';
+    return {start:start, end:end, label:'This Month'};
+  } else if (tab === 'sixmonth') {
+    // current month + 5 preceding months
+    var sMonth = month - 5;
+    var sYear  = year;
+    if (sMonth < 0) { sMonth += 12; sYear--; }
+    var start = sYear+'-'+String(sMonth+1).padStart(2,'0')+'-01';
+    var end   = year+'-'+String(month+1).padStart(2,'0')+'-31';
+    return {start:start, end:end, label:'Last 6 Months'};
+  } else {
+    var start = year+'-01-01';
+    var end   = year+'-12-31';
+    return {start:start, end:end, label:year+' (Full Year)'};
+  }
+}
+
+function monRenderGoalProgress() {
+  var container = document.getElementById('bud-goal-progress');
+  if (!container) return;
+  var d = monGetData();
+  var goal = d.budgetGoals[monGoalTab] || 0;
+  var range = monGetGoalDateRange(monGoalTab);
+  var expenses = d.transactions.filter(function(t) {
+    return t.type==='expense' && t.date && t.date >= range.start && t.date <= range.end;
+  });
+  var income = d.transactions.filter(function(t) {
+    return t.type==='income' && t.date && t.date >= range.start && t.date <= range.end;
+  });
+  var totalSpent  = expenses.reduce(function(s,t){ return s+t.amount; }, 0);
+  var totalIncome = income.reduce(function(s,t){ return s+t.amount; }, 0);
+
+  if (!goal) {
+    container.innerHTML = '<div style="font-size:12px;color:#4a7060;text-align:center;padding:8px 0">No goal set yet. Enter an amount above and hit Set.</div>';
+    return;
+  }
+
+  var pct        = Math.min(100, Math.round((totalSpent / goal) * 100));
+  var remaining  = goal - totalSpent;
+  var overBudget = remaining < 0;
+  var barColor   = pct >= 100 ? '#f74e4e' : pct >= 80 ? '#f7a94e' : '#00d18c';
+
+  // Status message
+  var statusMsg, statusColor;
+  if (overBudget) {
+    statusMsg = '🚨 Over budget by ' + monFmt(-remaining);
+    statusColor = '#f74e4e';
+  } else if (pct >= 80) {
+    statusMsg = '⚠️ Getting close — ' + monFmt(remaining) + ' left';
+    statusColor = '#f7a94e';
+  } else {
+    statusMsg = '✅ On track — ' + monFmt(remaining) + ' remaining';
+    statusColor = '#00d18c';
+  }
+
+  container.innerHTML =
+    // Spending vs goal numbers
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">' +
+      '<div>' +
+        '<div style="font-size:11px;color:#7a9e8e;margin-bottom:2px">SPENT ' + range.label.toUpperCase() + '</div>' +
+        '<div style="font-size:22px;font-weight:900;color:'+(overBudget?'#f74e4e':'#e8f0ed')+'">' + monFmt(totalSpent) + '</div>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<div style="font-size:11px;color:#7a9e8e;margin-bottom:2px">GOAL</div>' +
+        '<div style="font-size:22px;font-weight:900;color:#7a9e8e">' + monFmt(goal) + '</div>' +
+      '</div>' +
+    '</div>' +
+    // Progress bar
+    '<div style="height:12px;background:#1a2e24;border-radius:6px;overflow:hidden;margin-bottom:8px">' +
+      '<div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:6px;transition:width 0.4s"></div>' +
+    '</div>' +
+    // pct label + status
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+      '<span style="font-size:11px;color:#7a9e8e">'+pct+'% used</span>' +
+      '<span style="font-size:12px;font-weight:700;color:'+statusColor+'">'+statusMsg+'</span>' +
+    '</div>' +
+    // Income mini stat
+    '<div style="background:#0f1f17;border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">' +
+      '<span style="font-size:12px;color:#7a9e8e">Income this period</span>' +
+      '<span style="font-size:14px;font-weight:700;color:#00d18c">+' + monFmt(totalIncome) + '</span>' +
+    '</div>';
+}
+
+window.monFillFromSaved = function(idx) {
+  if (idx === '') return;
+  var d = monGetData();
+  var st = d.savedTransactions[parseInt(idx)];
+  if (!st) return;
+  monCurrentType = st.type;
+  monSetType(st.type);
+  document.getElementById('mon-inp-desc').value   = st.desc || '';
+  document.getElementById('mon-inp-amount').value = st.amount || '';
+  var catSel = document.getElementById('mon-inp-cat');
+  if (catSel && st.category) catSel.value = st.category;
+  var accSel = document.getElementById('mon-inp-account');
+  if (accSel && st.account) accSel.value = st.account;
+  // Reset dropdown
+  document.getElementById('mon-saved-tx-select').value = '';
+};
+
+window.monDeleteSavedTx = function(idx) {
+  var d = monGetData();
+  d.savedTransactions.splice(idx, 1);
+  monSave(d);
+};
+
+
 
 function monRenderAccounts() {
   var d = monGetData();
@@ -8253,10 +8472,19 @@ window.monOpenAdd = function() {
   // Populate category dropdown
   var d = monGetData();
   var catSel = document.getElementById('mon-inp-cat');
-  catSel.innerHTML = '<option value="">Category (optional)</option>' + d.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  catSel.innerHTML = '<option value="">Category (optional)</option>' + d.categories.map(c=>'<option value="'+c.name+'">'+c.name+'</option>').join('');
   var accSel = document.getElementById('mon-inp-account');
-  accSel.innerHTML = '<option value="">Account (optional)</option>' + d.accounts.map(a=>`<option value="${a.name}">${a.name}</option>`).join('');
-  monEditId = null;
+  accSel.innerHTML = '<option value="">Account (optional)</option>' + d.accounts.map(a=>'<option value="'+a.name+'">'+a.name+'</option>').join('');
+  // Populate saved templates
+  var stSel = document.getElementById('mon-saved-tx-select');
+  if (stSel) {
+    stSel.innerHTML = '<option value="">\uD83D\uDCCB Use a saved transaction…</option>' +
+      d.savedTransactions.map(function(st, i) {
+        return '<option value="'+i+'">'+(st.type==='income'?'\u2191':'\u2193')+' '+st.desc+' — '+monFmt(st.amount)+(st.category?' ('+st.category+')':'')+'</option>';
+      }).join('');
+  }
+  var cb = document.getElementById('mon-save-template');
+  if (cb) cb.checked = false;
   document.getElementById('mon-modal-title').textContent = 'Add Transaction';
   document.getElementById('mon-modal').style.display='flex';
 };
@@ -8272,10 +8500,19 @@ window.monModalSave = function() {
   if (!desc || isNaN(amount) || amount<=0 || !date) { alert('Please fill in description, amount, and date.'); return; }
   var d = monGetData();
   if (monEditId) {
-    d.transactions = d.transactions.map(t => t.id===monEditId ? {id:monEditId,type:monCurrentType,desc:desc,amount:amount,date:date,category:cat,account:acc} : t);
+    d.transactions = d.transactions.map(function(t){ return t.id===monEditId ? {id:monEditId,type:monCurrentType,desc:desc,amount:amount,date:date,category:cat,account:acc} : t; });
     monEditId = null;
   } else {
     d.transactions.push({id:Date.now()+'', type:monCurrentType, desc:desc, amount:amount, date:date, category:cat, account:acc});
+  }
+  // Save as template if checked
+  var cb = document.getElementById('mon-save-template');
+  if (cb && cb.checked) {
+    var existing = d.savedTransactions.findIndex(function(s){ return s.desc===desc && s.type===monCurrentType; });
+    var tpl = {type:monCurrentType, desc:desc, amount:amount, category:cat, account:acc};
+    if (existing !== -1) d.savedTransactions[existing] = tpl;
+    else d.savedTransactions.push(tpl);
+    cb.checked = false;
   }
   monSave(d);
   monModalClose();
