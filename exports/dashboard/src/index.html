@@ -9359,12 +9359,21 @@ function renderMoneyGraphCard() {
 
   var txCount = (d.transactions||[]).filter(function(t){ return t.date && t.date.startsWith(thisMonth.key); }).length;
 
-  var barsHtml = months.map(function(m, idx) {
+  var ttStyle = 'position:absolute;background:#0a1a12;border:1px solid #00d18c;color:#e8f0ed;font-size:11px;padding:4px 8px;border-radius:6px;pointer-events:none;white-space:nowrap;z-index:999;display:none;transform:translateX(-50%)';
+  var barsHtml =
+    '<div id="mon-card-tt" style="'+ttStyle+'"></div>' +
+    months.map(function(m, idx) {
     var isNow = idx === 5;
-    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">' +
+    var incTip = m.label+' Income: $'+m.inc.toFixed(2);
+    var expTip = m.label+' Expenses: $'+m.exp.toFixed(2);
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;position:relative">' +
       '<div style="display:flex;align-items:flex-end;gap:2px;height:52px">' +
-        '<div style="width:7px;border-radius:3px 3px 0 0;background:#00d18c;opacity:'+(isNow?1:0.45)+';height:'+barH(m.inc)+'px" title="'+m.label+' income"></div>' +
-        '<div style="width:7px;border-radius:3px 3px 0 0;background:#e05c5c;opacity:'+(isNow?1:0.45)+';height:'+barH(m.exp)+'px" title="'+m.label+' expenses"></div>' +
+        '<div style="width:7px;border-radius:3px 3px 0 0;background:#00d18c;opacity:'+(isNow?1:0.45)+';height:'+barH(m.inc)+'px;cursor:pointer" '+
+          'onmouseenter="var t=document.getElementById(\'mon-card-tt\');t.textContent=\''+incTip+'\';t.style.display=\'block\';t.style.left=this.getBoundingClientRect().left-this.closest(\'[id]\').getBoundingClientRect().left+\'px\';t.style.top=\'-28px\'" '+
+          'onmouseleave="document.getElementById(\'mon-card-tt\').style.display=\'none\'"></div>' +
+        '<div style="width:7px;border-radius:3px 3px 0 0;background:#e05c5c;opacity:'+(isNow?1:0.45)+';height:'+barH(m.exp)+'px;cursor:pointer" '+
+          'onmouseenter="var t=document.getElementById(\'mon-card-tt\');t.textContent=\''+expTip+'\';t.style.display=\'block\';t.style.left=this.getBoundingClientRect().left-this.closest(\'[id]\').getBoundingClientRect().left+\'px\';t.style.top=\'-28px\'" '+
+          'onmouseleave="document.getElementById(\'mon-card-tt\').style.display=\'none\'"></div>' +
       '</div>' +
       '<div style="font-size:9px;color:'+(isNow?'#e8f0ed':'#4a7060')+';font-weight:'+(isNow?700:400)+';">' + m.label + '</div>' +
     '</div>';
@@ -9841,25 +9850,16 @@ function monRenderGraphs() {
   var keys = _ml.keys, labels = _ml.labels;
   var PAL = MON_GRAPH_PALETTE;
 
-  // ── Reliable width: use window width minus sidebar+padding ──
-  function getW(el) {
-    // Try getBoundingClientRect on ancestors up to 6 levels
-    var node = el;
-    for (var i = 0; i < 6; i++) {
-      if (!node) break;
-      var rect = node.getBoundingClientRect();
-      if (rect && rect.width > 80) return Math.floor(rect.width) - 40;
-      node = node.parentElement;
-    }
-    // Fallback: window width minus sidebar (64px) minus padding
-    return Math.max(300, window.innerWidth - 120);
+  // ── Width: window minus sidebar(64) minus panel-padding(40) minus card-padding(40) ──
+  function getW() {
+    return Math.max(300, window.innerWidth - 64 - 40 - 40);
   }
 
   // ── Bar chart (SVG) ──
   function svgBar(containerId, seriesArr, lbls) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var W = getW(el);
+    var W = getW();
     var H = 200;
     var pad = { l: 52, r: 16, t: 20, b: 32 };
     var cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
@@ -9901,7 +9901,7 @@ function monRenderGraphs() {
   function svgLine(containerId, dataArr, lbls, color) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var W = getW(el);
+    var W = getW();
     var H = 180;
     var pad = { l: 52, r: 16, t: 16, b: 32 };
     var cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
