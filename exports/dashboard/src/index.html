@@ -1216,7 +1216,7 @@
         <div id="mon-budget-panel" style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;display:none">
 
           <!-- ── Savings Goal ── -->
-          <div style="border-top:1px solid #1a2e24;padding-top:16px;margin-top:4px">
+          <div style="background:#111a15;border:1px solid #1a2e24;border-radius:14px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
               <div style="font-size:12px;font-weight:800;color:#4e8ef7;text-transform:uppercase;letter-spacing:0.06em">💰 Savings Goal</div>
               <div style="display:flex;gap:6px">
@@ -1231,7 +1231,6 @@
               <button onclick="monSaveSavGoal()" style="background:#4e8ef7;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">Set</button>
             </div>
             <div id="sav-goal-progress"></div>
-          </div>
           </div>
 
           <!-- ── CATEGORIES SUMMARY ── -->
@@ -8438,7 +8437,7 @@ window.monSetTab = function(tab) {
   if (tab==='transactions') monRenderTransactions();
   if (tab==='budget')       { monRenderBudget(); monSetSavGoalTab(monSavGoalTab); }
   if (tab==='accounts')     monRenderAccounts();
-  if (tab==='graphs')       { requestAnimationFrame(function(){ requestAnimationFrame(function(){ monRenderGraphs(); }); }); }
+  if (tab==='graphs')       setTimeout(monRenderGraphs, 150);
 };
 
 window.monPrevMonth = function() { monViewMonth--; if(monViewMonth<0){monViewMonth=11;monViewYear--;} monRenderTransactions(); };
@@ -9766,15 +9765,7 @@ function monGetMonthLabels() {
 function monSizeCanvas(el) {
   if (!el) return;
   var parent = el.parentElement;
-  // Walk up to find a container with real width, skipping hidden panels
-  var w = 0, node = parent;
-  while (node && w < 10) {
-    w = node.getBoundingClientRect().width || node.offsetWidth || node.clientWidth || 0;
-    node = node.parentElement;
-  }
-  // Fallback: compute from window minus sidebar
-  if (w < 10) w = (window.innerWidth || 900) - 64 - 56;
-  else w = w - 40; // subtract card padding
+  var w = (window.innerWidth || 900) - 64 - 56;
   var h = (parent && parent.style && parent.style.height) ? parseInt(parent.style.height) : 0;
   if (h < 10) h = 220;
   el.width  = Math.max(w, 200);
