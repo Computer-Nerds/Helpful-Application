@@ -9840,142 +9840,161 @@ function monSizeCanvas(el) {
 }
 
 function monRenderGraphs() {
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js not loaded');
+    return;
+  }
+
   var d = monGetData();
-  var txs = d.transactions || [];
   var _ml = monGetMonthLabels();
   var keys = _ml.keys, labels = _ml.labels;
   var PAL = MON_GRAPH_PALETTE;
 
-  function fmt(n) {
-    if (!n) return '$0';
-    if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(1) + 'k';
-    return '$' + Math.abs(n).toFixed(0);
-  }
-
-  // Pure CSS horizontal bars — zero DOM measurement
-  function hBars(containerId, groups, groupLabels, colors) {
+  function getCanvas(containerId) {
     var el = document.getElementById(containerId);
-    if (!el) return;
-    var allV = [].concat.apply([], groups.map(function(g){ return g; }));
-    var maxV = Math.max.apply(null, allV.map(Math.abs).concat([1]));
-    var html = '<div style="display:flex;flex-direction:column;gap:6px;padding:4px 0">';
-    groupLabels.forEach(function(lbl, i) {
-      html += '<div style="display:flex;align-items:center;gap:8px">';
-      html += '<div style="font-size:10px;color:#7a9e8e;width:36px;flex-shrink:0;text-align:right">' + lbl + '</div>';
-      html += '<div style="flex:1;display:flex;flex-direction:column;gap:2px">';
-      groups.forEach(function(g, si) {
-        var v = g[i] || 0;
-        var pct = Math.round(Math.abs(v) / maxV * 100);
-        html += '<div style="height:12px;background:#1a2e24;border-radius:3px;overflow:hidden" title="' + colors[si].label + ' ' + lbl + ': $' + v.toFixed(2) + '">' +
-          '<div style="height:100%;width:' + pct + '%;background:' + colors[si].color + ';border-radius:3px"></div>' +
-        '</div>';
-      });
-      html += '</div>';
-      html += '<div style="font-size:10px;color:#e8f0ed;width:50px;flex-shrink:0;text-align:left">';
-      groups.forEach(function(g, si) {
-        html += '<span style="color:' + colors[si].color + '">' + fmt(g[i]) + '</span> ';
-      });
-      html += '</div></div>';
-    });
-    html += '</div>';
-    // Legend
-    html += '<div style="display:flex;gap:12px;margin-top:8px;padding-left:44px">';
-    colors.forEach(function(c) {
-      html += '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:' + c.color + '"></div><span style="font-size:10px;color:#7a9e8e">' + c.label + '</span></div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
+    if (!el) return null;
+    el.innerHTML = '';
+    var cv = document.createElement('canvas');
+    cv.style.width  = '100%';
+    cv.style.height = '100%';
+    el.style.display = 'block';
+    el.appendChild(cv);
+    return cv;
   }
 
-  // Net savings bars (green/red)
-  function netBars(containerId, vals, lbls) {
+  function noData(containerId) {
     var el = document.getElementById(containerId);
-    if (!el) return;
-    var maxV = Math.max.apply(null, vals.map(Math.abs).concat([1]));
-    var html = '<div style="display:flex;flex-direction:column;gap:6px;padding:4px 0">';
-    vals.forEach(function(v, i) {
-      var pct = Math.round(Math.abs(v) / maxV * 100);
-      var col = v >= 0 ? '#00d18c' : '#e05c5c';
-      html += '<div style="display:flex;align-items:center;gap:8px">' +
-        '<div style="font-size:10px;color:#7a9e8e;width:36px;flex-shrink:0;text-align:right">' + lbls[i] + '</div>' +
-        '<div style="flex:1;height:12px;background:#1a2e24;border-radius:3px;overflow:hidden" title="' + lbls[i] + ' net: $' + v.toFixed(2) + '">' +
-          '<div style="height:100%;width:' + pct + '%;background:' + col + ';border-radius:3px"></div>' +
-        '</div>' +
-        '<div style="font-size:10px;font-weight:700;color:' + col + ';width:50px;flex-shrink:0">' + (v>=0?'+':'') + fmt(v) + '</div>' +
-      '</div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
+    if (el) el.innerHTML = '<div style="color:#4a7060;font-size:12px;padding:16px;text-align:center">No data yet</div>';
   }
 
-  // Horizontal category bars
-  function catBars(containerId, items) {
-    var el = document.getElementById(containerId);
-    if (!el) return;
-    if (!items.length) { el.innerHTML = '<div style="color:#4a7060;font-size:12px;padding:8px">No expense data yet</div>'; return; }
-    var maxV = Math.max.apply(null, items.map(function(x){ return x.v; })) || 1;
-    el.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">' +
-    items.map(function(item) {
-      var pct = Math.round(item.v / maxV * 100);
-      return '<div>' +
-        '<div style="display:flex;justify-content:space-between;margin-bottom:3px">' +
-          '<span style="font-size:11px;color:#e8f0ed">' + item.label + '</span>' +
-          '<span style="font-size:11px;font-weight:700;color:' + item.color + '">$' + item.v.toFixed(2) + '</span>' +
-        '</div>' +
-        '<div style="height:8px;background:#1a2e24;border-radius:4px;overflow:hidden">' +
-          '<div style="height:100%;width:' + pct + '%;background:' + item.color + ';border-radius:4px"></div>' +
-        '</div>' +
-      '</div>';
-    }).join('') + '</div>';
-  }
+  var chartDefaults = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#7a9e8e', font: { size: 11 } } },
+      tooltip: { backgroundColor: '#0a1a12', borderColor: '#00d18c', borderWidth: 1, titleColor: '#e8f0ed', bodyColor: '#7a9e8e' }
+    },
+    scales: {
+      x: { ticks: { color: '#4a7060', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { ticks: { color: '#4a7060', font: { size: 10 }, callback: function(v){ return '$'+(Math.abs(v)>=1000?(v/1000).toFixed(1)+'k':v); } }, grid: { color: 'rgba(255,255,255,0.06)' } }
+    }
+  };
 
-  var incomes  = keys.map(function(k) { return txs.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0); });
-  var expenses = keys.map(function(k) { return txs.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0); });
-  var nets     = keys.map(function(k,i) { return incomes[i] - expenses[i]; });
+  var incomes  = keys.map(function(k) {
+    var md = (typeof monInjectRecurring==='function') ? monInjectRecurring(JSON.parse(JSON.stringify(d)), k) : d;
+    return md.transactions.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0);
+  });
+  var expenses = keys.map(function(k) {
+    var md = (typeof monInjectRecurring==='function') ? monInjectRecurring(JSON.parse(JSON.stringify(d)), k) : d;
+    return md.transactions.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0);
+  });
+  var nets = keys.map(function(k, i) { return incomes[i] - expenses[i]; });
 
   var hasData = incomes.some(function(v){ return v>0; }) || expenses.some(function(v){ return v>0; });
-  if (!hasData) {
-    ['mgr-svg-inex','mgr-svg-net','mgr-svg-cat','mgr-svg-cum','mgr-svg-acc'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) el.innerHTML = '<div style="color:#4a7060;font-size:12px;padding:12px;text-align:center">No transactions yet</div>';
+
+  // ── 1. Income vs Expenses ──
+  monDestroyChart('inex');
+  var cv1 = getCanvas('mgr-svg-inex');
+  if (cv1 && hasData) {
+    monChartInstances['inex'] = new Chart(cv1, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Income',   data: incomes,  backgroundColor: 'rgba(0,209,140,0.7)',  borderColor: '#00d18c', borderWidth: 1, borderRadius: 4 },
+          { label: 'Expenses', data: expenses, backgroundColor: 'rgba(224,92,92,0.7)', borderColor: '#e05c5c', borderWidth: 1, borderRadius: 4 }
+        ]
+      },
+      options: JSON.parse(JSON.stringify(chartDefaults))
     });
-    return;
-  }
+  } else if (cv1) noData('mgr-svg-inex');
 
-  hBars('mgr-svg-inex', [incomes, expenses], labels, [
-    {label:'Income', color:'#00d18c'},
-    {label:'Expenses', color:'#e05c5c'}
-  ]);
+  // ── 2. Net Savings ──
+  monDestroyChart('net');
+  var cv2 = getCanvas('mgr-svg-net');
+  if (cv2 && hasData) {
+    monChartInstances['net'] = new Chart(cv2, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Net',
+          data: nets,
+          backgroundColor: nets.map(function(v){ return v >= 0 ? 'rgba(0,209,140,0.7)' : 'rgba(224,92,92,0.7)'; }),
+          borderColor:      nets.map(function(v){ return v >= 0 ? '#00d18c' : '#e05c5c'; }),
+          borderWidth: 1, borderRadius: 4
+        }]
+      },
+      options: JSON.parse(JSON.stringify(chartDefaults))
+    });
+  } else if (cv2) noData('mgr-svg-net');
 
-  netBars('mgr-svg-net', nets, labels);
-
+  // ── 3. Category breakdown ──
+  monDestroyChart('cat');
   var catTotals = {};
-  txs.forEach(function(t) {
+  d.transactions.forEach(function(t) {
     if (t.type !== 'expense') return;
-    var cat = t.category || 'Uncategorized';
-    catTotals[cat] = (catTotals[cat]||0) + t.amount;
+    catTotals[t.category||'Uncategorized'] = (catTotals[t.category||'Uncategorized']||0) + t.amount;
   });
-  catBars('mgr-svg-cat', Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8).map(function(k,i){
-    return { label:k, v:catTotals[k], color:PAL[i%PAL.length] };
-  }));
+  var catKeys = Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8);
+  var cv3 = getCanvas('mgr-svg-cat');
+  if (cv3 && catKeys.length) {
+    var catOpts = JSON.parse(JSON.stringify(chartDefaults));
+    catOpts.indexAxis = 'y';
+    catOpts.plugins.legend = { display: false };
+    monChartInstances['cat'] = new Chart(cv3, {
+      type: 'bar',
+      data: {
+        labels: catKeys,
+        datasets: [{ label: 'Spent', data: catKeys.map(function(k){ return catTotals[k]; }), backgroundColor: PAL.slice(0,catKeys.length), borderRadius: 4 }]
+      },
+      options: catOpts
+    });
+  } else if (cv3) noData('mgr-svg-cat');
 
-  // Cumulative spending this month
+  // ── 4. Cumulative spending this month ──
+  monDestroyChart('cum');
   var now2 = new Date();
   var thisKey = now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0');
   var days = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
   var cumL = [], cumV = [], run = 0;
   for (var dd = 1; dd <= days; dd++) {
     var dayKey = thisKey+'-'+String(dd).padStart(2,'0');
-    run += txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; }, 0);
-    cumL.push(String(dd));
+    run += d.transactions.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; }, 0);
+    if (dd % Math.ceil(days/10) === 0 || dd === days) cumL.push(String(dd));
+    else cumL.push('');
     cumV.push(run);
   }
-  netBars('mgr-svg-cum', cumV.map(function(v){ return v; }), cumL);
+  var cv4 = getCanvas('mgr-svg-cum');
+  if (cv4 && run > 0) {
+    var cumOpts = JSON.parse(JSON.stringify(chartDefaults));
+    cumOpts.plugins.legend = { display: false };
+    monChartInstances['cum'] = new Chart(cv4, {
+      type: 'line',
+      data: {
+        labels: cumL,
+        datasets: [{ label: 'Cumulative Spend', data: cumV, borderColor: '#f7a94e', backgroundColor: 'rgba(247,169,78,0.15)', fill: true, tension: 0.3, pointRadius: 2 }]
+      },
+      options: cumOpts
+    });
+  } else if (cv4) noData('mgr-svg-cum');
 
-  // Account balances
-  var accItems = (d.bankAccounts||[]).map(function(a,i){ return { label:(a.bank?a.bank+' ':'')+a.name, v:a.balance||0, color:PAL[i%PAL.length] }; })
-    .concat((d.creditCards||[]).map(function(cc,i){ return { label:(cc.bank?cc.bank+' ':'')+cc.name, v:cc.balance||0, color:'#e05c5c' }; }));
-  catBars('mgr-svg-acc', accItems);
+  // ── 5. Account balances ──
+  monDestroyChart('acc');
+  var accLabels = [], accVals = [], accColors = [];
+  (d.bankAccounts||[]).forEach(function(a, i) { accLabels.push((a.bank?a.bank+' ':'')+a.name); accVals.push(a.balance||0); accColors.push(PAL[i%PAL.length]); });
+  (d.creditCards||[]).forEach(function(cc) { accLabels.push((cc.bank?cc.bank+' ':'')+cc.name); accVals.push(cc.balance||0); accColors.push('#e05c5c'); });
+  var cv5 = getCanvas('mgr-svg-acc');
+  if (cv5 && accLabels.length) {
+    var accOpts = JSON.parse(JSON.stringify(chartDefaults));
+    accOpts.scales = {};
+    accOpts.plugins.legend = { display: false };
+    monChartInstances['acc'] = new Chart(cv5, {
+      type: 'doughnut',
+      data: { labels: accLabels, datasets: [{ data: accVals, backgroundColor: accColors, borderWidth: 0 }] },
+      options: accOpts
+    });
+  } else if (cv5) noData('mgr-svg-acc');
 }
 
 window.monGraphSetRange = monGraphSetRange;
