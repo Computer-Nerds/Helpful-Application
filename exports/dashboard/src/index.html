@@ -8430,14 +8430,8 @@ window.monSetTab = function(tab) {
   if (tab==='accounts')     monRenderAccounts();
 
   if (tab==='graphs') {
-    // Let the panel become visible, then render with two rAF for layout
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        var testEl = document.getElementById('mgr-svg-inex');
-        if (testEl) { void testEl.getBoundingClientRect(); }
-        monRenderGraphs();
-      });
-    });
+    // Give the browser a real layout tick before measuring
+    setTimeout(function() { monRenderGraphs(); }, 80);
   }
 };
 
@@ -9035,7 +9029,7 @@ window.monDeleteTx = function(id) {
 };
 window.monOpenEdit = function(id) {
   var d = monGetData();
-  var tx = d.transactions.find(t=>t.id===id);
+  var tx = d.transactions.find(function(t){ return t.id===id; });
   if (!tx) return;
   monEditId = id;
   monCurrentType = tx.type;
@@ -9044,11 +9038,21 @@ window.monOpenEdit = function(id) {
   document.getElementById('mon-inp-amount').value = tx.amount||'';
   document.getElementById('mon-inp-date').value   = tx.date||'';
   var catSel = document.getElementById('mon-inp-cat');
-  catSel.innerHTML = '<option value="">Category (optional)</option>' + d.categories.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  catSel.innerHTML = '<option value="">Category (optional)</option>' + (d.categories||[]).map(function(c){ return '<option value="'+c.name+'">'+c.name+'</option>'; }).join('');
   catSel.value = tx.category||'';
   var accSel = document.getElementById('mon-inp-account');
-  accSel.innerHTML = '<option value="">Account (optional)</option>' + d.accounts.map(a=>`<option value="${a.name}">${a.name}</option>`).join('');
+  accSel.innerHTML = '<option value="">Account (optional)</option>' + (d.accounts||[]).map(function(a){ return '<option value="'+a.name+'">'+a.name+'</option>'; }).join('');
   accSel.value = tx.account||'';
+  // Pre-fill recurring state
+  var recurChk   = document.getElementById('mon-recurring-chk');
+  var recurFreqEl= document.getElementById('mon-recurring-freq');
+  if (recurChk) {
+    recurChk.checked = !!(tx.recurring);
+    if (recurFreqEl) {
+      recurFreqEl.style.display = tx.recurring ? '' : 'none';
+      if (tx.recurFreq) recurFreqEl.value = tx.recurFreq;
+    }
+  }
   document.getElementById('mon-modal-title').textContent = 'Edit Transaction';
   document.getElementById('mon-modal').style.display='flex';
 };
@@ -9265,32 +9269,43 @@ window.monModalSave = function() {
   var acc    = document.getElementById('mon-inp-account').value;
   if (!desc || isNaN(amount) || amount<=0 || !date) { alert('Please fill in description, amount, and date.'); return; }
   var d = monGetData();
-  if (monEditId) {
-    d.transactions = d.transactions.map(function(t){ return t.id===monEditId ? {id:monEditId,type:monCurrentType,desc:desc,amount:amount,date:date,category:cat,account:acc} : t; });
-    monEditId = null;
+  var isEdit  = !!monEditId;
+  var editKey = monEditId;
+  if (isEdit) {
+    d.transactions = d.transactions.map(function(t){
+      return t.id===editKey ? {id:editKey,type:monCurrentType,desc:desc,amount:amount,date:date,category:cat,account:acc} : t;
+    });
   } else {
     d.transactions.push({id:Date.now()+'', type:monCurrentType, desc:desc, amount:amount, date:date, category:cat, account:acc});
   }
   // Save as template if checked
   var cb = document.getElementById('mon-save-template');
   if (cb && cb.checked) {
+    if (!d.savedTransactions) d.savedTransactions = [];
     var existing = d.savedTransactions.findIndex(function(s){ return s.desc===desc && s.type===monCurrentType; });
     var tpl = {type:monCurrentType, desc:desc, amount:amount, category:cat, account:acc};
     if (existing !== -1) d.savedTransactions[existing] = tpl;
     else d.savedTransactions.push(tpl);
     cb.checked = false;
   }
-  // Handle recurring flag
-  var recurChk  = document.getElementById('mon-recurring-chk');
-  var recurFreqEl = document.getElementById('mon-recurring-freq');
-  if (recurChk && recurChk.checked && !monEditId) {
-    var lastTx = d.transactions[d.transactions.length - 1];
-    if (lastTx) {
-      lastTx.recurring  = true;
-      lastTx.recurFreq  = (recurFreqEl && recurFreqEl.value) || 'monthly';
-      lastTx.recurNextDue = monCalcNextDue(lastTx.date, lastTx.recurFreq);
+  // Handle recurring — works for both add AND edit
+  var recurChk   = document.getElementById('mon-recurring-chk');
+  var recurFreqEl= document.getElementById('mon-recurring-freq');
+  var txToMark   = isEdit
+    ? d.transactions.find(function(t){ return t.id===editKey; })
+    : d.transactions[d.transactions.length - 1];
+  if (txToMark) {
+    if (recurChk && recurChk.checked) {
+      txToMark.recurring    = true;
+      txToMark.recurFreq    = (recurFreqEl && recurFreqEl.value) || 'monthly';
+      txToMark.recurNextDue = monCalcNextDue(txToMark.date, txToMark.recurFreq);
+    } else {
+      delete txToMark.recurring;
+      delete txToMark.recurFreq;
+      delete txToMark.recurNextDue;
     }
   }
+  monEditId = null;
   monSave(d);
   monModalClose();
   monRenderTransactions();
@@ -9319,18 +9334,17 @@ function renderMoneyGraphCard() {
     var dm = new Date(now.getFullYear(), now.getMonth() - i, 1);
     var key = dm.getFullYear()+'-'+String(dm.getMonth()+1).padStart(2,'0');
     var label = dm.toLocaleDateString('en-US',{month:'short'});
-    var inc = 0, exp = 0, sav = 0;
+    var inc = 0, exp = 0;
     (d.transactions||[]).forEach(function(t) {
       if (!t.date || !t.date.startsWith(key)) return;
       if (t.type==='income')  inc += (t.amount||0);
       if (t.type==='expense') exp += (t.amount||0);
-      if (t.type==='saving')  sav += (t.amount||0);
     });
-    months.push({key:key, label:label, inc:inc, exp:exp, sav:sav});
+    months.push({key:key, label:label, inc:inc, exp:exp});
   }
 
   var thisMonth = months[months.length-1];
-  var net = thisMonth.inc - thisMonth.exp - thisMonth.sav;
+  var net = thisMonth.inc - thisMonth.exp;
   var netColor = net >= 0 ? '#00d18c' : '#e05c5c';
   var netSign  = net > 0 ? '+' : '';
   var maxVal = Math.max.apply(null, months.map(function(m){ return Math.max(m.inc, m.exp, 1); }));
@@ -9343,20 +9357,6 @@ function renderMoneyGraphCard() {
   }
   function barH(v) { return Math.max(2, Math.round((v/maxVal)*52)); }
 
-  // Top expense category this month
-  var catTotals = {};
-  (d.transactions||[]).forEach(function(t) {
-    if (!t.date || !t.date.startsWith(thisMonth.key) || t.type !== 'expense') return;
-    var c = t.category || 'Other';
-    catTotals[c] = (catTotals[c]||0) + (t.amount||0);
-  });
-  var topCat = null, topCatAmt = 0;
-  Object.keys(catTotals).forEach(function(c) {
-    if (catTotals[c] > topCatAmt) { topCat = c; topCatAmt = catTotals[c]; }
-  });
-
-  // Savings rate and tx count
-  var savRate = thisMonth.inc > 0 ? Math.round((thisMonth.sav / thisMonth.inc) * 100) : 0;
   var txCount = (d.transactions||[]).filter(function(t){ return t.date && t.date.startsWith(thisMonth.key); }).length;
 
   var barsHtml = months.map(function(m, idx) {
@@ -9372,10 +9372,10 @@ function renderMoneyGraphCard() {
 
   el.innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-      '<div class="section-label">BUDGET</div>' +
+      '<div class="section-label">THIS MONTH</div>' +
       '<div style="font-size:13px;font-weight:900;color:'+netColor+'">' + netSign + fmtShort(net) + '<span style="font-size:9px;font-weight:400;color:#4a7060;margin-left:3px">net</span></div>' +
     '</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">' +
       '<div style="background:#0d1710;border:1px solid #1a2e24;border-radius:8px;padding:6px 8px">' +
         '<div style="font-size:9px;color:#4a7060;font-weight:700;letter-spacing:0.04em;margin-bottom:2px">INCOME</div>' +
         '<div style="font-size:13px;font-weight:900;color:#00d18c">'+fmtShort(thisMonth.inc)+'</div>' +
@@ -9384,20 +9384,14 @@ function renderMoneyGraphCard() {
         '<div style="font-size:9px;color:#4a7060;font-weight:700;letter-spacing:0.04em;margin-bottom:2px">SPENT</div>' +
         '<div style="font-size:13px;font-weight:900;color:#e05c5c">'+fmtShort(thisMonth.exp)+'</div>' +
       '</div>' +
-      '<div style="background:#0d1710;border:1px solid #1a2e24;border-radius:8px;padding:6px 8px">' +
-        '<div style="font-size:9px;color:#4a7060;font-weight:700;letter-spacing:0.04em;margin-bottom:2px">SAVED</div>' +
-        '<div style="font-size:13px;font-weight:900;color:#f7a94e">'+fmtShort(thisMonth.sav)+'</div>' +
-      '</div>' +
     '</div>' +
     '<div style="display:flex;align-items:flex-end;gap:4px;margin-bottom:8px">' + barsHtml + '</div>' +
-    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
       '<div style="display:flex;align-items:center;gap:3px"><div style="width:7px;height:7px;border-radius:2px;background:#00d18c"></div><span style="font-size:9px;color:#7a9e8e">Income</span></div>' +
       '<div style="display:flex;align-items:center;gap:3px"><div style="width:7px;height:7px;border-radius:2px;background:#e05c5c"></div><span style="font-size:9px;color:#7a9e8e">Expenses</span></div>' +
-      (topCat ? '<div style="margin-left:auto;font-size:9px;color:#4a7060">top: <span style="color:#e8f0ed;font-weight:700">'+topCat+'</span></div>' : '') +
+      (txCount > 0 ? '<div style="margin-left:auto;font-size:9px;color:#4a7060">'+txCount+' transaction'+(txCount!==1?'s':'')+'</div>' : '') +
     '</div>' +
-    (txCount > 0 ? '<div style="margin-top:5px;font-size:9px;color:#4a7060">'+txCount+' transaction'+(txCount!==1?'s':'')+
-      (savRate > 0 ? ' · save rate <span style="color:#f7a94e;font-weight:700">'+savRate+'%</span>' : '') +
-    '</div>' : '<div style="margin-top:8px;font-size:10px;color:#4a7060;text-align:center">No transactions yet — click to add one</div>');
+    (txCount === 0 ? '<div style="margin-top:8px;font-size:10px;color:#4a7060;text-align:center">No transactions yet</div>' : '');
 }
 
 // ════════════════════════════════════════════════
@@ -9847,123 +9841,114 @@ function monRenderGraphs() {
   var keys = _ml.keys, labels = _ml.labels;
   var PAL = MON_GRAPH_PALETTE;
 
-  // ── Helper: draw a bar chart into a div using inline SVG ──
-  function svgBar(containerId, seriesArr, lbls, opts) {
+  // ── Reliable width: use window width minus sidebar+padding ──
+  function getW(el) {
+    // Try getBoundingClientRect on ancestors up to 6 levels
+    var node = el;
+    for (var i = 0; i < 6; i++) {
+      if (!node) break;
+      var rect = node.getBoundingClientRect();
+      if (rect && rect.width > 80) return Math.floor(rect.width) - 40;
+      node = node.parentElement;
+    }
+    // Fallback: window width minus sidebar (64px) minus padding
+    return Math.max(300, window.innerWidth - 120);
+  }
+
+  // ── Bar chart (SVG) ──
+  function svgBar(containerId, seriesArr, lbls) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var W = el.getBoundingClientRect().width || el.offsetWidth || (window.innerWidth - 120) || 500;
-    var H = el.getBoundingClientRect().height || el.offsetHeight || 200;
-    var pad = { l: 48, r: 16, t: 12, b: 32 };
+    var W = getW(el);
+    var H = 200;
+    var pad = { l: 52, r: 16, t: 20, b: 32 };
     var cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
     var n = lbls.length;
-    if (n === 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet</div>'; return; }
+    if (n === 0 || cw <= 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet</div>'; return; }
     var allVals = seriesArr.reduce(function(a,s){ return a.concat(s.data); }, []);
-    var maxV = Math.max.apply(null, allVals.map(Math.abs)) || 1;
-    var step = Math.ceil(maxV / 4);
-    var yMax = step * 5;
+    var maxV = Math.max.apply(null, allVals.map(Math.abs).concat([1]));
+    var step = Math.pow(10, Math.floor(Math.log(maxV) / Math.LN10));
+    var yMax = Math.ceil(maxV / step) * step;
     var groupW = cw / n;
     var barW = Math.max(4, (groupW * 0.7) / seriesArr.length);
     var gap = (groupW - barW * seriesArr.length) / 2;
-
-    var lines = ''; var bars = ''; var xlbls = ''; var ylbls = '';
-    // Y gridlines
+    var lines = '', bars = '', xlbls = '', ylbls = '';
     for (var yi = 0; yi <= 4; yi++) {
       var yv = (yi / 4) * yMax;
       var yp = pad.t + ch - (yv / yMax) * ch;
-      lines += '<line x1="'+pad.l+'" y1="'+yp+'" x2="'+(W-pad.r)+'" y2="'+yp+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
-      ylbls += '<text x="'+(pad.l-4)+'" y="'+(yp+4)+'" fill="#4a7060" font-size="10" text-anchor="end">$'+Math.round(yv)+'</text>';
+      lines += '<line x1="'+pad.l+'" y1="'+yp.toFixed(1)+'" x2="'+(W-pad.r)+'" y2="'+yp.toFixed(1)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+      ylbls += '<text x="'+(pad.l-6)+'" y="'+(yp+4).toFixed(1)+'" fill="#4a7060" font-size="10" text-anchor="end">'+( yv>=1000 ? '$'+(yv/1000).toFixed(0)+'k' : '$'+Math.round(yv) )+'</text>';
     }
-    // Bars
     seriesArr.forEach(function(s, si) {
       s.data.forEach(function(v, i) {
+        var bh = Math.max(1, Math.abs(v) / yMax * ch);
         var x = pad.l + i * groupW + gap + si * barW;
-        var barH = Math.abs(v) / yMax * ch;
-        var y = pad.t + ch - barH;
-        bars += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+barH.toFixed(1)+'" fill="'+s.color+'" rx="2" opacity="0.85"/>';
+        var y = pad.t + ch - bh;
+        bars += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+bh.toFixed(1)+'" fill="'+s.color+'" rx="2" opacity="0.9"/>';
       });
     });
-    // X labels
     lbls.forEach(function(lbl, i) {
       var x = pad.l + i * groupW + groupW / 2;
-      xlbls += '<text x="'+x.toFixed(1)+'" y="'+(H - 6)+'" fill="#4a7060" font-size="10" text-anchor="middle">'+lbl+'</text>';
+      xlbls += '<text x="'+x.toFixed(1)+'" y="'+(H-6)+'" fill="#4a7060" font-size="10" text-anchor="middle">'+lbl+'</text>';
     });
-    // Legend
-    var legItems = seriesArr.map(function(s,i){
-      return '<text x="'+(pad.l + i*90)+'" y="10" fill="'+s.color+'" font-size="11">&#9632; '+s.label+'</text>';
+    var leg = seriesArr.map(function(s, i){
+      return '<text x="'+(pad.l + i*90)+'" y="12" fill="'+s.color+'" font-size="11">&#9632; '+s.label+'</text>';
     }).join('');
-
-    el.innerHTML = '<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
-      lines + bars + xlbls + ylbls + legItems +
-    '</svg>';
+    el.innerHTML = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">'+lines+bars+xlbls+ylbls+leg+'</svg>';
   }
 
-  // ── Helper: draw a line chart ──
+  // ── Line chart (SVG) ──
   function svgLine(containerId, dataArr, lbls, color) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    void el.getBoundingClientRect();
-    var W = el.offsetWidth || (window.innerWidth - 120) || 500, H = el.offsetHeight || 180;
-    var pad = { l: 52, r: 16, t: 12, b: 32 };
+    var W = getW(el);
+    var H = 180;
+    var pad = { l: 52, r: 16, t: 16, b: 32 };
     var cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
-    if (dataArr.length === 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet</div>'; return; }
-    var maxV = Math.max.apply(null, dataArr.map(Math.abs).concat([1]));
-    var minV = Math.min.apply(null, dataArr);
-    var range = maxV - Math.min(minV, 0); if (range < 1) range = maxV;
-    var yTop = maxV * 1.1, yBot = Math.min(minV, 0) * 1.1;
-    var yRange = yTop - yBot; if (yRange < 1) yRange = maxV;
-    var step = Math.ceil(yRange / 4);
-
     var n = dataArr.length;
+    if (n === 0 || cw <= 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet</div>'; return; }
+    var maxV = Math.max.apply(null, dataArr.map(Math.abs).concat([1]));
+    var minV = Math.min.apply(null, dataArr.concat([0]));
+    var yTop = maxV * 1.1, yBot = Math.min(minV, 0);
+    var yRange = yTop - yBot; if (yRange < 1) yRange = 1;
     var pts = dataArr.map(function(v, i) {
-      var x = pad.l + (n > 1 ? (i / (n-1)) * cw : cw/2);
-      var y = pad.t + ch - ((v - yBot) / yRange) * ch;
-      return [x.toFixed(1), y.toFixed(1)];
+      return [(pad.l + (n > 1 ? (i/(n-1))*cw : cw/2)).toFixed(1),
+              (pad.t + ch - ((v - yBot)/yRange)*ch).toFixed(1)];
     });
-    var zero = pad.t + ch - ((0 - yBot) / yRange) * ch;
-
-    var lines = ''; var ylbls = ''; var xlbls = '';
+    var zero = (pad.t + ch - ((0 - yBot)/yRange)*ch).toFixed(1);
+    var lines = '', ylbls = '', xlbls = '';
     for (var yi = 0; yi <= 4; yi++) {
-      var yv = yBot + (yi / 4) * yRange;
-      var yp = pad.t + ch - ((yv - yBot) / yRange) * ch;
-      lines += '<line x1="'+pad.l+'" y1="'+yp.toFixed(1)+'" x2="'+(W-pad.r)+'" y2="'+yp.toFixed(1)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
-      ylbls += '<text x="'+(pad.l-4)+'" y="'+(yp+4).toFixed(1)+'" fill="#4a7060" font-size="10" text-anchor="end">$'+Math.round(yv)+'</text>';
+      var yv = yBot + (yi/4)*yRange;
+      var yp = (pad.t + ch - ((yv-yBot)/yRange)*ch).toFixed(1);
+      lines += '<line x1="'+pad.l+'" y1="'+yp+'" x2="'+(W-pad.r)+'" y2="'+yp+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+      ylbls += '<text x="'+(pad.l-6)+'" y="'+(parseFloat(yp)+4).toFixed(1)+'" fill="#4a7060" font-size="10" text-anchor="end">'+( Math.abs(yv)>=1000 ? '$'+(yv/1000).toFixed(0)+'k' : '$'+Math.round(yv) )+'</text>';
     }
-    // Zero line
-    if (yBot < 0) lines += '<line x1="'+pad.l+'" y1="'+zero.toFixed(1)+'" x2="'+(W-pad.r)+'" y2="'+zero.toFixed(1)+'" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>';
-
+    if (yBot < 0) lines += '<line x1="'+pad.l+'" y1="'+zero+'" x2="'+(W-pad.r)+'" y2="'+zero+'" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>';
     lbls.forEach(function(lbl, i) {
       if (i % Math.max(1, Math.floor(n/8)) !== 0 && i !== n-1) return;
-      var x = pad.l + (n > 1 ? (i / (n-1)) * cw : cw/2);
-      xlbls += '<text x="'+x.toFixed(1)+'" y="'+(H-6)+'" fill="#4a7060" font-size="10" text-anchor="middle">'+lbl+'</text>';
+      var x = (pad.l + (n>1 ? (i/(n-1))*cw : cw/2)).toFixed(1);
+      xlbls += '<text x="'+x+'" y="'+(H-6)+'" fill="#4a7060" font-size="10" text-anchor="middle">'+lbl+'</text>';
     });
-
     var poly = pts.map(function(p){ return p[0]+','+p[1]; }).join(' ');
-    var fillPts = [[pad.l.toFixed(1), (pad.t+ch).toFixed(1)]].concat(pts).concat([[(pad.l+cw).toFixed(1),(pad.t+ch).toFixed(1)]]);
-    var fillPoly = fillPts.map(function(p){ return p[0]+','+p[1]; }).join(' ');
-
-    // Dots
-    var dots = pts.map(function(p, i) {
-      var v = dataArr[i];
-      var c = color || (v >= 0 ? '#00d18c' : '#e05c5c');
-      return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+c+'"/>';
+    var fill = [[pad.l.toFixed(1),(pad.t+ch).toFixed(1)]].concat(pts).concat([[(pad.l+cw).toFixed(1),(pad.t+ch).toFixed(1)]]);
+    var fillPoly = fill.map(function(p){ return p[0]+','+p[1]; }).join(' ');
+    var dots = pts.map(function(p,i){
+      var v = dataArr[i], dc = v >= 0 ? color : '#e05c5c';
+      return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+dc+'"/>';
     }).join('');
-
-    el.innerHTML = '<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
-      lines +
-      '<polygon points="'+fillPoly+'" fill="'+color+'" opacity="0.08"/>'+
+    el.innerHTML = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">'+
+      lines+'<polygon points="'+fillPoly+'" fill="'+color+'" opacity="0.08"/>'+
       '<polyline points="'+poly+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round"/>'+
-      dots + xlbls + ylbls +
-    '</svg>';
+      dots+xlbls+ylbls+'</svg>';
   }
 
-  // ── Helper: horizontal bar for categories / accounts ──
+  // ── Horizontal bar (CSS-based, no SVG — always works) ──
   function svgHBar(containerId, items) {
     var el = document.getElementById(containerId);
     if (!el) return;
     if (items.length === 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:10px">No data yet</div>'; return; }
     var maxV = Math.max.apply(null, items.map(function(x){ return x.value; })) || 1;
-    var W = el.offsetWidth || 400;
-    var html = items.map(function(item, i) {
+    el.innerHTML = items.map(function(item) {
       var pct = Math.round(item.value / maxV * 100);
       return '<div style="margin-bottom:10px">'+
         '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
@@ -9971,51 +9956,59 @@ function monRenderGraphs() {
           '<span style="font-size:12px;font-weight:700;color:'+item.color+'">$'+item.value.toFixed(2)+'</span>'+
         '</div>'+
         '<div style="height:10px;background:#1a2e24;border-radius:5px;overflow:hidden">'+
-          '<div style="height:100%;width:'+pct+'%;background:'+item.color+';border-radius:5px;transition:width 0.4s"></div>'+
+          '<div style="height:100%;width:'+pct+'%;background:'+item.color+';border-radius:5px"></div>'+
         '</div>'+
       '</div>';
     }).join('');
-    el.innerHTML = html;
   }
 
-  // ── 1. Income vs Expenses bar ──
+  // ── Data calculations ──
   var incomes  = keys.map(function(k){ return txs.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
   var expenses = keys.map(function(k){ return txs.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
-  svgBar('mgr-svg-inex', [
-    { label:'Income',   data: incomes,  color:'rgba(0,209,140,0.8)' },
-    { label:'Expenses', data: expenses, color:'rgba(224,92,92,0.8)' }
-  ], labels, {});
+  var nets     = keys.map(function(k,i){ return incomes[i] - expenses[i]; });
 
-  // ── 2. Net savings line ──
-  var nets = keys.map(function(k,i){ return incomes[i] - expenses[i]; });
+  // If ALL data is zero show empty state early
+  var hasData = incomes.some(function(v){ return v>0; }) || expenses.some(function(v){ return v>0; });
+  if (!hasData) {
+    ['mgr-svg-inex','mgr-svg-net','mgr-svg-cat','mgr-svg-cum','mgr-svg-acc'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet — add some transactions!</div>';
+    });
+    return;
+  }
+
+  svgBar('mgr-svg-inex', [
+    { label:'Income',   data: incomes,  color:'rgba(0,209,140,0.85)' },
+    { label:'Expenses', data: expenses, color:'rgba(224,92,92,0.85)' }
+  ], labels);
   svgLine('mgr-svg-net', nets, labels, '#00d18c');
 
-  // ── 3. Category breakdown ──
+  // Category breakdown
   var catTotals = {};
   txs.forEach(function(t){
     if (t.type !== 'expense') return;
-    var c = t.category || 'Uncategorized';
-    catTotals[c] = (catTotals[c]||0) + t.amount;
+    var cat = t.category || 'Uncategorized';
+    catTotals[cat] = (catTotals[cat]||0) + t.amount;
   });
-  var catItems = Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8).map(function(c,i){
-    return { label: c, value: catTotals[c], color: PAL[i % PAL.length] };
+  var catItems = Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8).map(function(cat,i){
+    return { label: cat, value: catTotals[cat], color: PAL[i % PAL.length] };
   });
   svgHBar('mgr-svg-cat', catItems);
 
-  // ── 4. Cumulative this month ──
+  // Cumulative spending this month
   var now2 = new Date();
-  var thisMonthKey = now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0');
-  var daysInMonth = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
-  var cumLabels = [], cumVals = [], running = 0;
-  for (var dd = 1; dd <= daysInMonth; dd++) {
-    var dayKey = thisMonthKey+'-'+String(dd).padStart(2,'0');
-    running += txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; },0);
-    cumLabels.push(dd === 1 || dd % 5 === 0 || dd === daysInMonth ? String(dd) : '');
-    cumVals.push(running);
+  var thisKey = now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0');
+  var days = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
+  var cumL = [], cumV = [], run = 0;
+  for (var dd = 1; dd <= days; dd++) {
+    var dayKey = thisKey+'-'+String(dd).padStart(2,'0');
+    run += txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; },0);
+    cumL.push(dd===1||dd%5===0||dd===days ? String(dd) : '');
+    cumV.push(run);
   }
-  svgLine('mgr-svg-cum', cumVals, cumLabels, '#f7a94e');
+  svgLine('mgr-svg-cum', cumV, cumL, '#f7a94e');
 
-  // ── 5. Account balances ──
+  // Account balances
   var accItems = (d.bankAccounts||[]).map(function(a,i){ return { label: (a.bank?a.bank+' ':'')+a.name, value: a.balance||0, color:'#00d18c' }; })
     .concat((d.creditCards||[]).map(function(c,i){ return { label: (c.bank?c.bank+' ':'')+c.name, value: c.balance||0, color:'#e05c5c' }; }));
   svgHBar('mgr-svg-acc', accItems);
