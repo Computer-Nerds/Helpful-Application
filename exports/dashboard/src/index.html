@@ -9360,7 +9360,7 @@ function renderMoneyGraphCard() {
   }
   function barH(v) { return Math.max(2, Math.round((v/maxVal)*52)); }
 
-  var txCount = (d.transactions||[]).filter(function(t){ return t.date && t.date.startsWith(thisMonth.key); }).length;
+  var txCount = (rawD.transactions||[]).filter(function(t){ return t.date && t.date.startsWith(thisMonth.key); }).length;
 
   var barsHtml = months.map(function(m, idx) {
     var isNow = idx === 5;
