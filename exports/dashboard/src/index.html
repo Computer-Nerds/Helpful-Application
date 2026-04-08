@@ -1170,6 +1170,7 @@
             <button id="mon-tab-transactions" onclick="monSetTab('transactions')" style="padding:5px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">💳 Transactions</button>
             <button id="mon-tab-budget" onclick="monSetTab('budget')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">📊 Budget</button>
             <button id="mon-tab-accounts" onclick="monSetTab('accounts')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">🏦 Accounts</button>
+            <button id="mon-tab-recurring" onclick="monSetTab('recurring')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">🔁 Recurring</button>
             <button id="mon-tab-graphs" onclick="monSetTab('graphs')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">📈 Graphs</button>
           </div>
           <button onclick="monOpenAdd()" style="margin-left:auto;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer" id="mon-add-btn">+ Add</button>
@@ -1240,7 +1241,7 @@
               <div id="mon-bud-income" style="font-size:18px;font-weight:900;color:#00d18c">$0</div>
             </div>
             <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
-              <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Spent This Month</div>
+              <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">All Expenses</div>
               <div id="mon-bud-spent" style="font-size:18px;font-weight:900;color:#e05c5c">$0</div>
             </div>
           </div>
@@ -1253,12 +1254,12 @@
             <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
               <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Budget Left</div>
               <div id="mon-bud-remaining" style="font-size:18px;font-weight:900;color:#00d18c">$0</div>
-              <div style="font-size:9px;color:#4a7060;margin-top:3px">budgeted − expenses</div>
+              <div style="font-size:9px;color:#4a7060;margin-top:3px">budgeted − tagged expenses</div>
             </div>
           </div>
           <!-- Explanation banner -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a9e8e;line-height:1.6">
-            💡 <strong style="color:#e8f0ed">How it works:</strong> Create categories (e.g. "Groceries $400") — then when you log a transaction, tag it with that category. <strong style="color:#00d18c">Budget Left</strong> = your category budgets minus all tagged expenses this month. <strong style="color:#00d18c">Income This Month</strong> comes from any transaction marked as Income.
+            💡 <strong style="color:#e8f0ed">How it works:</strong> Create categories (e.g. "Groceries $400") — then when you log a transaction, tag it with that category. <strong style="color:#00d18c">Budget Left</strong> = your category limits minus expenses tagged to those categories this month. <strong style="color:#00d18c">Income This Month</strong> comes from any transaction marked as Income.
           </div>
 
           <div style="display:flex;align-items:center;justify-content:space-between">
@@ -1266,6 +1267,20 @@
             <button onclick="monAddCategory()" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#00d18c;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">+ Category</button>
           </div>
           <div id="mon-budget-list" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
+        <!-- RECURRING TAB -->
+        <div id="mon-recurring-panel" style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;display:none">
+          <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:14px 16px">
+            <div style="font-size:12px;font-weight:800;color:#4e8ef7;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">🔁 Recurring Transactions</div>
+            <div style="font-size:12px;color:#7a9e8e;line-height:1.6;margin-bottom:12px">
+              Transactions marked as recurring are listed here. Each month when you open the app, any overdue recurring transactions are automatically added to your log — you can skip or confirm individually.
+            </div>
+            <div id="mon-recurring-due-banner" style="display:none;background:#1a2e24;border:1px solid #f7a94e;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#f7a94e;font-weight:700"></div>
+          </div>
+          <div id="mon-recurring-list" style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:13px;color:#4a7060;text-align:center;padding:20px">No recurring transactions yet. Check 🔁 Recurring when adding a transaction.</div>
+          </div>
         </div>
 
         <!-- ACCOUNTS TAB -->
@@ -1340,7 +1355,7 @@
         <!-- ══ GRAPHS PANEL ══ -->
         <div id="mon-graphs-panel" style="display:none;flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:20px;box-sizing:border-box;width:100%">
 
-          <!-- Time range selector -->
+            <!-- Range selector -->
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <span style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em">Range:</span>
             <button id="mgr-btn-6m" onclick="monGraphSetRange('6m')" style="padding:5px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">6 Months</button>
@@ -1348,55 +1363,34 @@
             <button id="mgr-btn-all" onclick="monGraphSetRange('all')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">All Time</button>
           </div>
 
-          <!-- 1. Income vs Expenses — Bar chart -->
+          <!-- 1. Income vs Expenses -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📊 Income vs Expenses</div>
-            <div style="position:relative;height:220px;width:100%">
-              <canvas id="mgr-canvas-inex"></canvas>
-            </div>
+            <div id="mgr-svg-inex" style="width:100%;height:200px"></div>
           </div>
 
-          <!-- 2. Net Savings per Month — Line chart -->
+          <!-- 2. Net Savings -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📈 Net Savings per Month</div>
-            <div style="position:relative;height:200px;width:100%">
-              <canvas id="mgr-canvas-net"></canvas>
-            </div>
+            <div id="mgr-svg-net" style="width:100%;height:180px"></div>
           </div>
 
-          <!-- 3. Spending by Category — Doughnut -->
+          <!-- 3. Category breakdown -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
-            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">🍩 Spending by Category</div>
-            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-              <div style="position:relative;width:200px;height:200px;flex-shrink:0">
-                <canvas id="mgr-canvas-cat"></canvas>
-              </div>
-              <div id="mgr-cat-legend" style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:140px"></div>
-            </div>
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📂 Spending by Category</div>
+            <div id="mgr-svg-cat" style="width:100%;min-height:60px"></div>
           </div>
 
-          <!-- 4. Account Balances Over Time — Stacked Area -->
-          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
-            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💰 Account Balance Snapshot</div>
-            <div style="position:relative;height:200px;width:100%">
-              <canvas id="mgr-canvas-acc"></canvas>
-            </div>
-          </div>
-
-          <!-- 5. Credit Utilization per Card — Horizontal Bar -->
-          <div id="mgr-credit-section" style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px;display:none">
-            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💳 Credit Utilization per Card</div>
-            <div style="position:relative;height:160px;width:100%">
-              <canvas id="mgr-canvas-credit"></canvas>
-            </div>
-          </div>
-
-          <!-- 6. Cumulative Spending — Line -->
+          <!-- 4. Cumulative this month -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📉 Cumulative Expenses This Month</div>
-            <div style="position:relative;height:180px;width:100%">
-              <canvas id="mgr-canvas-cum"></canvas>
-            </div>
+            <div id="mgr-svg-cum" style="width:100%;height:180px"></div>
+          </div>
+
+          <!-- 5. Account balances -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💰 Account Balance Snapshot</div>
+            <div id="mgr-svg-acc" style="width:100%;min-height:60px"></div>
           </div>
 
         </div>
@@ -1492,6 +1486,18 @@
               <input type="checkbox" id="mon-save-template" style="width:15px;height:15px;accent-color:#00d18c">
               <span style="font-size:12px;color:#7a9e8e">Save as reusable template</span>
             </label>
+            <!-- Recurring checkbox -->
+            <div style="display:flex;align-items:center;gap:10px;padding-top:2px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+                <input type="checkbox" id="mon-recurring-chk" onchange="monToggleRecurFreq()" style="width:15px;height:15px;accent-color:#4e8ef7">
+                <span style="font-size:12px;color:#7a9e8e">🔁 Recurring</span>
+              </label>
+              <select id="mon-recurring-freq" style="display:none;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:5px 10px;color:#e8f0ed;font-size:12px">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
           </div>
           <div style="display:flex;gap:10px;margin-top:18px">
             <button onclick="monModalClose()" style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#7a9e8e;padding:9px;font-size:13px;font-weight:700;cursor:pointer">Cancel</button>
@@ -8417,7 +8423,7 @@ var monEditId = null;
 
 window.monSetTab = function(tab) {
   monCurrentTab = tab;
-  ['transactions','budget','accounts','graphs'].forEach(function(t) {
+  ['transactions','budget','accounts','recurring','graphs'].forEach(function(t) {
     var panel = document.getElementById('mon-'+t+'-panel');
     var btn   = document.getElementById('mon-tab-'+t);
     if (!panel || !btn) return;
@@ -8432,11 +8438,13 @@ window.monSetTab = function(tab) {
     if (tab==='transactions') { addBtn.style.display=''; addBtn.textContent='+ Add'; addBtn.onclick=monOpenAdd; }
     else if (tab==='budget')  { addBtn.style.display='none'; }
     else if (tab==='accounts'){ addBtn.style.display=''; addBtn.textContent='+ Account'; addBtn.onclick=function(){ monOpenAddAccount('bank'); }; }
+    else if (tab==='recurring'){ addBtn.style.display='none'; }
     else if (tab==='graphs')  { addBtn.style.display='none'; }
   }
   if (tab==='transactions') monRenderTransactions();
   if (tab==='budget')       { monRenderBudget(); monSetSavGoalTab(monSavGoalTab); }
   if (tab==='accounts')     monRenderAccounts();
+  if (tab==='recurring')    monRenderRecurring();
   if (tab==='graphs')       setTimeout(monRenderGraphs, 150);
 };
 
@@ -8543,12 +8551,17 @@ function monRenderBudget() {
 
   // Summary totals
   var totalBudgeted = d.categories.reduce(function(s,c){ return s+c.budget; }, 0);
-  // Income total = income only (savings does NOT count as income)
+  // Income total = income transactions only
   var totalIncome   = incomes.reduce(function(s,t){ return s+t.amount; }, 0);
-  // Spent = expenses + savings (savings counts against budget/available money)
-  var totalAllSpent = expenses.reduce(function(s,t){ return s+t.amount; }, 0)
-                    + savings.reduce(function(s,t){ return s+t.amount; }, 0);
-  var totalRemaining = totalBudgeted - totalAllSpent;
+  // "Spent This Month" = ALL expenses this month (for the display card)
+  var totalAllSpent = expenses.reduce(function(s,t){ return s+t.amount; }, 0);
+  // "Budget Left" = category budgets MINUS only the expenses/savings tagged to a known category
+  var catNames = d.categories.map(function(c){ return c.name; });
+  var categorizedSpent = expenses.filter(function(t){ return t.category && catNames.indexOf(t.category) > -1; })
+                                 .reduce(function(s,t){ return s+t.amount; }, 0)
+                       + savings.filter(function(t){ return t.category && catNames.indexOf(t.category) > -1; })
+                                .reduce(function(s,t){ return s+t.amount; }, 0);
+  var totalRemaining = totalBudgeted - categorizedSpent;
 
   var totEl  = document.getElementById('mon-bud-total');
   var spEl   = document.getElementById('mon-bud-spent');
@@ -9773,246 +9786,362 @@ function monSizeCanvas(el) {
 }
 
 function monRenderGraphs() {
-  if (typeof Chart === 'undefined') { console.error('Chart.js not loaded'); return; }
   var d = monGetData();
   var txs = d.transactions || [];
   var _ml = monGetMonthLabels();
   var keys = _ml.keys, labels = _ml.labels;
+  var PAL = MON_GRAPH_PALETTE;
 
-  Chart.defaults.color = '#7a9e8e';
-  Chart.defaults.font.family = 'inherit';
-  Chart.defaults.font.size = 11;
+  // ── Helper: draw a bar chart into a div using inline SVG ──
+  function svgBar(containerId, seriesArr, lbls, opts) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    var W = el.offsetWidth || 500, H = el.offsetHeight || 200;
+    var pad = { l: 48, r: 16, t: 12, b: 32 };
+    var cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+    var n = lbls.length;
+    if (n === 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet</div>'; return; }
+    var allVals = seriesArr.reduce(function(a,s){ return a.concat(s.data); }, []);
+    var maxV = Math.max.apply(null, allVals.map(Math.abs)) || 1;
+    var step = Math.ceil(maxV / 4);
+    var yMax = step * 5;
+    var groupW = cw / n;
+    var barW = Math.max(4, (groupW * 0.7) / seriesArr.length);
+    var gap = (groupW - barW * seriesArr.length) / 2;
 
-  var gridColor = 'rgba(255,255,255,0.05)';
-  var tickColor = '#4a7060';
+    var lines = ''; var bars = ''; var xlbls = ''; var ylbls = '';
+    // Y gridlines
+    for (var yi = 0; yi <= 4; yi++) {
+      var yv = (yi / 4) * yMax;
+      var yp = pad.t + ch - (yv / yMax) * ch;
+      lines += '<line x1="'+pad.l+'" y1="'+yp+'" x2="'+(W-pad.r)+'" y2="'+yp+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+      ylbls += '<text x="'+(pad.l-4)+'" y="'+(yp+4)+'" fill="#4a7060" font-size="10" text-anchor="end">$'+Math.round(yv)+'</text>';
+    }
+    // Bars
+    seriesArr.forEach(function(s, si) {
+      s.data.forEach(function(v, i) {
+        var x = pad.l + i * groupW + gap + si * barW;
+        var barH = Math.abs(v) / yMax * ch;
+        var y = pad.t + ch - barH;
+        bars += '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+barH.toFixed(1)+'" fill="'+s.color+'" rx="2" opacity="0.85"/>';
+      });
+    });
+    // X labels
+    lbls.forEach(function(lbl, i) {
+      var x = pad.l + i * groupW + groupW / 2;
+      xlbls += '<text x="'+x.toFixed(1)+'" y="'+(H - 6)+'" fill="#4a7060" font-size="10" text-anchor="middle">'+lbl+'</text>';
+    });
+    // Legend
+    var legItems = seriesArr.map(function(s,i){
+      return '<text x="'+(pad.l + i*90)+'" y="10" fill="'+s.color+'" font-size="11">&#9632; '+s.label+'</text>';
+    }).join('');
 
-  // ── 1. Income vs Expenses Bar ──
-  monDestroyChart('inex');
+    el.innerHTML = '<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+      lines + bars + xlbls + ylbls + legItems +
+    '</svg>';
+  }
+
+  // ── Helper: draw a line chart ──
+  function svgLine(containerId, dataArr, lbls, color) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    var W = el.offsetWidth || 500, H = el.offsetHeight || 180;
+    var pad = { l: 52, r: 16, t: 12, b: 32 };
+    var cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+    if (dataArr.length === 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No data yet</div>'; return; }
+    var maxV = Math.max.apply(null, dataArr.map(Math.abs).concat([1]));
+    var minV = Math.min.apply(null, dataArr);
+    var range = maxV - Math.min(minV, 0); if (range < 1) range = maxV;
+    var yTop = maxV * 1.1, yBot = Math.min(minV, 0) * 1.1;
+    var yRange = yTop - yBot; if (yRange < 1) yRange = maxV;
+    var step = Math.ceil(yRange / 4);
+
+    var n = dataArr.length;
+    var pts = dataArr.map(function(v, i) {
+      var x = pad.l + (n > 1 ? (i / (n-1)) * cw : cw/2);
+      var y = pad.t + ch - ((v - yBot) / yRange) * ch;
+      return [x.toFixed(1), y.toFixed(1)];
+    });
+    var zero = pad.t + ch - ((0 - yBot) / yRange) * ch;
+
+    var lines = ''; var ylbls = ''; var xlbls = '';
+    for (var yi = 0; yi <= 4; yi++) {
+      var yv = yBot + (yi / 4) * yRange;
+      var yp = pad.t + ch - ((yv - yBot) / yRange) * ch;
+      lines += '<line x1="'+pad.l+'" y1="'+yp.toFixed(1)+'" x2="'+(W-pad.r)+'" y2="'+yp.toFixed(1)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+      ylbls += '<text x="'+(pad.l-4)+'" y="'+(yp+4).toFixed(1)+'" fill="#4a7060" font-size="10" text-anchor="end">$'+Math.round(yv)+'</text>';
+    }
+    // Zero line
+    if (yBot < 0) lines += '<line x1="'+pad.l+'" y1="'+zero.toFixed(1)+'" x2="'+(W-pad.r)+'" y2="'+zero.toFixed(1)+'" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4,4"/>';
+
+    lbls.forEach(function(lbl, i) {
+      if (i % Math.max(1, Math.floor(n/8)) !== 0 && i !== n-1) return;
+      var x = pad.l + (n > 1 ? (i / (n-1)) * cw : cw/2);
+      xlbls += '<text x="'+x.toFixed(1)+'" y="'+(H-6)+'" fill="#4a7060" font-size="10" text-anchor="middle">'+lbl+'</text>';
+    });
+
+    var poly = pts.map(function(p){ return p[0]+','+p[1]; }).join(' ');
+    var fillPts = [[pad.l.toFixed(1), (pad.t+ch).toFixed(1)]].concat(pts).concat([[(pad.l+cw).toFixed(1),(pad.t+ch).toFixed(1)]]);
+    var fillPoly = fillPts.map(function(p){ return p[0]+','+p[1]; }).join(' ');
+
+    // Dots
+    var dots = pts.map(function(p, i) {
+      var v = dataArr[i];
+      var c = color || (v >= 0 ? '#00d18c' : '#e05c5c');
+      return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+c+'"/>';
+    }).join('');
+
+    el.innerHTML = '<svg width="100%" height="'+H+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+      lines +
+      '<polygon points="'+fillPoly+'" fill="'+color+'" opacity="0.08"/>'+
+      '<polyline points="'+poly+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linejoin="round"/>'+
+      dots + xlbls + ylbls +
+    '</svg>';
+  }
+
+  // ── Helper: horizontal bar for categories / accounts ──
+  function svgHBar(containerId, items) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (items.length === 0) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:10px">No data yet</div>'; return; }
+    var maxV = Math.max.apply(null, items.map(function(x){ return x.value; })) || 1;
+    var W = el.offsetWidth || 400;
+    var html = items.map(function(item, i) {
+      var pct = Math.round(item.value / maxV * 100);
+      return '<div style="margin-bottom:10px">'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+          '<span style="font-size:12px;color:#e8f0ed">'+item.label+'</span>'+
+          '<span style="font-size:12px;font-weight:700;color:'+item.color+'">$'+item.value.toFixed(2)+'</span>'+
+        '</div>'+
+        '<div style="height:10px;background:#1a2e24;border-radius:5px;overflow:hidden">'+
+          '<div style="height:100%;width:'+pct+'%;background:'+item.color+';border-radius:5px;transition:width 0.4s"></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+    el.innerHTML = html;
+  }
+
+  // ── 1. Income vs Expenses bar ──
   var incomes  = keys.map(function(k){ return txs.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
   var expenses = keys.map(function(k){ return txs.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; },0); });
-  var ctxInex = document.getElementById('mgr-canvas-inex');
-  monSizeCanvas(ctxInex);
-  if (ctxInex) {
-    monChartInstances['inex'] = new Chart(ctxInex, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [
-          { label: 'Income',   data: incomes,  backgroundColor: 'rgba(0,209,140,0.75)',  borderRadius: 5, borderSkipped: false },
-          { label: 'Expenses', data: expenses, backgroundColor: 'rgba(224,92,92,0.75)',  borderRadius: 5, borderSkipped: false }
-        ]
-      },
-      options: {
-        responsive: false, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color:'#7a9e8e', boxWidth:12 } }, tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } } },
-        scales: {
-          x: { ticks:{ color:tickColor }, grid:{ color:gridColor } },
-          y: { ticks:{ color:tickColor, callback: function(v){ return '$'+v; } }, grid:{ color:gridColor } }
-        }
-      }
-    });
-  }
+  svgBar('mgr-svg-inex', [
+    { label:'Income',   data: incomes,  color:'rgba(0,209,140,0.8)' },
+    { label:'Expenses', data: expenses, color:'rgba(224,92,92,0.8)' }
+  ], labels, {});
 
-  // ── 2. Net Savings Line ──
-  monDestroyChart('net');
+  // ── 2. Net savings line ──
   var nets = keys.map(function(k,i){ return incomes[i] - expenses[i]; });
-  var ctxNet = document.getElementById('mgr-canvas-net');
-  monSizeCanvas(ctxNet);
-  if (ctxNet) {
-    monChartInstances['net'] = new Chart(ctxNet, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Net',
-          data: nets,
-          borderColor: '#00d18c',
-          backgroundColor: 'rgba(0,209,140,0.12)',
-          tension: 0.35,
-          fill: true,
-          pointBackgroundColor: nets.map(function(v){ return v>=0?'#00d18c':'#e05c5c'; }),
-          pointRadius: 4
-        }]
-      },
-      options: {
-        responsive: false, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
-        },
-        scales: {
-          x: { ticks:{color:tickColor}, grid:{color:gridColor} },
-          y: { ticks:{color:tickColor, callback:function(v){ return '$'+v; }}, grid:{color:gridColor} }
-        }
-      }
-    });
-  }
+  svgLine('mgr-svg-net', nets, labels, '#00d18c');
 
-  // ── 3. Spending by Category Doughnut ──
-  monDestroyChart('cat');
-  var allCatExpenses = {};
-  txs.forEach(function(t) {
-    if (t.type!=='expense') return;
-    if (!keys.some(function(k){ return t.date && t.date.startsWith(k); })) return;
-    var cat = t.category || 'Uncategorized';
-    allCatExpenses[cat] = (allCatExpenses[cat]||0) + t.amount;
+  // ── 3. Category breakdown ──
+  var catTotals = {};
+  txs.forEach(function(t){
+    if (t.type !== 'expense') return;
+    var c = t.category || 'Uncategorized';
+    catTotals[c] = (catTotals[c]||0) + t.amount;
   });
-  var catNames = Object.keys(allCatExpenses);
-  var catVals  = catNames.map(function(c){ return allCatExpenses[c]; });
-  var ctxCat = document.getElementById('mgr-canvas-cat');
-  monSizeCanvas(ctxCat);
-  if (ctxCat) {
-    if (catVals.length === 0) {
-      catVals  = [1]; catNames = ['No data'];
-    }
-    monChartInstances['cat'] = new Chart(ctxCat, {
-      type: 'doughnut',
-      data: {
-        labels: catNames,
-        datasets: [{ data: catVals, backgroundColor: MON_GRAPH_PALETTE.slice(0, catNames.length), borderWidth: 0, hoverOffset: 8 }]
-      },
-      options: {
-        responsive: false, maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
-        }
-      }
-    });
-    // Custom legend
-    var leg = document.getElementById('mgr-cat-legend');
-    if (leg) {
-      var total = catVals.reduce(function(s,v){ return s+v; },0);
-      leg.innerHTML = catNames.map(function(n,i){
-        var pct = total>0 ? Math.round(catVals[i]/total*100) : 0;
-        return '<div style="display:flex;align-items:center;gap:7px">'+
-          '<span style="width:10px;height:10px;border-radius:2px;background:'+MON_GRAPH_PALETTE[i%10]+';flex-shrink:0"></span>'+
-          '<span style="font-size:12px;color:#e8f0ed;flex:1">'+n+'</span>'+
-          '<span style="font-size:11px;color:#7a9e8e">'+pct+'%</span>'+
-        '</div>';
-      }).join('');
-    }
-  }
+  var catItems = Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8).map(function(c,i){
+    return { label: c, value: catTotals[c], color: PAL[i % PAL.length] };
+  });
+  svgHBar('mgr-svg-cat', catItems);
 
-  // ── 4. Account Balances Horizontal Bar ──
-  monDestroyChart('acc');
-  var allAccs = (d.bankAccounts||[]).map(function(a){ return { name: (a.bank?a.bank+' ':'')+(a.name||''), bal: a.balance||0, color:'#00d18c' }; })
-    .concat((d.creditCards||[]).map(function(c){ return { name: (c.bank?c.bank+' ':'')+(c.name||''), bal: c.balance||0, color:'#e05c5c' }; }));
-  var ctxAcc = document.getElementById('mgr-canvas-acc');
-  monSizeCanvas(ctxAcc);
-  if (ctxAcc) {
-    monChartInstances['acc'] = new Chart(ctxAcc, {
-      type: 'bar',
-      data: {
-        labels: allAccs.map(function(a){ return a.name; }),
-        datasets: [{
-          label: 'Balance / Debt',
-          data: allAccs.map(function(a){ return a.bal; }),
-          backgroundColor: allAccs.map(function(a){ return a.color+'bb'; }),
-          borderColor: allAccs.map(function(a){ return a.color; }),
-          borderWidth: 1,
-          borderRadius: 5
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: false, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
-        },
-        scales: {
-          x: { ticks:{color:tickColor, callback:function(v){return '$'+v;}}, grid:{color:gridColor} },
-          y: { ticks:{color:'#e8f0ed'}, grid:{display:false} }
-        }
-      }
-    });
-  }
-
-  // ── 5. Credit Utilization Horizontal Bar (only if cards exist) ──
-  monDestroyChart('credit');
-  var cards = d.creditCards || [];
-  var ccSection = document.getElementById('mgr-credit-section');
-  if (ccSection) ccSection.style.display = cards.length ? 'block' : 'none';
-  var ctxCredit = document.getElementById('mgr-canvas-credit');
-  monSizeCanvas(ctxCredit);
-  if (ctxCredit && cards.length) {
-    var utilPcts = cards.map(function(c){ return c.limit>0 ? Math.min(100,Math.round((c.balance||0)/c.limit*100)) : 0; });
-    monChartInstances['credit'] = new Chart(ctxCredit, {
-      type: 'bar',
-      data: {
-        labels: cards.map(function(c){ return (c.bank?c.bank+' ':'')+c.name; }),
-        datasets: [
-          { label: 'Used %',      data: utilPcts,                          backgroundColor: utilPcts.map(function(p){ return p>80?'rgba(247,78,78,0.75)':p>50?'rgba(247,169,78,0.75)':'rgba(78,159,212,0.75)'; }), borderRadius:5, borderSkipped:false },
-          { label: 'Available %', data: utilPcts.map(function(p){ return 100-p; }), backgroundColor: 'rgba(255,255,255,0.05)', borderRadius:5, borderSkipped:false }
-        ]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: false, maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color:'#7a9e8e', boxWidth:12 } },
-          tooltip: { callbacks: { label: function(c){ return ' '+c.raw+'%'; } } }
-        },
-        scales: {
-          x: { stacked:true, max:100, ticks:{color:tickColor, callback:function(v){return v+'%';}}, grid:{color:gridColor} },
-          y: { stacked:true, ticks:{color:'#e8f0ed'}, grid:{display:false} }
-        }
-      }
-    });
-    // Resize canvas height proportionally for card count
-    ctxCredit.parentElement.style.height = Math.max(100, cards.length * 52)+'px';
-  }
-
-  // ── 6. Cumulative Expenses this month (day-by-day) ──
-  monDestroyChart('cum');
+  // ── 4. Cumulative this month ──
   var now2 = new Date();
   var thisMonthKey = now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0');
   var daysInMonth = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
-  var dayLabels = [], cumVals = [], running = 0;
-  for (var d2 = 1; d2 <= daysInMonth; d2++) {
-    var dayKey = thisMonthKey+'-'+String(d2).padStart(2,'0');
-    var daySpend = txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; },0);
-    running += daySpend;
-    dayLabels.push(d2 <= 9 ? ''+d2 : ''+d2);
+  var cumLabels = [], cumVals = [], running = 0;
+  for (var dd = 1; dd <= daysInMonth; dd++) {
+    var dayKey = thisMonthKey+'-'+String(dd).padStart(2,'0');
+    running += txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; },0);
+    cumLabels.push(dd === 1 || dd % 5 === 0 || dd === daysInMonth ? String(dd) : '');
     cumVals.push(running);
   }
-  var ctxCum = document.getElementById('mgr-canvas-cum');
-  monSizeCanvas(ctxCum);
-  if (ctxCum) {
-    monChartInstances['cum'] = new Chart(ctxCum, {
-      type: 'line',
-      data: {
-        labels: dayLabels,
-        datasets: [{
-          label: 'Cumulative Spend',
-          data: cumVals,
-          borderColor: '#f7a94e',
-          backgroundColor: 'rgba(247,169,78,0.10)',
-          tension: 0.2,
-          fill: true,
-          pointRadius: 0,
-          pointHoverRadius: 5
-        }]
-      },
-      options: {
-        responsive: false, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: function(c){ return ' $'+c.raw.toFixed(2); } } }
-        },
-        scales: {
-          x: { ticks:{color:tickColor, maxTicksLimit:10}, grid:{color:gridColor} },
-          y: { ticks:{color:tickColor, callback:function(v){return '$'+v;}}, grid:{color:gridColor} }
-        }
-      }
-    });
-  }
+  svgLine('mgr-svg-cum', cumVals, cumLabels, '#f7a94e');
+
+  // ── 5. Account balances ──
+  var accItems = (d.bankAccounts||[]).map(function(a,i){ return { label: (a.bank?a.bank+' ':'')+a.name, value: a.balance||0, color:'#00d18c' }; })
+    .concat((d.creditCards||[]).map(function(c,i){ return { label: (c.bank?c.bank+' ':'')+c.name, value: c.balance||0, color:'#e05c5c' }; }));
+  svgHBar('mgr-svg-acc', accItems);
 }
 
 window.monGraphSetRange = monGraphSetRange;
 window.monRenderGraphs  = monRenderGraphs;
+
+// ════════════════════════════════════════
+// RECURRING TRANSACTIONS
+// ════════════════════════════════════════
+
+window.monToggleRecurFreq = function() {
+  var chk  = document.getElementById('mon-recurring-chk');
+  var freq = document.getElementById('mon-recurring-freq');
+  if (!chk || !freq) return;
+  freq.style.display = chk.checked ? '' : 'none';
+};
+
+// Called on monOpenAdd — reset recurring fields
+var _monOpenAddOrig = window.monOpenAdd;
+window.monOpenAdd = function() {
+  _monOpenAddOrig && _monOpenAddOrig();
+  var chk  = document.getElementById('mon-recurring-chk');
+  var freq = document.getElementById('mon-recurring-freq');
+  if (chk) chk.checked = false;
+  if (freq) { freq.style.display = 'none'; freq.value = 'monthly'; }
+};
+
+// Patch monModalSave to persist recurring flag
+var _monModalSaveOrig = window.monModalSave;
+window.monModalSave = function() {
+  // Capture recurring BEFORE original save clears the modal
+  var chk   = document.getElementById('mon-recurring-chk');
+  var freq  = document.getElementById('mon-recurring-freq');
+  var isRec = chk && chk.checked;
+  var recFreq = (freq && freq.value) || 'monthly';
+  // Call original save
+  _monModalSaveOrig && _monModalSaveOrig();
+  // If recurring, patch the last-added transaction
+  if (isRec) {
+    var d = monGetData();
+    var txs = d.transactions || [];
+    if (txs.length > 0) {
+      var last = txs[txs.length - 1];
+      last.recurring = true;
+      last.recurFreq = recFreq;
+      // Store next due date
+      last.recurNextDue = monCalcNextDue(last.date, recFreq);
+      monSaveData(d);
+    }
+    monRenderTransactions();
+  }
+};
+
+// Calculate next due date from a base date + frequency
+function monCalcNextDue(baseDate, freq) {
+  if (!baseDate) return null;
+  var d = new Date(baseDate + 'T00:00:00');
+  if (freq === 'monthly') d.setMonth(d.getMonth() + 1);
+  else if (freq === 'weekly') d.setDate(d.getDate() + 7);
+  else if (freq === 'yearly') d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// Render the Recurring tab
+window.monRenderRecurring = function() {
+  var d   = monGetData();
+  var txs = d.transactions || [];
+  var recs = txs.filter(function(t){ return t.recurring; });
+  var list = document.getElementById('mon-recurring-list');
+  if (!list) return;
+
+  // Check for overdue (due date <= today)
+  var today = new Date().toISOString().slice(0, 10);
+  var due = recs.filter(function(t){ return t.recurNextDue && t.recurNextDue <= today; });
+  var banner = document.getElementById('mon-recurring-due-banner');
+  if (banner) {
+    if (due.length > 0) {
+      banner.style.display = '';
+      banner.innerHTML = '⚠️ ' + due.length + ' recurring transaction' + (due.length>1?'s are':' is') + ' due — scroll down to confirm or skip.';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  if (recs.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:#4a7060;text-align:center;padding:20px">No recurring transactions yet. Check 🔁 Recurring when adding a transaction.</div>';
+    return;
+  }
+
+  var freqLabel = { monthly: 'Monthly', weekly: 'Weekly', yearly: 'Yearly' };
+
+  list.innerHTML = recs.map(function(t) {
+    var isDue = t.recurNextDue && t.recurNextDue <= today;
+    var typeColor = t.type === 'income' ? '#00d18c' : t.type === 'saving' ? '#4e8ef7' : '#e05c5c';
+    var typeLabel = t.type === 'income' ? 'Income' : t.type === 'saving' ? 'Saving' : 'Expense';
+    return '<div style="background:#111a15;border:1px solid '+(isDue?'#f7a94e':'#1a2e24')+';border-radius:12px;padding:14px 16px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<div>' +
+          '<div style="font-size:14px;font-weight:700;color:#e8f0ed">' + (t.description || 'Transaction') + '</div>' +
+          '<div style="font-size:11px;color:#4a7060;margin-top:2px">' + (t.category ? t.category + ' · ' : '') + (freqLabel[t.recurFreq] || 'Monthly') + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-size:16px;font-weight:800;color:' + typeColor + '">' + monFmt(t.amount) + '</div>' +
+          '<div style="font-size:11px;color:#4a7060;margin-top:2px">' + typeLabel + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<div style="font-size:12px;color:' + (isDue?'#f7a94e':'#7a9e8e') + '">' +
+          (isDue ? '⚠️ Due ' : '⏭️ Next: ') + (t.recurNextDue || '—') +
+        '</div>' +
+        '<div style="display:flex;gap:6px">' +
+          (isDue ? '<button onclick="monConfirmRecurring('' + t.id + '')" style="background:#00d18c;border:none;border-radius:8px;color:#0a1a12;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">✓ Confirm</button>' +
+                   '<button onclick="monSkipRecurring('' + t.id + '')" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#7a9e8e;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Skip</button>' : '') +
+          '<button onclick="monDeleteRecurring('' + t.id + '')" style="background:#1a2e24;border:1px solid #e05c5c;border-radius:8px;color:#e05c5c;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Remove</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+};
+
+// Confirm: add a new transaction entry for this month and advance next due
+window.monConfirmRecurring = function(id) {
+  var d   = monGetData();
+  var txs = d.transactions || [];
+  var rec = txs.find(function(t){ return t.id === id; });
+  if (!rec) return;
+  var today = new Date().toISOString().slice(0, 10);
+  // Add copy for this period
+  var newTx = { id: Date.now()+'', description: rec.description, amount: rec.amount,
+    type: rec.type, category: rec.category || '', account: rec.account || '',
+    date: today, recurring: false };
+  txs.push(newTx);
+  // Advance next due date
+  rec.recurNextDue = monCalcNextDue(today, rec.recurFreq || 'monthly');
+  d.transactions = txs;
+  monSaveData(d);
+  monRenderRecurring();
+  monRenderTransactions();
+};
+
+// Skip: just advance the next due date without adding a transaction
+window.monSkipRecurring = function(id) {
+  var d   = monGetData();
+  var txs = d.transactions || [];
+  var rec = txs.find(function(t){ return t.id === id; });
+  if (!rec) return;
+  var today = new Date().toISOString().slice(0, 10);
+  rec.recurNextDue = monCalcNextDue(today, rec.recurFreq || 'monthly');
+  d.transactions = txs;
+  monSaveData(d);
+  monRenderRecurring();
+};
+
+// Delete recurring (removes the recurring flag from the original transaction)
+window.monDeleteRecurring = function(id) {
+  if (!confirm('Remove this recurring entry? The original transaction stays.')) return;
+  var d   = monGetData();
+  d.transactions = (d.transactions || []).map(function(t){
+    if (t.id === id) { delete t.recurring; delete t.recurFreq; delete t.recurNextDue; }
+    return t;
+  });
+  monSaveData(d);
+  monRenderRecurring();
+};
+
+// Auto-check for due recurring on app load
+(function monCheckRecurringOnLoad() {
+  var d     = monGetData();
+  var txs   = d.transactions || [];
+  var today = new Date().toISOString().slice(0, 10);
+  var due   = txs.filter(function(t){ return t.recurring && t.recurNextDue && t.recurNextDue <= today; });
+  if (due.length > 0) {
+    // Show a small badge on the Recurring tab button
+    setTimeout(function(){
+      var btn = document.getElementById('mon-tab-recurring');
+      if (btn) btn.textContent = '🔁 Recurring (' + due.length + ')';
+    }, 500);
+  }
+})();
+
+
 </script>
 
 
