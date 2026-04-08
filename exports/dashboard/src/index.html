@@ -1351,13 +1351,13 @@
           <!-- 1. Income vs Expenses -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📊 Income vs Expenses</div>
-            <div id="mgr-svg-inex" style="width:100%;height:200px"></div>
+            <div id="mgr-svg-inex" style="width:100%;min-height:10px"></div>
           </div>
 
           <!-- 2. Net Savings -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📈 Net Savings per Month</div>
-            <div id="mgr-svg-net" style="width:100%;height:180px"></div>
+            <div id="mgr-svg-net" style="width:100%;min-height:10px"></div>
           </div>
 
           <!-- 3. Category breakdown -->
@@ -1369,7 +1369,7 @@
           <!-- 4. Cumulative this month -->
           <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
             <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📉 Cumulative Expenses This Month</div>
-            <div id="mgr-svg-cum" style="width:100%;height:180px"></div>
+            <div id="mgr-svg-cum" style="width:100%;min-height:10px"></div>
           </div>
 
           <!-- 5. Account balances -->
@@ -8534,6 +8534,8 @@ function monRenderTransactions() {
 function monRenderBudget() {
   var d = monGetData();
   var n = new Date(); var monthKey = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+  // Use same recurring injection as transactions tab so numbers match
+  d = monInjectRecurring(d, monthKey);
   var expenses = d.transactions.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(monthKey); });
   var savings  = d.transactions.filter(function(t){ return t.type==='saving'  && t.date && t.date.startsWith(monthKey); });
   var incomes  = d.transactions.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(monthKey); });
@@ -9326,7 +9328,7 @@ window.monInit = function() {
 function renderMoneyGraphCard() {
   var el = document.getElementById('home-money-graph-content');
   if (!el) return;
-  var d = (function(){ try { return JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); } catch(e){ return {transactions:[],categories:[],accounts:[]}; }})();
+  var rawD = (function(){ try { return JSON.parse(localStorage.getItem('monData')||'{"transactions":[],"categories":[],"accounts":[]}'); } catch(e){ return {transactions:[],categories:[],accounts:[]}; }})();
 
   var now = new Date();
   var months = [];
@@ -9334,8 +9336,9 @@ function renderMoneyGraphCard() {
     var dm = new Date(now.getFullYear(), now.getMonth() - i, 1);
     var key = dm.getFullYear()+'-'+String(dm.getMonth()+1).padStart(2,'0');
     var label = dm.toLocaleDateString('en-US',{month:'short'});
+    var mD = (typeof monInjectRecurring === 'function') ? monInjectRecurring(JSON.parse(JSON.stringify(rawD)), key) : rawD;
     var inc = 0, exp = 0;
-    (d.transactions||[]).forEach(function(t) {
+    (mD.transactions||[]).forEach(function(t) {
       if (!t.date || !t.date.startsWith(key)) return;
       if (t.type==='income')  inc += (t.amount||0);
       if (t.type==='expense') exp += (t.amount||0);
@@ -9843,155 +9846,136 @@ function monRenderGraphs() {
   var keys = _ml.keys, labels = _ml.labels;
   var PAL = MON_GRAPH_PALETTE;
 
-  function fmtMoney(n) {
-    if (!n || n === 0) return '$0';
-    if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  function fmt(n) {
+    if (!n) return '$0';
     if (Math.abs(n) >= 1000) return '$' + (n/1000).toFixed(1) + 'k';
-    return '$' + n.toFixed(2);
+    return '$' + Math.abs(n).toFixed(0);
   }
 
-  // ── CSS bar chart — no DOM measurement needed ──
-  function cssBarChart(containerId, series, lbls) {
+  // Pure CSS horizontal bars — zero DOM measurement
+  function hBars(containerId, groups, groupLabels, colors) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var allVals = series.reduce(function(a, s) { return a.concat(s.data); }, []);
-    var maxV = Math.max.apply(null, allVals.map(Math.abs).concat([1]));
-
-    var html = '<div style="display:flex;align-items:flex-end;gap:0;width:100%;height:180px;position:relative">';
-    // Y axis labels
-    html += '<div style="display:flex;flex-direction:column;justify-content:space-between;height:180px;padding:0 6px 20px 0;flex-shrink:0">';
-    for (var yi = 4; yi >= 0; yi--) {
-      html += '<span style="font-size:9px;color:#4a7060;white-space:nowrap">' + fmtMoney((yi/4)*maxV) + '</span>';
-    }
-    html += '</div>';
-    // Bars area
-    html += '<div style="display:flex;align-items:flex-end;flex:1;height:180px;gap:2px;padding-bottom:20px;overflow:hidden">';
-    lbls.forEach(function(lbl, i) {
-      html += '<div style="display:flex;flex-direction:column;align-items:center;flex:1;height:160px;justify-content:flex-end;position:relative">';
-      series.forEach(function(s) {
-        var v = s.data[i] || 0;
-        var pct = Math.max(1, Math.round((Math.abs(v) / maxV) * 100));
-        var tip = lbl + ' ' + s.label + ': ' + fmtMoney(v);
-        html += '<div title="' + tip + '" style="width:10px;height:' + pct + '%;background:' + s.color + ';border-radius:3px 3px 0 0;cursor:pointer;transition:opacity 0.15s;margin:0 1px" onmouseenter="this.style.opacity=\'0.7\'" onmouseleave="this.style.opacity=\'1\'"></div>';
+    var allV = [].concat.apply([], groups.map(function(g){ return g; }));
+    var maxV = Math.max.apply(null, allV.map(Math.abs).concat([1]));
+    var html = '<div style="display:flex;flex-direction:column;gap:6px;padding:4px 0">';
+    groupLabels.forEach(function(lbl, i) {
+      html += '<div style="display:flex;align-items:center;gap:8px">';
+      html += '<div style="font-size:10px;color:#7a9e8e;width:36px;flex-shrink:0;text-align:right">' + lbl + '</div>';
+      html += '<div style="flex:1;display:flex;flex-direction:column;gap:2px">';
+      groups.forEach(function(g, si) {
+        var v = g[i] || 0;
+        var pct = Math.round(Math.abs(v) / maxV * 100);
+        html += '<div style="height:12px;background:#1a2e24;border-radius:3px;overflow:hidden" title="' + colors[si].label + ' ' + lbl + ': $' + v.toFixed(2) + '">' +
+          '<div style="height:100%;width:' + pct + '%;background:' + colors[si].color + ';border-radius:3px"></div>' +
+        '</div>';
       });
-      html += '<div style="position:absolute;bottom:0;font-size:9px;color:#4a7060;white-space:nowrap">' + lbl + '</div>';
       html += '</div>';
+      html += '<div style="font-size:10px;color:#e8f0ed;width:50px;flex-shrink:0;text-align:left">';
+      groups.forEach(function(g, si) {
+        html += '<span style="color:' + colors[si].color + '">' + fmt(g[i]) + '</span> ';
+      });
+      html += '</div></div>';
     });
-    html += '</div></div>';
-
+    html += '</div>';
     // Legend
-    html += '<div style="display:flex;gap:14px;margin-top:6px">';
-    series.forEach(function(s) {
-      html += '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:' + s.color + '"></div><span style="font-size:10px;color:#7a9e8e">' + s.label + '</span></div>';
+    html += '<div style="display:flex;gap:12px;margin-top:8px;padding-left:44px">';
+    colors.forEach(function(c) {
+      html += '<div style="display:flex;align-items:center;gap:4px"><div style="width:10px;height:10px;border-radius:2px;background:' + c.color + '"></div><span style="font-size:10px;color:#7a9e8e">' + c.label + '</span></div>';
     });
     html += '</div>';
-
     el.innerHTML = html;
   }
 
-  // ── CSS line chart ──
-  function cssLineChart(containerId, data, lbls, color) {
+  // Net savings bars (green/red)
+  function netBars(containerId, vals, lbls) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var maxV = Math.max.apply(null, data.map(Math.abs).concat([1]));
-    var minV = Math.min.apply(null, data.concat([0]));
-    var range = maxV - minV; if (range < 1) range = 1;
-
-    var html = '<div style="display:flex;align-items:flex-end;width:100%;height:180px">';
-    // Y axis
-    html += '<div style="display:flex;flex-direction:column;justify-content:space-between;height:180px;padding:0 6px 20px 0;flex-shrink:0">';
-    for (var yi = 4; yi >= 0; yi--) {
-      html += '<span style="font-size:9px;color:#4a7060;white-space:nowrap">' + fmtMoney(minV + (yi/4)*range) + '</span>';
-    }
-    html += '</div>';
-    // Dots + connecting lines via flexbox
-    html += '<div style="display:flex;align-items:flex-end;flex:1;height:180px;padding-bottom:20px;position:relative;overflow:visible">';
-    data.forEach(function(v, i) {
-      var pctFromBottom = Math.round(((v - minV) / range) * 140);
-      var dotColor = v >= 0 ? color : '#e05c5c';
-      var tip = lbls[i] + ': ' + fmtMoney(v);
-      html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:140px;position:relative">';
-      html += '<div title="' + tip + '" style="width:8px;height:8px;border-radius:50%;background:' + dotColor + ';position:absolute;bottom:' + pctFromBottom + 'px;cursor:pointer" onmouseenter="this.style.transform=\'scale(1.5)\'" onmouseleave="this.style.transform=\'scale(1)\'"></div>';
-      html += '<div style="position:absolute;bottom:0;font-size:9px;color:#4a7060;white-space:nowrap">' + (i % Math.max(1, Math.floor(data.length/6)) === 0 ? lbls[i] : '') + '</div>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-    el.innerHTML = html;
-  }
-
-  // ── CSS horizontal bar chart ──
-  function cssHBarChart(containerId, items) {
-    var el = document.getElementById(containerId);
-    if (!el) return;
-    if (!items.length) { el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:10px">No data yet</div>'; return; }
-    var maxV = Math.max.apply(null, items.map(function(x) { return x.value; })) || 1;
-    el.innerHTML = items.map(function(item) {
-      var pct = Math.round(item.value / maxV * 100);
-      return '<div style="margin-bottom:10px">' +
-        '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
-          '<span style="font-size:12px;color:#e8f0ed">' + item.label + '</span>' +
-          '<span style="font-size:12px;font-weight:700;color:' + item.color + '">' + fmtMoney(item.value) + '</span>' +
+    var maxV = Math.max.apply(null, vals.map(Math.abs).concat([1]));
+    var html = '<div style="display:flex;flex-direction:column;gap:6px;padding:4px 0">';
+    vals.forEach(function(v, i) {
+      var pct = Math.round(Math.abs(v) / maxV * 100);
+      var col = v >= 0 ? '#00d18c' : '#e05c5c';
+      html += '<div style="display:flex;align-items:center;gap:8px">' +
+        '<div style="font-size:10px;color:#7a9e8e;width:36px;flex-shrink:0;text-align:right">' + lbls[i] + '</div>' +
+        '<div style="flex:1;height:12px;background:#1a2e24;border-radius:3px;overflow:hidden" title="' + lbls[i] + ' net: $' + v.toFixed(2) + '">' +
+          '<div style="height:100%;width:' + pct + '%;background:' + col + ';border-radius:3px"></div>' +
         '</div>' +
-        '<div style="height:10px;background:#1a2e24;border-radius:5px;overflow:hidden">' +
-          '<div style="height:100%;width:' + pct + '%;background:' + item.color + ';border-radius:5px;transition:width 0.4s"></div>' +
+        '<div style="font-size:10px;font-weight:700;color:' + col + ';width:50px;flex-shrink:0">' + (v>=0?'+':'') + fmt(v) + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  }
+
+  // Horizontal category bars
+  function catBars(containerId, items) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    if (!items.length) { el.innerHTML = '<div style="color:#4a7060;font-size:12px;padding:8px">No expense data yet</div>'; return; }
+    var maxV = Math.max.apply(null, items.map(function(x){ return x.v; })) || 1;
+    el.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">' +
+    items.map(function(item) {
+      var pct = Math.round(item.v / maxV * 100);
+      return '<div>' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:3px">' +
+          '<span style="font-size:11px;color:#e8f0ed">' + item.label + '</span>' +
+          '<span style="font-size:11px;font-weight:700;color:' + item.color + '">$' + item.v.toFixed(2) + '</span>' +
+        '</div>' +
+        '<div style="height:8px;background:#1a2e24;border-radius:4px;overflow:hidden">' +
+          '<div style="height:100%;width:' + pct + '%;background:' + item.color + ';border-radius:4px"></div>' +
         '</div>' +
       '</div>';
-    }).join('');
+    }).join('') + '</div>';
   }
 
-  // ── Data ──
-  var incomes  = keys.map(function(k) { return txs.filter(function(t) { return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0); });
-  var expenses = keys.map(function(k) { return txs.filter(function(t) { return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0); });
-  var nets     = keys.map(function(k, i) { return incomes[i] - expenses[i]; });
+  var incomes  = keys.map(function(k) { return txs.filter(function(t){ return t.type==='income'  && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0); });
+  var expenses = keys.map(function(k) { return txs.filter(function(t){ return t.type==='expense' && t.date && t.date.startsWith(k); }).reduce(function(s,t){ return s+t.amount; }, 0); });
+  var nets     = keys.map(function(k,i) { return incomes[i] - expenses[i]; });
 
   var hasData = incomes.some(function(v){ return v>0; }) || expenses.some(function(v){ return v>0; });
   if (!hasData) {
-    ['mgr-svg-inex','mgr-svg-net','mgr-svg-cat','mgr-svg-cum','mgr-svg-acc'].forEach(function(id) {
+    ['mgr-svg-inex','mgr-svg-net','mgr-svg-cat','mgr-svg-cum','mgr-svg-acc'].forEach(function(id){
       var el = document.getElementById(id);
-      if (el) el.innerHTML = '<div style="color:#4a7060;font-size:13px;padding:20px;text-align:center">No transactions yet — add some to see graphs!</div>';
+      if (el) el.innerHTML = '<div style="color:#4a7060;font-size:12px;padding:12px;text-align:center">No transactions yet</div>';
     });
     return;
   }
 
-  cssBarChart('mgr-svg-inex', [
-    { label: 'Income',   data: incomes,  color: 'rgba(0,209,140,0.85)' },
-    { label: 'Expenses', data: expenses, color: 'rgba(224,92,92,0.85)' }
-  ], labels);
+  hBars('mgr-svg-inex', [incomes, expenses], labels, [
+    {label:'Income', color:'#00d18c'},
+    {label:'Expenses', color:'#e05c5c'}
+  ]);
 
-  cssLineChart('mgr-svg-net', nets, labels, '#00d18c');
+  netBars('mgr-svg-net', nets, labels);
 
-  // Category breakdown
   var catTotals = {};
   txs.forEach(function(t) {
     if (t.type !== 'expense') return;
     var cat = t.category || 'Uncategorized';
-    catTotals[cat] = (catTotals[cat] || 0) + t.amount;
+    catTotals[cat] = (catTotals[cat]||0) + t.amount;
   });
-  var catItems = Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8).map(function(cat, i) {
-    return { label: cat, value: catTotals[cat], color: PAL[i % PAL.length] };
-  });
-  cssHBarChart('mgr-svg-cat', catItems);
+  catBars('mgr-svg-cat', Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; }).slice(0,8).map(function(k,i){
+    return { label:k, v:catTotals[k], color:PAL[i%PAL.length] };
+  }));
 
-  // Cumulative this month
+  // Cumulative spending this month
   var now2 = new Date();
-  var thisKey = now2.getFullYear() + '-' + String(now2.getMonth()+1).padStart(2,'0');
+  var thisKey = now2.getFullYear()+'-'+String(now2.getMonth()+1).padStart(2,'0');
   var days = new Date(now2.getFullYear(), now2.getMonth()+1, 0).getDate();
   var cumL = [], cumV = [], run = 0;
   for (var dd = 1; dd <= days; dd++) {
-    var dayKey = thisKey + '-' + String(dd).padStart(2,'0');
+    var dayKey = thisKey+'-'+String(dd).padStart(2,'0');
     run += txs.filter(function(t){ return t.type==='expense' && t.date===dayKey; }).reduce(function(s,t){ return s+t.amount; }, 0);
     cumL.push(String(dd));
     cumV.push(run);
   }
-  cssLineChart('mgr-svg-cum', cumV, cumL, '#f7a94e');
+  netBars('mgr-svg-cum', cumV.map(function(v){ return v; }), cumL);
 
   // Account balances
-  var accItems = (d.bankAccounts||[]).map(function(a, i) {
-    return { label: (a.bank ? a.bank+' ' : '') + a.name, value: a.balance || 0, color: '#00d18c' };
-  }).concat((d.creditCards||[]).map(function(cc) {
-    return { label: (cc.bank ? cc.bank+' ' : '') + cc.name, value: cc.balance || 0, color: '#e05c5c' };
-  }));
-  cssHBarChart('mgr-svg-acc', accItems);
+  var accItems = (d.bankAccounts||[]).map(function(a,i){ return { label:(a.bank?a.bank+' ':'')+a.name, v:a.balance||0, color:PAL[i%PAL.length] }; })
+    .concat((d.creditCards||[]).map(function(cc,i){ return { label:(cc.bank?cc.bank+' ':'')+cc.name, v:cc.balance||0, color:'#e05c5c' }; }));
+  catBars('mgr-svg-acc', accItems);
 }
 
 window.monGraphSetRange = monGraphSetRange;
