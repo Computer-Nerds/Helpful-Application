@@ -9246,6 +9246,11 @@ window.monOpenAdd = function() {
   var cb = document.getElementById('mon-save-template');
   if (cb) cb.checked = false;
   document.getElementById('mon-modal-title').textContent = 'Add Transaction';
+  // Reset recurring fields
+  var recurChk = document.getElementById('mon-recurring-chk');
+  var recurFreq = document.getElementById('mon-recurring-freq');
+  if (recurChk) recurChk.checked = false;
+  if (recurFreq) { recurFreq.style.display = 'none'; recurFreq.value = 'monthly'; }
   document.getElementById('mon-modal').style.display='flex';
 };
 
@@ -9273,6 +9278,17 @@ window.monModalSave = function() {
     if (existing !== -1) d.savedTransactions[existing] = tpl;
     else d.savedTransactions.push(tpl);
     cb.checked = false;
+  }
+  // Handle recurring flag
+  var recurChk  = document.getElementById('mon-recurring-chk');
+  var recurFreqEl = document.getElementById('mon-recurring-freq');
+  if (recurChk && recurChk.checked && !monEditId) {
+    var lastTx = d.transactions[d.transactions.length - 1];
+    if (lastTx) {
+      lastTx.recurring  = true;
+      lastTx.recurFreq  = (recurFreqEl && recurFreqEl.value) || 'monthly';
+      lastTx.recurNextDue = monCalcNextDue(lastTx.date, lastTx.recurFreq);
+    }
   }
   monSave(d);
   monModalClose();
@@ -9979,41 +9995,6 @@ window.monToggleRecurFreq = function() {
 };
 
 // Called on monOpenAdd — reset recurring fields
-var _monOpenAddOrig = window.monOpenAdd;
-window.monOpenAdd = function() {
-  _monOpenAddOrig && _monOpenAddOrig();
-  var chk  = document.getElementById('mon-recurring-chk');
-  var freq = document.getElementById('mon-recurring-freq');
-  if (chk) chk.checked = false;
-  if (freq) { freq.style.display = 'none'; freq.value = 'monthly'; }
-};
-
-// Patch monModalSave to persist recurring flag
-var _monModalSaveOrig = window.monModalSave;
-window.monModalSave = function() {
-  // Capture recurring BEFORE original save clears the modal
-  var chk   = document.getElementById('mon-recurring-chk');
-  var freq  = document.getElementById('mon-recurring-freq');
-  var isRec = chk && chk.checked;
-  var recFreq = (freq && freq.value) || 'monthly';
-  // Call original save
-  _monModalSaveOrig && _monModalSaveOrig();
-  // If recurring, patch the last-added transaction
-  if (isRec) {
-    var d = monGetData();
-    var txs = d.transactions || [];
-    if (txs.length > 0) {
-      var last = txs[txs.length - 1];
-      last.recurring = true;
-      last.recurFreq = recFreq;
-      // Store next due date
-      last.recurNextDue = monCalcNextDue(last.date, recFreq);
-      monSaveData(d);
-    }
-    monRenderTransactions();
-  }
-};
-
 // Calculate next due date from a base date + frequency
 function monCalcNextDue(baseDate, freq) {
   if (!baseDate) return null;
@@ -10072,9 +10053,9 @@ window.monRenderRecurring = function() {
           (isDue ? '⚠️ Due ' : '⏭️ Next: ') + (t.recurNextDue || '—') +
         '</div>' +
         '<div style="display:flex;gap:6px">' +
-          (isDue ? '<button onclick="monConfirmRecurring('' + t.id + '')" style="background:#00d18c;border:none;border-radius:8px;color:#0a1a12;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">✓ Confirm</button>' +
-                   '<button onclick="monSkipRecurring('' + t.id + '')" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#7a9e8e;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Skip</button>' : '') +
-          '<button onclick="monDeleteRecurring('' + t.id + '')" style="background:#1a2e24;border:1px solid #e05c5c;border-radius:8px;color:#e05c5c;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Remove</button>' +
+          (isDue ? '<button onclick="monConfirmRecurring(\'' + t.id + '\')" style="background:#00d18c;border:none;border-radius:8px;color:#0a1a12;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">✓ Confirm</button>' +
+                   '<button onclick="monSkipRecurring(\'' + t.id + '\')" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#7a9e8e;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Skip</button>' : '') +
+          '<button onclick="monDeleteRecurring(\'' + t.id + '\')" style="background:#1a2e24;border:1px solid #e05c5c;border-radius:8px;color:#e05c5c;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Remove</button>' +
         '</div>' +
       '</div>' +
     '</div>';
