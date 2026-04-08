@@ -1757,6 +1757,10 @@
             <div class="app-icon" style="background:#1a2a1e">🧮</div>
             <span class="app-label">Math</span>
           </div>
+          <div class="app-tile" onclick="openApp('books')">
+            <div class="app-icon" style="background:#1a1e2e">📚</div>
+            <span class="app-label">Books</span>
+          </div>
           <div class="app-tile" onclick="openApp('braingames')">
             <div class="app-icon" style="background:#0f2e1a">🧠</div>
             <span class="app-label">Brain Games</span>
@@ -2309,6 +2313,10 @@
             <div class="app-icon" style="background:#2e2a1a">🧮</div>
             <span class="app-label">Word Problems</span>
           </div>
+          <div class="app-tile" onclick="openBrainGame('geo')">
+            <div class="app-icon" style="background:#1a2e2a">🌍</div>
+            <span class="app-label">Geography</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2606,6 +2614,87 @@
       </div>
     </div>
 
+
+    <!-- ══════ BOOK TRACKER ══════ -->
+    <div id="page-books" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('apps')">← Apps</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">📚 Book Tracker</span>
+        <button onclick="bookOpenAdd()" style="margin-left:auto;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer">+ Add Book</button>
+      </div>
+      <!-- Shelf tabs -->
+      <div style="display:flex;gap:0;border-bottom:1px solid #1a2e24;background:#0d1210;flex-shrink:0;padding:0 20px">
+        <button id="book-tab-reading"   onclick="bookSetShelf('reading')"  style="padding:10px 16px;border:none;border-bottom:2px solid #00d18c;background:transparent;color:#00d18c;font-size:13px;font-weight:700;cursor:pointer">📖 Reading</button>
+        <button id="book-tab-want"      onclick="bookSetShelf('want')"     style="padding:10px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:#4a7060;font-size:13px;font-weight:600;cursor:pointer">🔖 Want to Read</button>
+        <button id="book-tab-finished"  onclick="bookSetShelf('finished')" style="padding:10px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:#4a7060;font-size:13px;font-weight:600;cursor:pointer">✅ Finished</button>
+      </div>
+      <!-- Stats bar -->
+      <div id="book-stats" style="display:flex;gap:16px;padding:10px 20px;background:#0a1209;border-bottom:1px solid #1a2e24;flex-shrink:0;flex-wrap:wrap"></div>
+      <!-- Book list -->
+      <div id="book-list" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <!-- Book Add/Edit Modal -->
+    <div id="book-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;align-items:center;justify-content:center">
+      <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:16px;padding:24px;width:min(92vw,420px);display:flex;flex-direction:column;gap:12px;box-sizing:border-box;max-height:90vh;overflow-y:auto">
+        <div id="book-modal-title" style="font-size:15px;font-weight:700;color:#e8f0ed">Add Book</div>
+        <input id="book-inp-title"  placeholder="Title *" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+        <input id="book-inp-author" placeholder="Author" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+        <input id="book-inp-genre"  placeholder="Genre (e.g. Fantasy, Non-fiction)" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+        <input id="book-inp-pages"  placeholder="Total pages" type="number" min="1" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;width:100%;box-sizing:border-box">
+        <!-- Shelf selector -->
+        <div style="display:flex;gap:6px">
+          <button id="book-shelf-reading"  onclick="bookModalSetShelf('reading')"  style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">📖 Reading</button>
+          <button id="book-shelf-want"     onclick="bookModalSetShelf('want')"     style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">🔖 Want</button>
+          <button id="book-shelf-finished" onclick="bookModalSetShelf('finished')" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">✅ Finished</button>
+        </div>
+        <!-- Progress (reading only) -->
+        <div id="book-progress-field" style="display:flex;align-items:center;gap:8px">
+          <input id="book-inp-progress" placeholder="Current page" type="number" min="0" style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:14px;outline:none;box-sizing:border-box">
+          <span style="font-size:13px;color:#4a7060;flex-shrink:0">/ <span id="book-prog-total">?</span> pages</span>
+        </div>
+        <!-- Rating (finished only) -->
+        <div id="book-rating-field" style="display:none;flex-direction:column;gap:6px">
+          <div style="font-size:12px;color:#7a9e8e">Rating</div>
+          <div id="book-stars" style="display:flex;gap:4px;font-size:24px;cursor:pointer"></div>
+        </div>
+        <!-- Notes -->
+        <textarea id="book-inp-notes" placeholder="Notes / thoughts (optional)" rows="3" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;padding:10px 12px;color:#e8f0ed;font-size:13px;outline:none;resize:vertical;width:100%;box-sizing:border-box"></textarea>
+        <input type="hidden" id="book-edit-id">
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="bookSave()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer">Save</button>
+          <button onclick="document.getElementById('book-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════ GEOGRAPHY QUIZ ══════ -->
+    <div id="page-bg-geo" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🌍 Geography Quiz</span>
+        <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="geo-score">0</span> &nbsp;|&nbsp; Streak: <span id="geo-streak">0</span></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
+        <!-- Category tabs -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+          <button id="geo-cat-capitals"  onclick="geoSetCat('capitals')"  style="padding:7px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">🏛️ Capitals</button>
+          <button id="geo-cat-flags"     onclick="geoSetCat('flags')"     style="padding:7px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">🚩 Flags</button>
+          <button id="geo-cat-continents" onclick="geoSetCat('continents')" style="padding:7px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">🗺️ Continents</button>
+          <button id="geo-cat-populations" onclick="geoSetCat('populations')" style="padding:7px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">👥 Population</button>
+        </div>
+        <div id="geo-question-card" style="width:100%;background:#0f1f17;border:1px solid #1f3a2a;border-radius:14px;padding:22px;text-align:center;box-sizing:border-box">
+          <div id="geo-flag-display" style="font-size:64px;margin-bottom:10px;display:none"></div>
+          <div id="geo-question-text" style="font-size:17px;font-weight:700;color:#e8f0ed;line-height:1.5"></div>
+          <div id="geo-hint" style="font-size:12px;color:#4a7060;margin-top:6px"></div>
+        </div>
+        <div id="geo-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%"></div>
+        <div id="geo-msg" style="font-size:14px;font-weight:700;min-height:22px;text-align:center"></div>
+        <button id="geo-next-btn" onclick="geoNext()" style="display:none;background:#00d18c;color:#0a1a12;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer">Next →</button>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /body -->
 
@@ -2728,7 +2817,10 @@ function setPage(p) {
   if (p === 'spanish') spanishInit();
 }
 
-function openApp(app) { setPage(app); }
+function openApp(app) {
+  if (app === 'books') { setPage('books'); bookSetShelf('reading'); return; }
+  setPage(app);
+}
 function openBrainGame(game) {
   if (game === 'wordle') setPage('wordle');
   else setPage('bg-' + game);
@@ -10104,6 +10196,426 @@ window.monCalcNextDue = monCalcNextDue;
 
 
 
+
+
+// ════════════════════════════════════════════════
+//  BOOK TRACKER
+// ════════════════════════════════════════════════
+var bookShelf = 'reading';
+var bookModalShelf = 'reading';
+var bookRating = 0;
+
+function bookGetData() {
+  try { return JSON.parse(localStorage.getItem('bookData') || '{"books":[]}'); } catch(e) { return {books:[]}; }
+}
+function bookSaveData(d) { localStorage.setItem('bookData', JSON.stringify(d)); }
+
+function bookSetShelf(shelf) {
+  bookShelf = shelf;
+  ['reading','want','finished'].forEach(function(s) {
+    var btn = document.getElementById('book-tab-'+s);
+    if (!btn) return;
+    btn.style.borderBottomColor = s===shelf ? '#00d18c' : 'transparent';
+    btn.style.color = s===shelf ? '#00d18c' : '#4a7060';
+    btn.style.fontWeight = s===shelf ? '700' : '600';
+  });
+  bookRender();
+}
+
+function bookRender() {
+  var d = bookGetData();
+  var books = d.books.filter(function(b){ return b.shelf === bookShelf; });
+
+  // Stats bar
+  var stats = document.getElementById('book-stats');
+  if (stats) {
+    var total = d.books.length;
+    var reading = d.books.filter(function(b){ return b.shelf==='reading'; }).length;
+    var finished = d.books.filter(function(b){ return b.shelf==='finished'; }).length;
+    var want = d.books.filter(function(b){ return b.shelf==='want'; }).length;
+    var avgRating = (function(){
+      var rated = d.books.filter(function(b){ return b.rating>0; });
+      if (!rated.length) return 0;
+      return (rated.reduce(function(s,b){ return s+b.rating; },0)/rated.length).toFixed(1);
+    })();
+    stats.innerHTML = [
+      {label:'Total', val:total, color:'#e8f0ed'},
+      {label:'Reading', val:reading, color:'#4e8ef7'},
+      {label:'Finished', val:finished, color:'#00d18c'},
+      {label:'Want', val:want, color:'#f7a94e'},
+      {label:'Avg Rating', val:avgRating>0?'⭐'+avgRating:'—', color:'#f7a94e'},
+    ].map(function(s){
+      return '<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:9px;color:#4a7060;text-transform:uppercase;letter-spacing:0.05em">'+s.label+'</span><span style="font-size:14px;font-weight:700;color:'+s.color+'">'+s.val+'</span></div>';
+    }).join('<div style="width:1px;background:#1a2e24;align-self:stretch"></div>');
+  }
+
+  var list = document.getElementById('book-list');
+  if (!list) return;
+  if (!books.length) {
+    var emptyMsg = bookShelf==='reading' ? 'No books in progress. Hit + Add Book.' : bookShelf==='want' ? 'No books on your wishlist yet.' : 'No finished books yet. Keep reading!';
+    list.innerHTML = '<div style="text-align:center;color:#4a7060;font-size:13px;padding:40px 0">'+emptyMsg+'</div>';
+    return;
+  }
+  list.innerHTML = '';
+  books.forEach(function(book) {
+    var card = document.createElement('div');
+    card.style.cssText = 'background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px';
+
+    var pct = (book.pages && book.progress) ? Math.min(100, Math.round(book.progress/book.pages*100)) : 0;
+    var progressBar = (bookShelf==='reading' && book.pages) ?
+      '<div style="height:5px;background:#1a2e24;border-radius:3px;overflow:hidden;margin-top:4px"><div style="height:100%;width:'+pct+'%;background:#4e8ef7;border-radius:3px;transition:width 0.3s"></div></div>' +
+      '<div style="font-size:11px;color:#4a7060">Page '+(book.progress||0)+' of '+book.pages+' &nbsp;·&nbsp; '+pct+'%</div>' : '';
+
+    var stars = book.rating ? '⭐'.repeat(book.rating) : '';
+
+    card.innerHTML =
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:14px;font-weight:700;color:#e8f0ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+book.title+'</div>' +
+          (book.author ? '<div style="font-size:12px;color:#7a9e8e;margin-top:2px">by '+book.author+'</div>' : '') +
+          (book.genre  ? '<div style="font-size:11px;color:#4a7060;margin-top:2px">'+book.genre+'</div>' : '') +
+        '</div>' +
+        '<div style="display:flex;gap:6px;flex-shrink:0">' +
+          (stars ? '<span style="font-size:12px">'+stars+'</span>' : '') +
+          '<button onclick="bookOpenEdit(\''+book.id+'\')" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:14px;padding:0 2px" title="Edit">✏</button>' +
+          '<button onclick="bookDelete(\''+book.id+'\')" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:16px;padding:0 2px" title="Delete">×</button>' +
+        '</div>' +
+      '</div>' +
+      progressBar +
+      (book.notes ? '<div style="font-size:12px;color:#4a7060;border-top:1px solid #1a2e24;padding-top:8px;line-height:1.5">'+book.notes+'</div>' : '') +
+      (bookShelf !== 'finished' ?
+        '<div style="display:flex;gap:6px;margin-top:2px">' +
+          (bookShelf==='want' ? '<button onclick="bookMoveTo(\''+book.id+'\',\'reading\')" style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:7px;color:#4e8ef7;font-size:12px;font-weight:600;padding:6px;cursor:pointer">📖 Start Reading</button>' : '') +
+          (bookShelf==='reading' ? '<button onclick="bookMoveTo(\''+book.id+'\',\'finished\')" style="flex:1;background:#1a2e24;border:1px solid #1f3a2a;border-radius:7px;color:#00d18c;font-size:12px;font-weight:600;padding:6px;cursor:pointer">✅ Mark Finished</button>' : '') +
+        '</div>' : '') ;
+
+    list.appendChild(card);
+  });
+}
+
+window.bookOpenAdd = function() {
+  document.getElementById('book-modal-title').textContent = 'Add Book';
+  document.getElementById('book-inp-title').value = '';
+  document.getElementById('book-inp-author').value = '';
+  document.getElementById('book-inp-genre').value = '';
+  document.getElementById('book-inp-pages').value = '';
+  document.getElementById('book-inp-progress').value = '';
+  document.getElementById('book-inp-notes').value = '';
+  document.getElementById('book-edit-id').value = '';
+  bookRating = 0;
+  bookModalSetShelf('reading');
+  bookRenderStars();
+  document.getElementById('book-modal').style.display = 'flex';
+};
+
+window.bookOpenEdit = function(id) {
+  var d = bookGetData();
+  var book = d.books.find(function(b){ return b.id===id; });
+  if (!book) return;
+  document.getElementById('book-modal-title').textContent = 'Edit Book';
+  document.getElementById('book-inp-title').value = book.title||'';
+  document.getElementById('book-inp-author').value = book.author||'';
+  document.getElementById('book-inp-genre').value = book.genre||'';
+  document.getElementById('book-inp-pages').value = book.pages||'';
+  document.getElementById('book-inp-progress').value = book.progress||'';
+  document.getElementById('book-inp-notes').value = book.notes||'';
+  document.getElementById('book-edit-id').value = id;
+  bookRating = book.rating||0;
+  bookModalSetShelf(book.shelf||'reading');
+  bookRenderStars();
+  document.getElementById('book-modal').style.display = 'flex';
+};
+
+window.bookModalSetShelf = function(shelf) {
+  bookModalShelf = shelf;
+  ['reading','want','finished'].forEach(function(s) {
+    var btn = document.getElementById('book-shelf-'+s);
+    if (!btn) return;
+    btn.style.background = s===shelf ? '#00d18c' : '#1a2e24';
+    btn.style.color = s===shelf ? '#0a1a12' : '#7a9e8e';
+    btn.style.borderColor = s===shelf ? '#00d18c' : '#1f3a2a';
+  });
+  var pf = document.getElementById('book-progress-field');
+  var rf = document.getElementById('book-rating-field');
+  if (pf) pf.style.display = shelf==='reading' ? 'flex' : 'none';
+  if (rf) rf.style.display = shelf==='finished' ? 'flex' : 'none';
+  var pt = document.getElementById('book-prog-total');
+  if (pt) { var pg = document.getElementById('book-inp-pages').value; pt.textContent = pg||'?'; }
+};
+
+function bookRenderStars() {
+  var stars = document.getElementById('book-stars');
+  if (!stars) return;
+  stars.innerHTML = '';
+  for (var i = 1; i <= 5; i++) {
+    var s = document.createElement('span');
+    s.textContent = i <= bookRating ? '⭐' : '☆';
+    s.style.cssText = 'cursor:pointer;font-size:24px;opacity:'+(i<=bookRating?1:0.4);
+    (function(val){ s.addEventListener('click', function(){ bookRating=val; bookRenderStars(); }); })(i);
+    stars.appendChild(s);
+  }
+}
+
+window.bookSave = function() {
+  var title = document.getElementById('book-inp-title').value.trim();
+  if (!title) { alert('Title is required'); return; }
+  var d = bookGetData();
+  var editId = document.getElementById('book-edit-id').value;
+  var pages = parseInt(document.getElementById('book-inp-pages').value)||0;
+  var progress = parseInt(document.getElementById('book-inp-progress').value)||0;
+  if (editId) {
+    var idx = d.books.findIndex(function(b){ return b.id===editId; });
+    if (idx > -1) {
+      d.books[idx].title = title;
+      d.books[idx].author = document.getElementById('book-inp-author').value.trim();
+      d.books[idx].genre = document.getElementById('book-inp-genre').value.trim();
+      d.books[idx].pages = pages;
+      d.books[idx].progress = progress;
+      d.books[idx].notes = document.getElementById('book-inp-notes').value.trim();
+      d.books[idx].shelf = bookModalShelf;
+      d.books[idx].rating = bookRating;
+    }
+  } else {
+    d.books.push({
+      id: Date.now().toString(),
+      title: title,
+      author: document.getElementById('book-inp-author').value.trim(),
+      genre: document.getElementById('book-inp-genre').value.trim(),
+      pages: pages,
+      progress: progress,
+      notes: document.getElementById('book-inp-notes').value.trim(),
+      shelf: bookModalShelf,
+      rating: bookRating,
+      added: new Date().toISOString().slice(0,10)
+    });
+  }
+  bookSaveData(d);
+  document.getElementById('book-modal').style.display = 'none';
+  bookRender();
+};
+
+window.bookDelete = function(id) {
+  var d = bookGetData();
+  d.books = d.books.filter(function(b){ return b.id!==id; });
+  bookSaveData(d);
+  bookRender();
+};
+
+window.bookMoveTo = function(id, shelf) {
+  var d = bookGetData();
+  var book = d.books.find(function(b){ return b.id===id; });
+  if (book) { book.shelf = shelf; if (shelf==='finished' && !book.finishedDate) book.finishedDate = new Date().toISOString().slice(0,10); }
+  bookSaveData(d);
+  bookSetShelf(shelf);
+};
+
+// Sync pages input to modal total display
+document.addEventListener('input', function(e){
+  if (e.target && e.target.id === 'book-inp-pages') {
+    var pt = document.getElementById('book-prog-total');
+    if (pt) pt.textContent = e.target.value||'?';
+  }
+});
+
+// ════════════════════════════════════════════════
+//  GEOGRAPHY QUIZ
+// ════════════════════════════════════════════════
+var geoScore = 0, geoStreak = 0, geoCat = 'capitals', geoCurrentQ = null, geoAnswered = false;
+
+var GEO_DATA = {
+  capitals: [
+    {q:'What is the capital of France?',     a:'Paris',       choices:['Paris','London','Berlin','Madrid']},
+    {q:'What is the capital of Japan?',       a:'Tokyo',       choices:['Seoul','Beijing','Tokyo','Bangkok']},
+    {q:'What is the capital of Australia?',  a:'Canberra',    choices:['Sydney','Melbourne','Canberra','Brisbane']},
+    {q:'What is the capital of Brazil?',     a:'Brasília',    choices:['São Paulo','Rio de Janeiro','Brasília','Buenos Aires']},
+    {q:'What is the capital of Canada?',     a:'Ottawa',      choices:['Toronto','Vancouver','Ottawa','Montreal']},
+    {q:'What is the capital of Egypt?',      a:'Cairo',       choices:['Cairo','Alexandria','Luxor','Nairobi']},
+    {q:'What is the capital of Argentina?',  a:'Buenos Aires',choices:['Lima','Santiago','Bogotá','Buenos Aires']},
+    {q:'What is the capital of Russia?',     a:'Moscow',      choices:['St. Petersburg','Moscow','Kiev','Minsk']},
+    {q:'What is the capital of India?',      a:'New Delhi',   choices:['Mumbai','Kolkata','New Delhi','Chennai']},
+    {q:'What is the capital of Mexico?',     a:'Mexico City', choices:['Guadalajara','Mexico City','Monterrey','Tijuana']},
+    {q:'What is the capital of South Korea?',a:'Seoul',       choices:['Busan','Incheon','Seoul','Daegu']},
+    {q:'What is the capital of Germany?',    a:'Berlin',      choices:['Munich','Hamburg','Berlin','Frankfurt']},
+    {q:'What is the capital of Italy?',      a:'Rome',        choices:['Milan','Naples','Florence','Rome']},
+    {q:'What is the capital of Spain?',      a:'Madrid',      choices:['Barcelona','Madrid','Seville','Valencia']},
+    {q:'What is the capital of South Africa?',a:'Pretoria',   choices:['Cape Town','Johannesburg','Durban','Pretoria']},
+    {q:'What is the capital of China?',      a:'Beijing',     choices:['Shanghai','Beijing','Guangzhou','Shenzhen']},
+    {q:'What is the capital of Saudi Arabia?',a:'Riyadh',     choices:['Jeddah','Riyadh','Mecca','Medina']},
+    {q:'What is the capital of Turkey?',     a:'Ankara',      choices:['Istanbul','Ankara','Izmir','Bursa']},
+    {q:'What is the capital of Thailand?',   a:'Bangkok',     choices:['Phuket','Chiang Mai','Bangkok','Pattaya']},
+    {q:'What is the capital of Nigeria?',    a:'Abuja',       choices:['Lagos','Kano','Ibadan','Abuja']},
+    {q:'What is the capital of Kenya?',      a:'Nairobi',     choices:['Mombasa','Nairobi','Kisumu','Nakuru']},
+    {q:'What is the capital of Indonesia?',  a:'Jakarta',     choices:['Bali','Jakarta','Surabaya','Medan']},
+    {q:'What is the capital of Pakistan?',   a:'Islamabad',   choices:['Karachi','Lahore','Islamabad','Peshawar']},
+    {q:'What is the capital of Norway?',     a:'Oslo',        choices:['Bergen','Oslo','Stavanger','Trondheim']},
+    {q:'What is the capital of Sweden?',     a:'Stockholm',   choices:['Gothenburg','Malmö','Stockholm','Uppsala']},
+    {q:'What is the capital of Greece?',     a:'Athens',      choices:['Thessaloniki','Athens','Patras','Heraklion']},
+    {q:'What is the capital of Portugal?',   a:'Lisbon',      choices:['Porto','Lisbon','Braga','Coimbra']},
+    {q:'What is the capital of Poland?',     a:'Warsaw',      choices:['Kraków','Warsaw','Łódź','Wrocław']},
+    {q:'What is the capital of Ukraine?',    a:'Kyiv',        choices:['Kharkiv','Kyiv','Odessa','Lviv']},
+    {q:'What is the capital of New Zealand?',a:'Wellington',  choices:['Auckland','Wellington','Christchurch','Dunedin']},
+  ],
+  flags: [
+    {q:'Which country has this flag?', flag:'🇺🇸', a:'United States',  choices:['United States','Canada','Australia','United Kingdom']},
+    {q:'Which country has this flag?', flag:'🇯🇵', a:'Japan',           choices:['Japan','South Korea','China','Taiwan']},
+    {q:'Which country has this flag?', flag:'🇧🇷', a:'Brazil',          choices:['Brazil','Argentina','Colombia','Venezuela']},
+    {q:'Which country has this flag?', flag:'🇨🇦', a:'Canada',          choices:['Canada','Switzerland','Austria','Denmark']},
+    {q:'Which country has this flag?', flag:'🇩🇪', a:'Germany',         choices:['Germany','Belgium','Hungary','Ethiopia']},
+    {q:'Which country has this flag?', flag:'🇫🇷', a:'France',          choices:['France','Netherlands','Italy','Ireland']},
+    {q:'Which country has this flag?', flag:'🇮🇳', a:'India',           choices:['India','Niger','Ireland','Ivory Coast']},
+    {q:'Which country has this flag?', flag:'🇦🇺', a:'Australia',       choices:['Australia','New Zealand','Fiji','Tuvalu']},
+    {q:'Which country has this flag?', flag:'🇲🇽', a:'Mexico',          choices:['Mexico','Italy','Hungary','Bulgaria']},
+    {q:'Which country has this flag?', flag:'🇷🇺', a:'Russia',          choices:['Russia','Slovenia','Slovakia','Serbia']},
+    {q:'Which country has this flag?', flag:'🇰🇷', a:'South Korea',     choices:['South Korea','Japan','China','Taiwan']},
+    {q:'Which country has this flag?', flag:'🇿🇦', a:'South Africa',    choices:['South Africa','Jamaica','Zimbabwe','Kenya']},
+    {q:'Which country has this flag?', flag:'🇳🇬', a:'Nigeria',         choices:['Nigeria','Ireland','Saudi Arabia','Pakistan']},
+    {q:'Which country has this flag?', flag:'🇳🇴', a:'Norway',          choices:['Norway','Iceland','Denmark','Finland']},
+    {q:'Which country has this flag?', flag:'🇸🇪', a:'Sweden',          choices:['Sweden','Finland','Ukraine','Greece']},
+    {q:'Which country has this flag?', flag:'🇨🇭', a:'Switzerland',     choices:['Switzerland','Denmark','England','Georgia']},
+    {q:'Which country has this flag?', flag:'🇹🇷', a:'Turkey',          choices:['Turkey','Pakistan','Tunisia','Libya']},
+    {q:'Which country has this flag?', flag:'🇦🇷', a:'Argentina',       choices:['Argentina','Uruguay','El Salvador','Honduras']},
+    {q:'Which country has this flag?', flag:'🇪🇬', a:'Egypt',           choices:['Egypt','Iraq','Syria','Yemen']},
+    {q:'Which country has this flag?', flag:'🇬🇷', a:'Greece',          choices:['Greece','Uruguay','El Salvador','Honduras']},
+  ],
+  continents: [
+    {q:'Which continent is Brazil in?',          a:'South America', choices:['North America','South America','Africa','Europe']},
+    {q:'Which continent is Egypt in?',           a:'Africa',        choices:['Africa','Asia','Europe','Middle East']},
+    {q:'Which continent is Japan in?',           a:'Asia',          choices:['Asia','Oceania','Africa','Europe']},
+    {q:'Which continent is Australia in?',       a:'Oceania',       choices:['Asia','Oceania','Africa','Antarctica']},
+    {q:'Which continent is Mexico in?',          a:'North America', choices:['North America','South America','Central America','Europe']},
+    {q:'Which continent is Russia mostly in?',   a:'Asia',          choices:['Europe','Asia','Both Europe & Asia','North America']},
+    {q:'Which continent is Nigeria in?',         a:'Africa',        choices:['Africa','Asia','South America','Europe']},
+    {q:'Which continent is Turkey mostly in?',   a:'Asia',          choices:['Europe','Asia','Africa','Middle East']},
+    {q:'Which continent is India in?',           a:'Asia',          choices:['Asia','Africa','Middle East','Oceania']},
+    {q:'Which continent is Argentina in?',       a:'South America', choices:['South America','North America','Europe','Africa']},
+    {q:'Which continent is France in?',          a:'Europe',        choices:['Europe','Asia','Africa','North America']},
+    {q:'Which continent is Canada in?',          a:'North America', choices:['North America','South America','Europe','Asia']},
+    {q:'Which continent is South Africa in?',    a:'Africa',        choices:['Africa','Asia','South America','Oceania']},
+    {q:'Which continent is Indonesia in?',       a:'Asia',          choices:['Asia','Oceania','Africa','Pacific Islands']},
+    {q:'Which continent is New Zealand in?',     a:'Oceania',       choices:['Oceania','Asia','Australia','Pacific Islands']},
+    {q:'Which continent is Kenya in?',           a:'Africa',        choices:['Africa','Asia','South America','Middle East']},
+    {q:'Which continent is Norway in?',          a:'Europe',        choices:['Europe','North America','Asia','Arctic']},
+    {q:'Which continent is Chile in?',           a:'South America', choices:['South America','North America','Europe','Africa']},
+    {q:'Which continent is Saudi Arabia in?',    a:'Asia',          choices:['Asia','Africa','Middle East','Europe']},
+    {q:'Which continent is Cuba in?',            a:'North America', choices:['North America','South America','Caribbean','Europe']},
+  ],
+  populations: [
+    {q:'Which country has the largest population?',       a:'China',         choices:['China','India','United States','Indonesia']},
+    {q:'Which country has the second largest population?',a:'India',         choices:['China','India','United States','Indonesia']},
+    {q:'Which continent has the most countries?',         a:'Africa',        choices:['Africa','Asia','Europe','Americas']},
+    {q:'Approximately how many countries are in the world?',a:'195',         choices:['180','195','210','225']},
+    {q:'Which is the largest country by area?',           a:'Russia',        choices:['Russia','Canada','China','United States']},
+    {q:'Which is the smallest country in the world?',     a:'Vatican City',  choices:['Monaco','Vatican City','San Marino','Liechtenstein']},
+    {q:'Which country has the highest population density?',a:'Monaco',       choices:['Monaco','Singapore','Bangladesh','Malta']},
+    {q:'What is the most spoken language in the world?',  a:'Mandarin Chinese', choices:['English','Spanish','Mandarin Chinese','Hindi']},
+    {q:'Which ocean is the largest?',                     a:'Pacific Ocean', choices:['Atlantic Ocean','Pacific Ocean','Indian Ocean','Arctic Ocean']},
+    {q:'Which is the longest river in the world?',        a:'Nile',          choices:['Amazon','Nile','Yangtze','Mississippi']},
+    {q:'Which is the highest mountain in the world?',     a:'Mount Everest', choices:['K2','Mount Everest','Kangchenjunga','Lhotse']},
+    {q:'Which is the largest desert in the world?',       a:'Sahara',        choices:['Arabian','Gobi','Sahara','Antarctic']},
+    {q:'Which country has the most official languages?',  a:'South Africa',  choices:['India','Switzerland','South Africa','Bolivia']},
+    {q:'How many time zones does Russia have?',           a:'11',            choices:['8','9','11','13']},
+    {q:'Which city has the most metro/subway stations?',  a:'New York City', choices:['Tokyo','Moscow','New York City','London']},
+  ]
+};
+
+function geoSetCat(cat) {
+  geoCat = cat;
+  ['capitals','flags','continents','populations'].forEach(function(c) {
+    var btn = document.getElementById('geo-cat-'+c);
+    if (!btn) return;
+    btn.style.background = c===cat ? '#00d18c' : '#1a2e24';
+    btn.style.color = c===cat ? '#0a1a12' : '#7a9e8e';
+    btn.style.borderColor = c===cat ? '#00d18c' : '#1f3a2a';
+  });
+  geoNext();
+}
+window.geoSetCat = geoSetCat;
+
+function geoNext() {
+  geoAnswered = false;
+  var pool = GEO_DATA[geoCat];
+  var q = pool[Math.floor(Math.random()*pool.length)];
+  geoCurrentQ = q;
+
+  var flag = document.getElementById('geo-flag-display');
+  var qText = document.getElementById('geo-question-text');
+  var hint = document.getElementById('geo-hint');
+  var msg = document.getElementById('geo-msg');
+  var nextBtn = document.getElementById('geo-next-btn');
+
+  if (flag) { flag.style.display = q.flag ? 'block' : 'none'; if (q.flag) flag.textContent = q.flag; }
+  if (qText) qText.textContent = q.q;
+  if (hint) hint.textContent = '';
+  if (msg) { msg.textContent = ''; msg.style.color = '#e8f0ed'; }
+  if (nextBtn) nextBtn.style.display = 'none';
+
+  // Shuffle choices
+  var choices = q.choices.slice().sort(function(){ return Math.random()-0.5; });
+  var cont = document.getElementById('geo-choices');
+  if (!cont) return;
+  cont.innerHTML = '';
+  choices.forEach(function(choice) {
+    var btn = document.createElement('button');
+    btn.textContent = choice;
+    btn.style.cssText = 'background:#0f1f17;border:1px solid #1f3a2a;border-radius:10px;color:#e8f0ed;font-size:14px;font-weight:600;padding:12px 8px;cursor:pointer;text-align:center;transition:background 0.15s';
+    btn.addEventListener('click', function(){ geoAnswer(choice, btn, choices); });
+    cont.appendChild(btn);
+  });
+}
+window.geoNext = geoNext;
+
+function geoAnswer(choice, btn, allChoices) {
+  if (geoAnswered) return;
+  geoAnswered = true;
+  var correct = choice === geoCurrentQ.a;
+  var msg = document.getElementById('geo-msg');
+  var nextBtn = document.getElementById('geo-next-btn');
+  var cont = document.getElementById('geo-choices');
+
+  // Color all buttons
+  cont.querySelectorAll('button').forEach(function(b) {
+    if (b.textContent === geoCurrentQ.a) {
+      b.style.background = 'rgba(0,209,140,0.25)';
+      b.style.borderColor = '#00d18c';
+      b.style.color = '#00d18c';
+    } else if (b === btn && !correct) {
+      b.style.background = 'rgba(224,92,92,0.25)';
+      b.style.borderColor = '#e05c5c';
+      b.style.color = '#e05c5c';
+    }
+    b.style.cursor = 'default';
+  });
+
+  if (correct) {
+    geoScore++; geoStreak++;
+    if (msg) { msg.textContent = '✅ Correct!'; msg.style.color = '#00d18c'; }
+  } else {
+    geoStreak = 0;
+    if (msg) { msg.textContent = '❌ Nope! It\'s ' + geoCurrentQ.a; msg.style.color = '#e05c5c'; }
+  }
+
+  var sc = document.getElementById('geo-score');
+  var st = document.getElementById('geo-streak');
+  if (sc) sc.textContent = geoScore;
+  if (st) st.textContent = geoStreak;
+  if (nextBtn) nextBtn.style.display = 'inline-block';
+}
+
+// Init geo when page loads
+(function(){
+  var orig = window.openBrainGame;
+  window.openBrainGame = function(name) {
+    if (name === 'geo') {
+      geoScore = 0; geoStreak = 0;
+      var sc = document.getElementById('geo-score'); if(sc) sc.textContent=0;
+      var st = document.getElementById('geo-streak'); if(st) st.textContent=0;
+      setPage('bg-geo');
+      geoSetCat('capitals');
+    } else {
+      orig(name);
+    }
+  };
+})();
 
 </script>
 
