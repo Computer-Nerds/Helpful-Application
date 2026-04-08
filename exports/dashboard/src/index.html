@@ -1268,7 +1268,117 @@
           <div id="mon-budget-list" style="display:flex;flex-direction:column;gap:10px"></div>
         </div>
 
-        <!-- RECURRING TAB -->
+        <div id="mon-accounts-panel" style="flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;display:none">
+          <!-- Net worth summary -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
+              <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Cash / Assets</div>
+              <div id="mon-acc-assets-val" style="font-size:18px;font-weight:900;color:#00d18c">$0</div>
+            </div>
+            <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
+              <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Total Credit</div>
+              <div id="mon-acc-credit-val" style="font-size:18px;font-weight:900;color:#4e9fd4">$0</div>
+            </div>
+            <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:12px 14px;text-align:center">
+              <div style="font-size:10px;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Net Worth</div>
+              <div id="mon-net-worth-val" style="font-size:18px;font-weight:900;color:#00d18c">$0</div>
+            </div>
+          </div>
+
+          <!-- Bank Accounts section -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div style="font-size:12px;font-weight:800;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.06em">🏦 Bank Accounts</div>
+              <button onclick="monOpenAddAccount('bank')" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#00d18c;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">+ Add</button>
+            </div>
+            <div id="mon-bank-list" style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;color:#4a7060;padding:10px 0;text-align:center">No bank accounts yet.</div>
+            </div>
+          </div>
+
+          <!-- Savings Interest section -->
+          <div id="mon-savings-interest-section" style="display:none">
+            <div style="font-size:12px;font-weight:800;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">💰 Savings Interest</div>
+            <div id="mon-savings-interest-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+
+          <!-- Credit section -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div style="font-size:12px;font-weight:800;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.06em">💳 Credit Cards</div>
+              <button onclick="monOpenAddAccount('credit')" style="background:#1a2e24;border:1px solid #1f3a2a;border-radius:8px;color:#4e9fd4;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">+ Add</button>
+            </div>
+            <div id="mon-credit-list" style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;color:#4a7060;padding:10px 0;text-align:center">No credit cards yet.</div>
+            </div>
+          </div>
+
+          <!-- Combined credit utilization -->
+          <div id="mon-combined-credit-section" style="display:none;margin-top:4px">
+            <div style="background:#111a15;border:1px solid #1a2e24;border-radius:12px;padding:14px 16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:11px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em">Combined Credit Utilization</span>
+                <span id="mon-combined-pct" style="font-size:15px;font-weight:900;color:#4e9fd4">0%</span>
+              </div>
+              <div style="background:#1a2e24;border-radius:6px;height:10px;overflow:hidden;margin-bottom:8px">
+                <div id="mon-combined-bar" style="height:100%;width:0%;background:#4e9fd4;border-radius:6px;transition:width 0.4s"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#4a7060">Used: <strong id="mon-combined-used" style="color:#e8f0ed">$0</strong></span>
+                <span style="font-size:11px;color:#4a7060">Total Limit: <strong id="mon-combined-limit" style="color:#e8f0ed">$0</strong></span>
+                <span style="font-size:11px;color:#4a7060">Available: <strong id="mon-combined-avail" style="color:#00d18c">$0</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- legacy list kept hidden for compat -->
+          <div id="mon-accounts-list" style="display:none"></div>
+        </div>
+
+
+        <!-- ══ GRAPHS PANEL ══ -->
+
+        <div id="mon-graphs-panel" style="display:none;flex:1;overflow-y:auto;padding:18px 20px;flex-direction:column;gap:20px;box-sizing:border-box;width:100%">
+
+          <!-- Range selector -->
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:700;color:#7a9e8e;text-transform:uppercase;letter-spacing:0.05em">Range:</span>
+            <button id="mgr-btn-6m" onclick="monGraphSetRange('6m')" style="padding:5px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">6 Months</button>
+            <button id="mgr-btn-1y" onclick="monGraphSetRange('1y')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">1 Year</button>
+            <button id="mgr-btn-all" onclick="monGraphSetRange('all')" style="padding:5px 14px;border-radius:20px;border:1px solid #1f3a2a;background:#1a2e24;color:#7a9e8e;font-size:12px;font-weight:700;cursor:pointer">All Time</button>
+          </div>
+
+          <!-- 1. Income vs Expenses -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📊 Income vs Expenses</div>
+            <div id="mgr-svg-inex" style="width:100%;height:200px"></div>
+          </div>
+
+          <!-- 2. Net Savings -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📈 Net Savings per Month</div>
+            <div id="mgr-svg-net" style="width:100%;height:180px"></div>
+          </div>
+
+          <!-- 3. Category breakdown -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📂 Spending by Category</div>
+            <div id="mgr-svg-cat" style="width:100%;min-height:60px"></div>
+          </div>
+
+          <!-- 4. Cumulative this month -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">📉 Cumulative Expenses This Month</div>
+            <div id="mgr-svg-cum" style="width:100%;height:180px"></div>
+          </div>
+
+          <!-- 5. Account balances -->
+          <div style="background:#0d1a12;border:1px solid #1a2e24;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:700;color:#e8f0ed;margin-bottom:14px">💰 Account Balance Snapshot</div>
+            <div id="mgr-svg-acc" style="width:100%;min-height:60px"></div>
+          </div>
+
+        </div>
 
         <!-- Add Account Modal -->
         <div id="mon-acc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center">
