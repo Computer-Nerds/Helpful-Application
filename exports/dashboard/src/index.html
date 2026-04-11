@@ -895,6 +895,48 @@
 
     <!-- ══ HOME ══ -->
     <div class="page active" id="page-home">
+      <!-- US Map Background -->
+      <div id="usmap-bg" style="position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0.13">
+        <svg id="usmap-bg-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">
+          <!-- State paths - simplified US -->
+          <path d="M153,192 L153,290 L230,290 L230,350 L310,350 L310,290 L390,290 L390,230 L310,230 L310,192 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M310,192 L390,192 L390,140 L450,140 L450,192 L520,192 L520,240 L450,240 L450,290 L390,290 L390,230 L310,230 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M450,140 L540,140 L560,192 L520,192 L450,192 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M520,192 L560,192 L600,192 L620,250 L560,260 L520,240 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M560,260 L620,250 L660,300 L600,320 L550,310 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M390,290 L450,290 L450,360 L390,360 L310,350 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M450,290 L520,240 L560,260 L550,310 L500,340 L450,360 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M550,310 L600,320 L620,380 L560,390 L500,370 L500,340 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M600,320 L660,300 L700,350 L680,400 L620,380 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M230,290 L310,290 L310,350 L230,350 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M153,290 L230,290 L230,350 L153,350 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M390,360 L450,360 L500,370 L480,430 L420,440 L390,420 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M500,370 L560,390 L580,450 L520,460 L480,430 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M560,390 L620,380 L650,440 L590,460 L580,450 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M620,380 L680,400 L710,460 L650,440 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M153,192 L153,140 L200,130 L240,160 L310,192 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M153,350 L230,350 L220,420 L170,430 L140,390 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M230,350 L310,350 L310,420 L250,440 L220,420 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M310,350 L390,360 L390,420 L310,420 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M680,400 L700,350 L750,360 L760,420 L710,460 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M700,350 L750,300 L800,330 L790,380 L750,360 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M750,300 L800,260 L840,290 L830,330 L800,330 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M800,260 L840,220 L880,240 L870,280 L840,290 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M310,192 L310,140 L390,140 L390,192 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <path d="M540,140 L600,130 L620,180 L600,192 L560,192 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1.5"/>
+          <!-- Alaska (small inset) -->
+          <rect x="80" y="440" width="120" height="100" rx="4" fill="#111a15" stroke="#1a3a2a" stroke-width="1"/>
+          <path d="M90,510 L100,480 L130,470 L160,480 L170,510 L140,530 L110,530 Z" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1"/>
+          <!-- Hawaii (small inset) -->
+          <rect x="220" y="490" width="80" height="55" rx="4" fill="#111a15" stroke="#1a3a2a" stroke-width="1"/>
+          <ellipse cx="245" cy="515" rx="10" ry="8" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1"/>
+          <ellipse cx="265" cy="520" rx="8" ry="7" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1"/>
+          <ellipse cx="283" cy="516" rx="9" ry="7" fill="#1a3a2a" stroke="#2a5a3a" stroke-width="1"/>
+        </svg>
+        <svg id="usmap-dots-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+          <!-- City dots rendered by JS -->
+        </svg>
+      </div>
       <div id="home-content">
         <div id="home-greeting"></div>
         <button id="home-edit-btn" onclick="toggleEditMode()" title="Edit Dashboard">
@@ -1779,6 +1821,94 @@
             <div class="app-icon" style="background:#0f2e1a">🧠</div>
             <span class="app-label">Brain Games</span>
           </div>
+          <div class="app-tile" onclick="openApp('usmap')">
+            <div class="app-icon" style="background:#1a2030">🗺️</div>
+            <span class="app-label">US Map</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ US MAP ══ -->
+    <div class="page" id="page-usmap" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button onclick="setPage('apps')" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:18px;padding:4px">←</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🗺️ My US Map</span>
+        <span style="font-size:12px;color:#4a7060;margin-left:4px" id="usmap-city-count"></span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button onclick="usmapClearAll()" style="background:#1a2e24;border:1px solid #1f3a2a;color:#e05c5c;border-radius:7px;padding:5px 12px;font-size:12px;cursor:pointer">Clear All</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <!-- Instructions -->
+        <div style="text-align:center;padding:8px;font-size:12px;color:#4a7060;flex-shrink:0">
+          Click anywhere on the map to add a city you've visited. Click a glowing dot to remove it.
+        </div>
+        <!-- Map container -->
+        <div style="flex:1;position:relative;overflow:hidden" id="usmap-container">
+          <svg id="usmap-main-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet"
+               style="width:100%;height:100%;cursor:crosshair;display:block"
+               onclick="usmapClick(event)">
+            <!-- Background -->
+            <rect width="960" height="600" fill="#0d1a14"/>
+            <!-- State fills - continental US rough shapes -->
+            <!-- Northwest -->
+            <path d="M153,100 L155,192 L230,190 L310,192 L310,140 L390,140 L390,100 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- Northern tier -->
+            <path d="M390,100 L540,100 L560,140 L520,145 L450,140 L390,140 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M540,100 L660,100 L680,160 L620,160 L600,145 L560,140 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M660,100 L800,100 L820,170 L760,180 L700,170 L680,160 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M800,100 L880,100 L900,160 L870,200 L840,190 L820,170 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- Mountain west -->
+            <path d="M153,192 L155,350 L230,350 L230,290 L310,290 L310,192 L230,190 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M310,192 L310,290 L390,290 L390,360 L450,355 L520,330 L560,280 L520,240 L520,145 L450,140 L390,140 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- Plains -->
+            <path d="M520,145 L520,240 L560,280 L620,260 L620,160 L600,145 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M620,160 L620,260 L660,300 L700,280 L700,170 L680,160 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M700,170 L700,280 L740,310 L780,290 L800,230 L820,170 L760,180 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M820,170 L800,230 L830,270 L870,250 L900,200 L900,160 L870,200 L840,190 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- South / southeast -->
+            <path d="M155,350 L155,430 L170,460 L230,450 L230,350 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M230,350 L230,450 L310,440 L310,350 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M310,350 L310,440 L390,430 L390,360 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M390,360 L390,430 L450,420 L480,460 L520,450 L550,390 L520,330 L450,355 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M550,390 L520,450 L560,480 L600,460 L620,400 L620,340 L580,330 L560,280 L520,330 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M620,340 L600,460 L640,470 L670,440 L680,380 L660,300 L620,260 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M660,300 L680,380 L670,440 L710,450 L730,400 L740,310 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M740,310 L730,400 L780,380 L810,320 L780,290 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M780,290 L810,320 L860,300 L860,250 L830,270 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <path d="M860,250 L860,300 L900,280 L900,200 L870,250 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- Florida peninsula -->
+            <path d="M480,460 L480,530 L510,560 L540,530 L540,480 L520,450 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- Alaska inset box -->
+            <rect x="60" y="440" width="130" height="110" rx="4" fill="#0d1a14" stroke="#1f4a2e" stroke-width="1"/>
+            <text x="125" y="455" text-anchor="middle" font-size="8" fill="#2a5a3a">Alaska</text>
+            <path d="M80,510 L95,478 L120,468 L148,478 L165,510 L140,535 L105,535 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="1.2"/>
+            <!-- Hawaii inset box -->
+            <rect x="210" y="470" width="90" height="70" rx="4" fill="#0d1a14" stroke="#1f4a2e" stroke-width="1"/>
+            <text x="255" y="483" text-anchor="middle" font-size="8" fill="#2a5a3a">Hawaii</text>
+            <ellipse cx="230" cy="510" rx="10" ry="8" fill="#152a1e" stroke="#1f4a2e" stroke-width="1"/>
+            <ellipse cx="250" cy="516" rx="9" ry="7" fill="#152a1e" stroke="#1f4a2e" stroke-width="1"/>
+            <ellipse cx="270" cy="514" rx="10" ry="8" fill="#152a1e" stroke="#1f4a2e" stroke-width="1"/>
+            <ellipse cx="288" cy="508" rx="8" ry="7" fill="#152a1e" stroke="#1f4a2e" stroke-width="1"/>
+            <!-- City dots layer -->
+            <g id="usmap-main-dots"></g>
+          </svg>
+        </div>
+        <!-- City name input popup -->
+        <div id="usmap-popup" style="display:none;position:absolute;background:#1a2e24;border:1px solid #00d18c;border-radius:12px;padding:16px;z-index:100;min-width:200px;box-shadow:0 4px 24px rgba(0,0,0,0.6)">
+          <div style="font-size:13px;color:#7a9e8e;margin-bottom:10px">Name this city:</div>
+          <input id="usmap-city-input" type="text" placeholder="e.g. Oklahoma City"
+            style="width:100%;background:#0d1a14;border:1px solid #1f3a2a;border-radius:8px;padding:8px 12px;color:#e8f0ed;font-size:14px;outline:none;box-sizing:border-box"
+            onkeydown="if(event.key==='Enter')usmapSaveCity()"/>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button onclick="usmapSaveCity()" style="flex:1;background:#00d18c;border:none;color:#0a1a12;border-radius:8px;padding:8px;font-size:13px;font-weight:700;cursor:pointer">Add ✓</button>
+            <button onclick="usmapClosePopup()" style="background:#1f3a2a;border:none;color:#7a9e8e;border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer">✕</button>
+          </div>
+        </div>
+        <!-- City list -->
+        <div style="flex-shrink:0;max-height:120px;overflow-y:auto;padding:8px 16px;border-top:1px solid #1a2e24;background:#0a0f0d">
+          <div id="usmap-city-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
         </div>
       </div>
     </div>
@@ -2794,7 +2924,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','money','fitness','apps','smarthome','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem','books','bg-geo','bg-connections'];
+const PAGES = ['home','planner','money','fitness','apps','smarthome','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem','books','bg-geo','bg-connections','usmap'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', money:'nav-money', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -2832,6 +2962,7 @@ function setPage(p) {
   if(p==='bg-pos'         && typeof posNext!=='undefined')    posStart();
   if(p==='bg-wordproblem' && typeof wpNext!=='undefined')     wpStart();
   if(p==='bg-connections' && typeof connInit!=='undefined')    connInit();
+  if(p==='usmap'          && typeof usmapOpen!=='undefined')   usmapOpen();
   if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
   PAGES.forEach(id => {
     const el = document.getElementById('page-' + id);
@@ -10864,6 +10995,199 @@ window.connSubmit=function(){
     }
   }
 };
+
+
+// ════════════════════════════════════════════════════════════
+//  US MAP
+// ════════════════════════════════════════════════════════════
+
+// City coordinate presets (SVG viewBox 960x600)
+var USMAP_CITY_COORDS = {
+  'New York':       {x:870,y:180}, 'Los Angeles':    {x:155,y:340},
+  'Chicago':        {x:680,y:210}, 'Houston':        {x:570,y:420},
+  'Phoenix':        {x:230,y:360}, 'Philadelphia':   {x:855,y:200},
+  'San Antonio':    {x:545,y:445}, 'San Diego':      {x:175,y:355},
+  'Dallas':         {x:575,y:390}, 'San Jose':       {x:143,y:290},
+  'Austin':         {x:555,y:430}, 'Jacksonville':   {x:780,y:390},
+  'Fort Worth':     {x:562,y:390}, 'Columbus':       {x:760,y:235},
+  'Charlotte':      {x:790,y:285}, 'Indianapolis':   {x:720,y:235},
+  'San Francisco':  {x:138,y:280}, 'Seattle':        {x:162,y:130},
+  'Denver':         {x:418,y:270}, 'Nashville':      {x:725,y:305},
+  'Oklahoma City':  {x:555,y:360}, 'Boston':         {x:885,y:165},
+  'Las Vegas':      {x:210,y:320}, 'Portland':       {x:158,y:155},
+  'Memphis':        {x:685,y:325}, 'Atlanta':        {x:745,y:350},
+  'Miami':          {x:790,y:480}, 'Minneapolis':    {x:600,y:175},
+  'New Orleans':    {x:670,y:430}, 'Kansas City':    {x:615,y:290},
+  'Tulsa':          {x:570,y:345}, 'Tampa':          {x:760,y:430},
+  'Pittsburgh':     {x:810,y:220}, 'Cincinnati':     {x:750,y:245},
+  'St. Louis':      {x:660,y:285}, 'Sacramento':     {x:152,y:265},
+  'Salt Lake City': {x:295,y:250}, 'Albuquerque':   {x:380,y:360},
+  'Tucson':         {x:260,y:390}, 'Raleigh':        {x:820,y:285},
+  'Richmond':       {x:840,y:250}, 'Louisville':     {x:730,y:265}
+};
+
+var usmapPendingX = 0, usmapPendingY = 0;
+
+function usmapLoad() {
+  return JSON.parse(localStorage.getItem('usmapCities') || '[]');
+}
+function usmapSave(cities) {
+  localStorage.setItem('usmapCities', JSON.stringify(cities));
+  usmapRenderBg();
+  usmapRenderMain();
+  usmapRenderList();
+  usmapUpdateCount();
+}
+
+// Dashboard background dots
+function usmapRenderBg() {
+  var svg = document.getElementById('usmap-dots-svg');
+  if (!svg) return;
+  svg.innerHTML = '';
+  var cities = usmapLoad();
+  cities.forEach(function(city) {
+    var g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    // Outer glow pulse ring
+    var c1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c1.setAttribute('cx', city.x); c1.setAttribute('cy', city.y); c1.setAttribute('r','10');
+    c1.setAttribute('fill','none'); c1.setAttribute('stroke','#00d18c'); c1.setAttribute('stroke-width','1.5'); c1.setAttribute('opacity','0.3');
+    c1.innerHTML = '<animate attributeName="r" values="7;14;7" dur="2.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>';
+    // Inner dot
+    var c2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c2.setAttribute('cx', city.x); c2.setAttribute('cy', city.y); c2.setAttribute('r','4');
+    c2.setAttribute('fill','#00d18c'); c2.setAttribute('opacity','0.9');
+    g.appendChild(c1); g.appendChild(c2);
+    svg.appendChild(g);
+  });
+}
+
+// Main map dots (editor)
+function usmapRenderMain() {
+  var layer = document.getElementById('usmap-main-dots');
+  if (!layer) return;
+  layer.innerHTML = '';
+  var cities = usmapLoad();
+  cities.forEach(function(city, idx) {
+    var g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'pointer';
+    // Pulse ring
+    var c1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c1.setAttribute('cx', city.x); c1.setAttribute('cy', city.y); c1.setAttribute('r','12');
+    c1.setAttribute('fill','none'); c1.setAttribute('stroke','#00d18c'); c1.setAttribute('stroke-width','2'); c1.setAttribute('opacity','0.3');
+    c1.innerHTML = '<animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/>';
+    // Dot
+    var c2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c2.setAttribute('cx', city.x); c2.setAttribute('cy', city.y); c2.setAttribute('r','5');
+    c2.setAttribute('fill','#00d18c');
+    // Label
+    var t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', city.x); t.setAttribute('y', parseFloat(city.y)-10);
+    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','9');
+    t.setAttribute('fill','#00d18c'); t.setAttribute('font-weight','600');
+    t.textContent = city.name;
+    // Remove on click
+    g.onclick = (function(i){ return function(e){ e.stopPropagation(); usmapRemove(i); }; })(idx);
+    g.appendChild(c1); g.appendChild(c2); g.appendChild(t);
+    layer.appendChild(g);
+  });
+}
+
+function usmapRenderList() {
+  var el = document.getElementById('usmap-city-list');
+  if (!el) return;
+  var cities = usmapLoad();
+  if (cities.length === 0) { el.innerHTML = '<span style="color:#4a7060;font-size:12px">No cities yet — click the map to add one!</span>'; return; }
+  el.innerHTML = '';
+  cities.forEach(function(city, idx) {
+    var chip = document.createElement('div');
+    chip.style.cssText = 'background:#1a2e24;border:1px solid #00d18c;border-radius:20px;padding:4px 12px;font-size:12px;color:#00d18c;display:flex;align-items:center;gap:6px;cursor:default';
+    chip.innerHTML = '📍 ' + city.name + ' <span onclick="usmapRemove('+idx+')" style="cursor:pointer;color:#4a7060;font-size:14px;line-height:1">×</span>';
+    el.appendChild(chip);
+  });
+}
+
+function usmapUpdateCount() {
+  var el = document.getElementById('usmap-city-count');
+  if (!el) return;
+  var n = usmapLoad().length;
+  el.textContent = n + ' ' + (n === 1 ? 'city' : 'cities') + ' visited';
+}
+
+window.usmapClick = function(e) {
+  var svg = document.getElementById('usmap-main-svg');
+  var rect = svg.getBoundingClientRect();
+  var scaleX = 960 / rect.width;
+  var scaleY = 600 / rect.height;
+  usmapPendingX = Math.round((e.clientX - rect.left) * scaleX);
+  usmapPendingY = Math.round((e.clientY - rect.top) * scaleY);
+  // Check if it matches a known city
+  var best = null, bestDist = 999;
+  Object.keys(USMAP_CITY_COORDS).forEach(function(name) {
+    var coords = USMAP_CITY_COORDS[name];
+    var d = Math.sqrt(Math.pow(coords.x - usmapPendingX, 2) + Math.pow(coords.y - usmapPendingY, 2));
+    if (d < bestDist) { bestDist = d; best = name; }
+  });
+  var input = document.getElementById('usmap-city-input');
+  if (input) input.value = bestDist < 40 ? best : '';
+  // Position popup near click
+  var popup = document.getElementById('usmap-popup');
+  if (!popup) return;
+  var container = document.getElementById('usmap-container');
+  var cr = container.getBoundingClientRect();
+  var px = e.clientX - cr.left + 10;
+  var py = e.clientY - cr.top + 10;
+  if (px + 220 > cr.width)  px = e.clientX - cr.left - 230;
+  if (py + 120 > cr.height) py = e.clientY - cr.top - 130;
+  popup.style.left = px + 'px';
+  popup.style.top  = py + 'px';
+  popup.style.display = 'block';
+  setTimeout(function(){ if(input) input.focus(); }, 50);
+};
+
+window.usmapSaveCity = function() {
+  var input = document.getElementById('usmap-city-input');
+  var name = (input ? input.value.trim() : '');
+  if (!name) return;
+  var cities = usmapLoad();
+  // Don't duplicate
+  if (cities.some(function(c){ return c.name.toLowerCase() === name.toLowerCase(); })) {
+    usmapClosePopup(); return;
+  }
+  // Use preset coords if name matches
+  var coords = USMAP_CITY_COORDS[name];
+  cities.push({ name: name, x: coords ? coords.x : usmapPendingX, y: coords ? coords.y : usmapPendingY });
+  usmapSave(cities);
+  usmapClosePopup();
+};
+
+window.usmapClosePopup = function() {
+  var p = document.getElementById('usmap-popup');
+  if (p) p.style.display = 'none';
+};
+
+window.usmapRemove = function(idx) {
+  var cities = usmapLoad();
+  cities.splice(idx, 1);
+  usmapSave(cities);
+};
+
+window.usmapClearAll = function() {
+  if (!confirm('Remove all visited cities?')) return;
+  localStorage.setItem('usmapCities', '[]');
+  usmapRenderBg(); usmapRenderMain(); usmapRenderList(); usmapUpdateCount();
+};
+
+// Called when usmap page opens
+window.usmapOpen = function() {
+  usmapRenderMain();
+  usmapRenderList();
+  usmapUpdateCount();
+};
+
+// Init bg on home load
+window.addEventListener('DOMContentLoaded', function() {
+  usmapRenderBg();
+});
 
 </script>
 
