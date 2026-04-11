@@ -896,8 +896,8 @@
     <!-- ══ HOME ══ -->
     <div class="page active" id="page-home">
       <!-- US Map Background -->
-      <div id="usmap-bg" style="position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0.18">
-        <svg id="usmap-bg-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">
+      <div id="usmap-bg" style="position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0.13">
+        <svg id="usmap-bg-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
 <path d="M608.0,345.7 L650.9,346.0 L657.8,396.7 L660.9,409.9 L662.7,411.3 L660.0,414.3 L658.6,421.5 L660.2,429.2 L659.1,437.1 L660.9,441.6 L618.0,441.7 L617.5,445.3 L621.2,449.4 L621.8,455.1 L620.2,458.3 L614.7,460.1 L611.3,460.2 L615.4,458.6 L611.2,449.2 L609.1,457.9 L604.8,456.7 L603.5,420.1 L609.7,348.2 L608.0,345.7 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="0.8" stroke-linejoin="round"/>
 <path d="M169.9,400.3 L173.1,399.4 L174.1,395.7 L173.2,392.9 L170.0,391.4 L169.7,383.9 L173.1,380.3 L172.9,371.3 L174.6,367.5 L179.5,362.3 L175.4,358.6 L171.2,348.6 L172.3,340.8 L169.3,319.4 L175.6,318.2 L179.2,321.0 L181.0,316.9 L180.9,297.6 L263.6,297.6 L263.6,433.6 L230.1,433.6 L168.3,405.7 L169.9,400.3 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="0.8" stroke-linejoin="round"/>
 <path d="M263.6,201.6 L379.2,201.6 L379.3,297.8 L263.6,297.6 L263.6,201.6 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="0.8" stroke-linejoin="round"/>
@@ -947,7 +947,7 @@
 <path d="M511.5,393.1 L559.0,393.5 L558.8,396.0 L560.2,394.0 L559.0,399.6 L560.9,400.2 L559.3,402.2 L559.8,403.6 L561.4,402.1 L560.5,404.2 L562.0,405.8 L559.9,406.2 L563.8,409.0 L562.0,412.4 L559.2,412.8 L559.0,414.4 L561.7,413.8 L559.4,415.6 L560.2,417.7 L557.4,422.2 L556.2,421.2 L557.3,423.7 L555.2,424.5 L555.2,426.7 L553.5,426.1 L555.1,427.9 L553.2,429.0 L554.0,432.7 L552.2,432.0 L553.3,434.9 L551.2,435.2 L552.5,440.0 L551.3,441.6 L582.4,441.6 L580.7,449.7 L586.1,461.3 L580.7,465.5 L583.9,468.9 L586.9,463.7 L588.7,464.3 L588.8,467.7 L591.2,466.3 L588.8,469.3 L589.8,471.4 L588.5,470.7 L587.7,473.8 L586.1,472.2 L586.8,474.7 L583.8,474.2 L584.9,475.6 L583.5,474.6 L583.5,476.1 L586.4,480.3 L591.5,481.2 L593.0,484.8 L594.4,484.4 L592.5,489.8 L590.6,487.6 L587.9,491.3 L590.2,485.2 L588.4,486.6 L580.9,481.9 L574.6,487.6 L571.2,481.3 L564.0,488.3 L562.4,485.3 L557.2,483.7 L557.4,480.9 L559.8,483.6 L559.6,481.4 L558.2,479.2 L556.3,480.2 L555.9,477.3 L554.2,478.3 L551.1,474.4 L551.5,472.0 L547.7,472.6 L548.1,469.7 L542.0,471.5 L545.0,474.8 L541.1,476.7 L525.8,471.1 L514.9,473.0 L513.4,470.5 L517.2,464.0 L516.5,452.7 L520.2,441.0 L520.0,437.2 L515.2,428.3 L515.2,423.0 L511.5,417.8 L511.5,393.1 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="0.8" stroke-linejoin="round"/>
 <path d="M878.0,193.9 L879.1,177.4 L885.9,177.1 L888.4,185.5 L887.5,186.3 L885.8,182.8 L884.3,192.7 L878.0,193.9 Z" fill="#152a1e" stroke="#1f4a2e" stroke-width="0.8" stroke-linejoin="round"/>
         </svg>
-        <svg id="usmap-dots-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+        <svg id="usmap-dots-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet" style="position:absolute;inset:0;width:100%;height:100%">
         </svg>
       </div>
       <div id="home-content">
@@ -11065,7 +11065,7 @@ function usmapSave(cities) {
   usmapUpdateCount();
 }
 
-// Dashboard background dots
+// Dashboard background dots with angled leader labels
 function usmapRenderBg() {
   var svg = document.getElementById('usmap-dots-svg');
   if (!svg) return;
@@ -11073,21 +11073,38 @@ function usmapRenderBg() {
   var cities = usmapLoad();
   cities.forEach(function(city) {
     var g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    // Outer glow pulse ring
+    var cx = city.x, cy = city.y;
+    // Angled leader line: goes up-right at 45deg then horizontal
+    var dx = 18, dy = -22, hLen = 28;
+    var x1 = cx, y1 = cy;
+    var x2 = cx + dx, y2 = cy + dy;
+    var x3 = cx + dx + hLen, y3 = cy + dy;
+    var line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    line.setAttribute('points', x1+','+y1+' '+x2+','+y2+' '+x3+','+y3);
+    line.setAttribute('fill','none'); line.setAttribute('stroke','#00d18c');
+    line.setAttribute('stroke-width','1'); line.setAttribute('opacity','0.8');
+    // City name label
+    var t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', x3+3); t.setAttribute('y', y3+1);
+    t.setAttribute('font-size','7'); t.setAttribute('fill','#00d18c');
+    t.setAttribute('font-weight','700'); t.setAttribute('font-family','Segoe UI,sans-serif');
+    t.setAttribute('opacity','0.9');
+    t.textContent = city.name;
+    // Pulse ring
     var c1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c1.setAttribute('cx', city.x); c1.setAttribute('cy', city.y); c1.setAttribute('r','10');
-    c1.setAttribute('fill','none'); c1.setAttribute('stroke','#00d18c'); c1.setAttribute('stroke-width','1.5'); c1.setAttribute('opacity','0.3');
-    c1.innerHTML = '<animate attributeName="r" values="7;14;7" dur="2.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>';
+    c1.setAttribute('cx', cx); c1.setAttribute('cy', cy); c1.setAttribute('r','8');
+    c1.setAttribute('fill','none'); c1.setAttribute('stroke','#00d18c'); c1.setAttribute('stroke-width','1.2'); c1.setAttribute('opacity','0.25');
+    c1.innerHTML = '<animate attributeName="r" values="5;12;5" dur="2.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.35;0;0.35" dur="2.5s" repeatCount="indefinite"/>';
     // Inner dot
     var c2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c2.setAttribute('cx', city.x); c2.setAttribute('cy', city.y); c2.setAttribute('r','4');
-    c2.setAttribute('fill','#00d18c'); c2.setAttribute('opacity','0.9');
-    g.appendChild(c1); g.appendChild(c2);
+    c2.setAttribute('cx', cx); c2.setAttribute('cy', cy); c2.setAttribute('r','3.5');
+    c2.setAttribute('fill','#00d18c'); c2.setAttribute('opacity','0.95');
+    g.appendChild(c1); g.appendChild(c2); g.appendChild(line); g.appendChild(t);
     svg.appendChild(g);
   });
 }
 
-// Main map dots (editor)
+// Main map dots (editor) with leader labels
 function usmapRenderMain() {
   var layer = document.getElementById('usmap-main-dots');
   if (!layer) return;
@@ -11096,24 +11113,37 @@ function usmapRenderMain() {
   cities.forEach(function(city, idx) {
     var g = document.createElementNS('http://www.w3.org/2000/svg','g');
     g.style.cursor = 'pointer';
+    var cx = city.x, cy = city.y;
+    // Angled leader: 45deg up-right then horizontal
+    var dx = 22, dy = -28, hLen = 34;
+    var x2 = cx + dx, y2 = cy + dy, x3 = cx + dx + hLen, y3 = cy + dy;
+    // Hit area (invisible larger circle for easy clicking)
+    var hit = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    hit.setAttribute('cx', cx); hit.setAttribute('cy', cy); hit.setAttribute('r','14');
+    hit.setAttribute('fill','transparent');
     // Pulse ring
     var c1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c1.setAttribute('cx', city.x); c1.setAttribute('cy', city.y); c1.setAttribute('r','12');
-    c1.setAttribute('fill','none'); c1.setAttribute('stroke','#00d18c'); c1.setAttribute('stroke-width','2'); c1.setAttribute('opacity','0.3');
-    c1.innerHTML = '<animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/>';
+    c1.setAttribute('cx', cx); c1.setAttribute('cy', cy); c1.setAttribute('r','10');
+    c1.setAttribute('fill','none'); c1.setAttribute('stroke','#00d18c'); c1.setAttribute('stroke-width','1.5'); c1.setAttribute('opacity','0.3');
+    c1.innerHTML = '<animate attributeName="r" values="7;16;7" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.45;0;0.45" dur="2s" repeatCount="indefinite"/>';
     // Dot
     var c2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c2.setAttribute('cx', city.x); c2.setAttribute('cy', city.y); c2.setAttribute('r','5');
+    c2.setAttribute('cx', cx); c2.setAttribute('cy', cy); c2.setAttribute('r','5');
     c2.setAttribute('fill','#00d18c');
+    // Leader line
+    var line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    line.setAttribute('points', cx+','+cy+' '+x2+','+y2+' '+x3+','+y3);
+    line.setAttribute('fill','none'); line.setAttribute('stroke','#00d18c');
+    line.setAttribute('stroke-width','1.2'); line.setAttribute('opacity','0.8');
     // Label
     var t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x', city.x); t.setAttribute('y', parseFloat(city.y)-10);
-    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','9');
-    t.setAttribute('fill','#00d18c'); t.setAttribute('font-weight','600');
+    t.setAttribute('x', x3+4); t.setAttribute('y', y3+1);
+    t.setAttribute('font-size','10'); t.setAttribute('fill','#00d18c');
+    t.setAttribute('font-weight','700'); t.setAttribute('font-family','Segoe UI,sans-serif');
     t.textContent = city.name;
     // Remove on click
     g.onclick = (function(i){ return function(e){ e.stopPropagation(); usmapRemove(i); }; })(idx);
-    g.appendChild(c1); g.appendChild(c2); g.appendChild(t);
+    g.appendChild(hit); g.appendChild(c1); g.appendChild(c2); g.appendChild(line); g.appendChild(t);
     layer.appendChild(g);
   });
 }
@@ -11141,11 +11171,12 @@ function usmapUpdateCount() {
 
 window.usmapClick = function(e) {
   var svg = document.getElementById('usmap-main-svg');
-  var rect = svg.getBoundingClientRect();
-  var scaleX = 960 / rect.width;
-  var scaleY = 600 / rect.height;
-  usmapPendingX = Math.round((e.clientX - rect.left) * scaleX);
-  usmapPendingY = Math.round((e.clientY - rect.top) * scaleY);
+  // Use SVG's own coordinate transform — exact regardless of CSS scaling
+  var pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  var svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
+  usmapPendingX = Math.round(svgPt.x);
+  usmapPendingY = Math.round(svgPt.y);
   // Check if it matches a known city
   var best = null, bestDist = 999;
   Object.keys(USMAP_CITY_COORDS).forEach(function(name) {
