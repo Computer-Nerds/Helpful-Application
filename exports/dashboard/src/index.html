@@ -2331,7 +2331,33 @@
             <div class="app-icon" style="background:#1a2e2a">🌍</div>
             <span class="app-label">Geography</span>
           </div>
+          <div class="app-tile" onclick="openBrainGame('connections')">
+            <div class="app-icon" style="background:#1a1a2e">🔗</div>
+            <span class="app-label">Connections</span>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ══ CONNECTIONS ══ -->
+    <div id="page-bg-connections" class="page" style="flex-direction:column">
+      <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
+        <button onclick="openApp('braingames')" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:18px;padding:4px">←</button>
+        <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔗 Connections</span>
+        <span style="margin-left:auto;font-size:12px;color:#4a7060" id="conn-puzzle-label"></span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;align-items:center;gap:14px;box-sizing:border-box">
+        <div style="font-size:13px;color:#7a9e8e;text-align:center">Find four groups of four that share something in common.</div>
+        <div id="conn-mistakes" style="font-size:12px;color:#4a7060;letter-spacing:2px"></div>
+        <div id="conn-board" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:520px"></div>
+        <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;justify-content:center">
+          <button onclick="connShuffle()" style="background:#1a2e24;border:1px solid #1f3a2a;color:#7a9e8e;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer">Shuffle</button>
+          <button onclick="connDeselect()" style="background:#1a2e24;border:1px solid #1f3a2a;color:#7a9e8e;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer">Deselect All</button>
+          <button onclick="connSubmit()" id="conn-submit-btn" style="background:#00d18c;border:none;color:#0a1a12;border-radius:8px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;opacity:0.4;pointer-events:none">Submit</button>
+        </div>
+        <div id="conn-solved-rows" style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:520px"></div>
+        <div id="conn-result" style="font-size:15px;font-weight:700;text-align:center;min-height:30px"></div>
+        <button onclick="connNewPuzzle()" id="conn-next-btn" style="display:none;background:#00d18c;border:none;color:#0a1a12;border-radius:10px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px">Next Puzzle →</button>
       </div>
     </div>
 
@@ -2768,7 +2794,7 @@ document.getElementById('tb-max').onclick   = () => ipcRenderer.send('win-maximi
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════
 let currentPage = 'home';
-const PAGES = ['home','planner','money','fitness','apps','smarthome','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem','books','bg-geo'];
+const PAGES = ['home','planner','money','fitness','apps','smarthome','security','chess','piano','typing','music','math','spanish','braingames','wordle','bg-memory','bg-analogies','bg-speedread','bg-focus','bg-language','bg-wordleditor','bg-fixup','bg-spellingbee','bg-scramble','bg-rhyme','bg-pos','bg-wordproblem','books','bg-geo','bg-connections'];
 const NAV_IDS = { home:'nav-home', planner:'nav-planner', money:'nav-money', apps:'nav-apps', security:'nav-security' };
 
 function setPage(p) {
@@ -2805,6 +2831,7 @@ function setPage(p) {
   if(p==='bg-rhyme'       && typeof rhymeNext!=='undefined')  rhymeStart();
   if(p==='bg-pos'         && typeof posNext!=='undefined')    posStart();
   if(p==='bg-wordproblem' && typeof wpNext!=='undefined')     wpStart();
+  if(p==='bg-connections' && typeof connInit!=='undefined')    connInit();
   if(p==='bg-memory'   && typeof memRenderGrid!=='undefined') { memLevel=1; memScore=0; memPhase='idle'; memRenderGrid(false); document.getElementById('mem-msg').textContent=''; document.getElementById('mem-btn').textContent='Start'; document.getElementById('mem-btn').onclick=memStart; document.getElementById('mem-btn').disabled=false; }
   PAGES.forEach(id => {
     const el = document.getElementById('page-' + id);
@@ -10680,6 +10707,163 @@ function geoAnswer(choice, btn, allChoices) {
     }
   };
 })();
+
+
+// ════════════════════════════════════════════════════════════
+//  CONNECTIONS GAME
+// ════════════════════════════════════════════════════════════
+var CONN_PUZZLES = [
+  { id:1, groups:[
+    {cat:'Types of Jazz',      color:'#4e8ef7', words:['Bebop','Swing','Fusion','Modal']},
+    {cat:'___ Ball',           color:'#a855f7', words:['Basket','Base','Foot','Pin']},
+    {cat:'Things that spin',   color:'#f7a94e', words:['Top','Record','Earth','Dreidel']},
+    {cat:'Famous Alberts',     color:'#00d18c', words:['Einstein','Camus','Pujols','Brooks']}
+  ]},
+  { id:2, groups:[
+    {cat:'Shades of Blue',     color:'#4e8ef7', words:['Navy','Cobalt','Teal','Cerulean']},
+    {cat:'___ Fish',           color:'#a855f7', words:['Sword','Cat','Star','Blow']},
+    {cat:'Cooking methods',    color:'#00d18c', words:['Braise','Sauté','Poach','Sear']},
+    {cat:'Ancient wonders',    color:'#f7a94e', words:['Pyramid','Colossus','Lighthouse','Zeus']}
+  ]},
+  { id:3, groups:[
+    {cat:'Parts of a shoe',    color:'#4e8ef7', words:['Sole','Tongue','Lace','Heel']},
+    {cat:'Card games',         color:'#a855f7', words:['Poker','Rummy','Snap','War']},
+    {cat:'Planets (no Earth)', color:'#00d18c', words:['Mars','Venus','Saturn','Mercury']},
+    {cat:'Things in a wallet', color:'#f7a94e', words:['Cash','Card','Photo','Receipt']}
+  ]},
+  { id:4, groups:[
+    {cat:'Dog breeds',         color:'#4e8ef7', words:['Poodle','Beagle','Boxer','Husky']},
+    {cat:'Chess pieces',       color:'#a855f7', words:['Rook','Bishop','Knight','Pawn']},
+    {cat:'Pizza toppings',     color:'#00d18c', words:['Pepperoni','Mushroom','Olive','Basil']},
+    {cat:'Types of clouds',    color:'#f7a94e', words:['Cirrus','Cumulus','Stratus','Nimbus']}
+  ]},
+  { id:5, groups:[
+    {cat:'___ stone',          color:'#4e8ef7', words:['Lime','Sand','Key','Cobble']},
+    {cat:'Olympic sports',     color:'#a855f7', words:['Fencing','Luge','Archery','Judo']},
+    {cat:'Keyboard shortcuts', color:'#00d18c', words:['Copy','Paste','Undo','Save']},
+    {cat:'Things with rings',  color:'#f7a94e', words:['Saturn','Tree','Boxing','Circus']}
+  ]},
+  { id:6, groups:[
+    {cat:'Monopoly pieces',    color:'#4e8ef7', words:['Thimble','Iron','Boot','Hat']},
+    {cat:'Types of tea',       color:'#a855f7', words:['Green','Oolong','Chai','Matcha']},
+    {cat:'Movie genres',       color:'#00d18c', words:['Noir','Western','Thriller','Slasher']},
+    {cat:'Things that glow',   color:'#f7a94e', words:['Firefly','Moon','Neon','Ember']}
+  ]},
+  { id:7, groups:[
+    {cat:'Famous Mikes',       color:'#4e8ef7', words:['Tyson','Jordan','Myers','Wazowski']},
+    {cat:'Phobia prefixes',    color:'#a855f7', words:['Claustro','Acro','Arachno','Xeno']},
+    {cat:'Types of bridges',   color:'#00d18c', words:['Arch','Truss','Beam','Cable']},
+    {cat:'Things in an ocean', color:'#f7a94e', words:['Coral','Trench','Current','Kelp']}
+  ]},
+  { id:8, groups:[
+    {cat:'Space phenomena',    color:'#4e8ef7', words:['Nebula','Pulsar','Quasar','Void']},
+    {cat:'Types of pasta',     color:'#a855f7', words:['Penne','Rigatoni','Farfalle','Orzo']},
+    {cat:'Poker hands',        color:'#00d18c', words:['Flush','Straight','Full','Pair']},
+    {cat:'___ pool',           color:'#f7a94e', words:['Car','Swimming','Dead','Gene']}
+  ]}
+];
+
+var connPuzzleIdx = 0, connSelected = [], connWords = [], connSolvedGroups = [], connMistakes = 0;
+var CONN_MAX_MISTAKES = 4;
+
+function connShuffleArr(a){ var arr=a.slice(); for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;} return arr; }
+
+window.connInit = function(){
+  connPuzzleIdx = parseInt(localStorage.getItem('connPuzzleIdx')||'0') % CONN_PUZZLES.length;
+  connLoadPuzzle(false);
+};
+
+window.connNewPuzzle = function(){
+  connPuzzleIdx = (connPuzzleIdx+1) % CONN_PUZZLES.length;
+  localStorage.setItem('connPuzzleIdx', connPuzzleIdx);
+  connLoadPuzzle(false);
+};
+
+function connLoadPuzzle(advance){
+  var pz = CONN_PUZZLES[connPuzzleIdx];
+  connWords = [];
+  pz.groups.forEach(function(g){ g.words.forEach(function(w){ connWords.push({word:w,group:g.cat,color:g.color}); }); });
+  connWords = connShuffleArr(connWords);
+  connSelected = []; connSolvedGroups = []; connMistakes = 0;
+  var lbl=document.getElementById('conn-puzzle-label'); if(lbl) lbl.textContent='Puzzle #'+(connPuzzleIdx+1)+' / '+CONN_PUZZLES.length;
+  var res=document.getElementById('conn-result'); if(res){res.textContent='';res.style.color='#00d18c';}
+  var nb=document.getElementById('conn-next-btn'); if(nb) nb.style.display='none';
+  var sr=document.getElementById('conn-solved-rows'); if(sr) sr.innerHTML='';
+  connRenderMistakes(); connRenderBoard();
+}
+
+function connRenderMistakes(){
+  var el=document.getElementById('conn-mistakes'); if(!el) return;
+  var s=''; for(var i=0;i<CONN_MAX_MISTAKES;i++) s+=i<connMistakes?'🟥':'⬜';
+  el.textContent='Mistakes: '+s;
+}
+
+function connRenderBoard(){
+  var board=document.getElementById('conn-board'); if(!board) return;
+  board.innerHTML='';
+  connWords.forEach(function(item,i){
+    var sel=connSelected.indexOf(i)>-1;
+    var d=document.createElement('div');
+    d.textContent=item.word;
+    d.style.cssText='background:'+(sel?'#00d18c':'#1a2e24')+';color:'+(sel?'#0a1a12':'#e8f0ed')+';border:2px solid '+(sel?'#00d18c':'#1f3a2a')+';border-radius:10px;padding:14px 4px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;user-select:none;line-height:1.2';
+    d.onclick=(function(idx){return function(){connToggle(idx);};})(i);
+    board.appendChild(d);
+  });
+  var btn=document.getElementById('conn-submit-btn');
+  if(btn){btn.style.opacity=connSelected.length===4?'1':'0.4';btn.style.pointerEvents=connSelected.length===4?'auto':'none';}
+}
+
+window.connShuffle=function(){ connWords=connShuffleArr(connWords); connRenderBoard(); };
+window.connDeselect=function(){ connSelected=[]; connRenderBoard(); };
+
+function connToggle(idx){
+  var pos=connSelected.indexOf(idx);
+  if(pos>-1) connSelected.splice(pos,1);
+  else if(connSelected.length<4) connSelected.push(idx);
+  connRenderBoard();
+}
+
+window.connSubmit=function(){
+  if(connSelected.length!==4) return;
+  var chosen=connSelected.map(function(i){return connWords[i];});
+  var cats={};
+  chosen.forEach(function(it){cats[it.group]=(cats[it.group]||0)+1;});
+  var keys=Object.keys(cats);
+  if(keys.length===1){
+    var cat=keys[0], color=chosen[0].color;
+    connSolvedGroups.push(cat);
+    var sorted=connSelected.slice().sort(function(a,b){return b-a;});
+    sorted.forEach(function(i){connWords.splice(i,1);});
+    connSelected=[];
+    var sr=document.getElementById('conn-solved-rows');
+    if(sr){
+      var row=document.createElement('div');
+      row.style.cssText='background:'+color+';border-radius:10px;padding:14px 16px;text-align:center;width:100%;box-sizing:border-box';
+      row.innerHTML='<div style="font-size:11px;font-weight:800;color:#0a1a12;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+cat+'</div>'
+        +'<div style="font-size:13px;font-weight:700;color:#0a1a12">'+chosen.map(function(x){return x.word;}).join(' · ')+'</div>';
+      sr.appendChild(row);
+    }
+    if(connWords.length===0){
+      var res=document.getElementById('conn-result'); var nb=document.getElementById('conn-next-btn');
+      if(res){res.textContent='🎉 You got it!';res.style.color='#00d18c';}
+      if(nb) nb.style.display='block';
+    } else { connRenderBoard(); }
+  } else {
+    connMistakes++;
+    connRenderMistakes();
+    var board=document.getElementById('conn-board');
+    if(board){
+      var tiles=board.querySelectorAll('div');
+      connSelected.forEach(function(i){if(tiles[i]){tiles[i].style.background='#e05c5c';tiles[i].style.borderColor='#e05c5c';tiles[i].style.color='#fff';}});
+      setTimeout(function(){connSelected=[];connRenderBoard();},700);
+    }
+    if(connMistakes>=CONN_MAX_MISTAKES){
+      var res=document.getElementById('conn-result'); var nb=document.getElementById('conn-next-btn');
+      if(res){res.textContent='💀 Out of tries!';res.style.color='#e05c5c';}
+      if(nb) nb.style.display='block';
+    }
+  }
+};
 
 </script>
 
