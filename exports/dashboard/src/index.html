@@ -930,7 +930,10 @@
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
-            <div class="section-label" style="margin-bottom:14px">Dailys</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div class="section-label" style="margin-bottom:0">Dailys</div>
+              <button onclick="dailyGoalEditOpen();event.stopPropagation()" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:13px;padding:2px 4px" title="Edit goals">⚙️</button>
+            </div>
 
             <div class="daily-row">
               <div class="daily-header">
@@ -978,6 +981,17 @@
               </div>
               <div class="prog-track"><div class="prog-fill" id="math-daily-bar" style="width:0%;background:#e8a020"></div></div>
               <div class="daily-goal" id="math-daily-goal" style="display:none">✓ Goal complete!</div>
+            </div>
+
+            <div class="daily-row">
+              <div class="daily-header">
+                <div class="daily-label"><span>🇪🇸</span> Spanish</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="daily-time" id="spanish-daily-time" style="color:#00d18c;font-size:11px">—</span>
+                </div>
+              </div>
+              <div class="prog-track"><div class="prog-fill" id="spanish-daily-bar" style="width:0%;background:#e05c8c"></div></div>
+              <div class="daily-goal" id="spanish-daily-goal" style="display:none">✓ Done today!</div>
             </div><button class="card-scroll-toggle" title="Toggle scroll" onclick="toggleCardScroll(this);event.stopPropagation()">SCROLL</button>
             <div class="card-resize-handle" title="Drag to resize"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00d18c" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="2" y2="22"/><line x1="22" y1="12" x2="12" y2="22"/></svg></div>
           </div>
@@ -3057,23 +3071,62 @@ function dailyCheckReset() {
     localStorage.setItem('pianoTimer',  '0');
     localStorage.setItem('typingTimer', '0');
     localStorage.setItem('mathTimer',   '0');
+    localStorage.setItem('spanishDailyDone', 'false');
     localStorage.setItem('dailyLastDate', today);
   }
 }
 
+function dailyGetGoals() {
+  return {
+    chess:  parseInt(localStorage.getItem('dailyGoal_chess')||'30'),
+    piano:  parseInt(localStorage.getItem('dailyGoal_piano')||'30'),
+    typing: parseInt(localStorage.getItem('dailyGoal_typing')||'15'),
+    math:   parseInt(localStorage.getItem('dailyGoal_math')||'15'),
+  };
+}
+
+window.dailyGoalEditOpen = function() {
+  var g = dailyGetGoals();
+  document.getElementById('dg-chess').value  = g.chess;
+  document.getElementById('dg-piano').value  = g.piano;
+  document.getElementById('dg-typing').value = g.typing;
+  document.getElementById('dg-math').value   = g.math;
+  document.getElementById('daily-goal-modal').style.display = 'flex';
+};
+
+window.dailyGoalEditSave = function() {
+  var chess  = Math.max(1, parseInt(document.getElementById('dg-chess').value)||30);
+  var piano  = Math.max(1, parseInt(document.getElementById('dg-piano').value)||30);
+  var typing = Math.max(1, parseInt(document.getElementById('dg-typing').value)||15);
+  var math   = Math.max(1, parseInt(document.getElementById('dg-math').value)||15);
+  localStorage.setItem('dailyGoal_chess',  chess);
+  localStorage.setItem('dailyGoal_piano',  piano);
+  localStorage.setItem('dailyGoal_typing', typing);
+  localStorage.setItem('dailyGoal_math',   math);
+  document.getElementById('daily-goal-modal').style.display = 'none';
+  renderHomeDailys();
+};
+
 function renderHomeDailys() {
   dailyCheckReset();
+
+  var g  = dailyGetGoals();
+  var cGoal = g.chess  * 60;
+  var pGoal = g.piano  * 60;
+  var tGoal = g.typing * 60;
+  var mGoal = g.math   * 60;
 
   var cs = parseInt(localStorage.getItem('chessTimer')||'0');
   var ps = parseInt(localStorage.getItem('pianoTimer')||'0');
   var ts = parseInt(localStorage.getItem('typingTimer')||'0');
   var ms = parseInt(localStorage.getItem('mathTimer')||'0');
+  var spDone = localStorage.getItem('spanishDailyDone') === 'true';
 
   // Mark streaks when goals are hit
-  if (cs >= 1800) streakMarkDone('chess');
-  if (ps >= 1800) streakMarkDone('piano');
-  if (ts >= 900)  streakMarkDone('typing');
-  if (ms >= 900)  streakMarkDone('math');
+  if (cs >= cGoal) streakMarkDone('chess');
+  if (ps >= pGoal) streakMarkDone('piano');
+  if (ts >= tGoal) streakMarkDone('typing');
+  if (ms >= mGoal) streakMarkDone('math');
 
   // Update streak badges
   streakBadge('chess',  streakGetCount('chess'));
@@ -3085,27 +3138,35 @@ function renderHomeDailys() {
   var pt = document.getElementById('piano-daily-time');
   var tt = document.getElementById('typing-daily-time');
   var mt = document.getElementById('math-daily-time');
+  var spt= document.getElementById('spanish-daily-time');
   var cb = document.getElementById('chess-daily-bar');
   var pb = document.getElementById('piano-daily-bar');
   var tb = document.getElementById('typing-daily-bar');
   var mb = document.getElementById('math-daily-bar');
+  var spb= document.getElementById('spanish-daily-bar');
 
-  if(ct){ ct.textContent = Math.floor(cs/60)+'m / 30m'; ct.className = 'daily-time' + (cs>=1800?' done':''); }
-  if(pt){ pt.textContent = Math.floor(ps/60)+'m / 30m'; pt.className = 'daily-time' + (ps>=1800?' done':''); }
-  if(tt){ tt.textContent = Math.floor(ts/60)+'m / 15m'; tt.className = 'daily-time' + (ts>=900?' done':''); }
-  if(mt){ mt.textContent = Math.floor(ms/60)+'m / 15m'; mt.className = 'daily-time' + (ms>=900?' done':''); }
-  if(cb){ cb.style.width = Math.min((cs/1800)*100,100)+'%'; cb.style.background = cs>=1800?'#00d18c':'#4e8ef7'; }
-  if(pb){ pb.style.width = Math.min((ps/1800)*100,100)+'%'; pb.style.background = ps>=1800?'#00d18c':'#a855f7'; }
-  if(tb){ tb.style.width = Math.min((ts/900)*100,100)+'%';  tb.style.background = ts>=900?'#00d18c':'#f7a94e'; }
-  if(mb){ mb.style.width = Math.min((ms/900)*100,100)+'%';  mb.style.background = ms>=900?'#00d18c':'#e8a020'; }
+  if(ct){ ct.textContent = Math.floor(cs/60)+'m / '+g.chess+'m'; ct.className = 'daily-time' + (cs>=cGoal?' done':''); }
+  if(pt){ pt.textContent = Math.floor(ps/60)+'m / '+g.piano+'m'; pt.className = 'daily-time' + (ps>=pGoal?' done':''); }
+  if(tt){ tt.textContent = Math.floor(ts/60)+'m / '+g.typing+'m'; tt.className = 'daily-time' + (ts>=tGoal?' done':''); }
+  if(mt){ mt.textContent = Math.floor(ms/60)+'m / '+g.math+'m'; mt.className = 'daily-time' + (ms>=mGoal?' done':''); }
+  if(spt){ spt.textContent = spDone ? 'Done ✓' : 'Not done'; spt.style.color = spDone ? '#00d18c' : '#4a7060'; }
+
+  if(cb){ cb.style.width = Math.min((cs/cGoal)*100,100)+'%'; cb.style.background = cs>=cGoal?'#00d18c':'#4e8ef7'; }
+  if(pb){ pb.style.width = Math.min((ps/pGoal)*100,100)+'%'; pb.style.background = ps>=pGoal?'#00d18c':'#a855f7'; }
+  if(tb){ tb.style.width = Math.min((ts/tGoal)*100,100)+'%'; tb.style.background = ts>=tGoal?'#00d18c':'#f7a94e'; }
+  if(mb){ mb.style.width = Math.min((ms/mGoal)*100,100)+'%'; mb.style.background = ms>=mGoal?'#00d18c':'#e8a020'; }
+  if(spb){ spb.style.width = spDone ? '100%' : '0%'; spb.style.background = '#e05c8c'; }
+
   var cg = document.getElementById('chess-daily-goal');
   var pg = document.getElementById('piano-daily-goal');
   var tg = document.getElementById('typing-daily-goal');
   var mg = document.getElementById('math-daily-goal');
-  if(cg) cg.style.display = cs>=1800?'block':'none';
-  if(pg) pg.style.display = ps>=1800?'block':'none';
-  if(tg) tg.style.display = ts>=900?'block':'none';
-  if(mg) mg.style.display = ms>=900?'block':'none';
+  var sg = document.getElementById('spanish-daily-goal');
+  if(cg) cg.style.display = cs>=cGoal?'block':'none';
+  if(pg) pg.style.display = ps>=pGoal?'block':'none';
+  if(tg) tg.style.display = ts>=tGoal?'block':'none';
+  if(mg) mg.style.display = ms>=mGoal?'block':'none';
+  if(sg) sg.style.display = spDone?'block':'none';
 }
 
 function renderHomeProjects() {
@@ -5839,6 +5900,9 @@ window.spFlashAnswer = function(score) {
   var rec = srs[w.id] || { interval:0, ease:2.5, reps:0 };
 
   spFlashSession.total++;
+  // Mark Spanish as done for the day when they answer a card
+  localStorage.setItem('spanishDailyDone', 'true');
+  if(typeof renderHomeDailys==='function') { try { renderHomeDailys(); } catch(e){} }
 
   // SM-2 inspired simple version
   if (score === 0) {
@@ -10620,5 +10684,52 @@ function geoAnswer(choice, btn, allChoices) {
 </script>
 
 
-    </body>
+    
+<!-- Daily Goal Edit Modal -->
+<div id="daily-goal-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1200;align-items:center;justify-content:center">
+  <div style="background:#0f1f17;border:1px solid #1f3a2a;border-radius:16px;padding:24px;width:min(90vw,340px);display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+    <div style="font-size:15px;font-weight:700;color:#e8f0ed">⚙️ Edit Daily Goals</div>
+    <div style="font-size:12px;color:#4a7060">Set your daily time goals in minutes.</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="font-size:13px;color:#e8f0ed">♟️ Chess</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input id="dg-chess" type="number" min="1" max="240" style="width:60px;background:#1a2e24;border:1px solid #1f3a2a;border-radius:7px;padding:6px 8px;color:#e8f0ed;font-size:14px;font-weight:700;text-align:center;outline:none">
+          <span style="font-size:12px;color:#4a7060">min</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="font-size:13px;color:#e8f0ed">🎹 Piano</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input id="dg-piano" type="number" min="1" max="240" style="width:60px;background:#1a2e24;border:1px solid #1f3a2a;border-radius:7px;padding:6px 8px;color:#e8f0ed;font-size:14px;font-weight:700;text-align:center;outline:none">
+          <span style="font-size:12px;color:#4a7060">min</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="font-size:13px;color:#e8f0ed">⌨️ Typing</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input id="dg-typing" type="number" min="1" max="240" style="width:60px;background:#1a2e24;border:1px solid #1f3a2a;border-radius:7px;padding:6px 8px;color:#e8f0ed;font-size:14px;font-weight:700;text-align:center;outline:none">
+          <span style="font-size:12px;color:#4a7060">min</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="font-size:13px;color:#e8f0ed">🧮 Math</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input id="dg-math" type="number" min="1" max="240" style="width:60px;background:#1a2e24;border:1px solid #1f3a2a;border-radius:7px;padding:6px 8px;color:#e8f0ed;font-size:14px;font-weight:700;text-align:center;outline:none">
+          <span style="font-size:12px;color:#4a7060">min</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <span style="font-size:13px;color:#e8f0ed">🇪🇸 Spanish</span>
+        <span style="font-size:12px;color:#00d18c;font-weight:600">Completion-based ✓</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button onclick="dailyGoalEditSave()" style="flex:1;background:#00d18c;color:#0a1a12;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer">Save</button>
+      <button onclick="document.getElementById('daily-goal-modal').style.display='none'" style="background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
+
+</body>
 </html>
