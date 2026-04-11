@@ -11083,12 +11083,12 @@ function usmapRenderBg() {
     line.setAttribute('points', x1+','+y1+' '+x2+','+y2+' '+x3+','+y3);
     line.setAttribute('fill','none'); line.setAttribute('stroke','#00d18c');
     line.setAttribute('stroke-width','1'); line.setAttribute('opacity','0.8');
-    // City name label
+    // City name label — sits on top of the horizontal line
     var t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x', x3+3); t.setAttribute('y', y3+1);
-    t.setAttribute('font-size','7'); t.setAttribute('fill','#00d18c');
-    t.setAttribute('font-weight','700'); t.setAttribute('font-family','Segoe UI,sans-serif');
-    t.setAttribute('opacity','0.9');
+    t.setAttribute('x', x2 + hLen/2); t.setAttribute('y', y3 - 3);
+    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','7');
+    t.setAttribute('fill','#00d18c'); t.setAttribute('font-weight','700');
+    t.setAttribute('font-family','Segoe UI,sans-serif'); t.setAttribute('opacity','0.9');
     t.textContent = city.name;
     // Pulse ring
     var c1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
@@ -11135,11 +11135,12 @@ function usmapRenderMain() {
     line.setAttribute('points', cx+','+cy+' '+x2+','+y2+' '+x3+','+y3);
     line.setAttribute('fill','none'); line.setAttribute('stroke','#00d18c');
     line.setAttribute('stroke-width','1.2'); line.setAttribute('opacity','0.8');
-    // Label
+    // Label — sits on top of the horizontal line
     var t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x', x3+4); t.setAttribute('y', y3+1);
-    t.setAttribute('font-size','10'); t.setAttribute('fill','#00d18c');
-    t.setAttribute('font-weight','700'); t.setAttribute('font-family','Segoe UI,sans-serif');
+    t.setAttribute('x', x2 + hLen/2); t.setAttribute('y', y3 - 4);
+    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','10');
+    t.setAttribute('fill','#00d18c'); t.setAttribute('font-weight','700');
+    t.setAttribute('font-family','Segoe UI,sans-serif');
     t.textContent = city.name;
     // Remove on click
     g.onclick = (function(i){ return function(e){ e.stopPropagation(); usmapRemove(i); }; })(idx);
@@ -11171,12 +11172,17 @@ function usmapUpdateCount() {
 
 window.usmapClick = function(e) {
   var svg = document.getElementById('usmap-main-svg');
-  // Use SVG's own coordinate transform — exact regardless of CSS scaling
-  var pt = svg.createSVGPoint();
-  pt.x = e.clientX; pt.y = e.clientY;
-  var svgPt = pt.matrixTransform(svg.getScreenCTM().inverse());
-  usmapPendingX = Math.round(svgPt.x);
-  usmapPendingY = Math.round(svgPt.y);
+  var rect = svg.getBoundingClientRect();
+  // xMidYMid meet: scale uniformly and center — compute letterbox offsets
+  var vbW = 960, vbH = 600;
+  var elW = rect.width, elH = rect.height;
+  var scale = Math.min(elW / vbW, elH / vbH);
+  var renderedW = vbW * scale;
+  var renderedH = vbH * scale;
+  var offsetX = (elW - renderedW) / 2;
+  var offsetY = (elH - renderedH) / 2;
+  usmapPendingX = Math.round((e.clientX - rect.left - offsetX) / scale);
+  usmapPendingY = Math.round((e.clientY - rect.top  - offsetY) / scale);
   // Check if it matches a known city
   var best = null, bestDist = 999;
   Object.keys(USMAP_CITY_COORDS).forEach(function(name) {
