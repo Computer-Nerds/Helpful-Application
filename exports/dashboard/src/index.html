@@ -4251,10 +4251,7 @@ function chExecuteMove(move,b,st,promoType,isBot=false){
     const{text,over,win}=chGetStatus(nb,ns,isBot);
     const statusEl=document.getElementById('chess-status');
     statusEl.textContent=text;statusEl.style.color=over?'#f74e4e':chThinking?'#f7a94e':'#00d18c';
-    if(over){chGameOver=true;
-      // Stop timer
-      if(chTimerRunning){chTimerRunning=false;clearInterval(chTimerInterval);const tb=document.getElementById('chess-timer-btn');if(tb){tb.textContent='▶';tb.style.background='rgba(0,209,140,0.15)';tb.style.borderColor='#00d18c';tb.style.color='#00d18c';}}
-      if(win)chStartConfetti();renderChessBoard();return;}
+    if(over){chGameOver=true;if(win)chStartConfetti();renderChessBoard();return;}
     renderChessBoard();
     if(!isBot){
       chThinking=true;
@@ -11368,6 +11365,59 @@ window.addEventListener('DOMContentLoaded', function() {
   usmapRenderBg();
 });
 
+
+function typingOpenCustomEditor() {
+  typingRenderCustomList();
+  var modal = document.getElementById('typing-custom-modal');
+  modal.style.display='flex';
+  setTimeout(function(){ var inp=document.getElementById('typing-custom-input'); if(inp) inp.focus(); },100);
+}
+function typingCloseCustomEditor() {
+  document.getElementById('typing-custom-modal').style.display='none';
+}
+function typingRenderCustomList() {
+  var list = document.getElementById('typing-custom-list');
+  if(!list) return;
+  var builtins = TYPING_BUILTIN_SENTENCES;
+  var customs = typingGetCustomSentences();
+  list.innerHTML = '';
+  builtins.forEach(function(s) {
+    var row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0d1a12;border:1px solid #1a3020;border-radius:8px;';
+    row.innerHTML='<span style="font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0">APP</span><span style="flex:1;font-size:13px;color:#7a9e8e">'+s+'</span>';
+    list.appendChild(row);
+  });
+  if(customs.length===0) {
+    var empty=document.createElement('div');
+    empty.style.cssText='font-size:12px;color:#3a5040;padding:8px;text-align:center';
+    empty.textContent='No custom sentences yet. Add one below!';
+    list.appendChild(empty);
+  }
+  customs.forEach(function(s, i) {
+    var row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
+    row.innerHTML='<span style="flex:1;font-size:13px;color:#e8f0ed">'+s+'</span><button onclick="typingDeleteCustomSentence('+i+')" style="background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;" title="Delete">✕</button>';
+    list.appendChild(row);
+  });
+  var inp=document.getElementById('typing-custom-input');
+  if(inp) inp.onkeydown=function(e){ if(e.key==='Enter') typingAddCustomSentence(); };
+}
+function typingAddCustomSentence() {
+  var input = document.getElementById('typing-custom-input');
+  var val = input.value.trim();
+  if(!val) return;
+  var arr = typingGetCustomSentences();
+  arr.push(val);
+  typingSaveCustomSentences(arr);
+  input.value='';
+  typingRenderCustomList();
+}
+function typingDeleteCustomSentence(i) {
+  var arr = typingGetCustomSentences();
+  arr.splice(i,1);
+  typingSaveCustomSentences(arr);
+  typingRenderCustomList();
+}
 </script>
 
 
@@ -11419,6 +11469,7 @@ window.addEventListener('DOMContentLoaded', function() {
 </div>
 
 
+
 <!-- ══ TYPING CUSTOM SENTENCES MODAL ══ -->
 <div id="typing-custom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center">
   <div style="background:#141a17;border:1px solid #1f2e28;border-radius:16px;width:560px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;padding:24px;gap:16px;">
@@ -11434,62 +11485,5 @@ window.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
-
-<script>
-function typingOpenCustomEditor() {
-  typingRenderCustomList();
-  const modal = document.getElementById('typing-custom-modal');
-  modal.style.display='flex';
-  setTimeout(()=>document.getElementById('typing-custom-input').focus(),100);
-}
-function typingCloseCustomEditor() {
-  document.getElementById('typing-custom-modal').style.display='none';
-}
-function typingRenderCustomList() {
-  const list = document.getElementById('typing-custom-list');
-  const builtins = TYPING_BUILTIN_SENTENCES;
-  const customs = typingGetCustomSentences();
-  list.innerHTML = '';
-  builtins.forEach(function(s) {
-    const row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0d1a12;border:1px solid #1a3020;border-radius:8px;';
-    row.innerHTML='<span style="font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0">APP</span><span style="flex:1;font-size:13px;color:#7a9e8e">'+s+'</span>';
-    list.appendChild(row);
-  });
-  if(customs.length===0) {
-    const empty=document.createElement('div');
-    empty.style.cssText='font-size:12px;color:#3a5040;padding:8px;text-align:center';
-    empty.textContent='No custom sentences yet. Add one below!';
-    list.appendChild(empty);
-  }
-  customs.forEach(function(s, i) {
-    const row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
-    row.innerHTML='<span style="flex:1;font-size:13px;color:#e8f0ed">'+s+'</span><button onclick="typingDeleteCustomSentence('+i+')" style="background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;" title="Delete">✕</button>';
-    list.appendChild(row);
-  });
-}
-function typingAddCustomSentence() {
-  const input = document.getElementById('typing-custom-input');
-  const val = input.value.trim();
-  if(!val) return;
-  const arr = typingGetCustomSentences();
-  arr.push(val);
-  typingSaveCustomSentences(arr);
-  input.value='';
-  typingRenderCustomList();
-}
-function typingDeleteCustomSentence(i) {
-  const arr = typingGetCustomSentences();
-  arr.splice(i,1);
-  typingSaveCustomSentences(arr);
-  typingRenderCustomList();
-}
-// Allow Enter to add sentence
-document.addEventListener('DOMContentLoaded', function() {
-  var inp = document.getElementById('typing-custom-input');
-  if(inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') typingAddCustomSentence(); });
-});
-</script>
 </body>
 </html>
