@@ -2137,6 +2137,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
             </button>
           </div>
+          <button class="btn btn-ghost" id="chess-undo-btn" style="display:none" onclick="chessUndoMove()" title="Take back last move">↩ Undo</button>
           <button class="btn btn-ghost" id="chess-new-game-btn" style="display:none" onclick="chessNewGame()">New Game</button>
         </div>
         <div id="chess-select">
@@ -2210,7 +2211,8 @@
         <div id="typing-topbar">
           <button class="btn btn-ghost" onclick="closeApp('typing')">← Apps</button>
           <span style="font-size:16px;font-weight:800">⌨️ Typing</span>
-          <div style="display:flex;gap:6px" id="typing-mode-btns"></div>
+          <div style="display:flex;gap:6px;align-items:center" id="typing-mode-btns"></div>
+          <button id="typing-custom-edit-btn" onclick="typingOpenCustomEditor()" title="Edit My Sentences" style="display:none;background:#1a1f1d;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✍️ Edit</button>
           <div style="flex:1"></div>
           <div class="typing-stat">
             <div class="typing-stat-val" id="typing-wpm">--</div>
@@ -3005,7 +3007,7 @@ function setPage(p) {
     renderPlannerSidebar();
     if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
-  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); fitRenderHomeFitnessCard(); renderMoneyGraphCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }); }
+  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); fitRenderHomeFitnessCard(); renderMoneyGraphCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); setTimeout(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }, 150); }); }
   if (p === 'money') { if(typeof monInit==='function') monInit(); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
@@ -4018,9 +4020,13 @@ const PST = {
   k:[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20],
 };
 const CHESS_RATINGS = [
-  {label:'Beginner',elo:400,depth:1,rand:0.9},{label:'Casual',elo:800,depth:2,rand:0.5},
-  {label:'Intermediate',elo:1200,depth:2,rand:0.2},{label:'Advanced',elo:1600,depth:3,rand:0.1},
-  {label:'Expert',elo:2000,depth:3,rand:0.02},{label:'Master',elo:2500,depth:4,rand:0},
+  {label:'Beginner',elo:300,depth:1,rand:1.0,description:'Makes lots of random moves'},
+  {label:'Novice',elo:600,depth:1,rand:0.75,description:'Plays mostly random with some sense'},
+  {label:'Casual',elo:900,depth:2,rand:0.5,description:'Avoids obvious blunders'},
+  {label:'Intermediate',elo:1200,depth:2,rand:0.2,description:'Plays solid but predictable'},
+  {label:'Advanced',elo:1500,depth:3,rand:0.08,description:'Strong positional play'},
+  {label:'Expert',elo:1800,depth:3,rand:0.02,description:'Very few mistakes'},
+  {label:'Master',elo:2100,depth:4,rand:0,description:'Near-perfect engine play'},
 ];
 const SQ = 70;
 
@@ -4091,7 +4097,7 @@ function playChessCapture(){const ctx=getACtx();const buf=ctx.createBuffer(1,ctx
 
 // Chess state
 let chBoard=null,chState=null,chSelected=null,chHighlights=[],chLastMove=null;
-let chGameOver=false,chThinking=false,chAnimPiece=null,chHistory=[],chPromoMove=null;
+let chGameOver=false,chThinking=false,chAnimPiece=null,chHistory=[],chPromoMove=null,chStateHistory=[];
 let chRating=null,chScreen='select';
 let chTimerRunning=false,chTimerElapsed=0,chTimerInterval=null;
 
@@ -4102,13 +4108,15 @@ function chessInit() {
   document.getElementById('chess-select').style.display='flex';
   document.getElementById('chess-game').style.display='none';
   document.getElementById('chess-new-game-btn').style.display='none';
+  const undoBtn=document.getElementById('chess-undo-btn');if(undoBtn)undoBtn.style.display='none';
   document.getElementById('chess-back-btn').textContent='← Apps';
   document.getElementById('chess-topbar-label').textContent='Chess vs Bot';
   const grid=document.getElementById('chess-ratings');
   grid.innerHTML=CHESS_RATINGS.map(r=>`
     <button class="chess-rating-btn" onclick="chessStart(${JSON.stringify(r).replace(/"/g,'&quot;')})">
-      <div style="font-size:16px;font-weight:700;margin-bottom:4px">${r.label}</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:2px">${r.label}</div>
       <div style="font-size:13px;color:#00d18c;font-weight:600">~${r.elo} ELO</div>
+      <div style="font-size:11px;color:#4a7060;margin-top:3px">${r.description||''}</div>
     </button>
   `).join('');
 }
@@ -4117,11 +4125,12 @@ function chessStart(r) {
   chRating=r;
   chBoard=startBoard();chState={castle:'KQkq',ep:null,turn:'w'};
   chSelected=null;chHighlights=[];chLastMove=null;chGameOver=false;chThinking=false;
-  chHistory=[];chPromoMove=null;chAnimPiece=null;
+  chHistory=[];chPromoMove=null;chAnimPiece=null;chStateHistory=[];
   chScreen='game';
   document.getElementById('chess-select').style.display='none';
   document.getElementById('chess-game').style.display='flex';
   document.getElementById('chess-new-game-btn').style.display='block';
+  document.getElementById('chess-undo-btn').style.display='block';
   document.getElementById('chess-back-btn').textContent='← Levels';
   document.getElementById('chess-topbar-label').innerHTML=`${r.label} <span style="color:#7a9e8e;font-weight:400;font-size:12px">~${r.elo} ELO</span>`;
   document.getElementById('chess-status').textContent='Your turn';
@@ -4134,6 +4143,26 @@ function chessBack() {
   else { closeApp('chess'); }
 }
 function chessNewGame() { if(chRating) chessStart(chRating); }
+
+function chessUndoMove() {
+  // Need to undo 2 half-moves: bot's move + player's move
+  if(chStateHistory.length < 2 || chThinking || chAnimPiece) return;
+  // Pop bot's move
+  chStateHistory.pop();
+  // Pop player's move  
+  const snap = chStateHistory.pop();
+  chBoard = snap.board;
+  chState = snap.state;
+  chHistory = snap.history;
+  chLastMove = snap.lastMove;
+  chGameOver = false;
+  chSelected = null;
+  chHighlights = [];
+  chPromoMove = null;
+  const statusEl = document.getElementById('chess-status');
+  if(statusEl){ statusEl.textContent = 'Your turn'; statusEl.style.color='#00d18c'; }
+  renderChessBoard();
+}
 
 function chTimerToggle() {
   chTimerRunning=!chTimerRunning;
@@ -4212,6 +4241,8 @@ function chExecuteMove(move,b,st,promoType,isBot=false){
   addChessAnimPiece(chAnimPiece,fromPx,toPx);
   setTimeout(()=>{
     chAnimPiece=null;
+    // Save undo snapshot before applying move
+    chStateHistory.push({board:cloneBoard(b),state:{...st},history:[...chHistory],lastMove:chLastMove?{...chLastMove}:null});
     const{board:nb,state:ns}=applyMove(b,finalMove,st);
     chBoard=nb;chState=ns;chLastMove=finalMove;chSelected=null;chHighlights=[];chPromoMove=null;
     if(isCapture)playChessCapture();else playChessMove();
@@ -4220,7 +4251,10 @@ function chExecuteMove(move,b,st,promoType,isBot=false){
     const{text,over,win}=chGetStatus(nb,ns,isBot);
     const statusEl=document.getElementById('chess-status');
     statusEl.textContent=text;statusEl.style.color=over?'#f74e4e':chThinking?'#f7a94e':'#00d18c';
-    if(over){chGameOver=true;clearInterval(chTimerInterval);chTimerRunning=false;if(win)chStartConfetti();renderChessBoard();return;}
+    if(over){chGameOver=true;
+      // Stop timer
+      if(chTimerRunning){chTimerRunning=false;clearInterval(chTimerInterval);const tb=document.getElementById('chess-timer-btn');if(tb){tb.textContent='▶';tb.style.background='rgba(0,209,140,0.15)';tb.style.borderColor='#00d18c';tb.style.color='#00d18c';}}
+      if(win)chStartConfetti();renderChessBoard();return;}
     renderChessBoard();
     if(!isBot){
       chThinking=true;
@@ -4431,8 +4465,21 @@ function updatePianoTimerDisplay(){const m=Math.floor(pianoTimerElapsed/60),s=pi
 // ════════════════════════════════════════════════════════════
 const WORDS_EASY=['the','be','to','of','and','a','in','that','have','it','for','not','on','with','he','as','you','do','at','this','but','his','by','from','they','we','say','her','she','or','an','will','my','one','all','would','there','their','what','so','up','out','if','about','who','get','which','go','me','when','make','can','like','time','no','just','him','know','take','people','into','year','your','good','some','could','them','see','other','than','then','now','look','only','come','its','over','think','also','back','after','use','two','how','our','work','first','well','way','even','new','want','because','any','these','give','day','most','us'];
 const WORDS_HARD=['rhythm','bureaucracy','entrepreneur','conscientious','phenomenon','onomatopoeia','necessary','accommodate','occurrence','perseverance','miscellaneous','acquaintance','Mediterranean','psychological','reconnaissance','extraordinary','approximately','distinguishable','incomprehensible','responsibilities','simultaneously','acknowledgement','conscientiously','extraordinarily','revolutionary','unprecedented','sophisticated','unambiguously','characteristic','disappointment'];
-const SENTENCES=['The quick brown fox jumps over the lazy dog.','Coding every day sharpens your mind and builds discipline.','Practice makes perfect and consistency is the key to mastering any skill.','Every great developer was once a beginner who refused to give up.','The secret of getting ahead is getting started.','A smooth sea never made a skilled sailor.','Focus on the journey not the destination.','Small daily improvements lead to stunning long-term results.','Type with intention and let your fingers find their own rhythm.','The keyboard is your instrument and the screen is your stage.','Learning to type quickly unlocks a whole new level of productivity.','There is no shortcut to mastery only deliberate and consistent practice.'];
-const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'}];
+const SENTENCES=['The quick brown fox jumps over the lazy dog.','Coding every day sharpens your mind and builds discipline.','Practice makes perfect and consistency is the key to mastering any skill.','Every great developer was once a beginner who refused to give up.','The secret of getting ahead is getting started.','A smooth sea never made a skilled sailor.','Focus on the journey not the destination.','Small daily improvements lead to stunning long-term results.','Type with intention and let your fingers find their own rhythm.','The keyboard is your instrument and the screen is your stage.','Learning to type quickly unlocks a whole new level of productivity.','There is no shortcut to mastery only deliberate and consistent practice.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.','Success is not final failure is not fatal it is the courage to continue that counts.','The future belongs to those who believe in the beauty of their dreams.','It does not matter how slowly you go as long as you do not stop.','Believe you can and you are halfway there.','The mind is everything what you think you become.','You miss one hundred percent of the shots you do not take.','If you are going through hell keep going.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Life is what happens when you are busy making other plans.','Whether you think you can or you think you cannot you are right.'];
+
+// ── Built-in typing sentences from the app (cannot be deleted) ──
+const TYPING_BUILTIN_SENTENCES = ['The quick brown fox jumps over the lazy dog.','The mind is everything what you think you become.','Small daily improvements lead to stunning long-term results.','Success is not final failure is not fatal it is the courage to continue that counts.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Whether you think you can or you think you cannot you are right.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.'];
+
+function typingGetCustomSentences() {
+  try { return JSON.parse(localStorage.getItem('typing_custom_sentences') || '[]'); } catch(e) { return []; }
+}
+function typingSaveCustomSentences(arr) {
+  localStorage.setItem('typing_custom_sentences', JSON.stringify(arr));
+}
+function typingAllCustomSentences() {
+  return [...TYPING_BUILTIN_SENTENCES, ...typingGetCustomSentences()];
+}
+const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'},{key:'custom',label:'My Sentences',icon:'✍️'}];
 
 let typingMode='words',typingPrompt='',typingTyped='',typingStarted=false,typingFinished=false;
 let typingStartTime=null,typingWpm=0,typingAcc=100;
@@ -4444,6 +4491,7 @@ let typingInitialized=false;
 function getTypingPrompt(mode){
   if(mode==='words')return [...WORDS_EASY].sort(()=>Math.random()-0.5).slice(0,20).join(' ');
   if(mode==='hard')return [...WORDS_HARD].sort(()=>Math.random()-0.5).slice(0,12).join(' ');
+  if(mode==='custom'){const cs=typingAllCustomSentences();return cs.length?cs[Math.floor(Math.random()*cs.length)]:'Add your own sentences using the ✍️ button!';}
   return SENTENCES[Math.floor(Math.random()*SENTENCES.length)];
 }
 
@@ -4468,6 +4516,8 @@ function renderTypingModes(){
       ${m.icon} ${m.label}
     </button>
   `).join('');
+  const editBtn=document.getElementById('typing-custom-edit-btn');
+  if(editBtn) editBtn.style.display=typingMode==='custom'?'':'none';
 }
 
 function typingReset(mode){
@@ -5941,6 +5991,71 @@ const SP_BUILTIN = [
   {id:'b55',es:'tres',en:'three',pron:'TREHS',type:'number',example:'Tengo {tres} gatos. (I have three cats.)'},
   {id:'b56',es:'diez',en:'ten',pron:'DYEHS',type:'number',example:'Son {diez} dólares. (That\'s ten dollars.)'},
   {id:'b57',es:'cien',en:'one hundred',pron:'SYEHN',type:'number',example:'Cuesta {cien} dólares. (It costs one hundred dollars.)'},
+  // ── Extra vocab batch 2 ──
+  {id:'b58',es:'ropa',en:'clothes',pron:'ROH-pah',type:'noun',example:'Me pongo la {ropa}. (I put on my clothes.)'},
+  {id:'b59',es:'zapato',en:'shoe',pron:'sah-PAH-toh',type:'noun',example:'¿Dónde está mi {zapato}? (Where is my shoe?)'},
+  {id:'b60',es:'camisa',en:'shirt',pron:'kah-MEE-sah',type:'noun',example:'La {camisa} es azul. (The shirt is blue.)'},
+  {id:'b61',es:'mano',en:'hand',pron:'MAH-noh',type:'noun',example:'Dame la {mano}. (Give me your hand.)'},
+  {id:'b62',es:'cabeza',en:'head',pron:'kah-BEH-sah',type:'noun',example:'Me duele la {cabeza}. (My head hurts.)'},
+  {id:'b63',es:'corazón',en:'heart',pron:'koh-rah-SOHN',type:'noun',example:'Te quiero con todo mi {corazón}. (I love you with all my heart.)'},
+  {id:'b64',es:'nombre',en:'name',pron:'NOHM-breh',type:'noun',example:'¿Cuál es tu {nombre}? (What is your name?)'},
+  {id:'b65',es:'país',en:'country',pron:'pah-EES',type:'noun',example:'Vivo en este {país}. (I live in this country.)'},
+  {id:'b66',es:'color',en:'color',pron:'koh-LOHR',type:'noun',example:'¿Cuál es tu {color} favorito? (What is your favorite color?)'},
+  {id:'b67',es:'número',en:'number',pron:'NOO-meh-roh',type:'noun',example:'¿Cuál es tu {número} de teléfono? (What is your phone number?)'},
+  {id:'b68',es:'pregunta',en:'question',pron:'preh-GOON-tah',type:'noun',example:'Tengo una {pregunta}. (I have a question.)'},
+  {id:'b69',es:'respuesta',en:'answer',pron:'res-PWES-tah',type:'noun',example:'La {respuesta} es correcta. (The answer is correct.)'},
+  {id:'b70',es:'historia',en:'history / story',pron:'ees-TOH-ryah',type:'noun',example:'La {historia} es interesante. (The story is interesting.)'},
+  {id:'b71',es:'música',en:'music',pron:'MOO-see-kah',type:'noun',example:'Me encanta la {música}. (I love music.)'},
+  {id:'b72',es:'deporte',en:'sport',pron:'deh-POHR-teh',type:'noun',example:'El {deporte} es bueno para la salud. (Sport is good for health.)'},
+  {id:'b73',es:'fútbol',en:'soccer',pron:'FOOT-bohl',type:'noun',example:'Juego al {fútbol} los domingos. (I play soccer on Sundays.)'},
+  {id:'b74',es:'lluvia',en:'rain',pron:'YOO-byah',type:'noun',example:'La {lluvia} es fría. (The rain is cold.)'},
+  {id:'b75',es:'sol',en:'sun',pron:'SOHL',type:'noun',example:'El {sol} brilla hoy. (The sun shines today.)'},
+  {id:'b76',es:'noche',en:'night',pron:'NOH-cheh',type:'noun',example:'Buenas {noches}. (Good night.)'},
+  {id:'b77',es:'día',en:'day',pron:'DEE-ah',type:'noun',example:'Buenos {días}. (Good morning/day.)'},
+  {id:'b78',es:'semana',en:'week',pron:'seh-MAH-nah',type:'noun',example:'Esta {semana} estoy ocupado. (This week I am busy.)'},
+  {id:'b79',es:'mes',en:'month',pron:'MEHS',type:'noun',example:'Este {mes} es agosto. (This month is August.)'},
+  {id:'b80',es:'aprender',en:'to learn',pron:'ah-pren-DEHR',type:'verb',example:'Quiero {aprender} español. (I want to learn Spanish.)'},
+  {id:'b81',es:'estudiar',en:'to study',pron:'es-too-DYAHR',type:'verb',example:'Voy a {estudiar} esta noche. (I am going to study tonight.)'},
+  {id:'b82',es:'escribir',en:'to write',pron:'es-kree-BEER',type:'verb',example:'Voy a {escribir} una carta. (I am going to write a letter.)'},
+  {id:'b83',es:'leer',en:'to read',pron:'leh-EHR',type:'verb',example:'Me gusta {leer} libros. (I like to read books.)'},
+  {id:'b84',es:'escuchar',en:'to listen',pron:'es-koo-CHAHR',type:'verb',example:'{Escucha} la música. (Listen to the music.)'},
+  {id:'b85',es:'correr',en:'to run',pron:'koh-REHR',type:'verb',example:'Me gusta {correr} por la mañana. (I like to run in the morning.)'},
+  {id:'b86',es:'dormir',en:'to sleep',pron:'dohr-MEER',type:'verb',example:'Necesito {dormir} ocho horas. (I need to sleep eight hours.)'},
+  {id:'b87',es:'trabajar',en:'to work',pron:'trah-bah-HAHR',type:'verb',example:'{Trabajo} en una oficina. (I work in an office.)'},
+  {id:'b88',es:'comprar',en:'to buy',pron:'kohm-PRAHR',type:'verb',example:'Voy a {comprar} comida. (I am going to buy food.)'},
+  {id:'b89',es:'vender',en:'to sell',pron:'ben-DEHR',type:'verb',example:'Quiero {vender} mi coche. (I want to sell my car.)'},
+  {id:'b90',es:'pensar',en:'to think',pron:'pen-SAHR',type:'verb',example:'{Pienso} que tienes razón. (I think you are right.)'},
+  {id:'b91',es:'creer',en:'to believe',pron:'kreh-EHR',type:'verb',example:'{Creo} en ti. (I believe in you.)'},
+  {id:'b92',es:'sentir',en:'to feel',pron:'sen-TEER',type:'verb',example:'Me {siento} bien hoy. (I feel good today.)'},
+  {id:'b93',es:'gustar',en:'to like / please',pron:'goos-TAHR',type:'verb',example:'Me {gusta} el café. (I like coffee.)'},
+  {id:'b94',es:'necesitar',en:'to need',pron:'neh-seh-see-TAHR',type:'verb',example:'{Necesito} ayuda. (I need help.)'},
+  {id:'b95',es:'buscar',en:'to look for',pron:'boos-KAHR',type:'verb',example:'Estoy {buscando} mis llaves. (I am looking for my keys.)'},
+  {id:'b96',es:'encontrar',en:'to find',pron:'en-kohn-TRAHR',type:'verb',example:'No puedo {encontrar} mi teléfono. (I can't find my phone.)'},
+  {id:'b97',es:'llegar',en:'to arrive',pron:'yeh-GAHR',type:'verb',example:'¿A qué hora {llegas}? (What time do you arrive?)'},
+  {id:'b98',es:'salir',en:'to leave / go out',pron:'sah-LEER',type:'verb',example:'Voy a {salir} a las ocho. (I'm going to leave at eight.)'},
+  {id:'b99',es:'regresar',en:'to return',pron:'reh-greh-SAHR',type:'verb',example:'¿Cuándo vas a {regresar}? (When are you going to return?)'},
+  {id:'b100',es:'esperar',en:'to wait / hope',pron:'es-peh-RAHR',type:'verb',example:'Tengo que {esperar} el autobús. (I have to wait for the bus.)'},
+  {id:'b101',es:'siempre',en:'always',pron:'SYEM-preh',type:'adjective',example:'Yo {siempre} llego a tiempo. (I always arrive on time.)'},
+  {id:'b102',es:'nunca',en:'never',pron:'NOON-kah',type:'adjective',example:'{Nunca} como carne. (I never eat meat.)'},
+  {id:'b103',es:'mucho',en:'much / a lot',pron:'MOO-choh',type:'adjective',example:'Tengo {mucho} trabajo. (I have a lot of work.)'},
+  {id:'b104',es:'poco',en:'little / few',pron:'POH-koh',type:'adjective',example:'Tengo un {poco} de tiempo. (I have a little time.)'},
+  {id:'b105',es:'mismo',en:'same / itself',pron:'MEES-moh',type:'adjective',example:'Es el {mismo} problema. (It is the same problem.)'},
+  {id:'b106',es:'otro',en:'other / another',pron:'OH-troh',type:'adjective',example:'Quiero {otro} café. (I want another coffee.)'},
+  {id:'b107',es:'cada',en:'each / every',pron:'KAH-dah',type:'adjective',example:'{Cada} día aprendo algo nuevo. (Each day I learn something new.)'},
+  {id:'b108',es:'con mucho gusto',en:'with pleasure / gladly',pron:'kohn MOO-choh GOOS-toh',type:'phrase',example:'—¿Me puedes ayudar? —{Con mucho gusto}. (—Can you help me? —Gladly.)'},
+  {id:'b109',es:'¿qué hora es?',en:'what time is it?',pron:'KEH OH-rah EHS',type:'phrase',example:'Perdón, ¿{qué hora es}? (Excuse me, what time is it?)'},
+  {id:'b110',es:'tengo hambre',en:'I am hungry',pron:'TEN-goh AHM-breh',type:'phrase',example:'{Tengo hambre}. ¿Comemos? (I'm hungry. Shall we eat?)'},
+  {id:'b111',es:'tengo sed',en:'I am thirsty',pron:'TEN-goh SEHD',type:'phrase',example:'{Tengo sed}. ¿Hay agua? (I'm thirsty. Is there water?)'},
+  {id:'b112',es:'¿dónde está?',en:'where is it?',pron:'DOHN-deh es-TAH',type:'phrase',example:'¿{Dónde está} el baño? (Where is the bathroom?)'},
+  {id:'b113',es:'me llamo',en:'my name is',pron:'meh YAH-moh',type:'phrase',example:'{Me llamo} Carlos. (My name is Carlos.)'},
+  {id:'b114',es:'cuatro',en:'four',pron:'KWAH-troh',type:'number',example:'Son las {cuatro}. (It's four o'clock.)'},
+  {id:'b115',es:'cinco',en:'five',pron:'SEEN-koh',type:'number',example:'Tengo {cinco} hermanos. (I have five siblings.)'},
+  {id:'b116',es:'seis',en:'six',pron:'SEHEES',type:'number',example:'Hay {seis} personas. (There are six people.)'},
+  {id:'b117',es:'siete',en:'seven',pron:'SYEH-teh',type:'number',example:'Son las {siete}. (It's seven o'clock.)'},
+  {id:'b118',es:'ocho',en:'eight',pron:'OH-choh',type:'number',example:'Tengo {ocho} años de experiencia. (I have eight years of experience.)'},
+  {id:'b119',es:'nueve',en:'nine',pron:'NWEH-beh',type:'number',example:'Son las {nueve}. (It's nine o'clock.)'},
+  {id:'b120',es:'veinte',en:'twenty',pron:'BEHN-teh',type:'number',example:'Cuesta {veinte} dólares. (It costs twenty dollars.)'},
+  {id:'b121',es:'cincuenta',en:'fifty',pron:'seen-KWEHN-tah',type:'number',example:'Hay {cincuenta} estados. (There are fifty states.)'},
 ];
 
 // ── State ──
@@ -9810,6 +9925,7 @@ function initCardLayout() {
   var layout = loadLayout() || getDefaultLayout();
   applyLayout(layout);
   applyScrollMap();
+  requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); setTimeout(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); },200); });
 }
 
 // ── Toggle edit mode ─────────────────────────────────────────────
@@ -11302,5 +11418,78 @@ window.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
+
+<!-- ══ TYPING CUSTOM SENTENCES MODAL ══ -->
+<div id="typing-custom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:#141a17;border:1px solid #1f2e28;border-radius:16px;width:560px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;padding:24px;gap:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:16px;font-weight:800;color:#e8f0ed">✍️ My Sentences</div>
+      <button onclick="typingCloseCustomEditor()" style="background:transparent;border:none;color:#7a9e8e;font-size:20px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="font-size:12px;color:#4a7060">App-provided sentences (can't delete) are shown in green. Add your own below.</div>
+    <div id="typing-custom-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;max-height:280px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input id="typing-custom-input" type="text" placeholder="Type a sentence and press Add…" style="flex:1;background:#111312;border:1px solid #1f2e28;color:#e8f0ed;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;font-family:inherit;">
+      <button onclick="typingAddCustomSentence()" style="background:#00d18c;color:#003d2a;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function typingOpenCustomEditor() {
+  typingRenderCustomList();
+  const modal = document.getElementById('typing-custom-modal');
+  modal.style.display='flex';
+  setTimeout(()=>document.getElementById('typing-custom-input').focus(),100);
+}
+function typingCloseCustomEditor() {
+  document.getElementById('typing-custom-modal').style.display='none';
+}
+function typingRenderCustomList() {
+  const list = document.getElementById('typing-custom-list');
+  const builtins = TYPING_BUILTIN_SENTENCES;
+  const customs = typingGetCustomSentences();
+  list.innerHTML = '';
+  builtins.forEach(function(s) {
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0d1a12;border:1px solid #1a3020;border-radius:8px;';
+    row.innerHTML='<span style="font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0">APP</span><span style="flex:1;font-size:13px;color:#7a9e8e">'+s+'</span>';
+    list.appendChild(row);
+  });
+  if(customs.length===0) {
+    const empty=document.createElement('div');
+    empty.style.cssText='font-size:12px;color:#3a5040;padding:8px;text-align:center';
+    empty.textContent='No custom sentences yet. Add one below!';
+    list.appendChild(empty);
+  }
+  customs.forEach(function(s, i) {
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
+    row.innerHTML='<span style="flex:1;font-size:13px;color:#e8f0ed">'+s+'</span><button onclick="typingDeleteCustomSentence('+i+')" style="background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;" title="Delete">✕</button>';
+    list.appendChild(row);
+  });
+}
+function typingAddCustomSentence() {
+  const input = document.getElementById('typing-custom-input');
+  const val = input.value.trim();
+  if(!val) return;
+  const arr = typingGetCustomSentences();
+  arr.push(val);
+  typingSaveCustomSentences(arr);
+  input.value='';
+  typingRenderCustomList();
+}
+function typingDeleteCustomSentence(i) {
+  const arr = typingGetCustomSentences();
+  arr.splice(i,1);
+  typingSaveCustomSentences(arr);
+  typingRenderCustomList();
+}
+// Allow Enter to add sentence
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('typing-custom-input');
+  if(inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter') typingAddCustomSentence(); });
+});
+</script>
 </body>
 </html>
