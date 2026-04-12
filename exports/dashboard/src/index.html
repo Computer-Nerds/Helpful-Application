@@ -4083,10 +4083,19 @@ function minimax(board,state,depth,alpha,beta,max){
 }
 function getBotMove(board,state,depth,rand){
   const moves=legalMovesFor(board,'b',state);if(!moves.length)return null;
-  if(rand>0&&Math.random()<rand)return moves[Math.floor(Math.random()*moves.length)];
-  let best=-Infinity,bestMove=null;
-  for(const m of moves){const{board:nb,state:ns}=applyMove(board,m,state);const score=minimax(nb,ns,depth-1,-Infinity,Infinity,true);if(score>best){best=score;bestMove=m;}}
-  return bestMove||moves[0];
+  // Score each move from black's perspective (minimize white's score)
+  const scored=[];
+  for(const m of moves){
+    const{board:nb,state:ns}=applyMove(board,m,state);
+    // After bot moves, white will try to maximize -> pass true for white's turn
+    const score=depth>1?minimax(nb,ns,depth-1,-Infinity,Infinity,true):evaluate(nb);
+    // Add randomness noise proportional to rand (lower ELOs get more noise)
+    const noise=rand>0?(Math.random()*2-1)*rand*500:0;
+    scored.push({m,score:score+noise});
+  }
+  // Bot is black -> wants LOWEST score (minimize white advantage)
+  scored.sort((a,b)=>a.score-b.score);
+  return scored[0].m;
 }
 
 // Chess sounds
@@ -4146,7 +4155,7 @@ function chessNewGame() { if(chRating) chessStart(chRating); }
 
 function chessUndoMove() {
   // Need to undo 2 half-moves: bot's move + player's move
-  if(chStateHistory.length < 2 || chThinking || chAnimPiece) return;
+  if(chGameOver || chStateHistory.length < 2 || chThinking || chAnimPiece) return;
   // Pop bot's move
   chStateHistory.pop();
   // Pop player's move  
@@ -4251,7 +4260,7 @@ function chExecuteMove(move,b,st,promoType,isBot=false){
     const{text,over,win}=chGetStatus(nb,ns,isBot);
     const statusEl=document.getElementById('chess-status');
     statusEl.textContent=text;statusEl.style.color=over?'#f74e4e':chThinking?'#f7a94e':'#00d18c';
-    if(over){chGameOver=true;if(win)chStartConfetti();renderChessBoard();return;}
+    if(over){chGameOver=true;const ub=document.getElementById('chess-undo-btn');if(ub)ub.style.display='none';if(win)chStartConfetti();renderChessBoard();return;}
     renderChessBoard();
     if(!isBot){
       chThinking=true;
