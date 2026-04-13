@@ -2500,7 +2500,7 @@
     <!-- ══ CONNECTIONS ══ -->
     <div id="page-bg-connections" class="page" style="flex-direction:column">
       <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
-        <button onclick="openApp('braingames')" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:18px;padding:4px">←</button>
+        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔗 Connections</span>
         <span style="margin-left:auto;font-size:12px;color:#4a7060" id="conn-puzzle-label"></span>
       </div>
@@ -10831,36 +10831,46 @@ var geoScore = 0, geoStreak = 0, geoCat = 'capitals', geoCurrentQ = null, geoAns
 
 var GEO_DATA = {
   capitals: [
-    {q:'What is the capital of France?',     a:'Paris',       choices:['Paris','London','Berlin','Madrid']},
-    {q:'What is the capital of Japan?',       a:'Tokyo',       choices:['Seoul','Beijing','Tokyo','Bangkok']},
-    {q:'What is the capital of Australia?',  a:'Canberra',    choices:['Sydney','Melbourne','Canberra','Brisbane']},
-    {q:'What is the capital of Brazil?',     a:'Brasília',    choices:['São Paulo','Rio de Janeiro','Brasília','Buenos Aires']},
-    {q:'What is the capital of Canada?',     a:'Ottawa',      choices:['Toronto','Vancouver','Ottawa','Montreal']},
-    {q:'What is the capital of Egypt?',      a:'Cairo',       choices:['Cairo','Alexandria','Luxor','Nairobi']},
-    {q:'What is the capital of Argentina?',  a:'Buenos Aires',choices:['Lima','Santiago','Bogotá','Buenos Aires']},
-    {q:'What is the capital of Russia?',     a:'Moscow',      choices:['St. Petersburg','Moscow','Kiev','Minsk']},
-    {q:'What is the capital of India?',      a:'New Delhi',   choices:['Mumbai','Kolkata','New Delhi','Chennai']},
-    {q:'What is the capital of Mexico?',     a:'Mexico City', choices:['Guadalajara','Mexico City','Monterrey','Tijuana']},
-    {q:'What is the capital of South Korea?',a:'Seoul',       choices:['Busan','Incheon','Seoul','Daegu']},
-    {q:'What is the capital of Germany?',    a:'Berlin',      choices:['Munich','Hamburg','Berlin','Frankfurt']},
-    {q:'What is the capital of Italy?',      a:'Rome',        choices:['Milan','Naples','Florence','Rome']},
-    {q:'What is the capital of Spain?',      a:'Madrid',      choices:['Barcelona','Madrid','Seville','Valencia']},
-    {q:'What is the capital of South Africa?',a:'Pretoria',   choices:['Cape Town','Johannesburg','Durban','Pretoria']},
-    {q:'What is the capital of China?',      a:'Beijing',     choices:['Shanghai','Beijing','Guangzhou','Shenzhen']},
-    {q:'What is the capital of Saudi Arabia?',a:'Riyadh',     choices:['Jeddah','Riyadh','Mecca','Medina']},
-    {q:'What is the capital of Turkey?',     a:'Ankara',      choices:['Istanbul','Ankara','Izmir','Bursa']},
-    {q:'What is the capital of Thailand?',   a:'Bangkok',     choices:['Phuket','Chiang Mai','Bangkok','Pattaya']},
-    {q:'What is the capital of Nigeria?',    a:'Abuja',       choices:['Lagos','Kano','Ibadan','Abuja']},
-    {q:'What is the capital of Kenya?',      a:'Nairobi',     choices:['Mombasa','Nairobi','Kisumu','Nakuru']},
-    {q:'What is the capital of Indonesia?',  a:'Jakarta',     choices:['Bali','Jakarta','Surabaya','Medan']},
-    {q:'What is the capital of Pakistan?',   a:'Islamabad',   choices:['Karachi','Lahore','Islamabad','Peshawar']},
-    {q:'What is the capital of Norway?',     a:'Oslo',        choices:['Bergen','Oslo','Stavanger','Trondheim']},
-    {q:'What is the capital of Sweden?',     a:'Stockholm',   choices:['Gothenburg','Malmö','Stockholm','Uppsala']},
-    {q:'What is the capital of Greece?',     a:'Athens',      choices:['Thessaloniki','Athens','Patras','Heraklion']},
-    {q:'What is the capital of Portugal?',   a:'Lisbon',      choices:['Porto','Lisbon','Braga','Coimbra']},
-    {q:'What is the capital of Poland?',     a:'Warsaw',      choices:['Kraków','Warsaw','Łódź','Wrocław']},
-    {q:'What is the capital of Ukraine?',    a:'Kyiv',        choices:['Kharkiv','Kyiv','Odessa','Lviv']},
-    {q:'What is the capital of New Zealand?',a:'Wellington',  choices:['Auckland','Wellington','Christchurch','Dunedin']},
+    {q:'What is the capital of France?',      flag:'🇫🇷', a:'Paris',        choices:['Paris','London','Berlin','Madrid']},
+    {q:'What is the capital of Japan?',        flag:'🇯🇵', a:'Tokyo',        choices:['Seoul','Beijing','Tokyo','Bangkok']},
+    {q:'What is the capital of Australia?',   flag:'🇦🇺', a:'Canberra',     choices:['Sydney','Melbourne','Canberra','Brisbane']},
+    {q:'What is the capital of Brazil?',      flag:'🇧🇷', a:'Brasília',     choices:['São Paulo','Rio de Janeiro','Brasília','Buenos Aires']},
+    {q:'What is the capital of Canada?',      flag:'🇨🇦', a:'Ottawa',       choices:['Toronto','Vancouver','Ottawa','Montreal']},
+    {q:'What is the capital of Egypt?',       flag:'🇪🇬', a:'Cairo',        choices:['Cairo','Alexandria','Luxor','Nairobi']},
+    {q:'What is the capital of Argentina?',   flag:'🇦🇷', a:'Buenos Aires', choices:['Lima','Santiago','Bogotá','Buenos Aires']},
+    {q:'What is the capital of Russia?',      flag:'🇷🇺', a:'Moscow',       choices:['St. Petersburg','Moscow','Kiev','Minsk']},
+    {q:'What is the capital of India?',       flag:'🇮🇳', a:'New Delhi',    choices:['Mumbai','Kolkata','New Delhi','Chennai']},
+    {q:'What is the capital of Mexico?',      flag:'🇲🇽', a:'Mexico City',  choices:['Guadalajara','Mexico City','Monterrey','Tijuana']},
+    {q:'What is the capital of South Korea?', flag:'🇰🇷', a:'Seoul',        choices:['Busan','Incheon','Seoul','Daegu']},
+    {q:'What is the capital of Germany?',     flag:'🇩🇪', a:'Berlin',       choices:['Munich','Hamburg','Berlin','Frankfurt']},
+    {q:'What is the capital of Italy?',       flag:'🇮🇹', a:'Rome',         choices:['Milan','Naples','Florence','Rome']},
+    {q:'What is the capital of Spain?',       flag:'🇪🇸', a:'Madrid',       choices:['Barcelona','Madrid','Seville','Valencia']},
+    {q:'What is the capital of South Africa?',flag:'🇿🇦', a:'Pretoria',     choices:['Cape Town','Johannesburg','Durban','Pretoria']},
+    {q:'What is the capital of China?',       flag:'🇨🇳', a:'Beijing',      choices:['Shanghai','Beijing','Guangzhou','Shenzhen']},
+    {q:'What is the capital of Saudi Arabia?',flag:'🇸🇦', a:'Riyadh',       choices:['Jeddah','Riyadh','Mecca','Medina']},
+    {q:'What is the capital of Turkey?',      flag:'🇹🇷', a:'Ankara',       choices:['Istanbul','Ankara','Izmir','Bursa']},
+    {q:'What is the capital of Thailand?',    flag:'🇹🇭', a:'Bangkok',      choices:['Phuket','Chiang Mai','Bangkok','Pattaya']},
+    {q:'What is the capital of Nigeria?',     flag:'🇳🇬', a:'Abuja',        choices:['Lagos','Kano','Ibadan','Abuja']},
+    {q:'What is the capital of Kenya?',       flag:'🇰🇪', a:'Nairobi',      choices:['Mombasa','Nairobi','Kisumu','Nakuru']},
+    {q:'What is the capital of Indonesia?',   flag:'🇮🇩', a:'Jakarta',      choices:['Bali','Jakarta','Surabaya','Medan']},
+    {q:'What is the capital of Pakistan?',    flag:'🇵🇰', a:'Islamabad',    choices:['Karachi','Lahore','Islamabad','Peshawar']},
+    {q:'What is the capital of Norway?',      flag:'🇳🇴', a:'Oslo',         choices:['Bergen','Oslo','Stavanger','Trondheim']},
+    {q:'What is the capital of Sweden?',      flag:'🇸🇪', a:'Stockholm',    choices:['Gothenburg','Malmö','Stockholm','Uppsala']},
+    {q:'What is the capital of Greece?',      flag:'🇬🇷', a:'Athens',       choices:['Thessaloniki','Athens','Patras','Heraklion']},
+    {q:'What is the capital of Portugal?',    flag:'🇵🇹', a:'Lisbon',       choices:['Porto','Lisbon','Braga','Coimbra']},
+    {q:'What is the capital of Poland?',      flag:'🇵🇱', a:'Warsaw',       choices:['Kraków','Warsaw','Łódź','Wrocław']},
+    {q:'What is the capital of Ukraine?',     flag:'🇺🇦', a:'Kyiv',         choices:['Kharkiv','Kyiv','Odessa','Lviv']},
+    {q:'What is the capital of New Zealand?', flag:'🇳🇿', a:'Wellington',   choices:['Auckland','Wellington','Christchurch','Dunedin']},
+    {q:'What is the capital of Morocco?',     flag:'🇲🇦', a:'Rabat',        choices:['Casablanca','Rabat','Marrakech','Fez']},
+    {q:'What is the capital of Peru?',        flag:'🇵🇪', a:'Lima',         choices:['Lima','Cusco','Arequipa','Trujillo']},
+    {q:'What is the capital of Vietnam?',     flag:'🇻🇳', a:'Hanoi',        choices:['Ho Chi Minh City','Hanoi','Da Nang','Hue']},
+    {q:'What is the capital of the Philippines?', flag:'🇵🇭', a:'Manila',   choices:['Manila','Cebu','Davao','Quezon City']},
+    {q:'What is the capital of Colombia?',    flag:'🇨🇴', a:'Bogotá',       choices:['Medellín','Bogotá','Cali','Barranquilla']},
+    {q:'What is the capital of Austria?',     flag:'🇦🇹', a:'Vienna',       choices:['Salzburg','Vienna','Graz','Innsbruck']},
+    {q:'What is the capital of Switzerland?', flag:'🇨🇭', a:'Bern',         choices:['Zurich','Geneva','Bern','Lausanne']},
+    {q:'What is the capital of Ethiopia?',    flag:'🇪🇹', a:'Addis Ababa',  choices:['Addis Ababa','Nairobi','Khartoum','Kampala']},
+    {q:'What is the capital of the Netherlands?', flag:'🇳🇱', a:'Amsterdam', choices:['Rotterdam','Amsterdam','The Hague','Utrecht']},
+    {q:'What is the capital of Czech Republic?',  flag:'🇨🇿', a:'Prague',    choices:['Brno','Prague','Ostrava','Pilsen']},
   ],
   flags: [
     {q:'Which country has this flag?', flag:'🇺🇸', a:'United States',  choices:['United States','Canada','Australia','United Kingdom']},
@@ -10883,6 +10893,16 @@ var GEO_DATA = {
     {q:'Which country has this flag?', flag:'🇦🇷', a:'Argentina',       choices:['Argentina','Uruguay','El Salvador','Honduras']},
     {q:'Which country has this flag?', flag:'🇪🇬', a:'Egypt',           choices:['Egypt','Iraq','Syria','Yemen']},
     {q:'Which country has this flag?', flag:'🇬🇷', a:'Greece',          choices:['Greece','Uruguay','El Salvador','Honduras']},
+    {q:'Which country has this flag?', flag:'🇵🇹', a:'Portugal',        choices:['Portugal','Brazil','Spain','Italy']},
+    {q:'Which country has this flag?', flag:'🇨🇳', a:'China',           choices:['China','Vietnam','North Korea','Laos']},
+    {q:'Which country has this flag?', flag:'🇮🇹', a:'Italy',           choices:['Italy','Ireland','Mexico','Bulgaria']},
+    {q:'Which country has this flag?', flag:'🇺🇦', a:'Ukraine',         choices:['Ukraine','Sweden','Kazakhstan','Somalia']},
+    {q:'Which country has this flag?', flag:'🇵🇱', a:'Poland',          choices:['Poland','Indonesia','Singapore','Monaco']},
+    {q:'Which country has this flag?', flag:'🇮🇩', a:'Indonesia',       choices:['Indonesia','Poland','Monaco','Singapore']},
+    {q:'Which country has this flag?', flag:'🇰🇪', a:'Kenya',           choices:['Kenya','Ethiopia','Uganda','Tanzania']},
+    {q:'Which country has this flag?', flag:'🇧🇪', a:'Belgium',         choices:['Belgium','Germany','Chad','Cameroon']},
+    {q:'Which country has this flag?', flag:'🇳🇿', a:'New Zealand',     choices:['New Zealand','Australia','Fiji','Cook Islands']},
+    {q:'Which country has this flag?', flag:'🇸🇦', a:'Saudi Arabia',    choices:['Saudi Arabia','Pakistan','Afghanistan','Iran']},
   ],
   continents: [
     {q:'Which continent is Brazil in?',          a:'South America', choices:['North America','South America','Africa','Europe']},
@@ -10905,23 +10925,43 @@ var GEO_DATA = {
     {q:'Which continent is Chile in?',           a:'South America', choices:['South America','North America','Europe','Africa']},
     {q:'Which continent is Saudi Arabia in?',    a:'Asia',          choices:['Asia','Africa','Middle East','Europe']},
     {q:'Which continent is Cuba in?',            a:'North America', choices:['North America','South America','Caribbean','Europe']},
+    {q:'Which continent is Morocco in?',         a:'Africa',        choices:['Africa','Europe','Asia','Middle East']},
+    {q:'Which continent is Iran in?',            a:'Asia',          choices:['Asia','Africa','Middle East','Europe']},
+    {q:'Which continent is Peru in?',            a:'South America', choices:['South America','North America','Central America','Africa']},
+    {q:'Which continent is the Philippines in?', a:'Asia',          choices:['Asia','Oceania','Pacific Islands','Africa']},
+    {q:'Which continent is Ethiopia in?',        a:'Africa',        choices:['Africa','Asia','Middle East','South America']},
   ],
   populations: [
-    {q:'Which country has the largest population?',       a:'China',         choices:['China','India','United States','Indonesia']},
-    {q:'Which country has the second largest population?',a:'India',         choices:['China','India','United States','Indonesia']},
-    {q:'Which continent has the most countries?',         a:'Africa',        choices:['Africa','Asia','Europe','Americas']},
-    {q:'Approximately how many countries are in the world?',a:'195',         choices:['180','195','210','225']},
-    {q:'Which is the largest country by area?',           a:'Russia',        choices:['Russia','Canada','China','United States']},
-    {q:'Which is the smallest country in the world?',     a:'Vatican City',  choices:['Monaco','Vatican City','San Marino','Liechtenstein']},
-    {q:'Which country has the highest population density?',a:'Monaco',       choices:['Monaco','Singapore','Bangladesh','Malta']},
-    {q:'What is the most spoken language in the world?',  a:'Mandarin Chinese', choices:['English','Spanish','Mandarin Chinese','Hindi']},
-    {q:'Which ocean is the largest?',                     a:'Pacific Ocean', choices:['Atlantic Ocean','Pacific Ocean','Indian Ocean','Arctic Ocean']},
-    {q:'Which is the longest river in the world?',        a:'Nile',          choices:['Amazon','Nile','Yangtze','Mississippi']},
-    {q:'Which is the highest mountain in the world?',     a:'Mount Everest', choices:['K2','Mount Everest','Kangchenjunga','Lhotse']},
-    {q:'Which is the largest desert in the world?',       a:'Sahara',        choices:['Arabian','Gobi','Sahara','Antarctic']},
-    {q:'Which country has the most official languages?',  a:'South Africa',  choices:['India','Switzerland','South Africa','Bolivia']},
-    {q:'How many time zones does Russia have?',           a:'11',            choices:['8','9','11','13']},
-    {q:'Which city has the most metro/subway stations?',  a:'New York City', choices:['Tokyo','Moscow','New York City','London']},
+    {q:'Which country has the largest population?',        a:'India',         choices:['China','India','United States','Indonesia']},
+    {q:'Which country is second most populous (2024)?',    a:'China',         choices:['China','India','United States','Indonesia']},
+    {q:'Which is the third most populous country?',        a:'United States', choices:['United States','Indonesia','Pakistan','Brazil']},
+    {q:'Which continent has the most people?',             a:'Asia',          choices:['Asia','Africa','Europe','North America']},
+    {q:'Which continent has the most countries?',          a:'Africa',        choices:['Africa','Asia','Europe','Americas']},
+    {q:'Approximately how many countries are in the world?',a:'195',          choices:['180','195','210','225']},
+    {q:'Which is the largest country by land area?',       a:'Russia',        choices:['Russia','Canada','China','United States']},
+    {q:'Which is the smallest country in the world?',      a:'Vatican City',  choices:['Monaco','Vatican City','San Marino','Liechtenstein']},
+    {q:'Which country has the highest population density?', a:'Monaco',       choices:['Monaco','Singapore','Bangladesh','Malta']},
+    {q:'What is the most spoken native language?',         a:'Mandarin Chinese', choices:['English','Spanish','Mandarin Chinese','Hindi']},
+    {q:'Which ocean is the largest?',                      a:'Pacific Ocean', choices:['Atlantic Ocean','Pacific Ocean','Indian Ocean','Arctic Ocean']},
+    {q:'Which is the longest river in the world?',         a:'Nile',          choices:['Amazon','Nile','Yangtze','Mississippi']},
+    {q:'Which is the highest mountain in the world?',      a:'Mount Everest', choices:['K2','Mount Everest','Kangchenjunga','Lhotse']},
+    {q:'Which is the largest desert in the world?',        a:'Antarctic Desert', choices:['Sahara','Gobi','Antarctic Desert','Arabian Desert']},
+    {q:'Which country has the most islands?',              a:'Sweden',        choices:['Indonesia','Norway','Philippines','Sweden']},
+    {q:'Which city has the most people?',                  a:'Tokyo',         choices:['Shanghai','Mumbai','Tokyo','New York']},
+    {q:'Which country has the most billionaires?',         a:'United States', choices:['China','United States','Germany','India']},
+    {q:'Approximately what is India population?',       a:'1.4 billion',   choices:['900 million','1.4 billion','2 billion','1.1 billion']},
+    {q:'Approximately what is the US population?',         a:'335 million',   choices:['250 million','300 million','335 million','400 million']},
+    {q:'Which country has the lowest population density?', a:'Mongolia',      choices:['Iceland','Australia','Mongolia','Canada']},
+    {q:'Which African country is most populous?',          a:'Nigeria',       choices:['Egypt','Ethiopia','Nigeria','South Africa']},
+    {q:'Which European country is most populous?',         a:'Germany',       choices:['France','Germany','United Kingdom','Italy']},
+    {q:'Which country has the most freshwater?',           a:'Brazil',        choices:['Russia','Canada','Brazil','United States']},
+    {q:'Which country produces the most oil?',             a:'United States', choices:['Saudi Arabia','Russia','United States','Iraq']},
+    {q:'What percent of Earth surface is water?',       a:'71%',           choices:['60%','71%','80%','55%']},
+    {q:'Which country is growing fastest in population?',  a:'Niger',         choices:['Niger','Nigeria','Chad','Mali']},
+    {q:'How many people live on Earth (approx.)?',         a:'8 billion',     choices:['6 billion','7 billion','8 billion','9 billion']},
+    {q:'Which language is most widely spoken overall?',    a:'English',       choices:['Mandarin Chinese','English','Spanish','Hindi']},
+    {q:'Which country has the oldest median age?',         a:'Japan',         choices:['Germany','Italy','Japan','South Korea']},
+    {q:'Which continent is least populated?',              a:'Antarctica',    choices:['Antarctica','Oceania','South America','Europe']},
   ]
 };
 
@@ -11030,54 +11070,97 @@ function geoAnswer(choice, btn, allChoices) {
 // ════════════════════════════════════════════════════════════
 var CONN_PUZZLES = [
   { id:1, groups:[
-    {cat:'Types of Jazz',      color:'#4e8ef7', words:['Bebop','Swing','Fusion','Modal']},
-    {cat:'___ Ball',           color:'#a855f7', words:['Basket','Base','Foot','Pin']},
-    {cat:'Things that spin',   color:'#f7a94e', words:['Top','Record','Earth','Dreidel']},
-    {cat:'Famous Alberts',     color:'#00d18c', words:['Einstein','Camus','Pujols','Brooks']}
+    {cat:'Types of Jazz',      color:'#4e8ef7', words:['Bebop','Swing','Fusion','Modal'],    explain:'All are distinct styles of jazz music.'},
+    {cat:'___ Ball',           color:'#a855f7', words:['Basket','Base','Foot','Pin'],         explain:'Each word precedes "Ball" to make a sport or game.'},
+    {cat:'Things that spin',   color:'#f7a94e', words:['Top','Record','Earth','Dreidel'],     explain:'All of these things rotate or spin.'},
+    {cat:'Famous Alberts',     color:'#00d18c', words:['Einstein','Camus','Pujols','Brooks'], explain:'All famous people with the first name Albert.'}
   ]},
   { id:2, groups:[
-    {cat:'Shades of Blue',     color:'#4e8ef7', words:['Navy','Cobalt','Teal','Cerulean']},
-    {cat:'___ Fish',           color:'#a855f7', words:['Sword','Cat','Star','Blow']},
-    {cat:'Cooking methods',    color:'#00d18c', words:['Braise','Sauté','Poach','Sear']},
-    {cat:'Ancient wonders',    color:'#f7a94e', words:['Pyramid','Colossus','Lighthouse','Zeus']}
+    {cat:'Shades of Blue',     color:'#4e8ef7', words:['Navy','Cobalt','Teal','Cerulean'],   explain:'All are shades or variants of the color blue.'},
+    {cat:'___ Fish',           color:'#a855f7', words:['Sword','Cat','Star','Blow'],          explain:'Each word precedes "Fish" (Swordfish, Catfish, etc.).'},
+    {cat:'Cooking methods',    color:'#00d18c', words:['Braise','Sauté','Poach','Sear'],      explain:'All are culinary techniques for cooking food.'},
+    {cat:'Ancient wonders',    color:'#f7a94e', words:['Pyramid','Colossus','Lighthouse','Zeus'], explain:'All are among the Seven Wonders of the Ancient World.'}
   ]},
   { id:3, groups:[
-    {cat:'Parts of a shoe',    color:'#4e8ef7', words:['Sole','Tongue','Lace','Heel']},
-    {cat:'Card games',         color:'#a855f7', words:['Poker','Rummy','Snap','War']},
-    {cat:'Planets (no Earth)', color:'#00d18c', words:['Mars','Venus','Saturn','Mercury']},
-    {cat:'Things in a wallet', color:'#f7a94e', words:['Cash','Card','Photo','Receipt']}
+    {cat:'Parts of a shoe',    color:'#4e8ef7', words:['Sole','Tongue','Lace','Heel'],       explain:'All are physical parts found on a shoe.'},
+    {cat:'Card games',         color:'#a855f7', words:['Poker','Rummy','Snap','War'],         explain:'All are games played with a standard deck of cards.'},
+    {cat:'Planets (no Earth)', color:'#00d18c', words:['Mars','Venus','Saturn','Mercury'],    explain:'All are planets in our solar system (excluding Earth).'},
+    {cat:'Things in a wallet', color:'#f7a94e', words:['Cash','Card','Photo','Receipt'],      explain:'Common items people carry inside a wallet.'}
   ]},
   { id:4, groups:[
-    {cat:'Dog breeds',         color:'#4e8ef7', words:['Poodle','Beagle','Boxer','Husky']},
-    {cat:'Chess pieces',       color:'#a855f7', words:['Rook','Bishop','Knight','Pawn']},
-    {cat:'Pizza toppings',     color:'#00d18c', words:['Pepperoni','Mushroom','Olive','Basil']},
-    {cat:'Types of clouds',    color:'#f7a94e', words:['Cirrus','Cumulus','Stratus','Nimbus']}
+    {cat:'Dog breeds',         color:'#4e8ef7', words:['Poodle','Beagle','Boxer','Husky'],   explain:'All are recognized breeds of domestic dog.'},
+    {cat:'Chess pieces',       color:'#a855f7', words:['Rook','Bishop','Knight','Pawn'],      explain:'All are pieces used in the game of chess.'},
+    {cat:'Pizza toppings',     color:'#00d18c', words:['Pepperoni','Mushroom','Olive','Basil'],explain:'All are common pizza toppings.'},
+    {cat:'Types of clouds',    color:'#f7a94e', words:['Cirrus','Cumulus','Stratus','Nimbus'],explain:'All are meteorological cloud classifications.'}
   ]},
   { id:5, groups:[
-    {cat:'___ stone',          color:'#4e8ef7', words:['Lime','Sand','Key','Cobble']},
-    {cat:'Olympic sports',     color:'#a855f7', words:['Fencing','Luge','Archery','Judo']},
-    {cat:'Keyboard shortcuts', color:'#00d18c', words:['Copy','Paste','Undo','Save']},
-    {cat:'Things with rings',  color:'#f7a94e', words:['Saturn','Tree','Boxing','Circus']}
+    {cat:'___ stone',          color:'#4e8ef7', words:['Lime','Sand','Key','Cobble'],        explain:'Each word precedes "stone" (Limestone, Sandstone, etc.).'},
+    {cat:'Olympic sports',     color:'#a855f7', words:['Fencing','Luge','Archery','Judo'],   explain:'All are sports competed at the Olympic Games.'},
+    {cat:'Keyboard shortcuts', color:'#00d18c', words:['Copy','Paste','Undo','Save'],         explain:'All are common keyboard shortcut actions (Ctrl+C, etc.).'},
+    {cat:'Things with rings',  color:'#f7a94e', words:['Saturn','Tree','Boxing','Circus'],   explain:'All are associated with rings — planet, growth rings, boxing ring, circus ring.'}
   ]},
   { id:6, groups:[
-    {cat:'Monopoly pieces',    color:'#4e8ef7', words:['Thimble','Iron','Boot','Hat']},
-    {cat:'Types of tea',       color:'#a855f7', words:['Green','Oolong','Chai','Matcha']},
-    {cat:'Movie genres',       color:'#00d18c', words:['Noir','Western','Thriller','Slasher']},
-    {cat:'Things that glow',   color:'#f7a94e', words:['Firefly','Moon','Neon','Ember']}
+    {cat:'Monopoly pieces',    color:'#4e8ef7', words:['Thimble','Iron','Boot','Hat'],       explain:'Classic playing pieces from the board game Monopoly.'},
+    {cat:'Types of tea',       color:'#a855f7', words:['Green','Oolong','Chai','Matcha'],    explain:'All are varieties or preparations of tea.'},
+    {cat:'Movie genres',       color:'#00d18c', words:['Noir','Western','Thriller','Slasher'],explain:'All are distinct film genre categories.'},
+    {cat:'Things that glow',   color:'#f7a94e', words:['Firefly','Moon','Neon','Ember'],     explain:'All are things that emit or reflect light.'}
   ]},
   { id:7, groups:[
-    {cat:'Famous Mikes',       color:'#4e8ef7', words:['Tyson','Jordan','Myers','Wazowski']},
-    {cat:'Phobia prefixes',    color:'#a855f7', words:['Claustro','Acro','Arachno','Xeno']},
-    {cat:'Types of bridges',   color:'#00d18c', words:['Arch','Truss','Beam','Cable']},
-    {cat:'Things in an ocean', color:'#f7a94e', words:['Coral','Trench','Current','Kelp']}
+    {cat:'Famous Mikes',       color:'#4e8ef7', words:['Tyson','Jordan','Myers','Wazowski'], explain:'All are famous characters or people named Mike.'},
+    {cat:'Phobia prefixes',    color:'#a855f7', words:['Claustro','Acro','Arachno','Xeno'],  explain:'All are prefixes for phobia names (fear of enclosed spaces, heights, etc.).'},
+    {cat:'Types of bridges',   color:'#00d18c', words:['Arch','Truss','Beam','Cable'],       explain:'All are structural types of bridges used in engineering.'},
+    {cat:'Things in an ocean', color:'#f7a94e', words:['Coral','Trench','Current','Kelp'],   explain:'All are things found in the ocean or sea.'}
   ]},
   { id:8, groups:[
-    {cat:'Space phenomena',    color:'#4e8ef7', words:['Nebula','Pulsar','Quasar','Void']},
-    {cat:'Types of pasta',     color:'#a855f7', words:['Penne','Rigatoni','Farfalle','Orzo']},
-    {cat:'Poker hands',        color:'#00d18c', words:['Flush','Straight','Full','Pair']},
-    {cat:'___ pool',           color:'#f7a94e', words:['Car','Swimming','Dead','Gene']}
+    {cat:'Space phenomena',    color:'#4e8ef7', words:['Nebula','Pulsar','Quasar','Void'],   explain:'All are phenomena or features found in outer space.'},
+    {cat:'Types of pasta',     color:'#a855f7', words:['Penne','Rigatoni','Farfalle','Orzo'],explain:'All are shapes of Italian pasta.'},
+    {cat:'Poker hands',        color:'#00d18c', words:['Flush','Straight','Full','Pair'],     explain:'All are names (or part of names) of poker hand rankings.'},
+    {cat:'___ pool',           color:'#f7a94e', words:['Car','Swimming','Dead','Gene'],       explain:'Each word precedes "pool" (Carpool, Swimming pool, Deadpool, Gene pool).'}
+  ]},
+  { id:9, groups:[
+    {cat:'Things that are wet',   color:'#4e8ef7', words:['Rain','Sweat','Dew','Tears'],       explain:'All are naturally occurring liquids associated with moisture.'},
+    {cat:'___ Berry',             color:'#a855f7', words:['Straw','Blue','Rasp','Black'],       explain:'Each word precedes "berry" (Strawberry, Blueberry, etc.).'},
+    {cat:'Famous Johns',          color:'#00d18c', words:['Lennon','Wick','Adams','Travolta'],  explain:'All are famous people or characters named John.'},
+    {cat:'Shades of Green',       color:'#f7a94e', words:['Lime','Sage','Olive','Jade'],        explain:'All are shades or variants of the color green.'}
+  ]},
+  { id:10, groups:[
+    {cat:'Things with keys',      color:'#4e8ef7', words:['Piano','Lock','Car','Map'],          explain:'All are things that have or use "keys" (different meanings).'},
+    {cat:'___ Star',              color:'#a855f7', words:['Rock','Gold','Death','Morning'],      explain:'Each word precedes "Star" (Rockstar, Gold Star, Death Star, Morning Star).'},
+    {cat:'Types of cheese',       color:'#00d18c', words:['Brie','Gouda','Havarti','Manchego'], explain:'All are varieties of cheese from different regions.'},
+    {cat:'Words meaning "tired"', color:'#f7a94e', words:['Weary','Drained','Spent','Beat'],    explain:'All are synonyms for feeling exhausted or tired.'}
+  ]},
+  { id:11, groups:[
+    {cat:'US Presidents (first name)',color:'#4e8ef7',words:['Abraham','Woodrow','Dwight','Calvin'],explain:'All are first names of US Presidents (Lincoln, Wilson, Eisenhower, Coolidge).'},
+    {cat:'Parts of a flower',      color:'#a855f7', words:['Petal','Stamen','Pistil','Sepal'],  explain:'All are anatomical parts of a flower.'},
+    {cat:'___ Ball (again)',        color:'#00d18c', words:['Snow','Fire','Gum','Odd'],          explain:'Each word precedes "ball" (Snowball, Fireball, Gumball, Oddball).'},
+    {cat:'Things that are sharp',   color:'#f7a94e', words:['Tack','Razor','Quill','Wit'],       explain:'All can be described as sharp — literally or figuratively.'}
+  ]},
+  { id:12, groups:[
+    {cat:'Types of knots',         color:'#4e8ef7', words:['Slip','Reef','Bowline','Clove'],     explain:'All are types of knots used in sailing or climbing.'},
+    {cat:'___ Man',                color:'#a855f7', words:['Spider','Pac','Snow','Old'],          explain:'Each word precedes "Man" (Spider-Man, Pac-Man, Snowman, Old Man).'},
+    {cat:'Card suits',             color:'#00d18c', words:['Hearts','Diamonds','Clubs','Spades'],explain:'The four suits in a standard deck of playing cards.'},
+    {cat:'Words that rhyme with "cat"',color:'#f7a94e',words:['Hat','Bat','Mat','Flat'],          explain:'All words rhyme with "cat".'}
+  ]},
+  { id:13, groups:[
+    {cat:'Things in a bakery',     color:'#4e8ef7', words:['Croissant','Éclair','Brioche','Tart'],explain:'All are baked goods commonly found in a bakery.'},
+    {cat:'Famous Jims',            color:'#a855f7', words:['Carrey','Henson','Morrison','Thorpe'],explain:'All are famous people named Jim.'},
+    {cat:'___ Light',              color:'#00d18c', words:['Moon','Flash','Candle','Star'],       explain:'Each word precedes "light" (Moonlight, Flashlight, etc.).'},
+    {cat:'Modes of transportation',color:'#f7a94e', words:['Ferry','Tram','Gondola','Rickshaw'],  explain:'All are forms of transportation used around the world.'}
+  ]},
+  { id:14, groups:[
+    {cat:'Things that are round',  color:'#4e8ef7', words:['Wheel','Coin','Globe','Donut'],      explain:'All are circular or spherical objects.'},
+    {cat:'Superhero powers',       color:'#a855f7', words:['Flight','Telepathy','Speed','Strength'],explain:'All are classic superpowers possessed by comic book heroes.'},
+    {cat:'___ House',              color:'#00d18c', words:['Power','Glass','Tree','Ware'],         explain:'Each word precedes "house" (Powerhouse, Glasshouse, Treehouse, Warehouse).'},
+    {cat:'Famous Elizabeths',      color:'#f7a94e', words:['Taylor','Warren','Holmes','Bennet'],   explain:'All are famous real or fictional people named Elizabeth.'}
+  ]},
+  { id:15, groups:[
+    {cat:'Things associated with money',color:'#4e8ef7',words:['Mint','Bank','Vault','Ledger'],  explain:'All are things or places associated with money and finance.'},
+    {cat:'___ Down',               color:'#a855f7', words:['Break','Shut','Count','Melt'],        explain:'Each word precedes "down" (Breakdown, Shutdown, Countdown, Meltdown).'},
+    {cat:'Parts of an eye',        color:'#00d18c', words:['Iris','Pupil','Cornea','Retina'],     explain:'All are anatomical parts of the human eye.'},
+    {cat:'Words for "fast"',       color:'#f7a94e', words:['Swift','Brisk','Fleet','Rapid'],      explain:'All are synonyms meaning quick or fast.'}
   ]}
 ];
+
 
 var connPuzzleIdx = 0, connSelected = [], connWords = [], connSolvedGroups = [], connMistakes = 0;
 var CONN_MAX_MISTAKES = 4;
@@ -11153,10 +11236,14 @@ window.connSubmit=function(){
     connSelected=[];
     var sr=document.getElementById('conn-solved-rows');
     if(sr){
+      var pz=CONN_PUZZLES[connPuzzleIdx];
+      var grp=pz.groups.find(function(g){return g.cat===cat;});
+      var explainText=grp&&grp.explain?grp.explain:'';
       var row=document.createElement('div');
       row.style.cssText='background:'+color+';border-radius:10px;padding:14px 16px;text-align:center;width:100%;box-sizing:border-box';
       row.innerHTML='<div style="font-size:11px;font-weight:800;color:#0a1a12;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+cat+'</div>'
-        +'<div style="font-size:13px;font-weight:700;color:#0a1a12">'+chosen.map(function(x){return x.word;}).join(' · ')+'</div>';
+        +'<div style="font-size:13px;font-weight:700;color:#0a1a12;margin-bottom:'+(explainText?'6':'0')+'px">'+chosen.map(function(x){return x.word;}).join(' · ')+'</div>'
+        +(explainText?'<div style="font-size:11px;color:rgba(0,0,0,0.6);font-style:italic">'+explainText+'</div>':'');
       sr.appendChild(row);
     }
     if(connWords.length===0){
