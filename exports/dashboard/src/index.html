@@ -981,7 +981,7 @@
           </div>
 
           <!-- Dailys card -->
-          <div id="dailys-card">
+          <div id="dailys-card" onclick="setPage('apps')" style="cursor:pointer">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
@@ -1171,6 +1171,7 @@
               <div id="proj-title"></div>
               <div id="proj-status-badge"></div>
             </div>
+            <button class="btn btn-ghost" style="font-size:12px;color:#7a9e8e" onclick="renameCurrentProject()">✏️ Rename</button>
             <button class="btn btn-ghost" style="font-size:12px;color:#f74e4e;border-color:#f74e4e25" onclick="deleteCurrentProject()">Delete</button>
           </div>
           <div class="proj-tabs">
@@ -2525,6 +2526,7 @@
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🟩 Daily Wordle</span>
         <button onclick="setPage('bg-wordleditor')" style="margin-left:auto;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer">✏️ Word List</button>
       </div>
+      <canvas id="wordle-confetti" style="display:none;position:fixed;inset:0;pointer-events:none;z-index:999"></canvas>
       <div id="wordle-wrap" style="display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;flex:1;overflow-y:auto">
         <div id="wordle-msg" style="height:28px;font-size:15px;font-weight:600;color:#e8a020;margin-bottom:8px"></div>
         <div id="wordle-board" style="display:grid;grid-template-rows:repeat(6,1fr);gap:6px;margin-bottom:18px"></div>
@@ -3892,8 +3894,30 @@ function deleteCurrentProject() {
   const projects = getProjects().filter(p=>p.id!==selectedProjectId);
   saveProjects(projects);
   selectedProjectId = null;
+  currentPlannerSection = null;
+  // Close new-project-row if open so + button works fresh
+  const npr = document.getElementById('new-project-row');
+  if(npr) npr.classList.remove('open');
   renderPlannerSidebar();
-  showPlannerSection(null);
+  document.getElementById('calendar-view').style.display = 'none';
+  document.getElementById('project-view').style.display = 'none';
+  document.getElementById('planner-empty').style.display = 'flex';
+}
+
+function renameCurrentProject() {
+  if (!selectedProjectId) return;
+  const projects = getProjects();
+  const p = projects.find(x => x.id === selectedProjectId);
+  if (!p) return;
+  const newName = prompt('Rename project:', p.name);
+  if (!newName || !newName.trim() || newName.trim() === p.name) return;
+  p.name = newName.trim();
+  saveProjects(projects);
+  renderPlannerSidebar();
+  // Update the header title
+  const titleEl = document.getElementById('proj-title');
+  if (titleEl) titleEl.textContent = p.name;
+  renderHomeProjects();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -4319,6 +4343,19 @@ function chessDoPromo(p){
 
 function chStartConfetti(){
   const canvas=document.getElementById('chess-confetti');
+  canvas.style.display='block';
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const pieces=Array.from({length:160},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,w:8+Math.random()*8,h:5+Math.random()*5,r:Math.random()*Math.PI*2,dr:(Math.random()-0.5)*0.2,dx:(Math.random()-0.5)*2,dy:2.5+Math.random()*3,color:['#00d18c','#4e8ef7','#f7a94e','#f74e4e','#e8f0ed','#ffd700'][Math.floor(Math.random()*6)]}));
+  let raf;
+  const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();p.x+=p.dx;p.y+=p.dy;p.r+=p.dr;if(p.y>canvas.height){p.y=-10;p.x=Math.random()*canvas.width;}});raf=requestAnimationFrame(draw);};
+  draw();
+  setTimeout(()=>{cancelAnimationFrame(raf);canvas.style.display='none';},4000);
+}
+
+function wordleStartConfetti(){
+  const canvas=document.getElementById('wordle-confetti');
+  if(!canvas) return;
   canvas.style.display='block';
   const ctx=canvas.getContext('2d');
   canvas.width=window.innerWidth;canvas.height=window.innerHeight;
@@ -6913,7 +6950,7 @@ function wordleKey(key) {
     result.forEach((r,i)=>{ if(r.state==='_'){ if(ansCount[r.letter]>0){r.state='present';ansCount[r.letter]--;} else r.state='absent'; } else ansCount[r.letter]--; });
     wGuesses.push({word:wCurrentGuess,result});
     result.forEach(r=>wordleUpdateKeyColor(r.letter,r.state));
-    if(wCurrentGuess===ans){ wGameOver=true; wDailyDone=true; }
+    if(wCurrentGuess===ans){ wGameOver=true; wDailyDone=true; setTimeout(wordleStartConfetti,300); }
     else if(wGuesses.length===6){ wGameOver=true; wDailyDone=true; }
     wCurrentGuess='';
     wordleSave();
@@ -11427,6 +11464,62 @@ function typingDeleteCustomSentence(i) {
   typingSaveCustomSentences(arr);
   typingRenderCustomList();
 }
+
+// ════════════════════════════════════════════════════════════
+//  MIDNIGHT AUTO-RESET (checks every minute)
+// ════════════════════════════════════════════════════════════
+(function() {
+  function getTodayKey() {
+    const now = new Date();
+    return now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate();
+  }
+  let _lastDayKey = getTodayKey();
+
+  function midnightReset() {
+    const key = getTodayKey();
+    if (key === _lastDayKey) return; // same day, nothing to do
+    _lastDayKey = key;
+
+    // Reset timer localStorage values
+    localStorage.setItem('chessTimer', '0');
+    localStorage.setItem('pianoTimer', '0');
+    localStorage.setItem('typingTimer', '0');
+    localStorage.setItem('mathTimer', '0');
+
+    // Reset in-memory timer vars
+    chTimerElapsed = 0; pianoTimerElapsed = 0; typingTimerElapsed = 0;
+    if (typeof mathTimerElapsed !== 'undefined') mathTimerElapsed = 0;
+
+    // Stop any running timers
+    if (chTimerRunning) { chTimerRunning = false; clearInterval(chTimerInterval); }
+    if (pianoTimerRunning) { pianoTimerRunning = false; clearInterval(pianoTimerInterval); }
+    if (typingTimerRunning) { typingTimerRunning = false; clearInterval(typingTimerInterval); }
+
+    // Re-render dailys display
+    if (typeof renderHomeDailys === 'function') renderHomeDailys();
+
+    // Refresh wordle — new daily word
+    if (typeof wordleInit === 'function') {
+      wordleInit();
+      if (typeof wordleRenderMini === 'function') wordleRenderMini();
+      // If user is on wordle page, re-render board too
+      const wp = document.getElementById('page-wordle');
+      if (wp && wp.classList.contains('active')) {
+        if (typeof wordleRenderBoard === 'function') wordleRenderBoard();
+        if (typeof wordleRenderKeyboard === 'function') wordleRenderKeyboard();
+        if (typeof wordleUpdateMsg === 'function') wordleUpdateMsg();
+      }
+    }
+
+    // Refresh quote
+    if (typeof renderQuoteOfDay === 'function') renderQuoteOfDay();
+
+    console.log('[HelpfulApp] Midnight reset fired for', key);
+  }
+
+  // Check every 60 seconds
+  setInterval(midnightReset, 60 * 1000);
+})();
 </script>
 
 
