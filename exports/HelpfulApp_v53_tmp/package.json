@@ -1,0 +1,25 @@
+{
+  "name": "my-dashboard",
+  "version": "1.0.0",
+  "description": "Personal Dashboard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.dashboard.app",
+    "productName": "Dashboard",
+    "win": {
+      "target": "nsis",
+      "icon": "src/icon.ico"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  }
+}

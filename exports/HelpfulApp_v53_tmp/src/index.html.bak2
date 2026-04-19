@@ -981,7 +981,7 @@
           </div>
 
           <!-- Dailys card -->
-          <div id="dailys-card" onclick="setPage('apps')" style="cursor:pointer">
+          <div id="dailys-card">
             <div class="card-drag-bar" title="Drag to move"><div class="card-drag-bar-dots"></div></div>
             <div class="edit-overlay"></div>
             <div class="card-click-shield"></div>
@@ -1171,7 +1171,6 @@
               <div id="proj-title"></div>
               <div id="proj-status-badge"></div>
             </div>
-            <button class="btn btn-ghost" style="font-size:12px;color:#7a9e8e" onclick="renameCurrentProject()">✏️ Rename</button>
             <button class="btn btn-ghost" style="font-size:12px;color:#f74e4e;border-color:#f74e4e25" onclick="deleteCurrentProject()">Delete</button>
           </div>
           <div class="proj-tabs">
@@ -2036,7 +2035,7 @@
 
           <!-- Question Card -->
           <div id="math-card">
-            <div id="math-streak-row" style="display:none">
+            <div id="math-streak-row">
               <span id="math-streak-fire">🔥</span>
               <span id="math-streak-txt">0 streak</span>
             </div>
@@ -2062,10 +2061,10 @@
 
           <!-- Stats -->
           <div id="math-stats">
-            <div class="math-stat"><div class="math-stat-val" id="math-stat-correct" style="color:#00d18c;font-size:28px">0</div><div class="math-stat-lbl">Correct</div></div>
-            <div class="math-stat" style="display:none"><div class="math-stat-val" id="math-stat-wrong" style="color:#e05252">0</div><div class="math-stat-lbl">Wrong</div></div>
-            <div class="math-stat" style="display:none"><div class="math-stat-val" id="math-stat-best">0</div><div class="math-stat-lbl">Best Streak</div></div>
-            <div class="math-stat" style="display:none"><div class="math-stat-val" id="math-stat-acc">—</div><div class="math-stat-lbl">Accuracy</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-correct">0</div><div class="math-stat-lbl">Correct</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-wrong" style="color:#e05252">0</div><div class="math-stat-lbl">Wrong</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-best">0</div><div class="math-stat-lbl">Best Streak</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-acc">—</div><div class="math-stat-lbl">Accuracy</div></div>
           </div>
 
         </div>
@@ -2138,7 +2137,6 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
             </button>
           </div>
-          <button class="btn btn-ghost" id="chess-undo-btn" style="display:none" onclick="chessUndoMove()" title="Take back last move">↩ Undo</button>
           <button class="btn btn-ghost" id="chess-new-game-btn" style="display:none" onclick="chessNewGame()">New Game</button>
         </div>
         <div id="chess-select">
@@ -2212,8 +2210,7 @@
         <div id="typing-topbar">
           <button class="btn btn-ghost" onclick="closeApp('typing')">← Apps</button>
           <span style="font-size:16px;font-weight:800">⌨️ Typing</span>
-          <div style="display:flex;gap:6px;align-items:center" id="typing-mode-btns"></div>
-          <button id="typing-custom-edit-btn" onclick="typingOpenCustomEditor()" title="Edit My Sentences" style="display:none;background:#1a1f1d;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✍️ Edit</button>
+          <div style="display:flex;gap:6px" id="typing-mode-btns"></div>
           <div style="flex:1"></div>
           <div class="typing-stat">
             <div class="typing-stat-val" id="typing-wpm">--</div>
@@ -2500,7 +2497,7 @@
     <!-- ══ CONNECTIONS ══ -->
     <div id="page-bg-connections" class="page" style="flex-direction:column">
       <div style="width:100%;background:#0a0f0d;border-bottom:1px solid #1a2e24;padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-sizing:border-box">
-        <button class="btn btn-ghost" onclick="setPage('braingames')">← Brain Games</button>
+        <button onclick="openApp('braingames')" style="background:none;border:none;color:#4a7060;cursor:pointer;font-size:18px;padding:4px">←</button>
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔗 Connections</span>
         <span style="margin-left:auto;font-size:12px;color:#4a7060" id="conn-puzzle-label"></span>
       </div>
@@ -2526,7 +2523,6 @@
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🟩 Daily Wordle</span>
         <button onclick="setPage('bg-wordleditor')" style="margin-left:auto;background:#1a2e24;color:#7a9e8e;border:1px solid #1f3a2a;border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer">✏️ Word List</button>
       </div>
-      <canvas id="wordle-confetti" style="display:none;position:fixed;inset:0;pointer-events:none;z-index:999"></canvas>
       <div id="wordle-wrap" style="display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;flex:1;overflow-y:auto">
         <div id="wordle-msg" style="height:28px;font-size:15px;font-weight:600;color:#e8a020;margin-bottom:8px"></div>
         <div id="wordle-board" style="display:grid;grid-template-rows:repeat(6,1fr);gap:6px;margin-bottom:18px"></div>
@@ -3009,7 +3005,7 @@ function setPage(p) {
     renderPlannerSidebar();
     if (!currentPlannerSection) { renderPlannerSidebar(); }
   }
-  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); fitRenderHomeFitnessCard(); renderMoneyGraphCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); setTimeout(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }, 150); }); }
+  if (p === 'home') { renderHomeDailys(); renderHomeProjects(); renderTodayCard(); fitRenderHomeFitnessCard(); renderMoneyGraphCard(); renderQuoteOfDay(); requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); }); }
   if (p === 'money') { if(typeof monInit==='function') monInit(); }
   if (p === 'piano') initPiano();
   if (p === 'typing') initTyping();
@@ -3894,30 +3890,8 @@ function deleteCurrentProject() {
   const projects = getProjects().filter(p=>p.id!==selectedProjectId);
   saveProjects(projects);
   selectedProjectId = null;
-  currentPlannerSection = null;
-  // Close new-project-row if open so + button works fresh
-  const npr = document.getElementById('new-project-row');
-  if(npr) npr.classList.remove('open');
   renderPlannerSidebar();
-  document.getElementById('calendar-view').style.display = 'none';
-  document.getElementById('project-view').style.display = 'none';
-  document.getElementById('planner-empty').style.display = 'flex';
-}
-
-function renameCurrentProject() {
-  if (!selectedProjectId) return;
-  const projects = getProjects();
-  const p = projects.find(x => x.id === selectedProjectId);
-  if (!p) return;
-  const newName = prompt('Rename project:', p.name);
-  if (!newName || !newName.trim() || newName.trim() === p.name) return;
-  p.name = newName.trim();
-  saveProjects(projects);
-  renderPlannerSidebar();
-  // Update the header title
-  const titleEl = document.getElementById('proj-title');
-  if (titleEl) titleEl.textContent = p.name;
-  renderHomeProjects();
+  showPlannerSection(null);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -4044,13 +4018,9 @@ const PST = {
   k:[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20],
 };
 const CHESS_RATINGS = [
-  {label:'Beginner',elo:300,depth:1,rand:1.0,description:'Makes lots of random moves'},
-  {label:'Novice',elo:600,depth:1,rand:0.75,description:'Plays mostly random with some sense'},
-  {label:'Casual',elo:900,depth:2,rand:0.5,description:'Avoids obvious blunders'},
-  {label:'Intermediate',elo:1200,depth:2,rand:0.2,description:'Plays solid but predictable'},
-  {label:'Advanced',elo:1500,depth:3,rand:0.08,description:'Strong positional play'},
-  {label:'Expert',elo:1800,depth:3,rand:0.02,description:'Very few mistakes'},
-  {label:'Master',elo:2100,depth:4,rand:0,description:'Near-perfect engine play'},
+  {label:'Beginner',elo:400,depth:1,rand:0.9},{label:'Casual',elo:800,depth:2,rand:0.5},
+  {label:'Intermediate',elo:1200,depth:2,rand:0.2},{label:'Advanced',elo:1600,depth:3,rand:0.1},
+  {label:'Expert',elo:2000,depth:3,rand:0.02},{label:'Master',elo:2500,depth:4,rand:0},
 ];
 const SQ = 70;
 
@@ -4107,19 +4077,10 @@ function minimax(board,state,depth,alpha,beta,max){
 }
 function getBotMove(board,state,depth,rand){
   const moves=legalMovesFor(board,'b',state);if(!moves.length)return null;
-  // Score each move from black's perspective (minimize white's score)
-  const scored=[];
-  for(const m of moves){
-    const{board:nb,state:ns}=applyMove(board,m,state);
-    // After bot moves, white will try to maximize -> pass true for white's turn
-    const score=depth>1?minimax(nb,ns,depth-1,-Infinity,Infinity,true):evaluate(nb);
-    // Add randomness noise proportional to rand (lower ELOs get more noise)
-    const noise=rand>0?(Math.random()*2-1)*rand*500:0;
-    scored.push({m,score:score+noise});
-  }
-  // Bot is black -> wants LOWEST score (minimize white advantage)
-  scored.sort((a,b)=>a.score-b.score);
-  return scored[0].m;
+  if(rand>0&&Math.random()<rand)return moves[Math.floor(Math.random()*moves.length)];
+  let best=-Infinity,bestMove=null;
+  for(const m of moves){const{board:nb,state:ns}=applyMove(board,m,state);const score=minimax(nb,ns,depth-1,-Infinity,Infinity,true);if(score>best){best=score;bestMove=m;}}
+  return bestMove||moves[0];
 }
 
 // Chess sounds
@@ -4130,7 +4091,7 @@ function playChessCapture(){const ctx=getACtx();const buf=ctx.createBuffer(1,ctx
 
 // Chess state
 let chBoard=null,chState=null,chSelected=null,chHighlights=[],chLastMove=null;
-let chGameOver=false,chThinking=false,chAnimPiece=null,chHistory=[],chPromoMove=null,chStateHistory=[];
+let chGameOver=false,chThinking=false,chAnimPiece=null,chHistory=[],chPromoMove=null;
 let chRating=null,chScreen='select';
 let chTimerRunning=false,chTimerElapsed=0,chTimerInterval=null;
 
@@ -4141,15 +4102,13 @@ function chessInit() {
   document.getElementById('chess-select').style.display='flex';
   document.getElementById('chess-game').style.display='none';
   document.getElementById('chess-new-game-btn').style.display='none';
-  const undoBtn=document.getElementById('chess-undo-btn');if(undoBtn)undoBtn.style.display='none';
   document.getElementById('chess-back-btn').textContent='← Apps';
   document.getElementById('chess-topbar-label').textContent='Chess vs Bot';
   const grid=document.getElementById('chess-ratings');
   grid.innerHTML=CHESS_RATINGS.map(r=>`
     <button class="chess-rating-btn" onclick="chessStart(${JSON.stringify(r).replace(/"/g,'&quot;')})">
-      <div style="font-size:16px;font-weight:700;margin-bottom:2px">${r.label}</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">${r.label}</div>
       <div style="font-size:13px;color:#00d18c;font-weight:600">~${r.elo} ELO</div>
-      <div style="font-size:11px;color:#4a7060;margin-top:3px">${r.description||''}</div>
     </button>
   `).join('');
 }
@@ -4158,12 +4117,11 @@ function chessStart(r) {
   chRating=r;
   chBoard=startBoard();chState={castle:'KQkq',ep:null,turn:'w'};
   chSelected=null;chHighlights=[];chLastMove=null;chGameOver=false;chThinking=false;
-  chHistory=[];chPromoMove=null;chAnimPiece=null;chStateHistory=[];
+  chHistory=[];chPromoMove=null;chAnimPiece=null;
   chScreen='game';
   document.getElementById('chess-select').style.display='none';
   document.getElementById('chess-game').style.display='flex';
   document.getElementById('chess-new-game-btn').style.display='block';
-  document.getElementById('chess-undo-btn').style.display='block';
   document.getElementById('chess-back-btn').textContent='← Levels';
   document.getElementById('chess-topbar-label').innerHTML=`${r.label} <span style="color:#7a9e8e;font-weight:400;font-size:12px">~${r.elo} ELO</span>`;
   document.getElementById('chess-status').textContent='Your turn';
@@ -4176,26 +4134,6 @@ function chessBack() {
   else { closeApp('chess'); }
 }
 function chessNewGame() { if(chRating) chessStart(chRating); }
-
-function chessUndoMove() {
-  // Need to undo 2 half-moves: bot's move + player's move
-  if(chGameOver || chStateHistory.length < 2 || chThinking || chAnimPiece) return;
-  // Pop bot's move
-  chStateHistory.pop();
-  // Pop player's move  
-  const snap = chStateHistory.pop();
-  chBoard = snap.board;
-  chState = snap.state;
-  chHistory = snap.history;
-  chLastMove = snap.lastMove;
-  chGameOver = false;
-  chSelected = null;
-  chHighlights = [];
-  chPromoMove = null;
-  const statusEl = document.getElementById('chess-status');
-  if(statusEl){ statusEl.textContent = 'Your turn'; statusEl.style.color='#00d18c'; }
-  renderChessBoard();
-}
 
 function chTimerToggle() {
   chTimerRunning=!chTimerRunning;
@@ -4274,8 +4212,6 @@ function chExecuteMove(move,b,st,promoType,isBot=false){
   addChessAnimPiece(chAnimPiece,fromPx,toPx);
   setTimeout(()=>{
     chAnimPiece=null;
-    // Save undo snapshot before applying move
-    chStateHistory.push({board:cloneBoard(b),state:{...st},history:[...chHistory],lastMove:chLastMove?{...chLastMove}:null});
     const{board:nb,state:ns}=applyMove(b,finalMove,st);
     chBoard=nb;chState=ns;chLastMove=finalMove;chSelected=null;chHighlights=[];chPromoMove=null;
     if(isCapture)playChessCapture();else playChessMove();
@@ -4284,7 +4220,7 @@ function chExecuteMove(move,b,st,promoType,isBot=false){
     const{text,over,win}=chGetStatus(nb,ns,isBot);
     const statusEl=document.getElementById('chess-status');
     statusEl.textContent=text;statusEl.style.color=over?'#f74e4e':chThinking?'#f7a94e':'#00d18c';
-    if(over){chGameOver=true;const ub=document.getElementById('chess-undo-btn');if(ub)ub.style.display='none';if(win)chStartConfetti();renderChessBoard();return;}
+    if(over){chGameOver=true;clearInterval(chTimerInterval);chTimerRunning=false;if(win)chStartConfetti();renderChessBoard();return;}
     renderChessBoard();
     if(!isBot){
       chThinking=true;
@@ -4343,19 +4279,6 @@ function chessDoPromo(p){
 
 function chStartConfetti(){
   const canvas=document.getElementById('chess-confetti');
-  canvas.style.display='block';
-  const ctx=canvas.getContext('2d');
-  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-  const pieces=Array.from({length:160},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,w:8+Math.random()*8,h:5+Math.random()*5,r:Math.random()*Math.PI*2,dr:(Math.random()-0.5)*0.2,dx:(Math.random()-0.5)*2,dy:2.5+Math.random()*3,color:['#00d18c','#4e8ef7','#f7a94e','#f74e4e','#e8f0ed','#ffd700'][Math.floor(Math.random()*6)]}));
-  let raf;
-  const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();p.x+=p.dx;p.y+=p.dy;p.r+=p.dr;if(p.y>canvas.height){p.y=-10;p.x=Math.random()*canvas.width;}});raf=requestAnimationFrame(draw);};
-  draw();
-  setTimeout(()=>{cancelAnimationFrame(raf);canvas.style.display='none';},4000);
-}
-
-function wordleStartConfetti(){
-  const canvas=document.getElementById('wordle-confetti');
-  if(!canvas) return;
   canvas.style.display='block';
   const ctx=canvas.getContext('2d');
   canvas.width=window.innerWidth;canvas.height=window.innerHeight;
@@ -4508,32 +4431,8 @@ function updatePianoTimerDisplay(){const m=Math.floor(pianoTimerElapsed/60),s=pi
 // ════════════════════════════════════════════════════════════
 const WORDS_EASY=['the','be','to','of','and','a','in','that','have','it','for','not','on','with','he','as','you','do','at','this','but','his','by','from','they','we','say','her','she','or','an','will','my','one','all','would','there','their','what','so','up','out','if','about','who','get','which','go','me','when','make','can','like','time','no','just','him','know','take','people','into','year','your','good','some','could','them','see','other','than','then','now','look','only','come','its','over','think','also','back','after','use','two','how','our','work','first','well','way','even','new','want','because','any','these','give','day','most','us'];
 const WORDS_HARD=['rhythm','bureaucracy','entrepreneur','conscientious','phenomenon','onomatopoeia','necessary','accommodate','occurrence','perseverance','miscellaneous','acquaintance','Mediterranean','psychological','reconnaissance','extraordinary','approximately','distinguishable','incomprehensible','responsibilities','simultaneously','acknowledgement','conscientiously','extraordinarily','revolutionary','unprecedented','sophisticated','unambiguously','characteristic','disappointment'];
-const SENTENCES=['The quick brown fox jumps over the lazy dog.','Coding every day sharpens your mind and builds discipline.','Practice makes perfect and consistency is the key to mastering any skill.','Every great developer was once a beginner who refused to give up.','The secret of getting ahead is getting started.','A smooth sea never made a skilled sailor.','Focus on the journey not the destination.','Small daily improvements lead to stunning long-term results.','Type with intention and let your fingers find their own rhythm.','The keyboard is your instrument and the screen is your stage.','Learning to type quickly unlocks a whole new level of productivity.','There is no shortcut to mastery only deliberate and consistent practice.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.','Success is not final failure is not fatal it is the courage to continue that counts.','The future belongs to those who believe in the beauty of their dreams.','It does not matter how slowly you go as long as you do not stop.','Believe you can and you are halfway there.','The mind is everything what you think you become.','You miss one hundred percent of the shots you do not take.','If you are going through hell keep going.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Life is what happens when you are busy making other plans.','Whether you think you can or you think you cannot you are right.'];
-
-// ── Built-in typing sentences (can be hidden by user) ──
-const TYPING_BUILTIN_SENTENCES_DEFAULT = ['The quick brown fox jumps over the lazy dog.','The mind is everything what you think you become.','Small daily improvements lead to stunning long-term results.','Success is not final failure is not fatal it is the courage to continue that counts.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Whether you think you can or you think you cannot you are right.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.'];
-
-// Built-in sentences are now optional — user can hide them
-const TYPING_BUILTIN_SENTENCES = TYPING_BUILTIN_SENTENCES_DEFAULT;
-
-function typingGetHiddenBuiltins() {
-  try { return JSON.parse(localStorage.getItem('typing_hidden_builtins') || '[]'); } catch(e) { return []; }
-}
-function typingSaveHiddenBuiltins(arr) {
-  localStorage.setItem('typing_hidden_builtins', JSON.stringify(arr));
-}
-function typingGetCustomSentences() {
-  try { return JSON.parse(localStorage.getItem('typing_custom_sentences') || '[]'); } catch(e) { return []; }
-}
-function typingSaveCustomSentences(arr) {
-  localStorage.setItem('typing_custom_sentences', JSON.stringify(arr));
-}
-function typingAllCustomSentences() {
-  var hidden = typingGetHiddenBuiltins();
-  var visibleBuiltins = TYPING_BUILTIN_SENTENCES_DEFAULT.filter(function(s) { return hidden.indexOf(s) === -1; });
-  return [...visibleBuiltins, ...typingGetCustomSentences()];
-}
-const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'},{key:'custom',label:'My Sentences',icon:'✍️'}];
+const SENTENCES=['The quick brown fox jumps over the lazy dog.','Coding every day sharpens your mind and builds discipline.','Practice makes perfect and consistency is the key to mastering any skill.','Every great developer was once a beginner who refused to give up.','The secret of getting ahead is getting started.','A smooth sea never made a skilled sailor.','Focus on the journey not the destination.','Small daily improvements lead to stunning long-term results.','Type with intention and let your fingers find their own rhythm.','The keyboard is your instrument and the screen is your stage.','Learning to type quickly unlocks a whole new level of productivity.','There is no shortcut to mastery only deliberate and consistent practice.'];
+const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'}];
 
 let typingMode='words',typingPrompt='',typingTyped='',typingStarted=false,typingFinished=false;
 let typingStartTime=null,typingWpm=0,typingAcc=100;
@@ -4545,7 +4444,6 @@ let typingInitialized=false;
 function getTypingPrompt(mode){
   if(mode==='words')return [...WORDS_EASY].sort(()=>Math.random()-0.5).slice(0,20).join(' ');
   if(mode==='hard')return [...WORDS_HARD].sort(()=>Math.random()-0.5).slice(0,12).join(' ');
-  if(mode==='custom'){const cs=typingAllCustomSentences();return cs.length?cs[Math.floor(Math.random()*cs.length)]:'Add your own sentences using the ✍️ button!';}
   return SENTENCES[Math.floor(Math.random()*SENTENCES.length)];
 }
 
@@ -4570,8 +4468,6 @@ function renderTypingModes(){
       ${m.icon} ${m.label}
     </button>
   `).join('');
-  const editBtn=document.getElementById('typing-custom-edit-btn');
-  if(editBtn) editBtn.style.display=typingMode==='custom'?'':'none';
 }
 
 function typingReset(mode){
@@ -4647,9 +4543,7 @@ function typingHandleInput(e){
   // Accuracy
   let wrong = 0;
   for(let i = 0; i < val.length; i++){ if(val[i] !== typingPrompt[i]) wrong++; }
-  // Accuracy: correct chars out of total prompt length (penalizes wrong chars fairly)
-  const totalChars = typingPrompt.length || 1;
-  typingAcc = Math.max(0, Math.round(((totalChars - wrong) / totalChars) * 100));
+  typingAcc = val.length > 0 ? Math.round(((val.length - wrong) / val.length) * 100) : 100;
   const accEl = document.getElementById('typing-acc');
   if(accEl){ accEl.textContent = typingAcc + '%'; accEl.style.color = typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'; }
 
@@ -4660,7 +4554,7 @@ function typingHandleInput(e){
   renderTypingPrompt();
 
   // Check completion
-  if(val.length === typingPrompt.length){
+  if(val.length === typingPrompt.length && val === typingPrompt){
     clearInterval(typingWpmInterval);
     typingFinished = true;
     const mins = (Date.now() - typingStartTime) / 60000;
@@ -4690,6 +4584,10 @@ function typingHandleInput(e){
           <div class="typing-result-stat">
             <div class="typing-result-stat-val" style="color:${typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'}">${typingAcc}%</div>
             <div class="typing-result-stat-lbl">Accuracy</div>
+          </div>
+          <div class="typing-result-stat">
+            <div class="typing-result-stat-val" style="color:${errCount===0?'#00d18c':errCount<=3?'#f7a94e':'#f87171'}">${errCount}</div>
+            <div class="typing-result-stat-lbl">Errors</div>
           </div>
           <div class="typing-result-stat">
             <div class="typing-result-stat-val" style="color:#7a9e8e">${typingBestWpm}</div>
@@ -4984,19 +4882,11 @@ async function musicHandleArt(files){
   };
 
   function mLoad(){
-    try{
-      const s=localStorage.getItem('math_rpg');
-      if(s){
-        const p=JSON.parse(s);
-        // Version 2: reset if old data (no v2 flag) — clears old progress
-        if(!p._v2){ localStorage.removeItem('math_rpg'); return; }
-        Object.assign(m,p);
-      }
-    }catch(e){}
+    try{ const s=localStorage.getItem('math_rpg'); if(s){ const p=JSON.parse(s); Object.assign(m,p); } }catch(e){}
   }
   function mSave(){
     localStorage.setItem('math_rpg', JSON.stringify({
-      _v2:true,level:m.level,xp:m.xp,streak:m.streak,best:m.best,correct:m.correct,wrong:m.wrong,ops:m.ops
+      level:m.level,xp:m.xp,streak:m.streak,best:m.best,correct:m.correct,wrong:m.wrong,ops:m.ops
     }));
   }
 
@@ -5079,9 +4969,8 @@ async function musicHandleArt(files){
   // ── Question generation ──────────────────────────────────────
   function mRange(){
     if(m.level <= 20) return 10;
-    if(m.level < 30) return Math.min(10 + (m.level - 20) * 3, 40);
-    // Level 30+: significantly harder - large numbers
-    return Math.min(50 + (m.level - 30) * 5, 999);
+    // After level 20, scale up gradually
+    return Math.min(10 + (m.level - 20) * 3, 100);
   }
   function mRand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
@@ -5095,11 +4984,11 @@ async function musicHandleArt(files){
     } else if(op==='-'){
       a=mRand(1,R); b=mRand(0,a); answer=a-b;
     } else if(op==='×'){
-      const maxMul=m.level<=20?10:m.level<30?Math.min(10+Math.floor((m.level-20)/2),12):Math.min(12+Math.floor((m.level-30)*1.5),30);
+      const maxMul=m.level<=20?10:Math.min(10+Math.floor((m.level-20)/2),12);
       a=mRand(1,maxMul); b=mRand(1,maxMul); answer=a*b;
     } else { // ÷
-      b=mRand(1,m.level<=20?10:m.level<30?Math.min(10+Math.floor((m.level-20)/2),12):Math.min(12+Math.floor((m.level-30)/2),25));
-      answer=mRand(1,m.level<30?Math.min(2+Math.floor(m.level/2),12):Math.min(12+(m.level-30),30));
+      b=mRand(1,m.level<=20?10:Math.min(10+Math.floor((m.level-20)/2),12));
+      answer=mRand(1,Math.min(2+Math.floor(m.level/2),12));
       a=b*answer;
     }
     m.qVal={a,b,op,answer};
@@ -5222,7 +5111,6 @@ async function musicHandleArt(files){
     if(!confirm('Reset all progress?')) return;
     m={level:1,xp:0,streak:0,best:0,correct:0,wrong:0,ops:['+','-'],qVal:null};
     localStorage.removeItem('math_rpg');
-    // No need to save v2 flag on reset — it'll be saved next correct answer
     // Reset op buttons
     document.querySelectorAll('.math-op-btn').forEach(b=>{
       b.classList.toggle('active', b.dataset.op==='+'||b.dataset.op==='-');
@@ -5995,129 +5883,64 @@ const SP_TYPES = ['all','noun','verb','adjective','phrase','number'];
 
 // ── Built-in vocab (immutable originals) ──
 const SP_BUILTIN = [
-  {id:'b0',es:'casa',en:'house',pron:'KAH-sah',type:'noun',example:`La {casa} es grande. (The house is big.)`},
-  {id:'b1',es:'perro',en:'dog',pron:'PEH-rroh',type:'noun',example:`El {perro} corre rápido. (The dog runs fast.)`},
-  {id:'b2',es:'gato',en:'cat',pron:'GAH-toh',type:'noun',example:`El {gato} duerme. (The cat sleeps.)`},
-  {id:'b3',es:'agua',en:'water',pron:'AH-gwah',type:'noun',example:`Quiero {agua}. (I want water.)`},
-  {id:'b4',es:'pan',en:'bread',pron:'PAHN',type:'noun',example:`El {pan} está fresco. (The bread is fresh.)`},
-  {id:'b5',es:'libro',en:'book',pron:'LEE-broh',type:'noun',example:`Leo un {libro}. (I read a book.)`},
-  {id:'b6',es:'ciudad',en:'city',pron:'syoo-DAHD',type:'noun',example:`La {ciudad} es bonita. (The city is beautiful.)`},
-  {id:'b7',es:'coche',en:'car',pron:'KOH-cheh',type:'noun',example:`El {coche} es rojo. (The car is red.)`},
-  {id:'b8',es:'mesa',en:'table',pron:'MEH-sah',type:'noun',example:`La {mesa} es de madera. (The table is made of wood.)`},
-  {id:'b9',es:'silla',en:'chair',pron:'SEE-yah',type:'noun',example:`Siéntate en la {silla}. (Sit in the chair.)`},
-  {id:'b10',es:'ventana',en:'window',pron:'ven-TAH-nah',type:'noun',example:`Abre la {ventana}. (Open the window.)`},
-  {id:'b11',es:'puerta',en:'door',pron:'PWEHR-tah',type:'noun',example:`Cierra la {puerta}. (Close the door.)`},
-  {id:'b12',es:'amigo',en:'friend',pron:'ah-MEE-goh',type:'noun',example:`Él es mi {amigo}. (He is my friend.)`},
-  {id:'b13',es:'familia',en:'family',pron:'fah-MEE-lyah',type:'noun',example:`Mi {familia} es grande. (My family is big.)`},
-  {id:'b14',es:'tiempo',en:'time / weather',pron:'TYEM-poh',type:'noun',example:`No tengo {tiempo}. (I don't have time.)`},
-  {id:'b15',es:'dinero',en:'money',pron:'dee-NEH-roh',type:'noun',example:`No tengo {dinero}. (I don't have money.)`},
-  {id:'b16',es:'trabajo',en:'work / job',pron:'trah-BAH-hoh',type:'noun',example:`Voy al {trabajo}. (I'm going to work.)`},
-  {id:'b17',es:'comida',en:'food',pron:'koh-MEE-dah',type:'noun',example:`La {comida} está deliciosa. (The food is delicious.)`},
-  {id:'b18',es:'escuela',en:'school',pron:'es-KWEH-lah',type:'noun',example:`Voy a la {escuela}. (I go to school.)`},
-  {id:'b19',es:'año',en:'year',pron:'AH-nyoh',type:'noun',example:`Este {año} aprendo español. (This year I'm learning Spanish.)`},
-  {id:'b20',es:'ser',en:'to be (permanent)',pron:'SEHR',type:'verb',example:`Yo {soy} americano. (I am American.)`},
-  {id:'b21',es:'estar',en:'to be (temporary)',pron:'es-TAHR',type:'verb',example:`Yo {estoy} cansado. (I am tired.)`},
-  {id:'b22',es:'tener',en:'to have',pron:'teh-NEHR',type:'verb',example:`Yo {tengo} un perro. (I have a dog.)`},
-  {id:'b23',es:'hacer',en:'to do / make',pron:'ah-SEHR',type:'verb',example:`¿Qué {haces}? (What are you doing?)`},
-  {id:'b24',es:'ir',en:'to go',pron:'EER',type:'verb',example:`Voy a {ir} al mercado. (I'm going to the market.)`},
-  {id:'b25',es:'poder',en:'to be able to / can',pron:'poh-DEHR',type:'verb',example:`¿{Puedes} ayudarme? (Can you help me?)`},
-  {id:'b26',es:'querer',en:'to want / love',pron:'keh-REHR',type:'verb',example:`{Quiero} aprender español. (I want to learn Spanish.)`},
-  {id:'b27',es:'hablar',en:'to speak',pron:'ah-BLAHR',type:'verb',example:`Yo {hablo} español. (I speak Spanish.)`},
-  {id:'b28',es:'comer',en:'to eat',pron:'koh-MEHR',type:'verb',example:`Voy a {comer} pizza. (I'm going to eat pizza.)`},
-  {id:'b29',es:'vivir',en:'to live',pron:'bee-BEER',type:'verb',example:`Yo {vivo} en Oklahoma. (I live in Oklahoma.)`},
-  {id:'b30',es:'saber',en:'to know (facts)',pron:'sah-BEHR',type:'verb',example:`Yo {sé} la respuesta. (I know the answer.)`},
-  {id:'b31',es:'ver',en:'to see / watch',pron:'BEHR',type:'verb',example:`¿{Ves} eso? (Do you see that?)`},
-  {id:'b32',es:'venir',en:'to come',pron:'beh-NEER',type:'verb',example:`¿{Vienes} conmigo? (Are you coming with me?)`},
-  {id:'b33',es:'dar',en:'to give',pron:'DAHR',type:'verb',example:`Te {doy} un regalo. (I give you a gift.)`},
-  {id:'b34',es:'llamar',en:'to call',pron:'yah-MAHR',type:'verb',example:`Voy a {llamar} a mi mamá. (I'm going to call my mom.)`},
-  {id:'b35',es:'grande',en:'big / great',pron:'GRAHN-deh',type:'adjective',example:`La ciudad es {grande}. (The city is big.)`},
-  {id:'b36',es:'pequeño',en:'small',pron:'peh-KEH-nyoh',type:'adjective',example:`El gato es {pequeño}. (The cat is small.)`},
-  {id:'b37',es:'bueno',en:'good',pron:'BWEH-noh',type:'adjective',example:`¡Eso es {bueno}! (That is good!)`},
-  {id:'b38',es:'malo',en:'bad',pron:'MAH-loh',type:'adjective',example:`El tiempo está {malo}. (The weather is bad.)`},
-  {id:'b39',es:'nuevo',en:'new',pron:'NWEH-boh',type:'adjective',example:`Tengo un coche {nuevo}. (I have a new car.)`},
-  {id:'b40',es:'viejo',en:'old',pron:'BYEH-hoh',type:'adjective',example:`Es un edificio {viejo}. (It's an old building.)`},
-  {id:'b41',es:'rápido',en:'fast / quick',pron:'RAH-pee-doh',type:'adjective',example:`El coche es {rápido}. (The car is fast.)`},
-  {id:'b42',es:'bonito',en:'pretty / nice',pron:'boh-NEE-toh',type:'adjective',example:`Es una ciudad {bonita}. (It's a pretty city.)`},
-  {id:'b43',es:'fácil',en:'easy',pron:'FAH-seel',type:'adjective',example:`El examen es {fácil}. (The exam is easy.)`},
-  {id:'b44',es:'difícil',en:'difficult',pron:'dee-FEE-seel',type:'adjective',example:`El español no es {difícil}. (Spanish is not difficult.)`},
-  {id:'b45',es:'hola',en:'hello',pron:'OH-lah',type:'phrase',example:`{Hola}, ¿cómo estás? (Hello, how are you?)`},
-  {id:'b46',es:'gracias',en:'thank you',pron:'GRAH-syahs',type:'phrase',example:`Muchas {gracias}. (Thank you very much.)`},
-  {id:'b47',es:'por favor',en:'please',pron:'por fah-BOHR',type:'phrase',example:`Habla más despacio, {por favor}. (Speak slower, please.)`},
-  {id:'b48',es:'lo siento',en:'I\'m sorry',pron:'loh SYEHN-toh',type:'phrase',example:`{Lo siento}, no entiendo. (I'm sorry, I don't understand.)`},
-  {id:'b49',es:'de nada',en:'you\'re welcome',pron:'deh NAH-dah',type:'phrase',example:`—Gracias. —{De nada}. (—Thanks. —You're welcome.)`},
-  {id:'b50',es:'¿cómo estás?',en:'how are you?',pron:'KOH-moh es-TAHS',type:'phrase',example:`¡Hola! ¿{Cómo estás}? (Hi! How are you?)`},
-  {id:'b51',es:'no entiendo',en:'I don\'t understand',pron:'noh en-TYEN-doh',type:'phrase',example:`{No entiendo} esta palabra. (I don't understand this word.)`},
-  {id:'b52',es:'¿hablas inglés?',en:'do you speak English?',pron:'AH-blahs een-GLEHS',type:'phrase',example:`Perdón, ¿{hablas inglés}? (Excuse me, do you speak English?)`},
-  {id:'b53',es:'uno',en:'one',pron:'OO-noh',type:'number',example:`Tengo {un} hermano. (I have one brother.)`},
-  {id:'b54',es:'dos',en:'two',pron:'DOHS',type:'number',example:`Son las {dos}. (It's two o'clock.)`},
-  {id:'b55',es:'tres',en:'three',pron:'TREHS',type:'number',example:`Tengo {tres} gatos. (I have three cats.)`},
-  {id:'b56',es:'diez',en:'ten',pron:'DYEHS',type:'number',example:`Son {diez} dólares. (That's ten dollars.)`},
-  {id:'b57',es:'cien',en:'one hundred',pron:'SYEHN',type:'number',example:`Cuesta {cien} dólares. (It costs one hundred dollars.)`},
-  // ── Extra vocab batch 2 ──
-  {id:'b58',es:'ropa',en:'clothes',pron:'ROH-pah',type:'noun',example:`Me pongo la {ropa}. (I put on my clothes.)`},
-  {id:'b59',es:'zapato',en:'shoe',pron:'sah-PAH-toh',type:'noun',example:`¿Dónde está mi {zapato}? (Where is my shoe?)`},
-  {id:'b60',es:'camisa',en:'shirt',pron:'kah-MEE-sah',type:'noun',example:`La {camisa} es azul. (The shirt is blue.)`},
-  {id:'b61',es:'mano',en:'hand',pron:'MAH-noh',type:'noun',example:`Dame la {mano}. (Give me your hand.)`},
-  {id:'b62',es:'cabeza',en:'head',pron:'kah-BEH-sah',type:'noun',example:`Me duele la {cabeza}. (My head hurts.)`},
-  {id:'b63',es:'corazón',en:'heart',pron:'koh-rah-SOHN',type:'noun',example:`Te quiero con todo mi {corazón}. (I love you with all my heart.)`},
-  {id:'b64',es:'nombre',en:'name',pron:'NOHM-breh',type:'noun',example:`¿Cuál es tu {nombre}? (What is your name?)`},
-  {id:'b65',es:'país',en:'country',pron:'pah-EES',type:'noun',example:`Vivo en este {país}. (I live in this country.)`},
-  {id:'b66',es:'color',en:'color',pron:'koh-LOHR',type:'noun',example:`¿Cuál es tu {color} favorito? (What is your favorite color?)`},
-  {id:'b67',es:'número',en:'number',pron:'NOO-meh-roh',type:'noun',example:`¿Cuál es tu {número} de teléfono? (What is your phone number?)`},
-  {id:'b68',es:'pregunta',en:'question',pron:'preh-GOON-tah',type:'noun',example:`Tengo una {pregunta}. (I have a question.)`},
-  {id:'b69',es:'respuesta',en:'answer',pron:'res-PWES-tah',type:'noun',example:`La {respuesta} es correcta. (The answer is correct.)`},
-  {id:'b70',es:'historia',en:'history / story',pron:'ees-TOH-ryah',type:'noun',example:`La {historia} es interesante. (The story is interesting.)`},
-  {id:'b71',es:'música',en:'music',pron:'MOO-see-kah',type:'noun',example:`Me encanta la {música}. (I love music.)`},
-  {id:'b72',es:'deporte',en:'sport',pron:'deh-POHR-teh',type:'noun',example:`El {deporte} es bueno para la salud. (Sport is good for health.)`},
-  {id:'b73',es:'fútbol',en:'soccer',pron:'FOOT-bohl',type:'noun',example:`Juego al {fútbol} los domingos. (I play soccer on Sundays.)`},
-  {id:'b74',es:'lluvia',en:'rain',pron:'YOO-byah',type:'noun',example:`La {lluvia} es fría. (The rain is cold.)`},
-  {id:'b75',es:'sol',en:'sun',pron:'SOHL',type:'noun',example:`El {sol} brilla hoy. (The sun shines today.)`},
-  {id:'b76',es:'noche',en:'night',pron:'NOH-cheh',type:'noun',example:`Buenas {noches}. (Good night.)`},
-  {id:'b77',es:'día',en:'day',pron:'DEE-ah',type:'noun',example:`Buenos {días}. (Good morning/day.)`},
-  {id:'b78',es:'semana',en:'week',pron:'seh-MAH-nah',type:'noun',example:`Esta {semana} estoy ocupado. (This week I am busy.)`},
-  {id:'b79',es:'mes',en:'month',pron:'MEHS',type:'noun',example:`Este {mes} es agosto. (This month is August.)`},
-  {id:'b80',es:'aprender',en:'to learn',pron:'ah-pren-DEHR',type:'verb',example:`Quiero {aprender} español. (I want to learn Spanish.)`},
-  {id:'b81',es:'estudiar',en:'to study',pron:'es-too-DYAHR',type:'verb',example:`Voy a {estudiar} esta noche. (I am going to study tonight.)`},
-  {id:'b82',es:'escribir',en:'to write',pron:'es-kree-BEER',type:'verb',example:`Voy a {escribir} una carta. (I am going to write a letter.)`},
-  {id:'b83',es:'leer',en:'to read',pron:'leh-EHR',type:'verb',example:`Me gusta {leer} libros. (I like to read books.)`},
-  {id:'b84',es:'escuchar',en:'to listen',pron:'es-koo-CHAHR',type:'verb',example:`{Escucha} la música. (Listen to the music.)`},
-  {id:'b85',es:'correr',en:'to run',pron:'koh-REHR',type:'verb',example:`Me gusta {correr} por la mañana. (I like to run in the morning.)`},
-  {id:'b86',es:'dormir',en:'to sleep',pron:'dohr-MEER',type:'verb',example:`Necesito {dormir} ocho horas. (I need to sleep eight hours.)`},
-  {id:'b87',es:'trabajar',en:'to work',pron:'trah-bah-HAHR',type:'verb',example:`{Trabajo} en una oficina. (I work in an office.)`},
-  {id:'b88',es:'comprar',en:'to buy',pron:'kohm-PRAHR',type:'verb',example:`Voy a {comprar} comida. (I am going to buy food.)`},
-  {id:'b89',es:'vender',en:'to sell',pron:'ben-DEHR',type:'verb',example:`Quiero {vender} mi coche. (I want to sell my car.)`},
-  {id:'b90',es:'pensar',en:'to think',pron:'pen-SAHR',type:'verb',example:`{Pienso} que tienes razón. (I think you are right.)`},
-  {id:'b91',es:'creer',en:'to believe',pron:'kreh-EHR',type:'verb',example:`{Creo} en ti. (I believe in you.)`},
-  {id:'b92',es:'sentir',en:'to feel',pron:'sen-TEER',type:'verb',example:`Me {siento} bien hoy. (I feel good today.)`},
-  {id:'b93',es:'gustar',en:'to like / please',pron:'goos-TAHR',type:'verb',example:`Me {gusta} el café. (I like coffee.)`},
-  {id:'b94',es:'necesitar',en:'to need',pron:'neh-seh-see-TAHR',type:'verb',example:`{Necesito} ayuda. (I need help.)`},
-  {id:'b95',es:'buscar',en:'to look for',pron:'boos-KAHR',type:'verb',example:`Estoy {buscando} mis llaves. (I am looking for my keys.)`},
-  {id:'b96',es:'encontrar',en:'to find',pron:'en-kohn-TRAHR',type:'verb',example:`No puedo {encontrar} mi teléfono. (I can't find my phone.)`},
-  {id:'b97',es:'llegar',en:'to arrive',pron:'yeh-GAHR',type:'verb',example:`¿A qué hora {llegas}? (What time do you arrive?)`},
-  {id:'b98',es:'salir',en:'to leave / go out',pron:'sah-LEER',type:'verb',example:`Voy a {salir} a las ocho. (I'm going to leave at eight.)`},
-  {id:'b99',es:'regresar',en:'to return',pron:'reh-greh-SAHR',type:'verb',example:`¿Cuándo vas a {regresar}? (When are you going to return?)`},
-  {id:'b100',es:'esperar',en:'to wait / hope',pron:'es-peh-RAHR',type:'verb',example:`Tengo que {esperar} el autobús. (I have to wait for the bus.)`},
-  {id:'b101',es:'siempre',en:'always',pron:'SYEM-preh',type:'adjective',example:`Yo {siempre} llego a tiempo. (I always arrive on time.)`},
-  {id:'b102',es:'nunca',en:'never',pron:'NOON-kah',type:'adjective',example:`{Nunca} como carne. (I never eat meat.)`},
-  {id:'b103',es:'mucho',en:'much / a lot',pron:'MOO-choh',type:'adjective',example:`Tengo {mucho} trabajo. (I have a lot of work.)`},
-  {id:'b104',es:'poco',en:'little / few',pron:'POH-koh',type:'adjective',example:`Tengo un {poco} de tiempo. (I have a little time.)`},
-  {id:'b105',es:'mismo',en:'same / itself',pron:'MEES-moh',type:'adjective',example:`Es el {mismo} problema. (It is the same problem.)`},
-  {id:'b106',es:'otro',en:'other / another',pron:'OH-troh',type:'adjective',example:`Quiero {otro} café. (I want another coffee.)`},
-  {id:'b107',es:'cada',en:'each / every',pron:'KAH-dah',type:'adjective',example:`{Cada} día aprendo algo nuevo. (Each day I learn something new.)`},
-  {id:'b108',es:'con mucho gusto',en:'with pleasure / gladly',pron:'kohn MOO-choh GOOS-toh',type:'phrase',example:`—¿Me puedes ayudar? —{Con mucho gusto}. (—Can you help me? —Gladly.)`},
-  {id:'b109',es:'¿qué hora es?',en:'what time is it?',pron:'KEH OH-rah EHS',type:'phrase',example:`Perdón, ¿{qué hora es}? (Excuse me, what time is it?)`},
-  {id:'b110',es:'tengo hambre',en:'I am hungry',pron:'TEN-goh AHM-breh',type:'phrase',example:`{Tengo hambre}. ¿Comemos? (I'm hungry. Shall we eat?)`},
-  {id:'b111',es:'tengo sed',en:'I am thirsty',pron:'TEN-goh SEHD',type:'phrase',example:`{Tengo sed}. ¿Hay agua? (I'm thirsty. Is there water?)`},
-  {id:'b112',es:'¿dónde está?',en:'where is it?',pron:'DOHN-deh es-TAH',type:'phrase',example:`¿{Dónde está} el baño? (Where is the bathroom?)`},
-  {id:'b113',es:'me llamo',en:'my name is',pron:'meh YAH-moh',type:'phrase',example:`{Me llamo} Carlos. (My name is Carlos.)`},
-  {id:'b114',es:'cuatro',en:'four',pron:'KWAH-troh',type:'number',example:`Son las {cuatro}. (It's four o'clock.)`},
-  {id:'b115',es:'cinco',en:'five',pron:'SEEN-koh',type:'number',example:`Tengo {cinco} hermanos. (I have five siblings.)`},
-  {id:'b116',es:'seis',en:'six',pron:'SEHEES',type:'number',example:`Hay {seis} personas. (There are six people.)`},
-  {id:'b117',es:'siete',en:'seven',pron:'SYEH-teh',type:'number',example:`Son las {siete}. (It's seven o'clock.)`},
-  {id:'b118',es:'ocho',en:'eight',pron:'OH-choh',type:'number',example:`Tengo {ocho} años de experiencia. (I have eight years of experience.)`},
-  {id:'b119',es:'nueve',en:'nine',pron:'NWEH-beh',type:'number',example:`Son las {nueve}. (It's nine o'clock.)`},
-  {id:'b120',es:'veinte',en:'twenty',pron:'BEHN-teh',type:'number',example:`Cuesta {veinte} dólares. (It costs twenty dollars.)`},
-  {id:'b121',es:'cincuenta',en:'fifty',pron:'seen-KWEHN-tah',type:'number',example:`Hay {cincuenta} estados. (There are fifty states.)`},
+  {id:'b0',es:'casa',en:'house',pron:'KAH-sah',type:'noun',example:'La {casa} es grande. (The house is big.)'},
+  {id:'b1',es:'perro',en:'dog',pron:'PEH-rroh',type:'noun',example:'El {perro} corre rápido. (The dog runs fast.)'},
+  {id:'b2',es:'gato',en:'cat',pron:'GAH-toh',type:'noun',example:'El {gato} duerme. (The cat sleeps.)'},
+  {id:'b3',es:'agua',en:'water',pron:'AH-gwah',type:'noun',example:'Quiero {agua}. (I want water.)'},
+  {id:'b4',es:'pan',en:'bread',pron:'PAHN',type:'noun',example:'El {pan} está fresco. (The bread is fresh.)'},
+  {id:'b5',es:'libro',en:'book',pron:'LEE-broh',type:'noun',example:'Leo un {libro}. (I read a book.)'},
+  {id:'b6',es:'ciudad',en:'city',pron:'syoo-DAHD',type:'noun',example:'La {ciudad} es bonita. (The city is beautiful.)'},
+  {id:'b7',es:'coche',en:'car',pron:'KOH-cheh',type:'noun',example:'El {coche} es rojo. (The car is red.)'},
+  {id:'b8',es:'mesa',en:'table',pron:'MEH-sah',type:'noun',example:'La {mesa} es de madera. (The table is made of wood.)'},
+  {id:'b9',es:'silla',en:'chair',pron:'SEE-yah',type:'noun',example:'Siéntate en la {silla}. (Sit in the chair.)'},
+  {id:'b10',es:'ventana',en:'window',pron:'ven-TAH-nah',type:'noun',example:'Abre la {ventana}. (Open the window.)'},
+  {id:'b11',es:'puerta',en:'door',pron:'PWEHR-tah',type:'noun',example:'Cierra la {puerta}. (Close the door.)'},
+  {id:'b12',es:'amigo',en:'friend',pron:'ah-MEE-goh',type:'noun',example:'Él es mi {amigo}. (He is my friend.)'},
+  {id:'b13',es:'familia',en:'family',pron:'fah-MEE-lyah',type:'noun',example:'Mi {familia} es grande. (My family is big.)'},
+  {id:'b14',es:'tiempo',en:'time / weather',pron:'TYEM-poh',type:'noun',example:'No tengo {tiempo}. (I don\'t have time.)'},
+  {id:'b15',es:'dinero',en:'money',pron:'dee-NEH-roh',type:'noun',example:'No tengo {dinero}. (I don\'t have money.)'},
+  {id:'b16',es:'trabajo',en:'work / job',pron:'trah-BAH-hoh',type:'noun',example:'Voy al {trabajo}. (I\'m going to work.)'},
+  {id:'b17',es:'comida',en:'food',pron:'koh-MEE-dah',type:'noun',example:'La {comida} está deliciosa. (The food is delicious.)'},
+  {id:'b18',es:'escuela',en:'school',pron:'es-KWEH-lah',type:'noun',example:'Voy a la {escuela}. (I go to school.)'},
+  {id:'b19',es:'año',en:'year',pron:'AH-nyoh',type:'noun',example:'Este {año} aprendo español. (This year I\'m learning Spanish.)'},
+  {id:'b20',es:'ser',en:'to be (permanent)',pron:'SEHR',type:'verb',example:'Yo {soy} americano. (I am American.)'},
+  {id:'b21',es:'estar',en:'to be (temporary)',pron:'es-TAHR',type:'verb',example:'Yo {estoy} cansado. (I am tired.)'},
+  {id:'b22',es:'tener',en:'to have',pron:'teh-NEHR',type:'verb',example:'Yo {tengo} un perro. (I have a dog.)'},
+  {id:'b23',es:'hacer',en:'to do / make',pron:'ah-SEHR',type:'verb',example:'¿Qué {haces}? (What are you doing?)'},
+  {id:'b24',es:'ir',en:'to go',pron:'EER',type:'verb',example:'Voy a {ir} al mercado. (I\'m going to the market.)'},
+  {id:'b25',es:'poder',en:'to be able to / can',pron:'poh-DEHR',type:'verb',example:'¿{Puedes} ayudarme? (Can you help me?)'},
+  {id:'b26',es:'querer',en:'to want / love',pron:'keh-REHR',type:'verb',example:'{Quiero} aprender español. (I want to learn Spanish.)'},
+  {id:'b27',es:'hablar',en:'to speak',pron:'ah-BLAHR',type:'verb',example:'Yo {hablo} español. (I speak Spanish.)'},
+  {id:'b28',es:'comer',en:'to eat',pron:'koh-MEHR',type:'verb',example:'Voy a {comer} pizza. (I\'m going to eat pizza.)'},
+  {id:'b29',es:'vivir',en:'to live',pron:'bee-BEER',type:'verb',example:'Yo {vivo} en Oklahoma. (I live in Oklahoma.)'},
+  {id:'b30',es:'saber',en:'to know (facts)',pron:'sah-BEHR',type:'verb',example:'Yo {sé} la respuesta. (I know the answer.)'},
+  {id:'b31',es:'ver',en:'to see / watch',pron:'BEHR',type:'verb',example:'¿{Ves} eso? (Do you see that?)'},
+  {id:'b32',es:'venir',en:'to come',pron:'beh-NEER',type:'verb',example:'¿{Vienes} conmigo? (Are you coming with me?)'},
+  {id:'b33',es:'dar',en:'to give',pron:'DAHR',type:'verb',example:'Te {doy} un regalo. (I give you a gift.)'},
+  {id:'b34',es:'llamar',en:'to call',pron:'yah-MAHR',type:'verb',example:'Voy a {llamar} a mi mamá. (I\'m going to call my mom.)'},
+  {id:'b35',es:'grande',en:'big / great',pron:'GRAHN-deh',type:'adjective',example:'La ciudad es {grande}. (The city is big.)'},
+  {id:'b36',es:'pequeño',en:'small',pron:'peh-KEH-nyoh',type:'adjective',example:'El gato es {pequeño}. (The cat is small.)'},
+  {id:'b37',es:'bueno',en:'good',pron:'BWEH-noh',type:'adjective',example:'¡Eso es {bueno}! (That is good!)'},
+  {id:'b38',es:'malo',en:'bad',pron:'MAH-loh',type:'adjective',example:'El tiempo está {malo}. (The weather is bad.)'},
+  {id:'b39',es:'nuevo',en:'new',pron:'NWEH-boh',type:'adjective',example:'Tengo un coche {nuevo}. (I have a new car.)'},
+  {id:'b40',es:'viejo',en:'old',pron:'BYEH-hoh',type:'adjective',example:'Es un edificio {viejo}. (It\'s an old building.)'},
+  {id:'b41',es:'rápido',en:'fast / quick',pron:'RAH-pee-doh',type:'adjective',example:'El coche es {rápido}. (The car is fast.)'},
+  {id:'b42',es:'bonito',en:'pretty / nice',pron:'boh-NEE-toh',type:'adjective',example:'Es una ciudad {bonita}. (It\'s a pretty city.)'},
+  {id:'b43',es:'fácil',en:'easy',pron:'FAH-seel',type:'adjective',example:'El examen es {fácil}. (The exam is easy.)'},
+  {id:'b44',es:'difícil',en:'difficult',pron:'dee-FEE-seel',type:'adjective',example:'El español no es {difícil}. (Spanish is not difficult.)'},
+  {id:'b45',es:'hola',en:'hello',pron:'OH-lah',type:'phrase',example:'{Hola}, ¿cómo estás? (Hello, how are you?)'},
+  {id:'b46',es:'gracias',en:'thank you',pron:'GRAH-syahs',type:'phrase',example:'Muchas {gracias}. (Thank you very much.)'},
+  {id:'b47',es:'por favor',en:'please',pron:'por fah-BOHR',type:'phrase',example:'Habla más despacio, {por favor}. (Speak slower, please.)'},
+  {id:'b48',es:'lo siento',en:'I\'m sorry',pron:'loh SYEHN-toh',type:'phrase',example:'{Lo siento}, no entiendo. (I\'m sorry, I don\'t understand.)'},
+  {id:'b49',es:'de nada',en:'you\'re welcome',pron:'deh NAH-dah',type:'phrase',example:'—Gracias. —{De nada}. (—Thanks. —You\'re welcome.)'},
+  {id:'b50',es:'¿cómo estás?',en:'how are you?',pron:'KOH-moh es-TAHS',type:'phrase',example:'¡Hola! ¿{Cómo estás}? (Hi! How are you?)'},
+  {id:'b51',es:'no entiendo',en:'I don\'t understand',pron:'noh en-TYEN-doh',type:'phrase',example:'{No entiendo} esta palabra. (I don\'t understand this word.)'},
+  {id:'b52',es:'¿hablas inglés?',en:'do you speak English?',pron:'AH-blahs een-GLEHS',type:'phrase',example:'Perdón, ¿{hablas inglés}? (Excuse me, do you speak English?)'},
+  {id:'b53',es:'uno',en:'one',pron:'OO-noh',type:'number',example:'Tengo {un} hermano. (I have one brother.)'},
+  {id:'b54',es:'dos',en:'two',pron:'DOHS',type:'number',example:'Son las {dos}. (It\'s two o\'clock.)'},
+  {id:'b55',es:'tres',en:'three',pron:'TREHS',type:'number',example:'Tengo {tres} gatos. (I have three cats.)'},
+  {id:'b56',es:'diez',en:'ten',pron:'DYEHS',type:'number',example:'Son {diez} dólares. (That\'s ten dollars.)'},
+  {id:'b57',es:'cien',en:'one hundred',pron:'SYEHN',type:'number',example:'Cuesta {cien} dólares. (It costs one hundred dollars.)'},
 ];
 
 // ── State ──
@@ -6969,7 +6792,7 @@ function wordleKey(key) {
     result.forEach((r,i)=>{ if(r.state==='_'){ if(ansCount[r.letter]>0){r.state='present';ansCount[r.letter]--;} else r.state='absent'; } else ansCount[r.letter]--; });
     wGuesses.push({word:wCurrentGuess,result});
     result.forEach(r=>wordleUpdateKeyColor(r.letter,r.state));
-    if(wCurrentGuess===ans){ wGameOver=true; wDailyDone=true; setTimeout(wordleStartConfetti,300); }
+    if(wCurrentGuess===ans){ wGameOver=true; wDailyDone=true; }
     else if(wGuesses.length===6){ wGameOver=true; wDailyDone=true; }
     wCurrentGuess='';
     wordleSave();
@@ -9987,7 +9810,6 @@ function initCardLayout() {
   var layout = loadLayout() || getDefaultLayout();
   applyLayout(layout);
   applyScrollMap();
-  requestAnimationFrame(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); setTimeout(function(){ if(typeof wordleRenderMini==='function') wordleRenderMini(); },200); });
 }
 
 // ── Toggle edit mode ─────────────────────────────────────────────
@@ -10850,46 +10672,36 @@ var geoScore = 0, geoStreak = 0, geoCat = 'capitals', geoCurrentQ = null, geoAns
 
 var GEO_DATA = {
   capitals: [
-    {q:'What is the capital of France?',      flag:'🇫🇷', a:'Paris',        choices:['Paris','London','Berlin','Madrid']},
-    {q:'What is the capital of Japan?',        flag:'🇯🇵', a:'Tokyo',        choices:['Seoul','Beijing','Tokyo','Bangkok']},
-    {q:'What is the capital of Australia?',   flag:'🇦🇺', a:'Canberra',     choices:['Sydney','Melbourne','Canberra','Brisbane']},
-    {q:'What is the capital of Brazil?',      flag:'🇧🇷', a:'Brasília',     choices:['São Paulo','Rio de Janeiro','Brasília','Buenos Aires']},
-    {q:'What is the capital of Canada?',      flag:'🇨🇦', a:'Ottawa',       choices:['Toronto','Vancouver','Ottawa','Montreal']},
-    {q:'What is the capital of Egypt?',       flag:'🇪🇬', a:'Cairo',        choices:['Cairo','Alexandria','Luxor','Nairobi']},
-    {q:'What is the capital of Argentina?',   flag:'🇦🇷', a:'Buenos Aires', choices:['Lima','Santiago','Bogotá','Buenos Aires']},
-    {q:'What is the capital of Russia?',      flag:'🇷🇺', a:'Moscow',       choices:['St. Petersburg','Moscow','Kiev','Minsk']},
-    {q:'What is the capital of India?',       flag:'🇮🇳', a:'New Delhi',    choices:['Mumbai','Kolkata','New Delhi','Chennai']},
-    {q:'What is the capital of Mexico?',      flag:'🇲🇽', a:'Mexico City',  choices:['Guadalajara','Mexico City','Monterrey','Tijuana']},
-    {q:'What is the capital of South Korea?', flag:'🇰🇷', a:'Seoul',        choices:['Busan','Incheon','Seoul','Daegu']},
-    {q:'What is the capital of Germany?',     flag:'🇩🇪', a:'Berlin',       choices:['Munich','Hamburg','Berlin','Frankfurt']},
-    {q:'What is the capital of Italy?',       flag:'🇮🇹', a:'Rome',         choices:['Milan','Naples','Florence','Rome']},
-    {q:'What is the capital of Spain?',       flag:'🇪🇸', a:'Madrid',       choices:['Barcelona','Madrid','Seville','Valencia']},
-    {q:'What is the capital of South Africa?',flag:'🇿🇦', a:'Pretoria',     choices:['Cape Town','Johannesburg','Durban','Pretoria']},
-    {q:'What is the capital of China?',       flag:'🇨🇳', a:'Beijing',      choices:['Shanghai','Beijing','Guangzhou','Shenzhen']},
-    {q:'What is the capital of Saudi Arabia?',flag:'🇸🇦', a:'Riyadh',       choices:['Jeddah','Riyadh','Mecca','Medina']},
-    {q:'What is the capital of Turkey?',      flag:'🇹🇷', a:'Ankara',       choices:['Istanbul','Ankara','Izmir','Bursa']},
-    {q:'What is the capital of Thailand?',    flag:'🇹🇭', a:'Bangkok',      choices:['Phuket','Chiang Mai','Bangkok','Pattaya']},
-    {q:'What is the capital of Nigeria?',     flag:'🇳🇬', a:'Abuja',        choices:['Lagos','Kano','Ibadan','Abuja']},
-    {q:'What is the capital of Kenya?',       flag:'🇰🇪', a:'Nairobi',      choices:['Mombasa','Nairobi','Kisumu','Nakuru']},
-    {q:'What is the capital of Indonesia?',   flag:'🇮🇩', a:'Jakarta',      choices:['Bali','Jakarta','Surabaya','Medan']},
-    {q:'What is the capital of Pakistan?',    flag:'🇵🇰', a:'Islamabad',    choices:['Karachi','Lahore','Islamabad','Peshawar']},
-    {q:'What is the capital of Norway?',      flag:'🇳🇴', a:'Oslo',         choices:['Bergen','Oslo','Stavanger','Trondheim']},
-    {q:'What is the capital of Sweden?',      flag:'🇸🇪', a:'Stockholm',    choices:['Gothenburg','Malmö','Stockholm','Uppsala']},
-    {q:'What is the capital of Greece?',      flag:'🇬🇷', a:'Athens',       choices:['Thessaloniki','Athens','Patras','Heraklion']},
-    {q:'What is the capital of Portugal?',    flag:'🇵🇹', a:'Lisbon',       choices:['Porto','Lisbon','Braga','Coimbra']},
-    {q:'What is the capital of Poland?',      flag:'🇵🇱', a:'Warsaw',       choices:['Kraków','Warsaw','Łódź','Wrocław']},
-    {q:'What is the capital of Ukraine?',     flag:'🇺🇦', a:'Kyiv',         choices:['Kharkiv','Kyiv','Odessa','Lviv']},
-    {q:'What is the capital of New Zealand?', flag:'🇳🇿', a:'Wellington',   choices:['Auckland','Wellington','Christchurch','Dunedin']},
-    {q:'What is the capital of Morocco?',     flag:'🇲🇦', a:'Rabat',        choices:['Casablanca','Rabat','Marrakech','Fez']},
-    {q:'What is the capital of Peru?',        flag:'🇵🇪', a:'Lima',         choices:['Lima','Cusco','Arequipa','Trujillo']},
-    {q:'What is the capital of Vietnam?',     flag:'🇻🇳', a:'Hanoi',        choices:['Ho Chi Minh City','Hanoi','Da Nang','Hue']},
-    {q:'What is the capital of the Philippines?', flag:'🇵🇭', a:'Manila',   choices:['Manila','Cebu','Davao','Quezon City']},
-    {q:'What is the capital of Colombia?',    flag:'🇨🇴', a:'Bogotá',       choices:['Medellín','Bogotá','Cali','Barranquilla']},
-    {q:'What is the capital of Austria?',     flag:'🇦🇹', a:'Vienna',       choices:['Salzburg','Vienna','Graz','Innsbruck']},
-    {q:'What is the capital of Switzerland?', flag:'🇨🇭', a:'Bern',         choices:['Zurich','Geneva','Bern','Lausanne']},
-    {q:'What is the capital of Ethiopia?',    flag:'🇪🇹', a:'Addis Ababa',  choices:['Addis Ababa','Nairobi','Khartoum','Kampala']},
-    {q:'What is the capital of the Netherlands?', flag:'🇳🇱', a:'Amsterdam', choices:['Rotterdam','Amsterdam','The Hague','Utrecht']},
-    {q:'What is the capital of Czech Republic?',  flag:'🇨🇿', a:'Prague',    choices:['Brno','Prague','Ostrava','Pilsen']},
+    {q:'What is the capital of France?',     a:'Paris',       choices:['Paris','London','Berlin','Madrid']},
+    {q:'What is the capital of Japan?',       a:'Tokyo',       choices:['Seoul','Beijing','Tokyo','Bangkok']},
+    {q:'What is the capital of Australia?',  a:'Canberra',    choices:['Sydney','Melbourne','Canberra','Brisbane']},
+    {q:'What is the capital of Brazil?',     a:'Brasília',    choices:['São Paulo','Rio de Janeiro','Brasília','Buenos Aires']},
+    {q:'What is the capital of Canada?',     a:'Ottawa',      choices:['Toronto','Vancouver','Ottawa','Montreal']},
+    {q:'What is the capital of Egypt?',      a:'Cairo',       choices:['Cairo','Alexandria','Luxor','Nairobi']},
+    {q:'What is the capital of Argentina?',  a:'Buenos Aires',choices:['Lima','Santiago','Bogotá','Buenos Aires']},
+    {q:'What is the capital of Russia?',     a:'Moscow',      choices:['St. Petersburg','Moscow','Kiev','Minsk']},
+    {q:'What is the capital of India?',      a:'New Delhi',   choices:['Mumbai','Kolkata','New Delhi','Chennai']},
+    {q:'What is the capital of Mexico?',     a:'Mexico City', choices:['Guadalajara','Mexico City','Monterrey','Tijuana']},
+    {q:'What is the capital of South Korea?',a:'Seoul',       choices:['Busan','Incheon','Seoul','Daegu']},
+    {q:'What is the capital of Germany?',    a:'Berlin',      choices:['Munich','Hamburg','Berlin','Frankfurt']},
+    {q:'What is the capital of Italy?',      a:'Rome',        choices:['Milan','Naples','Florence','Rome']},
+    {q:'What is the capital of Spain?',      a:'Madrid',      choices:['Barcelona','Madrid','Seville','Valencia']},
+    {q:'What is the capital of South Africa?',a:'Pretoria',   choices:['Cape Town','Johannesburg','Durban','Pretoria']},
+    {q:'What is the capital of China?',      a:'Beijing',     choices:['Shanghai','Beijing','Guangzhou','Shenzhen']},
+    {q:'What is the capital of Saudi Arabia?',a:'Riyadh',     choices:['Jeddah','Riyadh','Mecca','Medina']},
+    {q:'What is the capital of Turkey?',     a:'Ankara',      choices:['Istanbul','Ankara','Izmir','Bursa']},
+    {q:'What is the capital of Thailand?',   a:'Bangkok',     choices:['Phuket','Chiang Mai','Bangkok','Pattaya']},
+    {q:'What is the capital of Nigeria?',    a:'Abuja',       choices:['Lagos','Kano','Ibadan','Abuja']},
+    {q:'What is the capital of Kenya?',      a:'Nairobi',     choices:['Mombasa','Nairobi','Kisumu','Nakuru']},
+    {q:'What is the capital of Indonesia?',  a:'Jakarta',     choices:['Bali','Jakarta','Surabaya','Medan']},
+    {q:'What is the capital of Pakistan?',   a:'Islamabad',   choices:['Karachi','Lahore','Islamabad','Peshawar']},
+    {q:'What is the capital of Norway?',     a:'Oslo',        choices:['Bergen','Oslo','Stavanger','Trondheim']},
+    {q:'What is the capital of Sweden?',     a:'Stockholm',   choices:['Gothenburg','Malmö','Stockholm','Uppsala']},
+    {q:'What is the capital of Greece?',     a:'Athens',      choices:['Thessaloniki','Athens','Patras','Heraklion']},
+    {q:'What is the capital of Portugal?',   a:'Lisbon',      choices:['Porto','Lisbon','Braga','Coimbra']},
+    {q:'What is the capital of Poland?',     a:'Warsaw',      choices:['Kraków','Warsaw','Łódź','Wrocław']},
+    {q:'What is the capital of Ukraine?',    a:'Kyiv',        choices:['Kharkiv','Kyiv','Odessa','Lviv']},
+    {q:'What is the capital of New Zealand?',a:'Wellington',  choices:['Auckland','Wellington','Christchurch','Dunedin']},
   ],
   flags: [
     {q:'Which country has this flag?', flag:'🇺🇸', a:'United States',  choices:['United States','Canada','Australia','United Kingdom']},
@@ -10912,16 +10724,6 @@ var GEO_DATA = {
     {q:'Which country has this flag?', flag:'🇦🇷', a:'Argentina',       choices:['Argentina','Uruguay','El Salvador','Honduras']},
     {q:'Which country has this flag?', flag:'🇪🇬', a:'Egypt',           choices:['Egypt','Iraq','Syria','Yemen']},
     {q:'Which country has this flag?', flag:'🇬🇷', a:'Greece',          choices:['Greece','Uruguay','El Salvador','Honduras']},
-    {q:'Which country has this flag?', flag:'🇵🇹', a:'Portugal',        choices:['Portugal','Brazil','Spain','Italy']},
-    {q:'Which country has this flag?', flag:'🇨🇳', a:'China',           choices:['China','Vietnam','North Korea','Laos']},
-    {q:'Which country has this flag?', flag:'🇮🇹', a:'Italy',           choices:['Italy','Ireland','Mexico','Bulgaria']},
-    {q:'Which country has this flag?', flag:'🇺🇦', a:'Ukraine',         choices:['Ukraine','Sweden','Kazakhstan','Somalia']},
-    {q:'Which country has this flag?', flag:'🇵🇱', a:'Poland',          choices:['Poland','Indonesia','Singapore','Monaco']},
-    {q:'Which country has this flag?', flag:'🇮🇩', a:'Indonesia',       choices:['Indonesia','Poland','Monaco','Singapore']},
-    {q:'Which country has this flag?', flag:'🇰🇪', a:'Kenya',           choices:['Kenya','Ethiopia','Uganda','Tanzania']},
-    {q:'Which country has this flag?', flag:'🇧🇪', a:'Belgium',         choices:['Belgium','Germany','Chad','Cameroon']},
-    {q:'Which country has this flag?', flag:'🇳🇿', a:'New Zealand',     choices:['New Zealand','Australia','Fiji','Cook Islands']},
-    {q:'Which country has this flag?', flag:'🇸🇦', a:'Saudi Arabia',    choices:['Saudi Arabia','Pakistan','Afghanistan','Iran']},
   ],
   continents: [
     {q:'Which continent is Brazil in?',          a:'South America', choices:['North America','South America','Africa','Europe']},
@@ -10944,43 +10746,23 @@ var GEO_DATA = {
     {q:'Which continent is Chile in?',           a:'South America', choices:['South America','North America','Europe','Africa']},
     {q:'Which continent is Saudi Arabia in?',    a:'Asia',          choices:['Asia','Africa','Middle East','Europe']},
     {q:'Which continent is Cuba in?',            a:'North America', choices:['North America','South America','Caribbean','Europe']},
-    {q:'Which continent is Morocco in?',         a:'Africa',        choices:['Africa','Europe','Asia','Middle East']},
-    {q:'Which continent is Iran in?',            a:'Asia',          choices:['Asia','Africa','Middle East','Europe']},
-    {q:'Which continent is Peru in?',            a:'South America', choices:['South America','North America','Central America','Africa']},
-    {q:'Which continent is the Philippines in?', a:'Asia',          choices:['Asia','Oceania','Pacific Islands','Africa']},
-    {q:'Which continent is Ethiopia in?',        a:'Africa',        choices:['Africa','Asia','Middle East','South America']},
   ],
   populations: [
-    {q:'Which country has the largest population?',        a:'India',         choices:['China','India','United States','Indonesia']},
-    {q:'Which country is second most populous (2024)?',    a:'China',         choices:['China','India','United States','Indonesia']},
-    {q:'Which is the third most populous country?',        a:'United States', choices:['United States','Indonesia','Pakistan','Brazil']},
-    {q:'Which continent has the most people?',             a:'Asia',          choices:['Asia','Africa','Europe','North America']},
-    {q:'Which continent has the most countries?',          a:'Africa',        choices:['Africa','Asia','Europe','Americas']},
-    {q:'Approximately how many countries are in the world?',a:'195',          choices:['180','195','210','225']},
-    {q:'Which is the largest country by land area?',       a:'Russia',        choices:['Russia','Canada','China','United States']},
-    {q:'Which is the smallest country in the world?',      a:'Vatican City',  choices:['Monaco','Vatican City','San Marino','Liechtenstein']},
-    {q:'Which country has the highest population density?', a:'Monaco',       choices:['Monaco','Singapore','Bangladesh','Malta']},
-    {q:'What is the most spoken native language?',         a:'Mandarin Chinese', choices:['English','Spanish','Mandarin Chinese','Hindi']},
-    {q:'Which ocean is the largest?',                      a:'Pacific Ocean', choices:['Atlantic Ocean','Pacific Ocean','Indian Ocean','Arctic Ocean']},
-    {q:'Which is the longest river in the world?',         a:'Nile',          choices:['Amazon','Nile','Yangtze','Mississippi']},
-    {q:'Which is the highest mountain in the world?',      a:'Mount Everest', choices:['K2','Mount Everest','Kangchenjunga','Lhotse']},
-    {q:'Which is the largest desert in the world?',        a:'Antarctic Desert', choices:['Sahara','Gobi','Antarctic Desert','Arabian Desert']},
-    {q:'Which country has the most islands?',              a:'Sweden',        choices:['Indonesia','Norway','Philippines','Sweden']},
-    {q:'Which city has the most people?',                  a:'Tokyo',         choices:['Shanghai','Mumbai','Tokyo','New York']},
-    {q:'Which country has the most billionaires?',         a:'United States', choices:['China','United States','Germany','India']},
-    {q:'Approximately what is India population?',       a:'1.4 billion',   choices:['900 million','1.4 billion','2 billion','1.1 billion']},
-    {q:'Approximately what is the US population?',         a:'335 million',   choices:['250 million','300 million','335 million','400 million']},
-    {q:'Which country has the lowest population density?', a:'Mongolia',      choices:['Iceland','Australia','Mongolia','Canada']},
-    {q:'Which African country is most populous?',          a:'Nigeria',       choices:['Egypt','Ethiopia','Nigeria','South Africa']},
-    {q:'Which European country is most populous?',         a:'Germany',       choices:['France','Germany','United Kingdom','Italy']},
-    {q:'Which country has the most freshwater?',           a:'Brazil',        choices:['Russia','Canada','Brazil','United States']},
-    {q:'Which country produces the most oil?',             a:'United States', choices:['Saudi Arabia','Russia','United States','Iraq']},
-    {q:'What percent of Earth surface is water?',       a:'71%',           choices:['60%','71%','80%','55%']},
-    {q:'Which country is growing fastest in population?',  a:'Niger',         choices:['Niger','Nigeria','Chad','Mali']},
-    {q:'How many people live on Earth (approx.)?',         a:'8 billion',     choices:['6 billion','7 billion','8 billion','9 billion']},
-    {q:'Which language is most widely spoken overall?',    a:'English',       choices:['Mandarin Chinese','English','Spanish','Hindi']},
-    {q:'Which country has the oldest median age?',         a:'Japan',         choices:['Germany','Italy','Japan','South Korea']},
-    {q:'Which continent is least populated?',              a:'Antarctica',    choices:['Antarctica','Oceania','South America','Europe']},
+    {q:'Which country has the largest population?',       a:'China',         choices:['China','India','United States','Indonesia']},
+    {q:'Which country has the second largest population?',a:'India',         choices:['China','India','United States','Indonesia']},
+    {q:'Which continent has the most countries?',         a:'Africa',        choices:['Africa','Asia','Europe','Americas']},
+    {q:'Approximately how many countries are in the world?',a:'195',         choices:['180','195','210','225']},
+    {q:'Which is the largest country by area?',           a:'Russia',        choices:['Russia','Canada','China','United States']},
+    {q:'Which is the smallest country in the world?',     a:'Vatican City',  choices:['Monaco','Vatican City','San Marino','Liechtenstein']},
+    {q:'Which country has the highest population density?',a:'Monaco',       choices:['Monaco','Singapore','Bangladesh','Malta']},
+    {q:'What is the most spoken language in the world?',  a:'Mandarin Chinese', choices:['English','Spanish','Mandarin Chinese','Hindi']},
+    {q:'Which ocean is the largest?',                     a:'Pacific Ocean', choices:['Atlantic Ocean','Pacific Ocean','Indian Ocean','Arctic Ocean']},
+    {q:'Which is the longest river in the world?',        a:'Nile',          choices:['Amazon','Nile','Yangtze','Mississippi']},
+    {q:'Which is the highest mountain in the world?',     a:'Mount Everest', choices:['K2','Mount Everest','Kangchenjunga','Lhotse']},
+    {q:'Which is the largest desert in the world?',       a:'Sahara',        choices:['Arabian','Gobi','Sahara','Antarctic']},
+    {q:'Which country has the most official languages?',  a:'South Africa',  choices:['India','Switzerland','South Africa','Bolivia']},
+    {q:'How many time zones does Russia have?',           a:'11',            choices:['8','9','11','13']},
+    {q:'Which city has the most metro/subway stations?',  a:'New York City', choices:['Tokyo','Moscow','New York City','London']},
   ]
 };
 
@@ -11089,97 +10871,54 @@ function geoAnswer(choice, btn, allChoices) {
 // ════════════════════════════════════════════════════════════
 var CONN_PUZZLES = [
   { id:1, groups:[
-    {cat:'Types of Jazz',      color:'#4e8ef7', words:['Bebop','Swing','Fusion','Modal'],    explain:'All are distinct styles of jazz music.'},
-    {cat:'___ Ball',           color:'#a855f7', words:['Basket','Base','Foot','Pin'],         explain:'Each word precedes "Ball" to make a sport or game.'},
-    {cat:'Things that spin',   color:'#f7a94e', words:['Top','Record','Earth','Dreidel'],     explain:'All of these things rotate or spin.'},
-    {cat:'Famous Alberts',     color:'#00d18c', words:['Einstein','Camus','Pujols','Brooks'], explain:'All famous people with the first name Albert.'}
+    {cat:'Types of Jazz',      color:'#4e8ef7', words:['Bebop','Swing','Fusion','Modal']},
+    {cat:'___ Ball',           color:'#a855f7', words:['Basket','Base','Foot','Pin']},
+    {cat:'Things that spin',   color:'#f7a94e', words:['Top','Record','Earth','Dreidel']},
+    {cat:'Famous Alberts',     color:'#00d18c', words:['Einstein','Camus','Pujols','Brooks']}
   ]},
   { id:2, groups:[
-    {cat:'Shades of Blue',     color:'#4e8ef7', words:['Navy','Cobalt','Teal','Cerulean'],   explain:'All are shades or variants of the color blue.'},
-    {cat:'___ Fish',           color:'#a855f7', words:['Sword','Cat','Star','Blow'],          explain:'Each word precedes "Fish" (Swordfish, Catfish, etc.).'},
-    {cat:'Cooking methods',    color:'#00d18c', words:['Braise','Sauté','Poach','Sear'],      explain:'All are culinary techniques for cooking food.'},
-    {cat:'Ancient wonders',    color:'#f7a94e', words:['Pyramid','Colossus','Lighthouse','Zeus'], explain:'All are among the Seven Wonders of the Ancient World.'}
+    {cat:'Shades of Blue',     color:'#4e8ef7', words:['Navy','Cobalt','Teal','Cerulean']},
+    {cat:'___ Fish',           color:'#a855f7', words:['Sword','Cat','Star','Blow']},
+    {cat:'Cooking methods',    color:'#00d18c', words:['Braise','Sauté','Poach','Sear']},
+    {cat:'Ancient wonders',    color:'#f7a94e', words:['Pyramid','Colossus','Lighthouse','Zeus']}
   ]},
   { id:3, groups:[
-    {cat:'Parts of a shoe',    color:'#4e8ef7', words:['Sole','Tongue','Lace','Heel'],       explain:'All are physical parts found on a shoe.'},
-    {cat:'Card games',         color:'#a855f7', words:['Poker','Rummy','Snap','War'],         explain:'All are games played with a standard deck of cards.'},
-    {cat:'Planets (no Earth)', color:'#00d18c', words:['Mars','Venus','Saturn','Mercury'],    explain:'All are planets in our solar system (excluding Earth).'},
-    {cat:'Things in a wallet', color:'#f7a94e', words:['Cash','Card','Photo','Receipt'],      explain:'Common items people carry inside a wallet.'}
+    {cat:'Parts of a shoe',    color:'#4e8ef7', words:['Sole','Tongue','Lace','Heel']},
+    {cat:'Card games',         color:'#a855f7', words:['Poker','Rummy','Snap','War']},
+    {cat:'Planets (no Earth)', color:'#00d18c', words:['Mars','Venus','Saturn','Mercury']},
+    {cat:'Things in a wallet', color:'#f7a94e', words:['Cash','Card','Photo','Receipt']}
   ]},
   { id:4, groups:[
-    {cat:'Dog breeds',         color:'#4e8ef7', words:['Poodle','Beagle','Boxer','Husky'],   explain:'All are recognized breeds of domestic dog.'},
-    {cat:'Chess pieces',       color:'#a855f7', words:['Rook','Bishop','Knight','Pawn'],      explain:'All are pieces used in the game of chess.'},
-    {cat:'Pizza toppings',     color:'#00d18c', words:['Pepperoni','Mushroom','Olive','Basil'],explain:'All are common pizza toppings.'},
-    {cat:'Types of clouds',    color:'#f7a94e', words:['Cirrus','Cumulus','Stratus','Nimbus'],explain:'All are meteorological cloud classifications.'}
+    {cat:'Dog breeds',         color:'#4e8ef7', words:['Poodle','Beagle','Boxer','Husky']},
+    {cat:'Chess pieces',       color:'#a855f7', words:['Rook','Bishop','Knight','Pawn']},
+    {cat:'Pizza toppings',     color:'#00d18c', words:['Pepperoni','Mushroom','Olive','Basil']},
+    {cat:'Types of clouds',    color:'#f7a94e', words:['Cirrus','Cumulus','Stratus','Nimbus']}
   ]},
   { id:5, groups:[
-    {cat:'___ stone',          color:'#4e8ef7', words:['Lime','Sand','Key','Cobble'],        explain:'Each word precedes "stone" (Limestone, Sandstone, etc.).'},
-    {cat:'Olympic sports',     color:'#a855f7', words:['Fencing','Luge','Archery','Judo'],   explain:'All are sports competed at the Olympic Games.'},
-    {cat:'Keyboard shortcuts', color:'#00d18c', words:['Copy','Paste','Undo','Save'],         explain:'All are common keyboard shortcut actions (Ctrl+C, etc.).'},
-    {cat:'Things with rings',  color:'#f7a94e', words:['Saturn','Tree','Boxing','Circus'],   explain:'All are associated with rings — planet, growth rings, boxing ring, circus ring.'}
+    {cat:'___ stone',          color:'#4e8ef7', words:['Lime','Sand','Key','Cobble']},
+    {cat:'Olympic sports',     color:'#a855f7', words:['Fencing','Luge','Archery','Judo']},
+    {cat:'Keyboard shortcuts', color:'#00d18c', words:['Copy','Paste','Undo','Save']},
+    {cat:'Things with rings',  color:'#f7a94e', words:['Saturn','Tree','Boxing','Circus']}
   ]},
   { id:6, groups:[
-    {cat:'Monopoly pieces',    color:'#4e8ef7', words:['Thimble','Iron','Boot','Hat'],       explain:'Classic playing pieces from the board game Monopoly.'},
-    {cat:'Types of tea',       color:'#a855f7', words:['Green','Oolong','Chai','Matcha'],    explain:'All are varieties or preparations of tea.'},
-    {cat:'Movie genres',       color:'#00d18c', words:['Noir','Western','Thriller','Slasher'],explain:'All are distinct film genre categories.'},
-    {cat:'Things that glow',   color:'#f7a94e', words:['Firefly','Moon','Neon','Ember'],     explain:'All are things that emit or reflect light.'}
+    {cat:'Monopoly pieces',    color:'#4e8ef7', words:['Thimble','Iron','Boot','Hat']},
+    {cat:'Types of tea',       color:'#a855f7', words:['Green','Oolong','Chai','Matcha']},
+    {cat:'Movie genres',       color:'#00d18c', words:['Noir','Western','Thriller','Slasher']},
+    {cat:'Things that glow',   color:'#f7a94e', words:['Firefly','Moon','Neon','Ember']}
   ]},
   { id:7, groups:[
-    {cat:'Famous Mikes',       color:'#4e8ef7', words:['Tyson','Jordan','Myers','Wazowski'], explain:'All are famous characters or people named Mike.'},
-    {cat:'Phobia prefixes',    color:'#a855f7', words:['Claustro','Acro','Arachno','Xeno'],  explain:'All are prefixes for phobia names (fear of enclosed spaces, heights, etc.).'},
-    {cat:'Types of bridges',   color:'#00d18c', words:['Arch','Truss','Beam','Cable'],       explain:'All are structural types of bridges used in engineering.'},
-    {cat:'Things in an ocean', color:'#f7a94e', words:['Coral','Trench','Current','Kelp'],   explain:'All are things found in the ocean or sea.'}
+    {cat:'Famous Mikes',       color:'#4e8ef7', words:['Tyson','Jordan','Myers','Wazowski']},
+    {cat:'Phobia prefixes',    color:'#a855f7', words:['Claustro','Acro','Arachno','Xeno']},
+    {cat:'Types of bridges',   color:'#00d18c', words:['Arch','Truss','Beam','Cable']},
+    {cat:'Things in an ocean', color:'#f7a94e', words:['Coral','Trench','Current','Kelp']}
   ]},
   { id:8, groups:[
-    {cat:'Space phenomena',    color:'#4e8ef7', words:['Nebula','Pulsar','Quasar','Void'],   explain:'All are phenomena or features found in outer space.'},
-    {cat:'Types of pasta',     color:'#a855f7', words:['Penne','Rigatoni','Farfalle','Orzo'],explain:'All are shapes of Italian pasta.'},
-    {cat:'Poker hands',        color:'#00d18c', words:['Flush','Straight','Full','Pair'],     explain:'All are names (or part of names) of poker hand rankings.'},
-    {cat:'___ pool',           color:'#f7a94e', words:['Car','Swimming','Dead','Gene'],       explain:'Each word precedes "pool" (Carpool, Swimming pool, Deadpool, Gene pool).'}
-  ]},
-  { id:9, groups:[
-    {cat:'Things that are wet',   color:'#4e8ef7', words:['Rain','Sweat','Dew','Tears'],       explain:'All are naturally occurring liquids associated with moisture.'},
-    {cat:'___ Berry',             color:'#a855f7', words:['Straw','Blue','Rasp','Black'],       explain:'Each word precedes "berry" (Strawberry, Blueberry, etc.).'},
-    {cat:'Famous Johns',          color:'#00d18c', words:['Lennon','Wick','Adams','Travolta'],  explain:'All are famous people or characters named John.'},
-    {cat:'Shades of Green',       color:'#f7a94e', words:['Lime','Sage','Olive','Jade'],        explain:'All are shades or variants of the color green.'}
-  ]},
-  { id:10, groups:[
-    {cat:'Things with keys',      color:'#4e8ef7', words:['Piano','Lock','Car','Map'],          explain:'All are things that have or use "keys" (different meanings).'},
-    {cat:'___ Star',              color:'#a855f7', words:['Rock','Gold','Death','Morning'],      explain:'Each word precedes "Star" (Rockstar, Gold Star, Death Star, Morning Star).'},
-    {cat:'Types of cheese',       color:'#00d18c', words:['Brie','Gouda','Havarti','Manchego'], explain:'All are varieties of cheese from different regions.'},
-    {cat:'Words meaning "tired"', color:'#f7a94e', words:['Weary','Drained','Spent','Beat'],    explain:'All are synonyms for feeling exhausted or tired.'}
-  ]},
-  { id:11, groups:[
-    {cat:'US Presidents (first name)',color:'#4e8ef7',words:['Abraham','Woodrow','Dwight','Calvin'],explain:'All are first names of US Presidents (Lincoln, Wilson, Eisenhower, Coolidge).'},
-    {cat:'Parts of a flower',      color:'#a855f7', words:['Petal','Stamen','Pistil','Sepal'],  explain:'All are anatomical parts of a flower.'},
-    {cat:'___ Ball (again)',        color:'#00d18c', words:['Snow','Fire','Gum','Odd'],          explain:'Each word precedes "ball" (Snowball, Fireball, Gumball, Oddball).'},
-    {cat:'Things that are sharp',   color:'#f7a94e', words:['Tack','Razor','Quill','Wit'],       explain:'All can be described as sharp — literally or figuratively.'}
-  ]},
-  { id:12, groups:[
-    {cat:'Types of knots',         color:'#4e8ef7', words:['Slip','Reef','Bowline','Clove'],     explain:'All are types of knots used in sailing or climbing.'},
-    {cat:'___ Man',                color:'#a855f7', words:['Spider','Pac','Snow','Old'],          explain:'Each word precedes "Man" (Spider-Man, Pac-Man, Snowman, Old Man).'},
-    {cat:'Card suits',             color:'#00d18c', words:['Hearts','Diamonds','Clubs','Spades'],explain:'The four suits in a standard deck of playing cards.'},
-    {cat:'Words that rhyme with "cat"',color:'#f7a94e',words:['Hat','Bat','Mat','Flat'],          explain:'All words rhyme with "cat".'}
-  ]},
-  { id:13, groups:[
-    {cat:'Things in a bakery',     color:'#4e8ef7', words:['Croissant','Éclair','Brioche','Tart'],explain:'All are baked goods commonly found in a bakery.'},
-    {cat:'Famous Jims',            color:'#a855f7', words:['Carrey','Henson','Morrison','Thorpe'],explain:'All are famous people named Jim.'},
-    {cat:'___ Light',              color:'#00d18c', words:['Moon','Flash','Candle','Star'],       explain:'Each word precedes "light" (Moonlight, Flashlight, etc.).'},
-    {cat:'Modes of transportation',color:'#f7a94e', words:['Ferry','Tram','Gondola','Rickshaw'],  explain:'All are forms of transportation used around the world.'}
-  ]},
-  { id:14, groups:[
-    {cat:'Things that are round',  color:'#4e8ef7', words:['Wheel','Coin','Globe','Donut'],      explain:'All are circular or spherical objects.'},
-    {cat:'Superhero powers',       color:'#a855f7', words:['Flight','Telepathy','Speed','Strength'],explain:'All are classic superpowers possessed by comic book heroes.'},
-    {cat:'___ House',              color:'#00d18c', words:['Power','Glass','Tree','Ware'],         explain:'Each word precedes "house" (Powerhouse, Glasshouse, Treehouse, Warehouse).'},
-    {cat:'Famous Elizabeths',      color:'#f7a94e', words:['Taylor','Warren','Holmes','Bennet'],   explain:'All are famous real or fictional people named Elizabeth.'}
-  ]},
-  { id:15, groups:[
-    {cat:'Things associated with money',color:'#4e8ef7',words:['Mint','Bank','Vault','Ledger'],  explain:'All are things or places associated with money and finance.'},
-    {cat:'___ Down',               color:'#a855f7', words:['Break','Shut','Count','Melt'],        explain:'Each word precedes "down" (Breakdown, Shutdown, Countdown, Meltdown).'},
-    {cat:'Parts of an eye',        color:'#00d18c', words:['Iris','Pupil','Cornea','Retina'],     explain:'All are anatomical parts of the human eye.'},
-    {cat:'Words for "fast"',       color:'#f7a94e', words:['Swift','Brisk','Fleet','Rapid'],      explain:'All are synonyms meaning quick or fast.'}
+    {cat:'Space phenomena',    color:'#4e8ef7', words:['Nebula','Pulsar','Quasar','Void']},
+    {cat:'Types of pasta',     color:'#a855f7', words:['Penne','Rigatoni','Farfalle','Orzo']},
+    {cat:'Poker hands',        color:'#00d18c', words:['Flush','Straight','Full','Pair']},
+    {cat:'___ pool',           color:'#f7a94e', words:['Car','Swimming','Dead','Gene']}
   ]}
 ];
-
 
 var connPuzzleIdx = 0, connSelected = [], connWords = [], connSolvedGroups = [], connMistakes = 0;
 var CONN_MAX_MISTAKES = 4;
@@ -11255,14 +10994,10 @@ window.connSubmit=function(){
     connSelected=[];
     var sr=document.getElementById('conn-solved-rows');
     if(sr){
-      var pz=CONN_PUZZLES[connPuzzleIdx];
-      var grp=pz.groups.find(function(g){return g.cat===cat;});
-      var explainText=grp&&grp.explain?grp.explain:'';
       var row=document.createElement('div');
       row.style.cssText='background:'+color+';border-radius:10px;padding:14px 16px;text-align:center;width:100%;box-sizing:border-box';
       row.innerHTML='<div style="font-size:11px;font-weight:800;color:#0a1a12;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+cat+'</div>'
-        +'<div style="font-size:13px;font-weight:700;color:#0a1a12;margin-bottom:'+(explainText?'6':'0')+'px">'+chosen.map(function(x){return x.word;}).join(' · ')+'</div>'
-        +(explainText?'<div style="font-size:11px;color:rgba(0,0,0,0.6);font-style:italic">'+explainText+'</div>':'');
+        +'<div style="font-size:13px;font-weight:700;color:#0a1a12">'+chosen.map(function(x){return x.word;}).join(' · ')+'</div>';
       sr.appendChild(row);
     }
     if(connWords.length===0){
@@ -11517,138 +11252,6 @@ window.addEventListener('DOMContentLoaded', function() {
   usmapRenderBg();
 });
 
-
-function typingOpenCustomEditor() {
-  typingRenderCustomList();
-  var modal = document.getElementById('typing-custom-modal');
-  modal.style.display='flex';
-  setTimeout(function(){ var inp=document.getElementById('typing-custom-input'); if(inp) inp.focus(); },100);
-}
-function typingCloseCustomEditor() {
-  document.getElementById('typing-custom-modal').style.display='none';
-}
-function typingRenderCustomList() {
-  var list = document.getElementById('typing-custom-list');
-  if(!list) return;
-  var hidden = typingGetHiddenBuiltins();
-  var customs = typingGetCustomSentences();
-  list.innerHTML = '';
-
-  // Section header for builtins
-  var bHeader = document.createElement('div');
-  bHeader.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4a7060;padding:4px 2px 2px';
-  bHeader.textContent='Built-in Sentences';
-  list.appendChild(bHeader);
-
-  TYPING_BUILTIN_SENTENCES_DEFAULT.forEach(function(s) {
-    var isHidden = hidden.indexOf(s) !== -1;
-    var row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:'+(isHidden?'#0d0f0e':'#0d1a12')+';border:1px solid '+(isHidden?'#2a1a1a':'#1a3020')+';border-radius:8px;opacity:'+(isHidden?'0.5':'1');
-    row.innerHTML='<span style="font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0">APP</span><span style="flex:1;font-size:13px;color:#7a9e8e">'+s+'</span><button onclick="typingToggleBuiltin(this,''+s.replace(/'/g,"\'")+'')" style="background:transparent;border:1px solid '+(isHidden?'#4a7060':'#f74e4e')+';color:'+(isHidden?'#4a7060':'#f74e4e')+';cursor:pointer;font-size:11px;font-weight:700;border-radius:5px;padding:2px 7px;" title="'+(isHidden?'Show':'Hide')+'">'+( isHidden?'SHOW':'HIDE')+'</button>';
-    list.appendChild(row);
-  });
-
-  // Section header for custom
-  var cHeader = document.createElement('div');
-  cHeader.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4a7060;padding:10px 2px 2px';
-  cHeader.textContent='Your Sentences';
-  list.appendChild(cHeader);
-
-  if(customs.length===0) {
-    var empty=document.createElement('div');
-    empty.style.cssText='font-size:12px;color:#3a5040;padding:8px;text-align:center';
-    empty.textContent='No custom sentences yet. Add one below!';
-    list.appendChild(empty);
-  }
-  customs.forEach(function(s, i) {
-    var row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
-    row.innerHTML='<span style="flex:1;font-size:13px;color:#e8f0ed">'+s+'</span><button onclick="typingDeleteCustomSentence('+i+')" style="background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;" title="Delete">✕</button>';
-    list.appendChild(row);
-  });
-  var inp=document.getElementById('typing-custom-input');
-  if(inp) inp.onkeydown=function(e){ if(e.key==='Enter') typingAddCustomSentence(); };
-}
-
-function typingToggleBuiltin(btn, sentence) {
-  var hidden = typingGetHiddenBuiltins();
-  var idx = hidden.indexOf(sentence);
-  if(idx === -1) { hidden.push(sentence); } else { hidden.splice(idx, 1); }
-  typingSaveHiddenBuiltins(hidden);
-  typingRenderCustomList();
-}
-function typingAddCustomSentence() {
-  var input = document.getElementById('typing-custom-input');
-  var val = input.value.trim();
-  if(!val) return;
-  var arr = typingGetCustomSentences();
-  arr.push(val);
-  typingSaveCustomSentences(arr);
-  input.value='';
-  typingRenderCustomList();
-}
-function typingDeleteCustomSentence(i) {
-  var arr = typingGetCustomSentences();
-  arr.splice(i,1);
-  typingSaveCustomSentences(arr);
-  typingRenderCustomList();
-}
-
-// ════════════════════════════════════════════════════════════
-//  MIDNIGHT AUTO-RESET (checks every minute)
-// ════════════════════════════════════════════════════════════
-(function() {
-  function getTodayKey() {
-    const now = new Date();
-    return now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate();
-  }
-  let _lastDayKey = getTodayKey();
-
-  function midnightReset() {
-    const key = getTodayKey();
-    if (key === _lastDayKey) return; // same day, nothing to do
-    _lastDayKey = key;
-
-    // Reset timer localStorage values
-    localStorage.setItem('chessTimer', '0');
-    localStorage.setItem('pianoTimer', '0');
-    localStorage.setItem('typingTimer', '0');
-    localStorage.setItem('mathTimer', '0');
-
-    // Reset in-memory timer vars
-    chTimerElapsed = 0; pianoTimerElapsed = 0; typingTimerElapsed = 0;
-    if (typeof mathTimerElapsed !== 'undefined') mathTimerElapsed = 0;
-
-    // Stop any running timers
-    if (chTimerRunning) { chTimerRunning = false; clearInterval(chTimerInterval); }
-    if (pianoTimerRunning) { pianoTimerRunning = false; clearInterval(pianoTimerInterval); }
-    if (typingTimerRunning) { typingTimerRunning = false; clearInterval(typingTimerInterval); }
-
-    // Re-render dailys display
-    if (typeof renderHomeDailys === 'function') renderHomeDailys();
-
-    // Refresh wordle — new daily word
-    if (typeof wordleInit === 'function') {
-      wordleInit();
-      if (typeof wordleRenderMini === 'function') wordleRenderMini();
-      // If user is on wordle page, re-render board too
-      const wp = document.getElementById('page-wordle');
-      if (wp && wp.classList.contains('active')) {
-        if (typeof wordleRenderBoard === 'function') wordleRenderBoard();
-        if (typeof wordleRenderKeyboard === 'function') wordleRenderKeyboard();
-        if (typeof wordleUpdateMsg === 'function') wordleUpdateMsg();
-      }
-    }
-
-    // Refresh quote
-    if (typeof renderQuoteOfDay === 'function') renderQuoteOfDay();
-
-    console.log('[HelpfulApp] Midnight reset fired for', key);
-  }
-
-  // Check every 60 seconds
-  setInterval(midnightReset, 60 * 1000);
-})();
 </script>
 
 
@@ -11699,22 +11302,5 @@ function typingDeleteCustomSentence(i) {
   </div>
 </div>
 
-
-
-<!-- ══ TYPING CUSTOM SENTENCES MODAL ══ -->
-<div id="typing-custom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;align-items:center;justify-content:center">
-  <div style="background:#141a17;border:1px solid #1f2e28;border-radius:16px;width:560px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;padding:24px;gap:16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:16px;font-weight:800;color:#e8f0ed">✍️ My Sentences</div>
-      <button onclick="typingCloseCustomEditor()" style="background:transparent;border:none;color:#7a9e8e;font-size:20px;cursor:pointer;line-height:1">✕</button>
-    </div>
-    <div style="font-size:12px;color:#4a7060">App-provided sentences (can't delete) are shown in green. Add your own below.</div>
-    <div id="typing-custom-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;max-height:280px;"></div>
-    <div style="display:flex;gap:8px;">
-      <input id="typing-custom-input" type="text" placeholder="Type a sentence and press Add…" style="flex:1;background:#111312;border:1px solid #1f2e28;color:#e8f0ed;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;font-family:inherit;">
-      <button onclick="typingAddCustomSentence()" style="background:#00d18c;color:#003d2a;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Add</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
