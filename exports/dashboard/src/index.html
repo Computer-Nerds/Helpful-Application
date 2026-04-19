@@ -11543,40 +11543,75 @@ function typingRenderCustomList() {
   TYPING_BUILTIN_SENTENCES_DEFAULT.forEach(function(s) {
     var isHidden = hidden.indexOf(s) !== -1;
     var row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:'+(isHidden?'#0d0f0e':'#0d1a12')+';border:1px solid '+(isHidden?'#2a1a1a':'#1a3020')+';border-radius:8px;opacity:'+(isHidden?'0.5':'1');
-    row.innerHTML='<span style="font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0">APP</span><span style="flex:1;font-size:13px;color:#7a9e8e">'+s+'</span><button onclick="typingToggleBuiltin(this,''+s.replace(/'/g,"\'")+'')" style="background:transparent;border:1px solid '+(isHidden?'#4a7060':'#f74e4e')+';color:'+(isHidden?'#4a7060':'#f74e4e')+';cursor:pointer;font-size:11px;font-weight:700;border-radius:5px;padding:2px 7px;" title="'+(isHidden?'Show':'Hide')+'">'+( isHidden?'SHOW':'HIDE')+'</button>';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;opacity:' + (isHidden ? '0.5' : '1') + ';background:' + (isHidden ? '#0d0f0e' : '#0d1a12') + ';border:1px solid ' + (isHidden ? '#2a1a1a' : '#1a3020') + ';';
+
+    var label = document.createElement('span');
+    label.style.cssText = 'font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0';
+    label.textContent = 'APP';
+
+    var text = document.createElement('span');
+    text.style.cssText = 'flex:1;font-size:13px;color:#7a9e8e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    text.textContent = s;
+
+    var btn = document.createElement('button');
+    btn.style.cssText = 'background:transparent;border:1px solid ' + (isHidden ? '#4a7060' : '#f74e4e') + ';color:' + (isHidden ? '#4a7060' : '#f74e4e') + ';cursor:pointer;font-size:11px;font-weight:700;border-radius:5px;padding:2px 7px;font-family:inherit;flex-shrink:0;';
+    btn.textContent = isHidden ? 'SHOW' : 'HIDE';
+    btn.title = isHidden ? 'Show this sentence' : 'Hide this sentence';
+    (function(sentence) {
+      btn.addEventListener('click', function() { typingToggleBuiltin(sentence); });
+    })(s);
+
+    row.appendChild(label);
+    row.appendChild(text);
+    row.appendChild(btn);
     list.appendChild(row);
   });
 
   // Section header for custom
   var cHeader = document.createElement('div');
-  cHeader.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4a7060;padding:10px 2px 2px';
-  cHeader.textContent='Your Sentences';
+  cHeader.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4a7060;padding:10px 2px 2px';
+  cHeader.textContent = 'Your Sentences';
   list.appendChild(cHeader);
 
-  if(customs.length===0) {
-    var empty=document.createElement('div');
-    empty.style.cssText='font-size:12px;color:#3a5040;padding:8px;text-align:center';
-    empty.textContent='No custom sentences yet. Add one below!';
+  if(customs.length === 0) {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'font-size:12px;color:#3a5040;padding:8px;text-align:center';
+    empty.textContent = 'No custom sentences yet. Add one below!';
     list.appendChild(empty);
   }
   customs.forEach(function(s, i) {
     var row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
-    row.innerHTML='<span style="flex:1;font-size:13px;color:#e8f0ed">'+s+'</span><button onclick="typingDeleteCustomSentence('+i+')" style="background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;" title="Delete">✕</button>';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
+
+    var text = document.createElement('span');
+    text.style.cssText = 'flex:1;font-size:13px;color:#e8f0ed';
+    text.textContent = s;
+
+    var del = document.createElement('button');
+    del.style.cssText = 'background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;';
+    del.title = 'Delete';
+    del.textContent = '✕';
+    (function(idx) {
+      del.addEventListener('click', function() { typingDeleteCustomSentence(idx); });
+    })(i);
+
+    row.appendChild(text);
+    row.appendChild(del);
     list.appendChild(row);
   });
-  var inp=document.getElementById('typing-custom-input');
-  if(inp) inp.onkeydown=function(e){ if(e.key==='Enter') typingAddCustomSentence(); };
+
+  var inp = document.getElementById('typing-custom-input');
+  if(inp) inp.onkeydown = function(e) { if(e.key === 'Enter') typingAddCustomSentence(); };
 }
 
-function typingToggleBuiltin(btn, sentence) {
+function typingToggleBuiltin(sentence) {
   var hidden = typingGetHiddenBuiltins();
   var idx = hidden.indexOf(sentence);
   if(idx === -1) { hidden.push(sentence); } else { hidden.splice(idx, 1); }
   typingSaveHiddenBuiltins(hidden);
   typingRenderCustomList();
 }
+
 function typingAddCustomSentence() {
   var input = document.getElementById('typing-custom-input');
   var val = input.value.trim();
