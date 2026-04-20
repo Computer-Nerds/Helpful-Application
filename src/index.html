@@ -2036,7 +2036,7 @@
 
           <!-- Question Card -->
           <div id="math-card">
-            <div id="math-streak-row">
+            <div id="math-streak-row" style="display:none">
               <span id="math-streak-fire">🔥</span>
               <span id="math-streak-txt">0 streak</span>
             </div>
@@ -2062,10 +2062,10 @@
 
           <!-- Stats -->
           <div id="math-stats">
-            <div class="math-stat"><div class="math-stat-val" id="math-stat-correct">0</div><div class="math-stat-lbl">Correct</div></div>
-            <div class="math-stat"><div class="math-stat-val" id="math-stat-wrong" style="color:#e05252">0</div><div class="math-stat-lbl">Wrong</div></div>
-            <div class="math-stat"><div class="math-stat-val" id="math-stat-best">0</div><div class="math-stat-lbl">Best Streak</div></div>
-            <div class="math-stat"><div class="math-stat-val" id="math-stat-acc">—</div><div class="math-stat-lbl">Accuracy</div></div>
+            <div class="math-stat"><div class="math-stat-val" id="math-stat-correct" style="color:#00d18c;font-size:28px">0</div><div class="math-stat-lbl">Correct</div></div>
+            <div class="math-stat" style="display:none"><div class="math-stat-val" id="math-stat-wrong" style="color:#e05252">0</div><div class="math-stat-lbl">Wrong</div></div>
+            <div class="math-stat" style="display:none"><div class="math-stat-val" id="math-stat-best">0</div><div class="math-stat-lbl">Best Streak</div></div>
+            <div class="math-stat" style="display:none"><div class="math-stat-val" id="math-stat-acc">—</div><div class="math-stat-lbl">Accuracy</div></div>
           </div>
 
         </div>
@@ -4510,9 +4510,18 @@ const WORDS_EASY=['the','be','to','of','and','a','in','that','have','it','for','
 const WORDS_HARD=['rhythm','bureaucracy','entrepreneur','conscientious','phenomenon','onomatopoeia','necessary','accommodate','occurrence','perseverance','miscellaneous','acquaintance','Mediterranean','psychological','reconnaissance','extraordinary','approximately','distinguishable','incomprehensible','responsibilities','simultaneously','acknowledgement','conscientiously','extraordinarily','revolutionary','unprecedented','sophisticated','unambiguously','characteristic','disappointment'];
 const SENTENCES=['The quick brown fox jumps over the lazy dog.','Coding every day sharpens your mind and builds discipline.','Practice makes perfect and consistency is the key to mastering any skill.','Every great developer was once a beginner who refused to give up.','The secret of getting ahead is getting started.','A smooth sea never made a skilled sailor.','Focus on the journey not the destination.','Small daily improvements lead to stunning long-term results.','Type with intention and let your fingers find their own rhythm.','The keyboard is your instrument and the screen is your stage.','Learning to type quickly unlocks a whole new level of productivity.','There is no shortcut to mastery only deliberate and consistent practice.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.','Success is not final failure is not fatal it is the courage to continue that counts.','The future belongs to those who believe in the beauty of their dreams.','It does not matter how slowly you go as long as you do not stop.','Believe you can and you are halfway there.','The mind is everything what you think you become.','You miss one hundred percent of the shots you do not take.','If you are going through hell keep going.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Life is what happens when you are busy making other plans.','Whether you think you can or you think you cannot you are right.'];
 
-// ── Built-in typing sentences from the app (cannot be deleted) ──
-const TYPING_BUILTIN_SENTENCES = ['The quick brown fox jumps over the lazy dog.','The mind is everything what you think you become.','Small daily improvements lead to stunning long-term results.','Success is not final failure is not fatal it is the courage to continue that counts.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Whether you think you can or you think you cannot you are right.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.'];
+// ── Built-in typing sentences (can be hidden by user) ──
+const TYPING_BUILTIN_SENTENCES_DEFAULT = ['The quick brown fox jumps over the lazy dog.','The mind is everything what you think you become.','Small daily improvements lead to stunning long-term results.','Success is not final failure is not fatal it is the courage to continue that counts.','The best time to plant a tree was twenty years ago the second best time is now.','An investment in knowledge pays the best interest.','Whether you think you can or you think you cannot you are right.','The only way to do great work is to love what you do.','In the middle of every difficulty lies opportunity.'];
 
+// Built-in sentences are now optional — user can hide them
+const TYPING_BUILTIN_SENTENCES = TYPING_BUILTIN_SENTENCES_DEFAULT;
+
+function typingGetHiddenBuiltins() {
+  try { return JSON.parse(localStorage.getItem('typing_hidden_builtins') || '[]'); } catch(e) { return []; }
+}
+function typingSaveHiddenBuiltins(arr) {
+  localStorage.setItem('typing_hidden_builtins', JSON.stringify(arr));
+}
 function typingGetCustomSentences() {
   try { return JSON.parse(localStorage.getItem('typing_custom_sentences') || '[]'); } catch(e) { return []; }
 }
@@ -4520,7 +4529,9 @@ function typingSaveCustomSentences(arr) {
   localStorage.setItem('typing_custom_sentences', JSON.stringify(arr));
 }
 function typingAllCustomSentences() {
-  return [...TYPING_BUILTIN_SENTENCES, ...typingGetCustomSentences()];
+  var hidden = typingGetHiddenBuiltins();
+  var visibleBuiltins = TYPING_BUILTIN_SENTENCES_DEFAULT.filter(function(s) { return hidden.indexOf(s) === -1; });
+  return [...visibleBuiltins, ...typingGetCustomSentences()];
 }
 const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'},{key:'custom',label:'My Sentences',icon:'✍️'}];
 
@@ -4636,7 +4647,9 @@ function typingHandleInput(e){
   // Accuracy
   let wrong = 0;
   for(let i = 0; i < val.length; i++){ if(val[i] !== typingPrompt[i]) wrong++; }
-  typingAcc = val.length > 0 ? Math.round(((val.length - wrong) / val.length) * 100) : 100;
+  // Accuracy: correct chars out of total prompt length (penalizes wrong chars fairly)
+  const totalChars = typingPrompt.length || 1;
+  typingAcc = Math.max(0, Math.round(((totalChars - wrong) / totalChars) * 100));
   const accEl = document.getElementById('typing-acc');
   if(accEl){ accEl.textContent = typingAcc + '%'; accEl.style.color = typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'; }
 
@@ -4647,7 +4660,7 @@ function typingHandleInput(e){
   renderTypingPrompt();
 
   // Check completion
-  if(val.length === typingPrompt.length && val === typingPrompt){
+  if(val.length === typingPrompt.length){
     clearInterval(typingWpmInterval);
     typingFinished = true;
     const mins = (Date.now() - typingStartTime) / 60000;
@@ -4677,10 +4690,6 @@ function typingHandleInput(e){
           <div class="typing-result-stat">
             <div class="typing-result-stat-val" style="color:${typingAcc>=95?'#00d18c':typingAcc>=80?'#f7a94e':'#f87171'}">${typingAcc}%</div>
             <div class="typing-result-stat-lbl">Accuracy</div>
-          </div>
-          <div class="typing-result-stat">
-            <div class="typing-result-stat-val" style="color:${errCount===0?'#00d18c':errCount<=3?'#f7a94e':'#f87171'}">${errCount}</div>
-            <div class="typing-result-stat-lbl">Errors</div>
           </div>
           <div class="typing-result-stat">
             <div class="typing-result-stat-val" style="color:#7a9e8e">${typingBestWpm}</div>
@@ -4975,11 +4984,19 @@ async function musicHandleArt(files){
   };
 
   function mLoad(){
-    try{ const s=localStorage.getItem('math_rpg'); if(s){ const p=JSON.parse(s); Object.assign(m,p); } }catch(e){}
+    try{
+      const s=localStorage.getItem('math_rpg');
+      if(s){
+        const p=JSON.parse(s);
+        // Version 2: reset if old data (no v2 flag) — clears old progress
+        if(!p._v2){ localStorage.removeItem('math_rpg'); return; }
+        Object.assign(m,p);
+      }
+    }catch(e){}
   }
   function mSave(){
     localStorage.setItem('math_rpg', JSON.stringify({
-      level:m.level,xp:m.xp,streak:m.streak,best:m.best,correct:m.correct,wrong:m.wrong,ops:m.ops
+      _v2:true,level:m.level,xp:m.xp,streak:m.streak,best:m.best,correct:m.correct,wrong:m.wrong,ops:m.ops
     }));
   }
 
@@ -5062,8 +5079,9 @@ async function musicHandleArt(files){
   // ── Question generation ──────────────────────────────────────
   function mRange(){
     if(m.level <= 20) return 10;
-    // After level 20, scale up gradually
-    return Math.min(10 + (m.level - 20) * 3, 100);
+    if(m.level < 30) return Math.min(10 + (m.level - 20) * 3, 40);
+    // Level 30+: significantly harder - large numbers
+    return Math.min(50 + (m.level - 30) * 5, 999);
   }
   function mRand(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
@@ -5077,11 +5095,11 @@ async function musicHandleArt(files){
     } else if(op==='-'){
       a=mRand(1,R); b=mRand(0,a); answer=a-b;
     } else if(op==='×'){
-      const maxMul=m.level<=20?10:Math.min(10+Math.floor((m.level-20)/2),12);
+      const maxMul=m.level<=20?10:m.level<30?Math.min(10+Math.floor((m.level-20)/2),12):Math.min(12+Math.floor((m.level-30)*1.5),30);
       a=mRand(1,maxMul); b=mRand(1,maxMul); answer=a*b;
     } else { // ÷
-      b=mRand(1,m.level<=20?10:Math.min(10+Math.floor((m.level-20)/2),12));
-      answer=mRand(1,Math.min(2+Math.floor(m.level/2),12));
+      b=mRand(1,m.level<=20?10:m.level<30?Math.min(10+Math.floor((m.level-20)/2),12):Math.min(12+Math.floor((m.level-30)/2),25));
+      answer=mRand(1,m.level<30?Math.min(2+Math.floor(m.level/2),12):Math.min(12+(m.level-30),30));
       a=b*answer;
     }
     m.qVal={a,b,op,answer};
@@ -5204,6 +5222,7 @@ async function musicHandleArt(files){
     if(!confirm('Reset all progress?')) return;
     m={level:1,xp:0,streak:0,best:0,correct:0,wrong:0,ops:['+','-'],qVal:null};
     localStorage.removeItem('math_rpg');
+    // No need to save v2 flag on reset — it'll be saved next correct answer
     // Reset op buttons
     document.querySelectorAll('.math-op-btn').forEach(b=>{
       b.classList.toggle('active', b.dataset.op==='+'||b.dataset.op==='-');
@@ -11511,30 +11530,88 @@ function typingCloseCustomEditor() {
 function typingRenderCustomList() {
   var list = document.getElementById('typing-custom-list');
   if(!list) return;
-  var builtins = TYPING_BUILTIN_SENTENCES;
+  var hidden = typingGetHiddenBuiltins();
   var customs = typingGetCustomSentences();
   list.innerHTML = '';
-  builtins.forEach(function(s) {
+
+  // Section header for builtins
+  var bHeader = document.createElement('div');
+  bHeader.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4a7060;padding:4px 2px 2px';
+  bHeader.textContent='Built-in Sentences';
+  list.appendChild(bHeader);
+
+  TYPING_BUILTIN_SENTENCES_DEFAULT.forEach(function(s) {
+    var isHidden = hidden.indexOf(s) !== -1;
     var row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0d1a12;border:1px solid #1a3020;border-radius:8px;';
-    row.innerHTML='<span style="font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0">APP</span><span style="flex:1;font-size:13px;color:#7a9e8e">'+s+'</span>';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;opacity:' + (isHidden ? '0.5' : '1') + ';background:' + (isHidden ? '#0d0f0e' : '#0d1a12') + ';border:1px solid ' + (isHidden ? '#2a1a1a' : '#1a3020') + ';';
+
+    var label = document.createElement('span');
+    label.style.cssText = 'font-size:11px;font-weight:700;color:#00d18c;flex-shrink:0';
+    label.textContent = 'APP';
+
+    var text = document.createElement('span');
+    text.style.cssText = 'flex:1;font-size:13px;color:#7a9e8e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    text.textContent = s;
+
+    var btn = document.createElement('button');
+    btn.style.cssText = 'background:transparent;border:1px solid ' + (isHidden ? '#4a7060' : '#f74e4e') + ';color:' + (isHidden ? '#4a7060' : '#f74e4e') + ';cursor:pointer;font-size:11px;font-weight:700;border-radius:5px;padding:2px 7px;font-family:inherit;flex-shrink:0;';
+    btn.textContent = isHidden ? 'SHOW' : 'HIDE';
+    btn.title = isHidden ? 'Show this sentence' : 'Hide this sentence';
+    (function(sentence) {
+      btn.addEventListener('click', function() { typingToggleBuiltin(sentence); });
+    })(s);
+
+    row.appendChild(label);
+    row.appendChild(text);
+    row.appendChild(btn);
     list.appendChild(row);
   });
-  if(customs.length===0) {
-    var empty=document.createElement('div');
-    empty.style.cssText='font-size:12px;color:#3a5040;padding:8px;text-align:center';
-    empty.textContent='No custom sentences yet. Add one below!';
+
+  // Section header for custom
+  var cHeader = document.createElement('div');
+  cHeader.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#4a7060;padding:10px 2px 2px';
+  cHeader.textContent = 'Your Sentences';
+  list.appendChild(cHeader);
+
+  if(customs.length === 0) {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'font-size:12px;color:#3a5040;padding:8px;text-align:center';
+    empty.textContent = 'No custom sentences yet. Add one below!';
     list.appendChild(empty);
   }
   customs.forEach(function(s, i) {
     var row = document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
-    row.innerHTML='<span style="flex:1;font-size:13px;color:#e8f0ed">'+s+'</span><button onclick="typingDeleteCustomSentence('+i+')" style="background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;" title="Delete">✕</button>';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;background:#1a1f1d;border:1px solid #1f2e28;border-radius:8px;';
+
+    var text = document.createElement('span');
+    text.style.cssText = 'flex:1;font-size:13px;color:#e8f0ed';
+    text.textContent = s;
+
+    var del = document.createElement('button');
+    del.style.cssText = 'background:transparent;border:none;color:#f74e4e;cursor:pointer;font-size:16px;line-height:1;padding:0 4px;';
+    del.title = 'Delete';
+    del.textContent = '✕';
+    (function(idx) {
+      del.addEventListener('click', function() { typingDeleteCustomSentence(idx); });
+    })(i);
+
+    row.appendChild(text);
+    row.appendChild(del);
     list.appendChild(row);
   });
-  var inp=document.getElementById('typing-custom-input');
-  if(inp) inp.onkeydown=function(e){ if(e.key==='Enter') typingAddCustomSentence(); };
+
+  var inp = document.getElementById('typing-custom-input');
+  if(inp) inp.onkeydown = function(e) { if(e.key === 'Enter') typingAddCustomSentence(); };
 }
+
+function typingToggleBuiltin(sentence) {
+  var hidden = typingGetHiddenBuiltins();
+  var idx = hidden.indexOf(sentence);
+  if(idx === -1) { hidden.push(sentence); } else { hidden.splice(idx, 1); }
+  typingSaveHiddenBuiltins(hidden);
+  typingRenderCustomList();
+}
+
 function typingAddCustomSentence() {
   var input = document.getElementById('typing-custom-input');
   var val = input.value.trim();
