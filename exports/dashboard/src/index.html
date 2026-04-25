@@ -2735,7 +2735,7 @@
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🔀 Sentence Scramble</span>
         <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="scr-score">0</span> &nbsp;|&nbsp; Streak: <span id="scr-streak">0</span></span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div id="geo-std-pane" style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
         <div style="font-size:13px;color:#7a9e8e;text-align:center">Tap the words in the correct order to form a sentence.</div>
         <div id="scr-selected" style="min-height:52px;background:#0f1f17;border:1px solid #1f3a2a;border-radius:10px;padding:12px 14px;width:100%;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:15px;color:#e8f0ed"></div>
         <div id="scr-words" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%"></div>
@@ -2875,7 +2875,7 @@
         <span style="font-size:15px;font-weight:700;color:#e8f0ed">🌍 Geography Quiz</span>
         <span style="margin-left:auto;font-size:13px;color:#7a9e8e">Score: <span id="geo-score">0</span> &nbsp;|&nbsp; Streak: <span id="geo-streak">0</span></span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
+      <div id="geo-std-pane" style="display:flex;flex-direction:column;align-items:center;padding:24px 20px;overflow-y:auto;flex:1;gap:14px;max-width:520px;width:100%;margin:0 auto;box-sizing:border-box">
         <!-- Category tabs -->
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
           <button id="geo-cat-capitals"  onclick="geoSetCat('capitals')"  style="padding:7px 14px;border-radius:20px;border:1px solid #00d18c;background:#00d18c;color:#0a1a12;font-size:12px;font-weight:700;cursor:pointer">🏛️ Capitals</button>
@@ -11009,19 +11009,15 @@ function geoSetCat(cat) {
     btn.style.color = c===cat ? '#0a1a12' : '#7a9e8e';
     btn.style.borderColor = c===cat ? '#00d18c' : '#1f3a2a';
   });
-  // Show/hide normal vs map pane
-  var normalPane = document.querySelector('#geo-map-pane').previousElementSibling;
   var mapPane = document.getElementById('geo-map-pane');
+  var stdPane = document.getElementById('geo-std-pane');
   if(cat === 'map') {
-    // Hide standard geo content, show map pane
-    var stdContent = document.getElementById('geo-question-card');
-    if(stdContent) stdContent.closest('div[style*="flex-direction:column"]') && (stdContent.parentElement.style.display='none');
-    mapPane.style.display = 'flex';
+    if(stdPane) stdPane.style.display = 'none';
+    if(mapPane) mapPane.style.display = 'flex';
     geoMapNext();
   } else {
-    mapPane.style.display = 'none';
-    var stdContent = document.getElementById('geo-question-card');
-    if(stdContent && stdContent.parentElement) stdContent.parentElement.style.display = 'flex';
+    if(mapPane) mapPane.style.display = 'none';
+    if(stdPane) stdPane.style.display = 'flex';
     geoNext();
   }
 }
