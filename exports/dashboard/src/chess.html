@@ -368,22 +368,26 @@ function doMove(move){
 function botMove(){
   botThinking=true;
   document.getElementById('status-text').textContent='Bot thinking…';
+  // Yield to let the timer interval tick before heavy minimax computation
   setTimeout(()=>{
     const d=parseInt(document.getElementById('difficulty').value);
     const rating=RATINGS[d];
-    const move=getBotMove(board,gameState,rating.depth,rating.rand);
-    if(!move){checkGameOver();botThinking=false;return;}
-    const san=toSAN(board,move,gameState);
-    const captured=board[move.to[0]][move.to[1]];
-    if(captured){capturedW.push(captured.type);playCapture();}else playMove();
-    const res=applyMove(board,move,gameState);
-    board=res.board;gameState=res.state;
-    moveHistory.push({...move,san});
-    selected=null;legalMoves=[];
-    renderBoard();renderPanel();
-    checkGameOver();
-    botThinking=false;
-    if(!gameOver)document.getElementById('status-text').textContent='Your turn (White)';
+    // Another yield so timer stays alive during compute
+    setTimeout(()=>{
+      const move=getBotMove(board,gameState,rating.depth,rating.rand);
+      if(!move){checkGameOver();botThinking=false;return;}
+      const san=toSAN(board,move,gameState);
+      const captured=board[move.to[0]][move.to[1]];
+      if(captured){capturedW.push(captured.type);playCapture();}else playMove();
+      const res=applyMove(board,move,gameState);
+      board=res.board;gameState=res.state;
+      moveHistory.push({...move,san});
+      selected=null;legalMoves=[];
+      renderBoard();renderPanel();
+      checkGameOver();
+      botThinking=false;
+      if(!gameOver)document.getElementById('status-text').textContent='Your turn (White)';
+    },0);
   },50);
 }
 
