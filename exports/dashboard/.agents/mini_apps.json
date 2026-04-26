@@ -1,0 +1,24 @@
+{
+  "app_id": "69cf6b8a5f566e854e010503",
+  "slug": "johnny-6-app-4e010503",
+  "pages": {
+    "Chess": {
+      "title": "Chess"
+    },
+    "Home": {
+      "title": "Home"
+    },
+    "Music": {
+      "title": "Music"
+    },
+    "Notes": {
+      "title": "Notes"
+    },
+    "Piano": {
+      "title": "Piano"
+    },
+    "Typing": {
+      "title": "Typing"
+    }
+  }
+}

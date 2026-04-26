@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="piano_style.css">
+    <title>Helpful App v0.01</title>
+</head>
+<body id="scrollbar">
+    <div class="grid_container">
+        <!-- <div class="nav_container active">
+            <div class="hamburger_menu"><div class="hamburger active"><div class="bar"></div></div></div>
+            <a href="index.html"><div class="home_button"><div class="home_button_image"></div><div class="nav_p active">Home</div></div></a>
+            <a href="notes.html"><div class="notes_button"><div class="notes_button_image"></div><div class="nav_p active">Notes</div></div></a>
+            <a href="apps.html"><div class="apps_button"><div class="apps_button_image"></div><div class="nav_p active">Apps</div></div></a>
+            <a href="security.html"><div class="security_button"><div class="security_button_image"></div><div class="nav_p active">Security</div></div></a>
+        </div> -->
+
+        <a href="apps.html"><div class="back_button"><div class="back_btn_img"></div></div></a>
+        <div class="piano_container">
+            <div class="piano_nav">
+                <h1>Piano</h1>
+                <div class="volume_slider">Volume  <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1"> <div class="volume_image_container"><div class="volume_image"></div></div></div>
+                <div class="toggle_letters" id="hide_letters">Show Letters<input type="checkbox"></div>
+                <div class="toggle_letters" id="hide_nav">Hide Nav<input type="checkbox">Ctrl + H</div>
+                <div class="toggle_letters" id="toggle_sustain">Sustain<input type="checkbox">Ctrl + S</div>
+
+                <!-- <div class="quick_link_container">
+                    <div class="quick_link_btn active">All</div>
+                    <div class="quick_link_btn">Low Poly</div>
+                    <div class="quick_link_btn">High Poly</div>
+                </div> -->
+                <div class="timer_container" id="timer_container">
+                    <h2><div id="timer_minutes">25</div><div id="timer_part">:</div><div id="timer_seconds">00</div></h2>
+                        <div class="play_btn" id="play_btn"><div class="play_btn_image" id="play_btn_image"></div></div>
+                        <div class="reset_btn" id="reset_btn"><div class="reset_btn_image"></div></div>
+                </div>
+                <div class="buttons_container">
+                    <!-- <div class="edit_button"><div class="edit_btn_image"></div></div> -->
+                    <div class="timer_button" id="timer_btn"><div class="timer_btn_image"></div></div>
+                    <div class="dark_mode_button"><div class="dark_mode_image"></div></div>
+                    <div class="settings_button"><div class="settings_btn_image"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="start_btn_container">
+            <div class="start_btn" onclick="startPiano()">Start</div>
+        </div> -->
+
+        <div class="content_container">
+            <div class="note_chaser_wrapper">
+                <div class="note_chaser">
+                    <div class="lane_section"></div>
+                    <div class="lane_section"></div>
+                    <div class="lane_section"></div>
+                    <div class="lane_section"></div>
+                    <div class="lane_section"></div>
+                    <div class="lane_section"></div>
+                </div>
+            </div>
+            <div class="piano_box">
+                <div class="piano_container_box">
+                    <!-- <div class="octave">
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                    </div>
+                    <div class="octave">
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                    </div> -->
+                    <!-- <div class="octave">
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                        <div class="piano_key black_key"></div>
+                        <div class="piano_key white_key"></div>
+                    </div> -->
+                    <div class="octave">
+                        <div class="piano_key white_key" data-note="36"><div class="piano_text">C2</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">D</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">E</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">F</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">G</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">A</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">B</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                    </div>
+                    <div class="octave">
+                        <div class="piano_key white_key"><div class="piano_text">C</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">D</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">E</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">F</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">G</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">A</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">B</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                    </div>
+                    <div class="octave">
+                        <div class="piano_key white_key"><div class="piano_text">C</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">D</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">E</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">F</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">G</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">A</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">B</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                    </div>
+                    <div class="octave">
+                        <div class="piano_key white_key"><div class="piano_text">C</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">D</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">E</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">F</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">G</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">A</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">B</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                    </div>
+                    <div class="octave">
+                        <div class="piano_key white_key"><div class="piano_text">C</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">D</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">E</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">F</div></div>
+                        <div class="piano_key white_key"><div class="piano_text">G</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">A</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                        <div class="piano_key white_key"><div class="piano_text">B</div><div class="piano_key black_key"><div class="piano_text"></div></div></div>
+                    </div>
+                    <div class="octave">
+                        <div class="piano_key white_key"><div class="piano_text">C</div></div>
+                 </div>
+                    <!-- <div class="octave" transform="translate(720, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="80" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="160" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="240" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="320" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="400" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="480" width="80" height="400"></div>
+
+                        <div class="piano-key black-key" x="60" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="140" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="300" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="380" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="460" width="40" height="250"></div>
+                    </div>
+                    <div class="octave" transform="translate(1280, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="80" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="160" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="240" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="320" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="400" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="480" width="80" height="400"></div>
+
+                        <div class="piano-key black-key" x="60" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="140" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="300" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="380" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="460" width="40" height="250"></div>
+                    </div>
+                    <div class="octave" transform="translate(1840, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="80" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="160" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="240" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="320" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="400" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="480" width="80" height="400"></div>
+
+                        <div class="piano-key black-key" x="60" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="140" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="300" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="380" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="460" width="40" height="250"></div>
+                    </div>
+                    <div class="octave" transform="translate(2400, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="80" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="160" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="240" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="320" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="400" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="480" width="80" height="400"></div>
+
+                        <div class="piano-key black-key" x="60" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="140" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="300" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="380" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="460" width="40" height="250"></div>
+                    </div>
+                    <div class="octave" transform="translate(2960, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="80" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="160" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="240" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="320" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="400" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="480" width="80" height="400"></div>
+
+                        <div class="piano-key black-key" x="60" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="140" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="300" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="380" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="460" width="40" height="250"></div>
+                    </div>
+                    <div class="octave" transform="translate(3520, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="80" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="160" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="240" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="320" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="400" width="80" height="400"></div>
+                        <div class="piano-key white-key" x="480" width="80" height="400"></div>
+
+                        <div class="piano-key black-key" x="60" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="140" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="300" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="380" width="40" height="250"></div>
+                        <div class="piano-key black-key" x="460" width="40" height="250"></div>
+                    </div>
+                    <div class="octave" transform="translate(4080, 0)">
+                        <div class="piano-key white-key" x="0" width="80" height="400"></div> -->
+                        <!-- <rect class="piano-key white-key" x="80" width="80" height="400"></rect>
+                        <rect class="piano-key white-key" x="160" width="80" height="400"></rect>
+                        <rect class="piano-key white-key" x="240" width="80" height="400"></rect>
+                        <rect class="piano-key white-key" x="320" width="80" height="400"></rect>
+                        <rect class="piano-key white-key" x="400" width="80" height="400"></rect>
+                        <rect class="piano-key white-key" x="480" width="80" height="400"></rect>
+
+                        <rect class="piano-key black-key" x="60" width="40" height="250"></rect>
+                        <rect class="piano-key black-key" x="140" width="40" height="250"></rect>
+                        <rect class="piano-key black-key" x="300" width="40" height="250"></rect>
+                        <rect class="piano-key black-key" x="380" width="40" height="250"></rect>
+                        <rect class="piano-key black-key" x="460" width="40" height="250"></rect> -->
+                    <!-- </div> -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <audio id="note36" src="assets/Sounds/Piano/Piano.mf.C2.mp3"></audio>
+    <!-- <audio id="note" src="path/to/note61.mp4"></audio> -->
+</body>
+</html>
+
+<script src="piano_script.js"></script>
+
