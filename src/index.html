@@ -985,6 +985,10 @@
       </svg>
       <div id="home-content">
         <div id="home-greeting"></div>
+        <button id="home-hide-btn" onclick="toggleHideCards()" title="Hide/Show Cards" style="position:absolute;top:12px;right:90px;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.04);border:1px solid #1f3a2a;color:#7a9e8e;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color 0.15s,color 0.15s,background 0.15s;z-index:10;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          <span id="home-hide-label">Hide</span>
+        </button>
         <button id="home-edit-btn" onclick="toggleEditMode()" title="Edit Dashboard">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           <span id="home-edit-label">Edit</span>
@@ -2323,6 +2327,10 @@
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#7a9e8e" id="piano-hidenav-label">
             <input type="checkbox" id="piano-hidenav-chk" onchange="pianoHideNavChange(this.checked)" style="accent-color:#00d18c"> Hide Nav
           </label>
+          <button id="piano-media-toggle-btn" onclick="pianoToggleMedia()" style="background:rgba(255,255,255,0.04);border:1px solid #1f3a2a;color:#7a9e8e;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:border-color 0.15s,color 0.15s;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Media
+          </button>
           <div style="flex:1"></div>
           <div class="timer-block">
             <span class="timer-display" id="piano-timer-display">00:00</span>
@@ -2333,6 +2341,32 @@
           </div>
         </div>
         <div id="piano-chaser" ref="chaserRef"></div>
+        <!-- Media panel -->
+        <div id="piano-media-bar" style="width:100%;background:#060e09;border-bottom:1px solid #1a2e24;display:flex;flex-direction:column;align-items:stretch;flex-shrink:0;overflow:hidden;max-height:0;transition:max-height 0.3s ease;">
+          <div id="piano-media-content" style="position:relative;width:100%;background:#060e09;display:flex;align-items:center;justify-content:center;min-height:220px;">
+            <!-- No connection overlay -->
+            <div id="piano-no-conn" style="display:none;flex-direction:column;align-items:center;gap:8px;color:#4a7060;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+              <span style="font-size:13px;font-weight:600;">No Connection</span>
+              <span style="font-size:11px;color:#2a4a38;">Connect to the internet to load media</span>
+            </div>
+            <!-- Empty state -->
+            <div id="piano-media-empty" style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#2a4a38;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span style="font-size:12px;">Paste a YouTube URL or image URL below</span>
+            </div>
+            <!-- YouTube embed -->
+            <iframe id="piano-yt-frame" style="display:none;width:100%;height:220px;border:none;" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            <!-- Image display -->
+            <img id="piano-img-display" style="display:none;max-width:100%;max-height:280px;object-fit:contain;border-radius:6px;" />
+          </div>
+          <!-- URL input row -->
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid #1a2e24;background:#0a1410;flex-shrink:0;">
+            <input id="piano-media-url" type="text" placeholder="YouTube URL or image URL..." style="flex:1;background:#0f1f17;border:1px solid #1f3a2a;border-radius:8px;padding:7px 12px;color:#e8f0ed;font-size:12px;font-family:inherit;outline:none;" onkeydown="if(event.key==='Enter')pianoLoadMedia()"/>
+            <button onclick="pianoLoadMedia()" style="background:#00d18c;border:none;color:#0a1a12;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Load</button>
+            <button onclick="pianoMediaClear()" style="background:#1a2e24;border:1px solid #1f3a2a;color:#7a9e8e;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕</button>
+          </div>
+        </div>
         <div id="piano-keys-wrap">
           <div id="piano-keys"></div>
         </div>
@@ -3035,18 +3069,21 @@
       </div>
 
       <!-- MAP QUIZ PANE -->
-      <div id="geo-map-pane" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;padding:16px 12px;overflow-y:auto;gap:12px;width:100%;box-sizing:border-box">
-        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;max-width:620px">
+      <div id="geo-map-pane" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;padding:12px 16px;gap:10px;overflow-y:auto;">
+        <!-- Score row -->
+        <div style="display:flex;align-items:center;gap:18px;flex-shrink:0;">
           <span style="font-size:13px;color:#7a9e8e">Score: <span id="geo-map-score" style="color:#00d18c;font-weight:700">0</span></span>
           <span style="font-size:13px;color:#7a9e8e">Streak: <span id="geo-map-streak" style="color:#f7a94e;font-weight:700">0</span></span>
+          <span style="font-size:11px;color:#4a7060">Scroll to zoom · Drag to pan</span>
         </div>
-        <div style="width:100%;max-width:620px;background:#0a1a12;border:1px solid #1a3020;border-radius:12px;overflow:hidden">
-          <svg id="geo-map-svg" viewBox="0 0 1000 500" width="100%" style="display:block;"></svg>
+        <!-- Map container: bigger but not full screen -->
+        <div id="geo-map-viewport" style="width:100%;max-width:900px;height:420px;flex-shrink:0;position:relative;overflow:hidden;background:#0a1410;border:1px solid #1a3020;border-radius:12px;cursor:grab;">
+          <svg id="geo-map-svg" viewBox="0 0 1000 500" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;"></svg>
         </div>
-        <div style="font-size:13px;color:#7a9e8e;text-align:center">Which country is highlighted?</div>
-        <div id="geo-map-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:620px"></div>
-        <div id="geo-map-msg" style="font-size:14px;font-weight:700;min-height:22px;text-align:center"></div>
-        <button id="geo-map-next-btn" onclick="geoMapNext()" style="display:none;background:#00d18c;color:#0a1a12;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Next →</button>
+        <div style="font-size:13px;color:#7a9e8e;flex-shrink:0;">Which country is highlighted?</div>
+        <div id="geo-map-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:620px;flex-shrink:0;"></div>
+        <div id="geo-map-msg" style="font-size:14px;font-weight:700;min-height:22px;text-align:center;flex-shrink:0;"></div>
+        <button id="geo-map-next-btn" onclick="geoMapNext()" style="display:none;background:#00d18c;color:#0a1a12;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">Next →</button>
       </div>
       </div><!-- /pane container -->
     </div>
@@ -10078,6 +10115,21 @@ function renderMoneyGraphCard() {
 //  FREEFORM EDIT MODE
 // ════════════════════════════════════════════════
 var editModeActive = false;
+var cardsHidden = false;
+
+function toggleHideCards() {
+  cardsHidden = !cardsHidden;
+  var cards = document.getElementById('home-cards');
+  var btn   = document.getElementById('home-hide-btn');
+  var label = document.getElementById('home-hide-label');
+  if (cards) cards.style.opacity = cardsHidden ? '0' : '1';
+  if (cards) cards.style.pointerEvents = cardsHidden ? 'none' : '';
+  if (btn)   btn.style.borderColor = cardsHidden ? '#00d18c' : '#1f3a2a';
+  if (btn)   btn.style.color = cardsHidden ? '#00d18c' : '#7a9e8e';
+  if (btn)   btn.style.background = cardsHidden ? 'rgba(0,209,140,0.12)' : 'rgba(255,255,255,0.04)';
+  if (label) label.textContent = cardsHidden ? 'Show' : 'Hide';
+}
+window.toggleHideCards = toggleHideCards;
 
 var CARD_IDS = [
   'today-card','dailys-card','home-projects','home-wordle-card','tama-card',
@@ -11330,6 +11382,7 @@ const GEO_MAP_COUNTRIES = {
   "Iran": `M623.8,140.8L626.1,140.3L628.0,138.8L629.8,138.8L631.0,138.3L632.9,138.6L635.8,139.9L638.0,140.2L641.0,142.6L643.0,142.7L643.2,144.9L642.1,148.3L641.4,150.2L642.6,150.6L641.4,152.0L642.3,154.2L642.5,155.9L644.5,156.3L644.7,158.0L642.3,160.5L643.7,161.9L644.7,163.5L647.3,164.6L647.3,167.0L648.6,167.4L648.8,168.6L645.0,170.0L644.0,173.1L639.0,172.3L636.1,171.7L633.1,171.4L631.9,168.1L630.6,167.6L628.6,168.1L625.9,169.4L622.6,168.5L620.0,166.5L617.4,165.7L615.6,163.2L613.6,159.6L612.2,160.0L610.5,159.2L609.5,160.2L608.0,158.8L608.0,157.4L607.2,157.4L607.6,155.4L606.2,153.4L603.0,152.0L601.1,149.4L601.7,147.3L603.1,146.4L602.9,144.9L601.1,144.1L599.4,140.9L597.9,138.7L598.5,137.9L597.6,134.9L599.5,134.1L599.9,135.1L601.2,136.3L603.0,136.7L604.0,136.6L607.2,134.6L608.2,134.4L608.9,135.2L608.0,136.5L609.7,137.9L610.4,137.8L611.2,139.8L613.7,140.3L615.6,141.7L619.4,142.1L623.5,141.4L623.8,140.8Z`,
   "Iraq": `M601.1,144.1L602.9,144.9L603.1,146.4L601.7,147.3L601.1,149.4L603.0,152.0L606.2,153.4L607.6,155.4L607.2,157.4L608.0,157.4L608.0,158.8L609.5,160.2L607.9,160.1L606.1,159.8L604.2,162.4L599.2,162.2L591.7,156.8L587.7,155.0L584.5,154.2L583.4,151.0L589.3,148.2L590.4,145.0L590.1,143.0L591.6,142.4L592.9,140.7L594.1,140.3L597.2,140.7L598.1,141.3L599.4,140.9L601.1,144.1Z`,
   "Ireland": `M463.5,96.4L463.9,98.3L461.9,100.6L457.2,102.2L453.4,101.8L455.6,99.0L454.2,96.3L457.8,94.2L459.8,93.0L460.4,94.4L459.8,95.8L461.5,95.8L463.5,96.4Z`,
+  "United Kingdom": `M468.5,83.0L469.8,84.2L471.2,84.0L471.5,85.3L470.3,86.5L471.0,87.8L469.5,89.2L470.2,90.4L468.8,91.5L467.5,91.2L466.0,92.5L464.8,91.8L463.5,93.2L462.0,92.8L461.5,91.2L462.8,90.0L461.5,88.8L462.2,87.2L461.0,86.0L462.5,84.8L461.8,83.5L463.2,82.2L464.8,82.8L466.2,82.0L467.5,82.5L468.5,83.0ZM471.8,78.5L473.2,79.8L474.8,79.2L476.2,80.5L475.5,82.2L474.0,83.5L472.5,83.0L471.2,84.0L469.8,83.2L469.2,81.8L470.5,80.5L470.0,79.2L471.8,78.5ZM478.5,72.0L480.2,72.8L481.8,72.2L483.2,73.5L482.8,75.2L481.5,76.5L480.0,76.2L479.2,77.5L477.8,77.0L476.5,75.8L477.2,74.2L476.5,73.0L478.5,72.0ZM465.5,97.5L467.2,98.2L468.8,97.8L470.5,99.0L471.2,100.5L470.0,101.8L468.5,102.2L467.2,101.0L465.8,101.5L464.5,100.2L465.0,98.8L465.5,97.5Z`,
   "Israel": `M575.3,152.8L574.8,153.6L573.8,153.2L573.3,155.0L573.9,155.3L573.3,155.7L573.1,156.4L574.4,156.0L574.5,157.1L573.1,161.3L571.4,156.7L572.2,155.9L572.0,155.7L572.7,154.5L573.2,152.5L573.6,151.8L573.7,151.8L574.6,151.8L574.8,151.3L575.5,151.3L575.6,152.4L575.2,152.8L575.3,152.8Z`,
   "Italy": `M521.4,138.1L520.4,140.1L520.8,141.0L520.3,142.3L518.2,141.3L516.9,141.1L513.1,139.7L513.5,138.3L516.6,138.6L519.4,138.3L521.4,138.1ZM504.6,130.1L506.2,132.0L505.8,135.5L504.6,135.4L503.5,136.2L502.5,135.5L502.4,132.3L501.8,130.8L503.2,130.9L504.6,130.1ZM513.0,115.3L516.8,116.0L516.5,117.3L517.2,118.4L515.0,118.0L512.9,119.0L513.0,120.3L512.7,121.1L513.6,122.4L516.1,123.8L517.4,126.0L520.4,128.1L522.5,128.1L523.1,128.7L522.4,129.2L524.8,130.2L526.7,131.0L529.0,132.4L529.3,132.9L528.8,133.8L527.3,132.6L525.0,132.2L523.9,133.9L525.8,134.9L525.5,136.3L524.4,136.4L522.9,138.7L521.8,138.9L521.8,138.1L522.4,136.7L523.0,136.1L521.9,134.5L521.1,133.2L520.0,132.9L519.2,131.7L517.5,131.2L516.3,130.2L514.4,130.0L512.3,128.8L509.8,127.1L508.0,125.5L507.2,122.9L505.9,122.6L503.7,121.7L502.5,122.1L500.9,123.3L499.8,123.5L500.1,122.3L498.7,122.0L498.0,119.9L498.9,119.1L498.1,118.1L498.2,117.4L499.4,117.9L500.7,117.8L502.2,116.9L502.6,117.3L503.9,117.2L504.5,116.2L506.5,116.5L507.6,116.0L507.8,115.0L509.5,115.3L509.8,114.8L512.4,114.4L513.0,115.3Z`,
   "Jamaica": `M273.1,190.7L274.9,190.9L276.4,191.6L276.8,192.3L274.9,192.4L274.1,192.8L272.6,192.4L271.1,191.4L271.4,190.8L272.5,190.6L273.1,190.7Z`,
@@ -11459,18 +11512,84 @@ function geoMapNext() {
   });
 }
 
+// ── Geo Map zoom/pan ──────────────────────────────────────
+var _geoZoom = 1, _geoOffX = 0, _geoOffY = 0;
+var _geoDrag = false, _geoDragSX = 0, _geoDragSY = 0, _geoDragOX = 0, _geoDragOY = 0;
+
+function _geoApplyXform() {
+  var g = document.getElementById('geo-map-g');
+  if (g) g.setAttribute('transform', 'scale('+_geoZoom+') translate('+(_geoOffX/_geoZoom)+','+(_geoOffY/_geoZoom)+')');
+}
+
+function _geoInitInteraction() {
+  var vp = document.getElementById('geo-map-viewport');
+  if (!vp || vp._geoReady) return;
+  vp._geoReady = true;
+
+  vp.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var rect = vp.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var factor = e.deltaY < 0 ? 1.15 : (1/1.15);
+    var newZoom = Math.max(0.5, Math.min(20, _geoZoom * factor));
+    // Zoom toward mouse position
+    _geoOffX = mx - (mx - _geoOffX) * (newZoom / _geoZoom);
+    _geoOffY = my - (my - _geoOffY) * (newZoom / _geoZoom);
+    _geoZoom = newZoom;
+    _geoApplyXform();
+  }, { passive: false });
+
+  vp.addEventListener('mousedown', function(e) {
+    _geoDrag = true;
+    _geoDragSX = e.clientX; _geoDragSY = e.clientY;
+    _geoDragOX = _geoOffX;  _geoDragOY = _geoOffY;
+    vp.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!_geoDrag) return;
+    _geoOffX = _geoDragOX + (e.clientX - _geoDragSX);
+    _geoOffY = _geoDragOY + (e.clientY - _geoDragSY);
+    _geoApplyXform();
+  });
+  window.addEventListener('mouseup', function() {
+    if (_geoDrag) { _geoDrag = false; var vp2=document.getElementById('geo-map-viewport'); if(vp2) vp2.style.cursor='grab'; }
+  });
+}
+
+function _geoResetView() {
+  // Fit full map into the viewport box
+  var vp = document.getElementById('geo-map-viewport');
+  if (!vp) return;
+  var rect = vp.getBoundingClientRect();
+  var scaleX = rect.width / 1000, scaleY = rect.height / 500;
+  _geoZoom = Math.min(scaleX, scaleY) * 0.97;
+  _geoOffX = (rect.width  - 1000 * _geoZoom) / 2;
+  _geoOffY = (rect.height - 500  * _geoZoom) / 2;
+  _geoApplyXform();
+}
+
 function renderGeoMap(highlight) {
   var svg = document.getElementById('geo-map-svg');
-  var html = '<defs><filter id="mapglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+  var inner = '<defs><filter id="mapglow" x="-100%" y="-100%" width="300%" height="300%">'
+    + '<feGaussianBlur stdDeviation="3" result="coloredBlur"/>'
+    + '<feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>'
+    + '</filter></defs><g id="geo-map-g">';
   Object.keys(GEO_MAP_COUNTRIES).forEach(function(name) {
     var isHL = name === highlight;
-    var fill = isHL ? '#00d18c' : '#1a3020';
-    var stroke = isHL ? '#00ffaa' : '#0d2018';
-    var sw = isHL ? '1.5' : '0.4';
-    var filt = isHL ? ' filter="url(#mapglow)"' : '';
-    html += '<path d="' + GEO_MAP_COUNTRIES[name] + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + sw + '"' + filt + '/>';
+    var fill   = isHL ? '#00d18c' : '#1e3828';
+    var stroke = isHL ? '#00ffaa' : '#0d1f14';
+    var sw     = isHL ? '0.8'    : '0.3';
+    var filt   = isHL ? ' filter="url(#mapglow)"' : '';
+    inner += '<path d="' + GEO_MAP_COUNTRIES[name] + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + sw + '"' + filt + '/>';
   });
-  svg.innerHTML = html;
+  inner += '</g>';
+  svg.innerHTML = inner;
+
+  // Reset to full-map view on each new question
+  _geoResetView();
+  _geoInitInteraction();
 }
 
 function geoMapAnswer(chosen, choicesEl) {
@@ -11506,6 +11625,106 @@ function geoMapAnswer(chosen, choicesEl) {
 
 window.geoMapNext = geoMapNext;
 window.geoMapAnswer = geoMapAnswer;
+// ════════════════════════════════════════════════════════════
+//  PIANO MEDIA PANEL
+// ════════════════════════════════════════════════════════════
+var pianoMediaOpen = false;
+
+function pianoToggleMedia() {
+  pianoMediaOpen = !pianoMediaOpen;
+  var bar = document.getElementById('piano-media-bar');
+  var btn = document.getElementById('piano-media-toggle-btn');
+  if (bar) bar.style.maxHeight = pianoMediaOpen ? '340px' : '0';
+  if (btn) {
+    btn.style.borderColor = pianoMediaOpen ? '#00d18c' : '#1f3a2a';
+    btn.style.color       = pianoMediaOpen ? '#00d18c' : '#7a9e8e';
+    btn.style.background  = pianoMediaOpen ? 'rgba(0,209,140,0.12)' : 'rgba(255,255,255,0.04)';
+  }
+  if (pianoMediaOpen) pianoCheckConnection();
+}
+
+function pianoCheckConnection() {
+  var noConn  = document.getElementById('piano-no-conn');
+  var empty   = document.getElementById('piano-media-empty');
+  var ytFrame = document.getElementById('piano-yt-frame');
+  var imgDisp = document.getElementById('piano-img-display');
+  // If something is already loaded, don't show offline screen over it
+  if (ytFrame.style.display !== 'none' || imgDisp.style.display !== 'none') return;
+  if (!navigator.onLine) {
+    if (noConn)  noConn.style.display  = 'flex';
+    if (empty)   empty.style.display   = 'none';
+  } else {
+    if (noConn)  noConn.style.display  = 'none';
+    if (empty)   empty.style.display   = 'flex';
+  }
+}
+
+function pianoLoadMedia() {
+  var url     = (document.getElementById('piano-media-url').value || '').trim();
+  var noConn  = document.getElementById('piano-no-conn');
+  var empty   = document.getElementById('piano-media-empty');
+  var ytFrame = document.getElementById('piano-yt-frame');
+  var imgDisp = document.getElementById('piano-img-display');
+  if (!url) return;
+
+  if (!navigator.onLine) {
+    if (noConn) noConn.style.display = 'flex';
+    if (empty)  empty.style.display  = 'none';
+    ytFrame.style.display = 'none';
+    imgDisp.style.display = 'none';
+    return;
+  }
+
+  // Detect YouTube
+  var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (ytMatch) {
+    var embedUrl = 'https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=0&rel=0';
+    ytFrame.src = embedUrl;
+    ytFrame.style.display = 'block';
+    imgDisp.style.display = 'none';
+    if (noConn) noConn.style.display = 'none';
+    if (empty)  empty.style.display  = 'none';
+    return;
+  }
+
+  // Detect image URL
+  if (/\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i.test(url) || url.startsWith('data:image')) {
+    imgDisp.src = url;
+    imgDisp.style.display = 'block';
+    ytFrame.style.display = 'none';
+    if (noConn) noConn.style.display = 'none';
+    if (empty)  empty.style.display  = 'none';
+    return;
+  }
+
+  // Unknown — try loading as image anyway
+  imgDisp.src = url;
+  imgDisp.style.display = 'block';
+  imgDisp.onerror = function() {
+    imgDisp.style.display = 'none';
+    if (empty) { empty.style.display = 'flex'; empty.querySelector('span').textContent = 'Could not load — try a YouTube or direct image URL'; }
+  };
+  if (noConn) noConn.style.display = 'none';
+  if (empty)  empty.style.display  = 'none';
+}
+
+function pianoMediaClear() {
+  var ytFrame = document.getElementById('piano-yt-frame');
+  var imgDisp = document.getElementById('piano-img-display');
+  var urlInput = document.getElementById('piano-media-url');
+  if (ytFrame)  { ytFrame.src = ''; ytFrame.style.display = 'none'; }
+  if (imgDisp)  { imgDisp.src = ''; imgDisp.style.display = 'none'; }
+  if (urlInput) urlInput.value = '';
+  pianoCheckConnection();
+}
+
+window.addEventListener('online',  function() { pianoCheckConnection(); });
+window.addEventListener('offline', function() { pianoCheckConnection(); });
+window.pianoToggleMedia = pianoToggleMedia;
+window.pianoLoadMedia   = pianoLoadMedia;
+window.pianoMediaClear  = pianoMediaClear;
+
+
 
 
 // ════════════════════════════════════════════════════════════
