@@ -77,7 +77,6 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     frame: false,
-    icon: path.join(__dirname, 'src', 'icon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -99,67 +98,7 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
-  createWindow();
-
-  // ── Taskbar jump list shortcuts ──────────────────────────────────────────
-  app.setUserTasks([
-    {
-      program: process.execPath,
-      arguments: '--open=chess',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Chess',
-      description: 'Open Chess'
-    },
-    {
-      program: process.execPath,
-      arguments: '--open=piano',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Piano',
-      description: 'Open Piano'
-    },
-    {
-      program: process.execPath,
-      arguments: '--open=typing',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Typing',
-      description: 'Open Typing'
-    },
-    {
-      program: process.execPath,
-      arguments: '--open=music',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Music',
-      description: 'Open Music'
-    },
-    {
-      program: process.execPath,
-      arguments: '--open=notes',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Notes',
-      description: 'Open Notes'
-    },
-    {
-      program: process.execPath,
-      arguments: '--open=braingames',
-      iconPath: process.execPath,
-      iconIndex: 0,
-      title: 'Brain Games',
-      description: 'Open Brain Games'
-    }
-  ]);
-});
-
-// ── Handle --open= launch argument ──────────────────────────────────────────
-const launchArg = process.argv.find(a => a.startsWith('--open='));
-const launchApp = launchArg ? launchArg.replace('--open=', '') : null;
-
-ipcMain.handle('get-launch-app', () => launchApp);
+app.whenReady().then(createWindow);
 
 // ── IPC: titlebar ────────────────────────────────────────────────────────────
 ipcMain.on('win-close',    () => win && win.close());
