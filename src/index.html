@@ -2467,6 +2467,24 @@
             <div id="typing-prompt"></div>
             <div id="typing-results" style="display:none"></div>
           </div>
+
+          <!-- ══ LETTER FLASHCARD (letters mode only) ══ -->
+          <div id="letter-flash-panel" style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:30px 0">
+            <div id="letter-flash-stats" style="display:flex;gap:24px;font-size:13px;font-weight:700;color:#7a9e8e">
+              <span>Progress: <span id="lf-progress" style="color:#e8f0ed">0/30</span></span>
+              <span>Correct: <span id="lf-correct-ct" style="color:#00d18c">0</span></span>
+              <span>Mistakes: <span id="lf-mistake-ct" style="color:#f87171">0</span></span>
+              <span>Streak: <span id="lf-streak" style="color:#fbbf24">0</span></span>
+            </div>
+            <div id="letter-flash-card" style="width:160px;height:160px;background:#101714;border:2px solid #1f2e28;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:96px;font-weight:900;color:#e8f0ed;font-family:monospace;transition:border-color 0.15s,color 0.15s;user-select:none;">?</div>
+            <div id="letter-flash-hint" style="font-size:13px;color:#3a6050;height:18px">Press the matching key</div>
+            <div id="letter-flash-result-overlay" style="display:none;flex-direction:column;align-items:center;gap:14px;padding:20px">
+              <div id="lf-result-title" style="font-size:28px;font-weight:900;color:#00d18c">Done!</div>
+              <div id="lf-result-stats" style="font-size:15px;color:#7a9e8e"></div>
+              <button onclick="startLetterFlash()" style="background:rgba(0,209,140,0.15);border:1px solid #00d18c;color:#00d18c;border-radius:10px;padding:8px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">▶ Play Again</button>
+            </div>
+          </div>
+
           <div id="typing-legend">
             <span style="display:flex;align-items:center;color:#7ad4b8"><span class="typing-legend-dot" style="background:#00d18c"></span>Correct</span>
             <span style="display:flex;align-items:center;color:#f87171"><span class="typing-legend-dot" style="background:#f87171"></span>Mistake</span>
@@ -4790,29 +4808,133 @@ let typingBestWpm=parseInt(localStorage.getItem('typing_best_wpm')||'0');
 let typingTimerRunning=false,typingTimerElapsed=0,typingTimerInterval=null;
 let typingWpmInterval=null;
 let typingInitialized=false;
-// Letter drill settings
-let letterDrillLen=30; // number of chars per run
-let letterDrillFilter='all'; // 'all' | 'home' | 'top' | 'bottom'
-const LETTER_ROWS={
-  home:'asdfjkl;ghqwertyuiopzxcvbnm'.split('').filter(c=>'asdfghjkl;'.includes(c)).concat(['g','h']),
-  top:'qwertyuiop'.split(''),
-  bottom:'zxcvbnm,./'.split('')
-};
+// Letter flashcard settings
+let letterDrillLen=30;
+let letterDrillFilter='all';
+// Flashcard state
+let lfQueue=[],lfIndex=0,lfCorrect=0,lfMistakes=0,lfStreak=0,lfBestStreak=0,lfActive=false;
+let lfKeyHandler=null;
+
 function getLetterDrillPool(){
-  if(letterDrillFilter==='home') return 'asdfjklgh'.split('');
+  if(letterDrillFilter==='home') return 'asdfghjkl'.split('');
   if(letterDrillFilter==='top')  return 'qwertyuiop'.split('');
   if(letterDrillFilter==='bottom') return 'zxcvbnm'.split('');
   return 'abcdefghijklmnopqrstuvwxyz'.split('');
 }
 function genLetterDrill(){
+  // Still used for non-letters modes fallback (not called in letters mode)
   const pool=getLetterDrillPool();
-  let result='',word='';
+  let result='';
   for(let i=0;i<letterDrillLen;i++){
-    if(i>0&&i%5===0){result+=word+' ';word='';}
-    word+=pool[Math.floor(Math.random()*pool.length)];
+    if(i>0&&i%5===0) result+=' ';
+    result+=pool[Math.floor(Math.random()*pool.length)];
   }
-  result+=word;
   return result.trim();
+}
+function buildLFQueue(){
+  const pool=getLetterDrillPool();
+  const q=[];
+  for(let i=0;i<letterDrillLen;i++) q.push(pool[Math.floor(Math.random()*pool.length)]);
+  return q;
+}
+
+function startLetterFlash(){
+  lfQueue=buildLFQueue();
+  lfIndex=0;lfCorrect=0;lfMistakes=0;lfStreak=0;lfBestStreak=0;lfActive=true;
+  // Show flashcard panel, hide normal typing box
+  const panel=document.getElementById('letter-flash-panel');
+  const box=document.getElementById('typing-box');
+  const overlay=document.getElementById('letter-flash-result-overlay');
+  if(panel){panel.style.display='flex';}
+  if(box){box.style.display='none';}
+  if(overlay){overlay.style.display='none';}
+  renderLFCard();
+  // Attach key listener
+  if(lfKeyHandler) document.removeEventListener('keydown',lfKeyHandler);
+  lfKeyHandler=function(e){
+    if(!lfActive) return;
+    if(e.key==='Tab'||e.key==='Escape'){e.preventDefault();stopLetterFlash();return;}
+    const k=e.key.toLowerCase();
+    if(k.length!==1||!/[a-z]/.test(k)) return;
+    e.preventDefault();
+    const target=lfQueue[lfIndex];
+    const card=document.getElementById('letter-flash-card');
+    if(k===target){
+      // Correct
+      lfCorrect++;lfStreak++;
+      if(lfStreak>lfBestStreak) lfBestStreak=lfStreak;
+      if(card){card.style.color='#00d18c';card.style.borderColor='#00d18c';}
+      setTimeout(()=>{
+        lfIndex++;
+        if(lfIndex>=lfQueue.length){ finishLetterFlash(); return; }
+        renderLFCard();
+      },120);
+    } else {
+      // Wrong
+      lfMistakes++;lfStreak=0;
+      if(card){card.style.color='#f87171';card.style.borderColor='#f87171';}
+      setTimeout(()=>{ if(card){card.style.color='#e8f0ed';card.style.borderColor='#1f2e28';} },300);
+    }
+    updateLFStats();
+  };
+  document.addEventListener('keydown',lfKeyHandler);
+}
+
+function renderLFCard(){
+  const card=document.getElementById('letter-flash-card');
+  if(card){
+    card.textContent=lfQueue[lfIndex]||'?';
+    card.style.color='#e8f0ed';
+    card.style.borderColor='#1f2e28';
+  }
+  updateLFStats();
+}
+
+function updateLFStats(){
+  const p=document.getElementById('lf-progress');
+  const c=document.getElementById('lf-correct-ct');
+  const m=document.getElementById('lf-mistake-ct');
+  const s=document.getElementById('lf-streak');
+  if(p) p.textContent=lfIndex+'/'+lfQueue.length;
+  if(c) c.textContent=lfCorrect;
+  if(m) m.textContent=lfMistakes;
+  if(s) s.textContent=lfStreak;
+  // Progress bar
+  const fill=document.getElementById('typing-prog-fill');
+  if(fill) fill.style.width=(lfQueue.length?Math.round((lfIndex/lfQueue.length)*100):0)+'%';
+}
+
+function finishLetterFlash(){
+  lfActive=false;
+  if(lfKeyHandler){document.removeEventListener('keydown',lfKeyHandler);lfKeyHandler=null;}
+  const card=document.getElementById('letter-flash-card');
+  if(card) card.style.display='none';
+  const overlay=document.getElementById('letter-flash-result-overlay');
+  const statsEl=document.getElementById('lf-result-stats');
+  const titleEl=document.getElementById('lf-result-title');
+  const acc=lfQueue.length?Math.round((lfCorrect/lfQueue.length)*100):0;
+  if(titleEl) titleEl.textContent=acc===100?'Perfect! 🎉':'Done!';
+  if(titleEl) titleEl.style.color=acc===100?'#fbbf24':'#00d18c';
+  if(statsEl) statsEl.textContent=acc+'% accuracy · '+lfCorrect+' correct · '+lfMistakes+' mistakes · best streak '+lfBestStreak;
+  if(overlay){overlay.style.display='flex';}
+  // Update progress bar to full
+  const fill=document.getElementById('typing-prog-fill');
+  if(fill) fill.style.width='100%';
+}
+
+function stopLetterFlash(){
+  lfActive=false;
+  if(lfKeyHandler){document.removeEventListener('keydown',lfKeyHandler);lfKeyHandler=null;}
+  // Restore normal typing view
+  const panel=document.getElementById('letter-flash-panel');
+  const box=document.getElementById('typing-box');
+  if(panel) panel.style.display='none';
+  if(box) box.style.display='';
+  const card=document.getElementById('letter-flash-card');
+  if(card) card.style.display='flex';
+  typingMode='words';
+  renderTypingModes();
+  typingReset();
 }
 
 function getTypingPrompt(mode){
@@ -4872,12 +4994,29 @@ function renderLetterDrillBtns(){
   });
 }
 
-function typingSetLetterFilter(f){ letterDrillFilter=f; renderLetterDrillBtns(); typingReset(); }
-function typingSetLetterLen(n){ letterDrillLen=n; renderLetterDrillBtns(); typingReset(); }
+function typingSetLetterFilter(f){ letterDrillFilter=f; renderLetterDrillBtns(); startLetterFlash(); }
+function typingSetLetterLen(n){ letterDrillLen=n; renderLetterDrillBtns(); startLetterFlash(); }
 
 function typingReset(mode){
   if(mode)typingMode=mode;
   clearInterval(typingWpmInterval);
+  // Letters mode: use flashcard UI
+  if(typingMode==='letters'){
+    const panel=document.getElementById('letter-flash-panel');
+    const box=document.getElementById('typing-box');
+    if(panel){panel.style.display='flex';}
+    if(box){box.style.display='none';}
+    const card=document.getElementById('letter-flash-card');
+    if(card) card.style.display='flex';
+    document.getElementById('typing-prog-fill').style.width='0%';
+    startLetterFlash();
+    return;
+  }
+  // Normal modes: restore box, hide flashcard panel
+  const panel=document.getElementById('letter-flash-panel');
+  const box=document.getElementById('typing-box');
+  if(panel) panel.style.display='none';
+  if(box) box.style.display='';
   typingPrompt=getTypingPrompt(typingMode);
   typingTyped='';typingStarted=false;typingFinished=false;
   typingStartTime=null;typingWpm=0;typingAcc=100;
@@ -4887,7 +5026,7 @@ function typingReset(mode){
   document.getElementById('typing-acc').textContent='--';
   document.getElementById('typing-acc').style.color='#e8f0ed';
   document.getElementById('typing-prog-fill').style.width='0%';
-  const box=document.getElementById('typing-box');if(box)box.classList.remove('finished');
+  if(box)box.classList.remove('finished');
   const overlay=document.getElementById('typing-results');if(overlay){overlay.style.display='none';overlay.innerHTML='';}
   renderTypingPrompt();
   setTimeout(()=>document.getElementById('typing-input').focus(),50);
