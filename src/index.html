@@ -2426,6 +2426,19 @@
           <button class="btn btn-ghost" onclick="closeApp('typing')">← Apps</button>
           <span style="font-size:16px;font-weight:800">⌨️ Typing</span>
           <div style="display:flex;gap:6px;align-items:center" id="typing-mode-btns"></div>
+          <!-- Letter drill options — visible only in Letters mode -->
+          <div id="typing-letter-opts" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:11px;color:#7a9e8e;font-weight:700">ROW:</span>
+            <button onclick="typingSetLetterFilter('all')" id="lf-all" style="background:rgba(0,209,140,0.15);border:1px solid #00d18c;color:#00d18c;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">All</button>
+            <button onclick="typingSetLetterFilter('home')" id="lf-home" style="background:transparent;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">Home</button>
+            <button onclick="typingSetLetterFilter('top')" id="lf-top" style="background:transparent;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">Top</button>
+            <button onclick="typingSetLetterFilter('bottom')" id="lf-bottom" style="background:transparent;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">Bottom</button>
+            <span style="font-size:11px;color:#7a9e8e;font-weight:700;margin-left:6px">LEN:</span>
+            <button onclick="typingSetLetterLen(20)" id="ll-20" style="background:transparent;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">20</button>
+            <button onclick="typingSetLetterLen(30)" id="ll-30" style="background:rgba(0,209,140,0.15);border:1px solid #00d18c;color:#00d18c;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">30</button>
+            <button onclick="typingSetLetterLen(50)" id="ll-50" style="background:transparent;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">50</button>
+            <button onclick="typingSetLetterLen(80)" id="ll-80" style="background:transparent;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:3px 10px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;">80</button>
+          </div>
           <button id="typing-custom-edit-btn" onclick="typingOpenCustomEditor()" title="Edit My Sentences" style="display:none;background:#1a1f1d;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✍️ Edit</button>
           <div style="flex:1"></div>
           <div class="typing-stat">
@@ -4769,7 +4782,7 @@ function typingAllCustomSentences() {
   var visibleBuiltins = TYPING_BUILTIN_SENTENCES_DEFAULT.filter(function(s) { return hidden.indexOf(s) === -1; });
   return [...visibleBuiltins, ...typingGetCustomSentences()];
 }
-const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'},{key:'custom',label:'My Sentences',icon:'✍️'}];
+const TYPING_MODES=[{key:'words',label:'Words',icon:'📝'},{key:'hard',label:'Hard Words',icon:'💀'},{key:'sentences',label:'Sentences',icon:'📖'},{key:'letters',label:'Letters',icon:'🔡'},{key:'custom',label:'My Sentences',icon:'✍️'}];
 
 let typingMode='words',typingPrompt='',typingTyped='',typingStarted=false,typingFinished=false;
 let typingStartTime=null,typingWpm=0,typingAcc=100;
@@ -4777,10 +4790,35 @@ let typingBestWpm=parseInt(localStorage.getItem('typing_best_wpm')||'0');
 let typingTimerRunning=false,typingTimerElapsed=0,typingTimerInterval=null;
 let typingWpmInterval=null;
 let typingInitialized=false;
+// Letter drill settings
+let letterDrillLen=30; // number of chars per run
+let letterDrillFilter='all'; // 'all' | 'home' | 'top' | 'bottom'
+const LETTER_ROWS={
+  home:'asdfjkl;ghqwertyuiopzxcvbnm'.split('').filter(c=>'asdfghjkl;'.includes(c)).concat(['g','h']),
+  top:'qwertyuiop'.split(''),
+  bottom:'zxcvbnm,./'.split('')
+};
+function getLetterDrillPool(){
+  if(letterDrillFilter==='home') return 'asdfjklgh'.split('');
+  if(letterDrillFilter==='top')  return 'qwertyuiop'.split('');
+  if(letterDrillFilter==='bottom') return 'zxcvbnm'.split('');
+  return 'abcdefghijklmnopqrstuvwxyz'.split('');
+}
+function genLetterDrill(){
+  const pool=getLetterDrillPool();
+  let result='',word='';
+  for(let i=0;i<letterDrillLen;i++){
+    if(i>0&&i%5===0){result+=word+' ';word='';}
+    word+=pool[Math.floor(Math.random()*pool.length)];
+  }
+  result+=word;
+  return result.trim();
+}
 
 function getTypingPrompt(mode){
   if(mode==='words')return [...WORDS_EASY].sort(()=>Math.random()-0.5).slice(0,20).join(' ');
   if(mode==='hard')return [...WORDS_HARD].sort(()=>Math.random()-0.5).slice(0,12).join(' ');
+  if(mode==='letters')return genLetterDrill();
   if(mode==='custom'){const cs=typingAllCustomSentences();return cs.length?cs[Math.floor(Math.random()*cs.length)]:'Add your own sentences using the ✍️ button!';}
   return SENTENCES[Math.floor(Math.random()*SENTENCES.length)];
 }
@@ -4808,7 +4846,34 @@ function renderTypingModes(){
   `).join('');
   const editBtn=document.getElementById('typing-custom-edit-btn');
   if(editBtn) editBtn.style.display=typingMode==='custom'?'':'none';
+  // Show/hide letter drill options
+  const letterOpts=document.getElementById('typing-letter-opts');
+  if(letterOpts) letterOpts.style.display=typingMode==='letters'?'flex':'none';
+  // Update active states on letter filter/len buttons
+  if(typingMode==='letters') renderLetterDrillBtns();
 }
+
+function renderLetterDrillBtns(){
+  ['all','home','top','bottom'].forEach(f=>{
+    const b=document.getElementById('lf-'+f);
+    if(!b)return;
+    const active=letterDrillFilter===f;
+    b.style.background=active?'rgba(0,209,140,0.15)':'transparent';
+    b.style.borderColor=active?'#00d18c':'#1f2e28';
+    b.style.color=active?'#00d18c':'#7a9e8e';
+  });
+  [20,30,50,80].forEach(n=>{
+    const b=document.getElementById('ll-'+n);
+    if(!b)return;
+    const active=letterDrillLen===n;
+    b.style.background=active?'rgba(0,209,140,0.15)':'transparent';
+    b.style.borderColor=active?'#00d18c':'#1f2e28';
+    b.style.color=active?'#00d18c':'#7a9e8e';
+  });
+}
+
+function typingSetLetterFilter(f){ letterDrillFilter=f; renderLetterDrillBtns(); typingReset(); }
+function typingSetLetterLen(n){ letterDrillLen=n; renderLetterDrillBtns(); typingReset(); }
 
 function typingReset(mode){
   if(mode)typingMode=mode;
