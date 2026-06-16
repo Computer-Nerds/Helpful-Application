@@ -1,0 +1,14 @@
+.agents/.env
+
+# Music library files — keep folder structure, ignore actual media
+exports/dashboard/music/*.mp3
+exports/dashboard/music/*.wav
+exports/dashboard/music/*.ogg
+exports/dashboard/music/*.flac
+exports/dashboard/music/*.m4a
+exports/dashboard/music/*.aac
+exports/dashboard/music/covers/*.jpg
+exports/dashboard/music/covers/*.jpeg
+exports/dashboard/music/covers/*.png
+exports/dashboard/music/covers/*.webp
+exports/dashboard/music/library.json

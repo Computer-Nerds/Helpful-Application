@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Typing — Helpful App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-bg: #005e40;
+      --accent: #00d18c;
+      --bg: #111312;
+      --surface: #1a1f1d;
+      --text: #e8f0ed;
+      --text-muted: #7a9e8e;
+      --border: #1f2e28;
+      --red: #ff5f57;
+      --yellow: #febc2e;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Title bar */
+    #titlebar {
+      height: 36px;
+      background: #003d2a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      -webkit-app-region: drag;
+      flex-shrink: 0;
+      border-bottom: 1px solid #004d34;
+    }
+    #titlebar-title { font-size: 13px; font-weight: 600; color: #a0c9b8; letter-spacing: 0.5px; }
+    #titlebar-controls { display: flex; gap: 8px; -webkit-app-region: no-drag; }
+    .tb-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; }
+    #tb-close { background: #ff5f57; }
+    #tb-min   { background: #febc2e; }
+    #tb-max   { background: #28c840; }
+    .tb-btn:hover { filter: brightness(1.2); }
+
+    /* Top bar */
+    #topbar {
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
+      -webkit-app-region: no-drag;
+    }
+
+    #back-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    #back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+    #topbar h1 { font-size: 17px; font-weight: 700; color: var(--text); }
+
+    .topbar-spacer { flex: 1; }
+
+    /* Pomodoro in topbar */
+    #pomo-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0d1a14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 6px 14px;
+    }
+
+    #pomo-mode-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 50px;
+    }
+
+    #pomo-display {
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      min-width: 64px;
+      text-align: center;
+    }
+
+    #pomo-display.break-mode { color: var(--yellow); }
+
+    .pomo-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .pomo-btn:hover { background: rgba(255,255,255,0.16); }
+    .pomo-btn:active { transform: scale(0.92); }
+
+    #pomo-sessions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .pomo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .pomo-dot.done { background: var(--accent); }
+
+    /* Stats row */
+    #stats-row {
+      display: flex;
+      gap: 16px;
+      padding: 16px 32px 0;
+      flex-shrink: 0;
+    }
+
+    .stat-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+    }
+
+    .stat-pill .stat-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .stat-pill .stat-val.good { color: var(--accent); }
+    .stat-pill .stat-val.bad  { color: var(--red); }
+
+    .stat-pill .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-top: 2px;
+    }
+
+    /* Test area */
+    #test-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 48px;
+      gap: 20px;
+    }
+
+    #prompt-box {
+      font-size: 22px;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      max-width: 820px;
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      position: relative;
+    }
+
+    .char { display: inline; }
+    .char.correct { color: var(--accent); }
+    .char.wrong   { color: var(--red); background: rgba(255,95,87,0.15); border-radius: 2px; }
+    .char.cursor  { border-left: 2px solid var(--accent); margin-left: -1px; }
+    .char.pending { color: var(--text-muted); }
+
+    #input-field {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+
+    #controls-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .ctrl-btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.15s, transform 0.1s;
+    }
+    .ctrl-btn:active { transform: scale(0.97); }
+
+    #btn-start  { background: var(--accent); color: #003d2a; }
+    #btn-reset  { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    #btn-skip   { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); font-size: 13px; }
+
+    .ctrl-btn:hover { filter: brightness(1.1); }
+
+    #mode-selector {
+      display: flex;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .mode-btn {
+      padding: 6px 14px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-btn.active { background: rgba(0,209,140,0.15); color: var(--accent); }
+
+    #result-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(17,19,18,0.92);
+      border-radius: 14px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    #result-overlay.show { display: flex; }
+    #result-overlay h2 { font-size: 28px; color: var(--accent); }
+    #result-overlay p  { font-size: 16px; color: var(--text-muted); }
+
+    #hint-bar {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Title bar -->
+  <div id="titlebar">
+    <span id="titlebar-title">Typing — Helpful App</span>
+    <div id="titlebar-controls">
+      <button class="tb-btn" id="tb-min"   onclick="minWin()"></button>
+      <button class="tb-btn" id="tb-max"   onclick="maxWin()"></button>
+      <button class="tb-btn" id="tb-close" onclick="closeWin()"></button>
+    </div>
+  </div>
+
+  <!-- Top bar with Pomodoro -->
+  <div id="topbar">
+    <button id="back-btn" onclick="goBack()">←</button>
+    <h1>⌨️ Typing Practice</h1>
+    <div class="topbar-spacer"></div>
+
+    <!-- Pomodoro -->
+    <div id="pomo-bar">
+      <span id="pomo-mode-label">Focus</span>
+      <span id="pomo-display">25:00</span>
+      <button class="pomo-btn" id="pomo-play" onclick="pomoToggle()" title="Start/Pause">▶</button>
+      <button class="pomo-btn" onclick="pomoReset()" title="Reset">↺</button>
+      <button class="pomo-btn" onclick="pomoSkip()" title="Skip phase">⏭</button>
+      <div id="pomo-sessions">
+        <div class="pomo-dot" id="d0"></div>
+        <div class="pomo-dot" id="d1"></div>
+        <div class="pomo-dot" id="d2"></div>
+        <div class="pomo-dot" id="d3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div id="stats-row">
+    <div class="stat-pill"><div class="stat-val" id="stat-wpm">--</div><div class="stat-label">WPM</div></div>
+    <div class="stat-pill"><div class="stat-val" id="stat-acc">--</div><div class="stat-label">Accuracy</div></div>
+    <div class="stat-pill"><div class="stat-val" id="stat-chars">0</div><div class="stat-label">Chars</div></div>
+    <div class="stat-pill"><div class="stat-val" id="stat-errors">0</div><div class="stat-label">Errors</div></div>
+    <div style="margin-left:auto;">
+      <div id="mode-selector">
+        <button class="mode-btn active" onclick="setMode('words',this)">Words</button>
+        <button class="mode-btn" onclick="setMode('sentences',this)">Sentences</button>
+        <button class="mode-btn" onclick="setMode('numbers',this)">Numbers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test area -->
+  <div id="test-area">
+    <div id="prompt-box" onclick="focusInput()">
+      <div id="prompt-text"></div>
+      <div id="result-overlay">
+        <h2>✓ Complete!</h2>
+        <p id="result-detail"></p>
+      </div>
+    </div>
+    <input id="input-field" type="text" autocomplete="off" autocorrect="off" spellcheck="false" />
+    <div id="controls-row">
+      <button class="ctrl-btn" id="btn-start"  onclick="startTest()">Start</button>
+      <button class="ctrl-btn" id="btn-reset"  onclick="resetTest()">Reset</button>
+      <button class="ctrl-btn" id="btn-skip"   onclick="loadNewPrompt()">New prompt</button>
+    </div>
+    <div id="hint-bar">Click the text or press <strong>Enter</strong> to begin. <strong>Esc</strong> to reset.</div>
+  </div>
+
+  <script>
+    // Electron helpers
+    function closeWin() { try { require('electron').ipcRenderer.send('window-close'); } catch(e){} }
+    function minWin()   { try { require('electron').ipcRenderer.send('window-min');   } catch(e){} }
+    function maxWin()   { try { require('electron').ipcRenderer.send('window-max');   } catch(e){} }
+    function goBack()   { try { require('electron').ipcRenderer.send('navigate', 'apps'); } catch(e){ history.back(); } }
+
+    // ─── Word / sentence banks ───────────────────────────────────────────
+    const BANKS = {
+      words: [
+        'the quick brown fox jumps over the lazy dog',
+        'pack my box with five dozen liquor jugs',
+        'how vexingly quick daft zebras jump',
+        'the five boxing wizards jump quickly',
+        'sphinx of black quartz judge my vow',
+        'waltz nymph for quick jigs vex bud',
+        'glib jocks quiz nymph to vex dwarf',
+        'the job requires extra pluck and zeal from every young wage earner',
+        'coding every day improves your speed and focus significantly over time',
+        'practice makes perfect and consistency is the key to mastering any skill'
+      ],
+      sentences: [
+        'The sun sets slowly behind the mountains, painting the sky in shades of orange and pink.',
+        'She opened the old book and found a letter written in faded ink from decades ago.',
+        'Learning to type quickly and accurately is a skill that pays off for a lifetime.',
+        'Every morning he brewed fresh coffee and read the news before starting his work.',
+        'The city lights reflected off the wet pavement after the heavy rain had passed.',
+        'A good programmer writes code that is clean, efficient, and easy to understand.',
+        'Music has the unique power to transport us back to moments we thought were forgotten.',
+        'He spent three years building the app that would eventually change his entire career.',
+        'The library was quiet except for the soft sound of pages turning in the corner.',
+        'Focus and determination are the two most important ingredients for achieving great things.'
+      ],
+      numbers: [
+        '1234 5678 9012 3456 7890 2345 6789 0123 4567 8901',
+        '3.14159 2.71828 1.41421 1.73205 0.57721 1.61803',
+        '100 200 300 400 500 600 700 800 900 1000 1100 1200',
+        '42 17 99 8 55 33 71 14 88 26 63 45 91 7 50 22',
+        '2024 1985 2001 1776 1969 2048 1492 2000 1066 1815',
+        '10 20 30 40 50 60 70 80 90 100 110 120 130 140 150',
+        '1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987',
+        '256 512 1024 2048 4096 8192 16384 32768 65536',
+        '9 81 729 6561 59049 531441',
+        '1000000 2000000 3000000 4000000 5000000'
+      ]
+    };
+
+    let currentMode = 'words';
+    let currentPrompt = '';
+    let typedIndex = 0;
+    let errors = 0;
+    let startTime = null;
+    let testActive = false;
+    let timerInterval = null;
+
+    function setMode(mode, btn) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      resetTest();
+    }
+
+    function loadNewPrompt() {
+      const bank = BANKS[currentMode];
+      currentPrompt = bank[Math.floor(Math.random() * bank.length)];
+      renderPrompt();
+      resetState();
+      document.getElementById('result-overlay').classList.remove('show');
+    }
+
+    function renderPrompt() {
+      const box = document.getElementById('prompt-text');
+      box.innerHTML = currentPrompt.split('').map((ch, i) => {
+        let cls = i === 0 ? 'char cursor pending' : 'char pending';
+        return `<span class="${cls}" data-i="${i}">${ch === ' ' ? '&nbsp;' : ch}</span>`;
+      }).join('');
+    }
+
+    function resetState() {
+      typedIndex = 0;
+      errors = 0;
+      startTime = null;
+      testActive = false;
+      clearInterval(timerInterval);
+      timerInterval = null;
+      document.getElementById('input-field').value = '';
+      updateStats();
+    }
+
+    function resetTest() {
+      loadNewPrompt();
+    }
+
+    function startTest() {
+      loadNewPrompt();
+      focusInput();
+    }
+
+    function focusInput() {
+      if (testActive || typedIndex < currentPrompt.length) {
+        document.getElementById('input-field').focus();
+      }
+    }
+
+    // Typing handler
+    document.getElementById('input-field').addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { resetTest(); return; }
+      if (e.key === 'Enter' && !testActive) { loadNewPrompt(); focusInput(); return; }
+      if (!currentPrompt) return;
+
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        if (typedIndex > 0) {
+          typedIndex--;
+          const spans = document.querySelectorAll('#prompt-text .char');
+          spans[typedIndex].className = 'char pending';
+          if (typedIndex + 1 < spans.length) spans[typedIndex + 1].classList.remove('cursor');
+          spans[typedIndex].classList.add('cursor');
+        }
+        return;
+      }
+
+      if (e.key.length !== 1) return;
+      if (typedIndex >= currentPrompt.length) return;
+
+      // Start timer on first keypress
+      if (!testActive) {
+        testActive = true;
+        startTime = Date.now();
+        timerInterval = setInterval(updateStats, 200);
+      }
+
+      const expected = currentPrompt[typedIndex];
+      const spans = document.querySelectorAll('#prompt-text .char');
+      spans[typedIndex].classList.remove('cursor', 'pending');
+
+      if (e.key === expected) {
+        spans[typedIndex].classList.add('correct');
+      } else {
+        spans[typedIndex].classList.add('wrong');
+        errors++;
+        document.getElementById('stat-errors').textContent = errors;
+      }
+
+      typedIndex++;
+      if (typedIndex < spans.length) {
+        spans[typedIndex].classList.add('cursor');
+      }
+
+      updateStats();
+
+      if (typedIndex === currentPrompt.length) {
+        finishTest();
+      }
+    });
+
+    function updateStats() {
+      const chars = typedIndex;
+      const elapsed = startTime ? (Date.now() - startTime) / 60000 : 0;
+      const words = chars / 5;
+      const wpm = elapsed > 0 ? Math.round(words / elapsed) : 0;
+      const acc = chars > 0 ? Math.round(((chars - errors) / chars) * 100) : 100;
+
+      const wpmEl = document.getElementById('stat-wpm');
+      const accEl = document.getElementById('stat-acc');
+      wpmEl.textContent = wpm > 0 ? wpm : '--';
+      accEl.textContent = chars > 0 ? acc + '%' : '--';
+      wpmEl.className = 'stat-val' + (wpm >= 60 ? ' good' : wpm > 0 && wpm < 30 ? ' bad' : '');
+      accEl.className = 'stat-val' + (acc >= 95 ? ' good' : acc < 80 ? ' bad' : '');
+      document.getElementById('stat-chars').textContent = chars;
+    }
+
+    function finishTest() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      testActive = false;
+
+      const chars = currentPrompt.length;
+      const elapsed = (Date.now() - startTime) / 60000;
+      const wpm = Math.round((chars / 5) / elapsed);
+      const acc = Math.round(((chars - errors) / chars) * 100);
+
+      document.getElementById('stat-wpm').textContent = wpm;
+      document.getElementById('stat-acc').textContent = acc + '%';
+
+      const overlay = document.getElementById('result-overlay');
+      document.getElementById('result-detail').textContent = `${wpm} WPM · ${acc}% accuracy · ${errors} error${errors !== 1 ? 's' : ''}`;
+      overlay.classList.add('show');
+
+      // Save best stats to localStorage
+      const best = JSON.parse(localStorage.getItem('typing_best') || '{"wpm":0,"acc":0}');
+      if (wpm > best.wpm) {
+        localStorage.setItem('typing_best', JSON.stringify({ wpm, acc }));
+      }
+    }
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !document.getElementById('input-field').matches(':focus')) {
+        loadNewPrompt();
+        setTimeout(focusInput, 50);
+      }
+    });
+
+    // ─── Pomodoro ────────────────────────────────────────────────────────
+    const POMO_PHASES = [
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Break',       secs:  5 * 60 },
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Break',       secs:  5 * 60 },
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Break',       secs:  5 * 60 },
+      { label: 'Focus',       secs: 25 * 60 },
+      { label: 'Long Break',  secs: 15 * 60 },
+    ];
+
+    let pomoPhase = 0;
+    let pomoRemaining = POMO_PHASES[0].secs;
+    let pomoRunning = false;
+    let pomoInterval = null;
+    let pomoSession = 0; // number of focus sessions completed
+
+    function renderPomo() {
+      const m = Math.floor(pomoRemaining / 60);
+      const s = pomoRemaining % 60;
+      const disp = document.getElementById('pomo-display');
+      disp.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      const phase = POMO_PHASES[pomoPhase];
+      document.getElementById('pomo-mode-label').textContent = phase.label;
+      const isBreak = phase.label.includes('Break');
+      disp.className = isBreak ? 'break-mode' : '';
+      document.getElementById('pomo-play').textContent = pomoRunning ? '⏸' : '▶';
+      // dots — one per focus session
+      for (let i = 0; i < 4; i++) {
+        document.getElementById('d' + i).className = 'pomo-dot' + (i < pomoSession ? ' done' : '');
+      }
+    }
+
+    function pomoToggle() {
+      if (pomoRunning) {
+        clearInterval(pomoInterval);
+        pomoRunning = false;
+      } else {
+        pomoRunning = true;
+        pomoInterval = setInterval(() => {
+          pomoRemaining--;
+          if (pomoRemaining <= 0) {
+            pomoNext();
+          }
+          renderPomo();
+        }, 1000);
+      }
+      renderPomo();
+    }
+
+    function pomoNext() {
+      clearInterval(pomoInterval);
+      pomoRunning = false;
+      const phase = POMO_PHASES[pomoPhase];
+      if (phase.label === 'Focus') {
+        pomoSession = Math.min(4, pomoSession + 1);
+      }
+      pomoPhase = (pomoPhase + 1) % POMO_PHASES.length;
+      if (pomoPhase === 0) pomoSession = 0;
+      pomoRemaining = POMO_PHASES[pomoPhase].secs;
+      // notify
+      try { new Notification('Helpful App', { body: POMO_PHASES[pomoPhase].label + ' phase started!' }); } catch(e){}
+      renderPomo();
+    }
+
+    function pomoReset() {
+      clearInterval(pomoInterval);
+      pomoRunning = false;
+      pomoRemaining = POMO_PHASES[pomoPhase].secs;
+      renderPomo();
+    }
+
+    function pomoSkip() { pomoNext(); }
+
+    // Init
+    renderPomo();
+    loadNewPrompt();
+  </script>
+</body>
+</html>

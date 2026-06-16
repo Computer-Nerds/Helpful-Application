@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Piano</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#000;color:#e8f0ed;height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none;}
+#toolbar{height:52px;background:#0a0f0d;border-bottom:1px solid #1a2e24;display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;}
+#back-btn{background:#1a1f1d;border:1px solid #1f2e28;color:#7a9e8e;border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px;}
+#back-btn:hover{border-color:#00d18c;color:#00d18c;}
+#toolbar-title{font-size:16px;font-weight:800;letter-spacing:0.5px;}
+.tb-ctrl{display:flex;align-items:center;gap:8px;font-size:13px;color:#7a9e8e;}
+.tb-ctrl label{cursor:pointer;display:flex;align-items:center;gap:6px;}
+input[type=checkbox]{accent-color:#00d18c;}
+input[type=range]{accent-color:#00d18c;}
+#vol-label{font-size:12px;color:#4a7060;min-width:28px;}
+#timer-display{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:#00d18c;margin-left:auto;}
+.tb-btn{background:none;border:1px solid #1f2e28;color:#7a9e8e;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:13px;}
+.tb-btn:hover{border-color:#00d18c;color:#00d18c;}
+.tb-btn.active{border-color:#00d18c;color:#00d18c;background:rgba(0,209,140,0.08);}
+
+#shortcut-bar{background:#0a0f0d;border-bottom:1px solid #111;padding:5px 20px;display:flex;gap:20px;flex-shrink:0;}
+.sc-item{font-size:11px;color:#3a5548;}
+.sc-key{background:#1a2618;border:1px solid #1f2e28;border-radius:3px;padding:1px 5px;font-size:10px;color:#7a9e8e;font-family:monospace;}
+
+#chaser{flex:1;position:relative;overflow:hidden;background:#000;}
+#piano-row{height:36vh;position:relative;background:#1a1a1a;flex-shrink:0;border-top:2px solid #111;}
+#white-keys{position:absolute;inset:0;display:flex;}
+#black-keys{position:absolute;top:0;left:0;right:0;height:62%;pointer-events:none;z-index:5;}
+.wk{flex:1;height:100%;background:linear-gradient(#FFFFF7 96%,#eee 4%);border:1px solid #cacaca;border-top:none;border-radius:0 0 5px 5px;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:6px;box-shadow:inset 0 -6px 8px rgba(0,0,0,0.08),0 2px 6px rgba(0,0,0,0.4);transition:background 0.04s;position:relative;z-index:1;}
+.wk.pressed{background:linear-gradient(#d0f0e0 96%,#bbb 4%)!important;box-shadow:inset 0 -2px 4px rgba(0,209,140,0.2)!important;}
+.wk-label{font-size:10px;font-weight:700;}
+.bk{position:absolute;height:100%;background:linear-gradient(to bottom,#414141 0%,#252525 100%);border-radius:0 0 4px 4px;cursor:pointer;pointer-events:all;box-shadow:0 5px 10px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.07);transition:background 0.04s;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:4px;border:1px solid #111;border-top:none;}
+.bk.pressed{background:linear-gradient(to bottom,#555 0%,#333 100%)!important;box-shadow:0 2px 3px rgba(0,0,0,0.5)!important;}
+.bk-label{font-size:7px;color:#555;font-weight:700;}
+.beam{position:absolute;border-radius:3px 3px 0 0;pointer-events:none;transition:none;}
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <button id="back-btn" onclick="goBack()">← Apps</button>
+  <span id="toolbar-title">🎹 Piano</span>
+  <div class="tb-ctrl">
+    <span>Vol</span>
+    <input type="range" id="vol" min="0" max="1" step="0.05" value="0.8" oninput="setVol(this.value)" style="width:90px;">
+    <span id="vol-label">80%</span>
+  </div>
+  <div class="tb-ctrl">
+    <label><input type="checkbox" id="chk-labels" checked onchange="toggleLabels(this.checked)"> Labels</label>
+    <label><input type="checkbox" id="chk-sustain" onchange="setSustain(this.checked)"> Sustain <small style="color:#3a5548">Ctrl+S</small></label>
+    <label><input type="checkbox" id="chk-hidenav" onchange="toggleNav(this.checked)"> Hide Nav <small style="color:#3a5548">Ctrl+H</small></label>
+  </div>
+  <span id="timer-display">00:00</span>
+  <button class="tb-btn" id="timer-btn" onclick="toggleTimer()">▶</button>
+  <button class="tb-btn" onclick="resetTimer()">↺</button>
+</div>
+
+<div id="shortcut-bar">
+  <span class="sc-item"><span class="sc-key">MIDI</span> keyboard supported</span>
+  <span class="sc-item"><span class="sc-key">Mouse/Touch</span> to play keys</span>
+  <span class="sc-item"><span class="sc-key">Ctrl+S</span> sustain</span>
+  <span class="sc-item"><span class="sc-key">Ctrl+H</span> hide nav</span>
+</div>
+
+<div id="chaser"></div>
+<div id="piano-row">
+  <div id="white-keys"></div>
+  <div id="black-keys"></div>
+</div>
+
+<script>
+// ── Key data ──
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const ALL_KEYS=[];
+for(let oct=2;oct<=6;oct++){
+  const base=12+oct*12;
+  for(let n=0;n<12;n++){
+    const midi=base+n,name=NOTE_NAMES[n];
+    ALL_KEYS.push({midi,name,octave:oct,isBlack:name.includes('#'),label:name+oct});
+  }
+}
+ALL_KEYS.push({midi:108,name:'C',octave:7,isBlack:false,label:'C7'});
+const WHITE_KEYS=ALL_KEYS.filter(k=>!k.isBlack);
+const BLACK_KEYS=ALL_KEYS.filter(k=>k.isBlack);
+const WK_COUNT=WHITE_KEYS.length;
+
+// ── Audio ──
+let _ctx=null,activeNodes={};
+function getCtx(){
+  if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_ctx.state==='suspended')_ctx.resume();
+  return _ctx;
+}
+function midiToHz(n){return 440*Math.pow(2,(n-69)/12);}
+function playNote(midi,vol=1){
+  stopNote(midi,false,true);
+  const ctx=getCtx(),freq=midiToHz(midi);
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(0,ctx.currentTime);
+  master.gain.linearRampToValueAtTime(vol*0.5,ctx.currentTime+0.008);
+  master.connect(ctx.destination);
+  const oscs=[];
+  [[1,0.55],[2,0.22],[3,0.1],[4,0.05],[0.5,0.08]].forEach(([m,a])=>{
+    const o=ctx.createOscillator();o.type=m<=1?'triangle':'sine';o.frequency.value=freq*m;
+    const g=ctx.createGain();g.gain.value=a;o.connect(g);g.connect(master);o.start();oscs.push(o);
+  });
+  const blen=Math.floor(ctx.sampleRate*0.03),buf=ctx.createBuffer(1,blen,ctx.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<blen;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.006));
+  const ns=ctx.createBufferSource();ns.buffer=buf;
+  const nf=ctx.createBiquadFilter();nf.type='bandpass';nf.frequency.value=freq*2;nf.Q.value=1;
+  const ng=ctx.createGain();ng.gain.value=0.12;
+  ns.connect(nf);nf.connect(ng);ng.connect(master);ns.start();
+  activeNodes[midi]={oscs,master};
+}
+function stopNote(midi,sustain=false,immediate=false){
+  const node=activeNodes[midi];if(!node)return;
+  const ctx=getCtx(),rel=immediate?0:sustain?3.0:0.45;
+  const{master,oscs}=node;
+  master.gain.cancelScheduledValues(ctx.currentTime);
+  master.gain.setValueAtTime(master.gain.value,ctx.currentTime);
+  if(rel<0.01){try{oscs.forEach(o=>o.stop());master.disconnect();}catch{}}
+  else{master.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+rel);setTimeout(()=>{try{oscs.forEach(o=>o.stop());master.disconnect();}catch{}},(rel+0.1)*1000);}
+  delete activeNodes[midi];
+}
+
+// ── State ──
+let volume=0.8,sustain=false,showLabels=true,pressed=new Set(),beams=[],beamId=0;
+let timerSecs=0,timerRunning=false,timerInterval=null;
+
+// ── Timer ──
+function fmtTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function toggleTimer(){
+  timerRunning=!timerRunning;
+  const btn=document.getElementById('timer-btn');
+  btn.textContent=timerRunning?'⏸':'▶';
+  btn.classList.toggle('active',timerRunning);
+  if(timerRunning){timerInterval=setInterval(()=>{timerSecs++;document.getElementById('timer-display').textContent=fmtTime(timerSecs);localStorage.setItem('piano_timer',timerSecs);},1000);}
+  else clearInterval(timerInterval);
+}
+function resetTimer(){clearInterval(timerInterval);timerRunning=false;timerSecs=0;document.getElementById('timer-display').textContent='00:00';document.getElementById('timer-btn').textContent='▶';document.getElementById('timer-btn').classList.remove('active');}
+function setVol(v){volume=parseFloat(v);document.getElementById('vol-label').textContent=Math.round(volume*100)+'%';}
+function setSustain(v){sustain=v;}
+function toggleLabels(v){showLabels=v;buildKeys();}
+function toggleNav(v){
+  const tb=document.getElementById('toolbar'),sc=document.getElementById('shortcut-bar');
+  tb.style.display=v?'none':'flex';sc.style.display=v?'none':'flex';
+}
+function goBack(){try{require('electron').ipcRenderer.send('close-app');}catch(e){window.close();}}
+
+// ── Press/Release ──
+function pressKey(midi){
+  if(pressed.has(midi))return;
+  pressed.add(midi);
+  playNote(midi,volume);
+  const el=document.querySelector('[data-midi="'+midi+'"]');
+  if(el)el.classList.add('pressed');
+  spawnBeam(midi);
+}
+function releaseKey(midi){
+  pressed.delete(midi);
+  stopNote(midi,sustain);
+  const el=document.querySelector('[data-midi="'+midi+'"]');
+  if(el)el.classList.remove('pressed');
+}
+
+// ── Beams ──
+function spawnBeam(midi){
+  const key=ALL_KEYS.find(k=>k.midi===midi);if(!key)return;
+  const chaser=document.getElementById('chaser');
+  const totalW=document.getElementById('piano-row').offsetWidth;
+  const wkW=totalW/WK_COUNT;
+  let left,width;
+  if(!key.isBlack){
+    const idx=WHITE_KEYS.findIndex(k=>k.midi===midi);
+    left=idx*wkW;width=wkW;
+  }else{
+    const prev=WHITE_KEYS.filter(k=>k.midi<midi).length;
+    const bkW=wkW*0.6;left=prev*wkW-bkW/2;width=bkW;
+  }
+  const color=key.isBlack?'#888cff':key.name==='C'?'#ffd700':'#00d18c';
+  const id=++beamId;
+  const el=document.createElement('div');
+  el.className='beam';
+  el.id='beam-'+id;
+  el.style.cssText=`left:${left}px;width:${width}px;bottom:0;height:0;background:linear-gradient(to top,${color}dd 0%,${color}66 50%,transparent 100%);box-shadow:0 0 12px 2px ${color}44;`;
+  chaser.appendChild(el);
+  beams.push({id,el,born:Date.now()});
+}
+function animateBeams(){
+  const now=Date.now(),chaserH=document.getElementById('chaser').offsetHeight;
+  beams=beams.filter(b=>{
+    const age=now-b.born,dur=1400;
+    if(age>dur){b.el.remove();return false;}
+    const travel=age/dur*chaserH;
+    const opacity=age<dur*0.3?1:1-(age-dur*0.3)/(dur*0.7);
+    const h=Math.min(travel+30,chaserH);
+    b.el.style.height=h+'px';
+    b.el.style.opacity=opacity;
+    return true;
+  });
+  requestAnimationFrame(animateBeams);
+}
+requestAnimationFrame(animateBeams);
+
+// ── Build keyboard ──
+function buildKeys(){
+  const wkEl=document.getElementById('white-keys');
+  const bkEl=document.getElementById('black-keys');
+  wkEl.innerHTML='';bkEl.innerHTML='';
+  const totalW=document.getElementById('piano-row').offsetWidth;
+  const wkW=totalW/WK_COUNT;
+  WHITE_KEYS.forEach((k,idx)=>{
+    const div=document.createElement('div');
+    div.className='wk';div.dataset.midi=k.midi;
+    if(showLabels){
+      const lbl=document.createElement('span');
+      lbl.className='wk-label';
+      lbl.style.color=k.name==='C'?'#c8960c':'#999';
+      lbl.textContent=k.name==='C'?k.label:k.name;
+      div.appendChild(lbl);
+    }
+    div.addEventListener('mousedown',e=>{e.preventDefault();pressKey(k.midi);});
+    div.addEventListener('mouseup',()=>releaseKey(k.midi));
+    div.addEventListener('mouseleave',()=>{if(pressed.has(k.midi))releaseKey(k.midi);});
+    div.addEventListener('touchstart',e=>{e.preventDefault();pressKey(k.midi);},{passive:false});
+    div.addEventListener('touchend',e=>{e.preventDefault();releaseKey(k.midi);});
+    wkEl.appendChild(div);
+  });
+  BLACK_KEYS.forEach(k=>{
+    const prev=WHITE_KEYS.filter(wk=>wk.midi<k.midi).length;
+    const leftPct=prev/WK_COUNT*100;
+    const bwPct=0.6/WK_COUNT*100;
+    const div=document.createElement('div');
+    div.className='bk';div.dataset.midi=k.midi;
+    div.style.left=`calc(${leftPct}% - ${bwPct/2}%)`;
+    div.style.width=`${bwPct}%`;
+    if(showLabels){
+      const lbl=document.createElement('span');
+      lbl.className='bk-label';
+      lbl.textContent=k.name.replace('#','♯')+k.octave;
+      div.appendChild(lbl);
+    }
+    div.addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();pressKey(k.midi);});
+    div.addEventListener('mouseup',e=>{e.stopPropagation();releaseKey(k.midi);});
+    div.addEventListener('mouseleave',()=>{if(pressed.has(k.midi))releaseKey(k.midi);});
+    div.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();pressKey(k.midi);},{passive:false});
+    div.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();releaseKey(k.midi);});
+    bkEl.appendChild(div);
+  });
+}
+
+// ── MIDI ──
+if(navigator.requestMIDIAccess){
+  navigator.requestMIDIAccess().then(acc=>{
+    const conn=()=>{for(const i of acc.inputs.values())i.onmidimessage=e=>{
+      const[cmd,note,vel]=e.data;
+      if((cmd&0xf0)===0x90&&vel>0)pressKey(note);
+      else if((cmd&0xf0)===0x80||((cmd&0xf0)===0x90&&vel===0))releaseKey(note);
+    };};
+    conn();acc.onstatechange=conn;
+  }).catch(()=>{});
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key.toLowerCase()==='s'){e.preventDefault();const chk=document.getElementById('chk-sustain');chk.checked=!chk.checked;setSustain(chk.checked);}
+  if(e.ctrlKey&&e.key.toLowerCase()==='h'){e.preventDefault();const chk=document.getElementById('chk-hidenav');chk.checked=!chk.checked;toggleNav(chk.checked);}
+});
+
+window.addEventListener('resize',buildKeys);
+window.addEventListener('load',buildKeys);
+</script>
+</body>
+</html>

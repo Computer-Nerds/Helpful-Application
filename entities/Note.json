@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "updated_date": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "name": "Note"
+}
