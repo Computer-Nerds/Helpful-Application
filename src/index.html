@@ -3215,6 +3215,41 @@
       </div><!-- /pane container -->
     </div>
 
+
+    <!-- ══ PERIODIC TABLE QUIZ ══ -->
+    <div id="page-bg-periodic" class="page" style="flex-direction:column;background:#090e0c">
+      <div class="pt-topbar">
+        <button class="btn btn-ghost" onclick="setPage('braingames')" style="flex-shrink:0;font-size:12px;padding:5px 10px">← Back</button>
+        <span style="font-size:13px;font-weight:800;color:#e8f0ed">⚗️ Periodic Table Quiz</span>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          <button class="pt-mode-pill active" id="ptm-symbol" onclick="ptSetMode('symbol')">Name</button>
+          <button class="pt-mode-pill" id="ptm-name"   onclick="ptSetMode('name')">Symbol</button>
+          <button class="pt-mode-pill" id="ptm-number" onclick="ptSetMode('number')">Number</button>
+        </div>
+      </div>
+
+      <div class="pt-scorebar">
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-correct" style="color:#00d18c">0</div><div class="pt-sl">Correct</div></div>
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-wrong" style="color:#f87171">0</div><div class="pt-sl">Wrong</div></div>
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-streak" style="color:#fbbf24">0</div><div class="pt-sl">Streak</div></div>
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-pct" style="color:#c0d8cc">--%</div><div class="pt-sl">Accuracy</div></div>
+      </div>
+
+      <div class="pt-table-wrap">
+        <div class="pt-table" id="pt-table"></div>
+      </div>
+
+      <div class="pt-hint-bubble" id="pt-hint" style="margin:0 12px 0;flex:0 0 auto;display:flex">
+        <span id="pt-hint-text" style="flex:1">Loading…</span>
+      </div>
+
+      <div class="pt-input-row" style="position:relative">
+        <div id="pt-fact-popup" class="pt-fact-popup" style="display:none"></div>
+        <input id="pt-answer-input" type="text" placeholder="Type your answer and press Enter…" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="ptCheckKey(event)" />
+        <button onclick="ptSkip()" style="background:#111a15;border:1px solid #1f3028;color:#3a6050;border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap">Skip</button>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /body -->
 
@@ -13323,10 +13358,14 @@ function ptBuildTable() {
       if (!e) { html += `<div class="pt-cell empty" data-col="${col}" data-row="${row}"></div>`; continue; }
       const bg = PT_CAT_COLORS[e[5]] || '#0c1410';
       const tc = PT_CAT_TEXT[e[5]] || '#3a6050';
+      // Hide whatever field is being quizzed
+      const showSym  = ptMode !== 'name';
+      const showName = ptMode !== 'symbol';
+      const showNum  = ptMode !== 'number';
       html += `<div class="pt-cell" id="ptcell-${e[0]}" data-sym="${e[3]}" data-name="${e[4]}" data-num="${e[0]}" style="background:${bg}" title="${e[4]}">
-        <span class="pt-c-num">${e[0]}</span>
-        <span class="pt-c-sym" style="color:${tc}">${e[3]}</span>
-        <span class="pt-c-name">${e[4].length>9?e[4].substring(0,8)+'…':e[4]}</span>
+        <span class="pt-c-num" style="opacity:${showNum?1:0}">${e[0]}</span>
+        <span class="pt-c-sym" style="color:${tc};opacity:${showSym?1:0}">${e[3]}</span>
+        <span class="pt-c-name" style="opacity:${showName?1:0}">${e[4].length>9?e[4].substring(0,8)+'…':e[4]}</span>
       </div>`;
     }
   }
@@ -13451,6 +13490,7 @@ function ptSetMode(m) {
     const b=document.getElementById('ptm-'+k);
     if(b) b.classList.toggle('active', k===m);
   });
+  ptBuildTable();  // rebuild so visibility updates
   ptNext();
 }
 
@@ -13536,39 +13576,6 @@ function ptInit() {
   </div>
 </div>
 
-    <!-- ══ PERIODIC TABLE QUIZ ══ -->
-    <div id="page-bg-periodic" class="page" style="flex-direction:column;background:#090e0c">
-      <div class="pt-topbar">
-        <button class="btn btn-ghost" onclick="setPage('braingames')" style="flex-shrink:0;font-size:12px;padding:5px 10px">← Back</button>
-        <span style="font-size:13px;font-weight:800;color:#e8f0ed">⚗️ Periodic Table Quiz</span>
-        <div style="display:flex;gap:6px;margin-left:auto">
-          <button class="pt-mode-pill active" id="ptm-symbol" onclick="ptSetMode('symbol')">Name</button>
-          <button class="pt-mode-pill" id="ptm-name"   onclick="ptSetMode('name')">Symbol</button>
-          <button class="pt-mode-pill" id="ptm-number" onclick="ptSetMode('number')">Number</button>
-        </div>
-      </div>
-
-      <div class="pt-scorebar">
-        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-correct" style="color:#00d18c">0</div><div class="pt-sl">Correct</div></div>
-        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-wrong" style="color:#f87171">0</div><div class="pt-sl">Wrong</div></div>
-        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-streak" style="color:#fbbf24">0</div><div class="pt-sl">Streak</div></div>
-        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-pct" style="color:#c0d8cc">--%</div><div class="pt-sl">Accuracy</div></div>
-      </div>
-
-      <div class="pt-table-wrap">
-        <div class="pt-table" id="pt-table"></div>
-      </div>
-
-      <div class="pt-hint-bubble" id="pt-hint" style="margin:0 12px 0;flex:0 0 auto;display:flex">
-        <span id="pt-hint-text" style="flex:1">Loading…</span>
-      </div>
-
-      <div class="pt-input-row" style="position:relative">
-        <div id="pt-fact-popup" class="pt-fact-popup" style="display:none"></div>
-        <input id="pt-answer-input" type="text" placeholder="Type your answer and press Enter…" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="ptCheckKey(event)" />
-        <button onclick="ptSkip()" style="background:#111a15;border:1px solid #1f3028;color:#3a6050;border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap">Skip</button>
-      </div>
-    </div>
 
 </body>
 </html>
