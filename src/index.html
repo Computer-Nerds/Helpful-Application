@@ -827,7 +827,58 @@
     .tama-mood { font-size: 12px; font-weight: 700; text-align: center; color: #00d18c; }
     .tama-name { font-size: 10px; color: #4a7060; text-align: center; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
 
-    </style>
+    
+    /* ── Periodic Table Quiz ── */
+    #page-bg-periodic { overflow:hidden; }
+    .pt-table-wrap { overflow-x:auto; overflow-y:auto; flex:1; padding:0 16px 16px; }
+    .pt-table { display:grid; grid-template-columns:repeat(18,1fr); gap:3px; min-width:900px; }
+    .pt-cell {
+      aspect-ratio:1; border-radius:5px; border:1px solid #1c2c22;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      font-size:10px; cursor:default; transition:all 0.25s; position:relative; overflow:hidden;
+      background:#0c1410;
+    }
+    .pt-cell.empty { background:transparent; border-color:transparent; cursor:default; }
+    .pt-cell .pt-c-num { font-size:7px; color:#2a4838; position:absolute; top:2px; left:3px; }
+    .pt-cell .pt-c-sym { font-size:13px; font-weight:800; color:#3a6050; font-family:monospace; line-height:1.1; }
+    .pt-cell .pt-c-name { font-size:5.5px; color:#2a4838; margin-top:1px; text-align:center; line-height:1.1; }
+    .pt-cell.active {
+      border-color:#00d18c; background:#0a2018;
+      animation: ptPulse 0.6s ease-out;
+      z-index:2;
+    }
+    .pt-cell.active .pt-c-sym { color:#00d18c; font-size:16px; }
+    .pt-cell.active .pt-c-num { color:#3a8060; }
+    .pt-cell.active .pt-c-name { color:#3a8060; }
+    .pt-cell.correct-flash { border-color:#00d18c; background:rgba(0,209,140,0.22); transition:background 0.5s,border-color 0.5s; }
+    .pt-cell.wrong-flash   { border-color:#f87171; background:rgba(248,113,113,0.18); transition:background 0.5s,border-color 0.5s; }
+    .pt-cell.answered { border-color:#1f3a28; background:#0c1810; }
+    .pt-cell.answered .pt-c-sym { color:#1f4030; }
+    .pt-cell.answered .pt-c-num { color:#162a20; }
+    .pt-cell.answered .pt-c-name { color:#162a20; }
+    @keyframes ptPulse {
+      0%   { transform:scale(1);   box-shadow:0 0 0 0 rgba(0,209,140,0.7); }
+      50%  { transform:scale(1.18);box-shadow:0 0 0 6px rgba(0,209,140,0); }
+      100% { transform:scale(1);   box-shadow:0 0 0 0 rgba(0,209,140,0); }
+    }
+    .pt-input-row { display:flex; align-items:center; gap:10px; padding:10px 16px; flex-shrink:0; background:#0c1410; border-top:1px solid #1a2e22; }
+    .pt-input-row input { flex:1; background:#111a15; border:1.5px solid #1f3028; color:#e8f0ed; border-radius:10px; padding:9px 14px; font-size:15px; font-family:inherit; outline:none; transition:border-color 0.2s; }
+    .pt-input-row input:focus { border-color:#2a5040; }
+    .pt-input-row input.shake { animation:ptShake 0.3s ease; border-color:#f87171!important; }
+    @keyframes ptShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .pt-scorebar { display:flex; gap:0; flex-shrink:0; border-bottom:1px solid #1a2e22; }
+    .pt-scorebar-item { flex:1; text-align:center; padding:7px 0; }
+    .pt-scorebar-item .pt-sv { font-size:18px; font-weight:800; }
+    .pt-scorebar-item .pt-sl { font-size:9px; font-weight:700; letter-spacing:0.8px; color:#2a4838; text-transform:uppercase; }
+    .pt-topbar { display:flex; align-items:center; gap:10px; padding:8px 14px; flex-shrink:0; background:#0c1410; border-bottom:1px solid #1a2e22; }
+    .pt-mode-pill { background:#0e1a15; border:1px solid #1f3028; color:#3a6050; border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+    .pt-mode-pill:hover { border-color:#2a5040; color:#5a8070; }
+    .pt-mode-pill.active { background:rgba(0,209,140,0.1); border-color:#00d18c; color:#00d18c; }
+    .pt-hint-bubble { background:#0a1e14; border:1px solid #1f3028; border-radius:12px; padding:10px 14px; font-size:12px; color:#5a7a6a; flex:1; min-height:36px; display:flex; align-items:center; gap:8px; }
+    .pt-hint-bubble b { color:#00d18c; }
+    .pt-fact-popup { position:absolute; bottom:64px; left:50%; transform:translateX(-50%); width:min(380px,90vw); background:#0e1e18; border:1.5px solid #00d18c; border-radius:16px; padding:16px 18px; z-index:100; box-shadow:0 8px 32px rgba(0,0,0,0.6); animation:ptFactIn 0.25s ease; }
+    @keyframes ptFactIn { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+</style>
   <script src="chart.min.js"></script>
 </head>
 <body>
@@ -2737,6 +2788,10 @@
             <div class="app-icon" style="background:#1a1a2e">🔗</div>
             <span class="app-label">Connections</span>
           </div>
+          <div class="app-tile" onclick="openBrainGame('periodic')">
+            <div class="app-icon" style="background:#0f1e18">⚗️</div>
+            <span class="app-label">Periodic Table</span>
+          </div>
         </div>
       </div>
     </div>
@@ -3292,7 +3347,10 @@ function openApp(app) {
 }
 function openBrainGame(game) {
   if (game === 'wordle') setPage('wordle');
-  else setPage('bg-' + game);
+  else {
+    setPage('bg-' + game);
+    if (game==='periodic') setTimeout(ptInit, 50);
+  }
 }
 function closeApp(app) {
   if(app==='math' && typeof mathTimerRunning!=='undefined' && mathTimerRunning){
@@ -13128,6 +13186,290 @@ document.addEventListener('DOMContentLoaded',function(){
   } catch(e){}
 });
 
+
+// ════════════════════════════════════════════════════════════
+//  PERIODIC TABLE QUIZ
+// ════════════════════════════════════════════════════════════
+const PT_DATA = [
+  // [atomicNum, col, row, sym, name, category, mass, year, discoverer, fact]
+  [1,1,1,'H','Hydrogen','nonmetal','1.008','Ancient','—','Makes up ~75% of all normal matter. Stars are mostly hydrogen fusing into helium.'],
+  [2,18,1,'He','Helium','noble','4.003',1868,'Janssen','First detected in sunlight before it was found on Earth. So light it escapes gravity into space.'],
+  [3,1,2,'Li','Lithium','alkali','6.941',1817,'Arfwedson','Lightest metal. Powers the lithium-ion batteries in almost every modern gadget.'],
+  [4,2,2,'Be','Beryllium','alkaline','9.012',1798,'Vauquelin','Stiffer than steel at a fraction of the weight — used in spacecraft and telescopes.'],
+  [5,13,2,'B','Boron','metalloid','10.81',1808,'Davy','Key ingredient in Pyrex glass and used as a neutron absorber in nuclear reactors.'],
+  [6,14,2,'C','Carbon','nonmetal','12.011','Ancient','—','Basis of all known life. Diamond and graphite are both pure carbon — different atomic arrangements.'],
+  [7,15,2,'N','Nitrogen','nonmetal','14.007',1772,'Rutherford','Makes up 78% of Earth\'s atmosphere. Liquid nitrogen boils at −196°C.'],
+  [8,16,2,'O','Oxygen','nonmetal','15.999',1774,'Scheele','Supports combustion and respiration. Iron rusts because of oxidation by oxygen.'],
+  [9,17,2,'F','Fluorine','halogen','18.998',1886,'Moissan','Most electronegative element. Teflon\'s non-stick coating is a fluorine compound.'],
+  [10,18,2,'Ne','Neon','noble','20.180',1898,'Ramsay','Neon signs glow red-orange because excited neon atoms emit that exact wavelength of light.'],
+  [11,1,3,'Na','Sodium','alkali','22.990',1807,'Davy','Explodes on contact with water. Table salt is sodium bonded with chlorine.'],
+  [12,2,3,'Mg','Magnesium','alkaline','24.305',1755,'Black','Burns with brilliant white flame — used in flares. Vital for chlorophyll in plants.'],
+  [13,13,3,'Al','Aluminum','post-trans','26.982',1825,'Ørsted','Most abundant metal in Earth\'s crust. Once rarer than gold — Napoleon used aluminum cutlery for VIPs.'],
+  [14,14,3,'Si','Silicon','metalloid','28.085',1824,'Berzelius','Backbone of modern electronics. Silicon Valley is named after it. Sand is mostly silicon dioxide.'],
+  [15,15,3,'P','Phosphorus','nonmetal','30.974',1669,'Brand','First isolated from urine by an alchemist. White phosphorus glows in the dark.'],
+  [16,16,3,'S','Sulfur','nonmetal','32.06','Ancient','—','Known as "brimstone" since antiquity. Volcanoes emit sulfur compounds.'],
+  [17,17,3,'Cl','Chlorine','halogen','35.45',1774,'Scheele','Disinfects drinking water and pools. Was deployed as a chemical weapon in WWI.'],
+  [18,18,3,'Ar','Argon','noble','39.948',1894,'Rayleigh','Nearly 1% of the atmosphere — more than CO₂. Used as inert shielding gas in welding.'],
+  [19,1,4,'K','Potassium','alkali','39.098',1807,'Davy','Symbol K from Latin "kalium." Essential for nerve and muscle function.'],
+  [20,2,4,'Ca','Calcium','alkaline','40.078',1808,'Davy','Most abundant mineral in the human body — bones and teeth are mostly calcium phosphate.'],
+  [21,3,4,'Sc','Scandium','transition','44.956',1879,'Nilson','Used in aerospace alloys and high-intensity sports equipment like baseball bats.'],
+  [22,4,4,'Ti','Titanium','transition','47.867',1791,'Gregor','As strong as steel but 45% lighter. Used in aircraft, medical implants, and spacecraft.'],
+  [23,5,4,'V','Vanadium','transition','50.942',1801,'del Río','Vanadium steel is used in tools and springs. Named after the Norse goddess Vanadís.'],
+  [24,6,4,'Cr','Chromium','transition','51.996',1798,'Vauquelin','Gives rubies their red color. Chrome plating creates shiny, corrosion-resistant surfaces.'],
+  [25,7,4,'Mn','Manganese','transition','54.938',1774,'Gahn','Essential for producing steel. Also a trace nutrient needed by all living organisms.'],
+  [26,8,4,'Fe','Iron','transition','55.845','Ancient','—','Most used metal in the world. Earth\'s core is mostly iron-nickel. Hemoglobin uses iron to carry oxygen.'],
+  [27,9,4,'Co','Cobalt','transition','58.933',1735,'Brandt','Cobalt blue pigment used since ancient times. Co-60 is used in cancer radiotherapy.'],
+  [28,10,4,'Ni','Nickel','transition','58.693',1751,'Cronstedt','Named after "Old Nick" (the devil) by miners who found it instead of copper. Used in coinage.'],
+  [29,11,4,'Cu','Copper','transition','63.546','Ancient','—','One of the first metals used by humans. Still the best affordable electrical conductor.'],
+  [30,12,4,'Zn','Zinc','transition','65.38',1746,'Marggraf','Galvanizing steel with zinc prevents rust. Also an essential human nutrient.'],
+  [31,13,4,'Ga','Gallium','post-trans','69.723',1875,'Lecoq','Melts in your hand — melting point 29.8°C. Used in LEDs and semiconductors.'],
+  [32,14,4,'Ge','Germanium','metalloid','72.630',1886,'Winkler','Predicted by Mendeleev before it was discovered. Used in fiber optics and infrared optics.'],
+  [33,15,4,'As','Arsenic','metalloid','74.922','Ancient','—','Historically used as poison. Now used in semiconductors and wood preservatives.'],
+  [34,16,4,'Se','Selenium','nonmetal','78.971',1817,'Berzelius','Essential trace element — deficiency causes heart disease. Used in solar cells.'],
+  [35,17,4,'Br','Bromine','halogen','79.904',1825,'Balard','One of only two liquid elements at room temperature (mercury is the other).'],
+  [36,18,4,'Kr','Krypton','noble','83.798',1898,'Ramsay','Used in high-performance lightbulbs and some lasers. The metre was once defined by krypton-86.'],
+  [37,1,5,'Rb','Rubidium','alkali','85.468',1861,'Bunsen','So reactive it spontaneously ignites in air. Used in atomic clocks and GPS.'],
+  [38,2,5,'Sr','Strontium','alkaline','87.62',1790,'Crawford','Strontium compounds burn brilliant red — used in fireworks and emergency flares.'],
+  [39,3,5,'Y','Yttrium','transition','88.906',1794,'Gadolin','Used in making white LEDs and cancer treatment through radioactive Y-90.'],
+  [40,4,5,'Zr','Zirconium','transition','91.224',1789,'Klaproth','Highly resistant to corrosion — used in nuclear reactor cladding and zirconia gemstones.'],
+  [41,5,5,'Nb','Niobium','transition','92.906',1801,'Hatchett','Used in superconducting magnets for MRI machines. Almost all niobium is mined in Brazil.'],
+  [42,6,5,'Mo','Molybdenum','transition','95.96',1781,'Hjelm','Highest melting point of any element in Group 6. Key in high-strength steel alloys.'],
+  [43,7,5,'Tc','Technetium','transition','98',1937,'Perrier','First artificially produced element — no stable isotopes. Used in nuclear medicine imaging.'],
+  [44,8,5,'Ru','Ruthenium','transition','101.07',1844,'Klaus','Alloyed with platinum and palladium for electrical contacts. Named after Russia.'],
+  [45,9,5,'Rh','Rhodium','transition','102.91',1803,'Wollaston','One of the rarest and most expensive metals. Used in catalytic converters for cars.'],
+  [46,10,5,'Pd','Palladium','transition','106.42',1803,'Wollaston','Absorbs up to 900 times its own volume of hydrogen. Key in catalytic converters.'],
+  [47,11,5,'Ag','Silver','transition','107.87','Ancient','—','Best electrical and thermal conductor of all elements. Has natural antimicrobial properties.'],
+  [48,12,5,'Cd','Cadmium','transition','112.41',1817,'Stromeyer','Toxic heavy metal. Used in old rechargeable NiCd batteries and yellow/red pigments.'],
+  [49,13,5,'In','Indium','post-trans','114.82',1863,'Reich','Extremely soft — you can scratch it with a fingernail. Used in touchscreen coatings (ITO).'],
+  [50,14,5,'Sn','Tin','post-trans','118.71','Ancient','—','Bronze is copper-tin alloy. "Tin pest" caused Napoleon\'s army buttons to crumble in Russian winter.'],
+  [51,15,5,'Sb','Antimony','metalloid','121.76','Ancient','—','Used in ancient Egyptian eye makeup. Now mainly used in flame retardants.'],
+  [52,16,5,'Te','Tellurium','metalloid','127.60',1782,'Müller','Rarer than platinum. Used in solar panels and as an additive to improve steel machinability.'],
+  [53,17,5,'I','Iodine','halogen','126.90',1811,'Courtois','The thyroid gland needs iodine to produce hormones. Iodized salt prevents deficiency disorders.'],
+  [54,18,5,'Xe','Xenon','noble','131.29',1898,'Ramsay','Ion thrusters on spacecraft use xenon as propellant. Used in high-intensity arc lamps.'],
+  [55,1,6,'Cs','Cesium','alkali','132.91',1860,'Bunsen','Atomic clocks use cesium vibration — accurate to 1 second in 300 million years.'],
+  [56,2,6,'Ba','Barium','alkaline','137.33',1808,'Davy','Barium meals before X-rays reveal the digestive tract because barium is opaque to X-rays.'],
+  [72,4,6,'Hf','Hafnium','transition','178.49',1923,'Coster','Almost always found alongside zirconium. Used in nuclear control rods and microprocessors.'],
+  [73,5,6,'Ta','Tantalum','transition','180.95',1802,'Ekeberg','Extremely corrosion-resistant. Used in capacitors in smartphones and in surgical implants.'],
+  [74,6,6,'W','Tungsten','transition','183.84',1783,'Elhuyar','Highest melting point of any metal (3,422°C). Incandescent bulb filaments were tungsten.'],
+  [75,7,6,'Re','Rhenium','transition','186.21',1925,'Noddack','One of the last naturally occurring elements to be discovered. Used in jet engine turbines.'],
+  [76,8,6,'Os','Osmium','transition','190.23',1803,'Tennant','Densest naturally occurring element. So hard it was used in fountain pen tips.'],
+  [77,9,6,'Ir','Iridium','transition','192.22',1803,'Tennant','The iridium-enriched K-Pg boundary layer is evidence of the asteroid that killed the dinosaurs.'],
+  [78,10,6,'Pt','Platinum','transition','195.08',1735,'Ulloa','Catalytic converters use platinum to reduce car exhaust pollution. Chemically very stable.'],
+  [79,11,6,'Au','Gold','transition','196.97','Ancient','—','Only yellow metal. Doesn\'t tarnish. All gold ever mined would fill ~3.5 Olympic pools.'],
+  [80,12,6,'Hg','Mercury','transition','200.59','Ancient','—','Only metal liquid at room temperature. Highly toxic — damages the nervous system.'],
+  [81,13,6,'Tl','Thallium','post-trans','204.38',1861,'Crookes','Highly toxic — used as rat poison and in infrared detectors. Rare and dangerous.'],
+  [82,14,6,'Pb','Lead','post-trans','207.2','Ancient','—','Romans used lead pipes — "plumbing" comes from Latin "plumbum." Still used in car batteries.'],
+  [83,15,6,'Bi','Bismuth','post-trans','208.98',1753,'Geoffroy','The most diamagnetic metal. Bismuth crystals form spectacular rainbow-colored hopper shapes.'],
+  [84,16,6,'Po','Polonium','metalloid','209',1898,'Curie','Discovered by Marie Curie, named after her homeland Poland. Extremely radioactive and toxic.'],
+  [85,17,6,'At','Astatine','halogen','210',1940,'Corson','Rarest naturally occurring element — at any time only ~25 grams exist on Earth.'],
+  [86,18,6,'Rn','Radon','noble','222',1900,'Dorn','Radioactive gas produced by uranium decay. Seeps into buildings from soil — a lung cancer risk.'],
+  [87,1,7,'Fr','Francium','alkali','223',1939,'Perey','The second-rarest natural element. So unstable only a few atoms exist at any moment.'],
+  [88,2,7,'Ra','Radium','alkaline','226',1898,'Curie','Discovered by Marie Curie. Once painted on watch dials to glow in the dark, causing cancer.'],
+  [92,6,7,'U','Uranium','actinide','238.03',1789,'Klaproth','Heaviest naturally occurring element. One fuel pellet contains energy equal to 17,000 cu ft of gas.'],
+  [94,8,7,'Pu','Plutonium','actinide','244',1940,'Seaborg','Mostly synthetic. Pu-238 powers the Voyager spacecraft heat source, still going after 47 years.'],
+  // Lanthanides row (row 9 visual)
+  [57,3,9,'La','Lanthanum','lanthanide','138.91',1839,'Mosander','Used in camera lenses and carbon arc lamps for movie projectors.'],
+  [58,4,9,'Ce','Cerium','lanthanide','140.12',1803,'Berzelius','Most abundant rare earth. The flint in lighters is an alloy of cerium called "misch metal."'],
+  [59,5,9,'Pr','Praseodymium','lanthanide','140.91',1885,'von Welsbach','Its green compounds are used to color glasses and ceramics. Name means "green twin."'],
+  [60,6,9,'Nd','Neodymium','lanthanide','144.24',1885,'von Welsbach','Neodymium magnets are the strongest permanent magnets — used in headphones and hard drives.'],
+  [62,8,9,'Sm','Samarium','lanthanide','150.36',1879,'Lecoq','SmCo magnets work at high temperatures where neodymium fails. Used in guitar pickups.'],
+  [63,9,9,'Eu','Europium','lanthanide','151.96',1901,'Demarçay','Fluoresces red and blue — used in euro banknotes as anti-counterfeiting ink.'],
+  [64,10,9,'Gd','Gadolinium','lanthanide','157.25',1880,'Marignac','Used as contrast agent in MRI scans. Has highest neutron absorption of any element.'],
+  [65,11,9,'Tb','Terbium','lanthanide','158.93',1843,'Mosander','Produces green light in fluorescent lamps and TV screens. Named after Ytterby, Sweden.'],
+  [66,12,9,'Dy','Dysprosium','lanthanide','162.50',1886,'Lecoq','Name means "hard to get." Added to neodymium magnets to make them work at higher temperatures.'],
+  [67,13,9,'Ho','Holmium','lanthanide','164.93',1867,'Cleve','Has highest magnetic moment of any element. Named after Stockholm (Holmia).'],
+  [68,14,9,'Er','Erbium','lanthanide','167.26',1843,'Mosander','Used in fiber optic amplifiers — critical for the internet backbone. Tints glass pink.'],
+  [69,15,9,'Tm','Thulium','lanthanide','168.93',1879,'Cleve','Rarest stable lanthanide. Tm-170 is used in portable X-ray devices.'],
+  [70,16,9,'Yb','Ytterbium','lanthanide','173.05',1878,'Marignac','The most precise atomic clocks use ytterbium — they\'d lose 1 second in 10 billion years.'],
+  [71,17,9,'Lu','Lutetium','lanthanide','174.97',1907,'Urbain','Used in PET scan detectors. Most expensive rare earth — named after Lutetia (ancient Paris).'],
+  // Actinides row (row 10 visual)
+  [89,3,10,'Ac','Actinium','actinide','227',1899,'Debierne','Glows blue in the dark due to radioactivity. Named after Greek "aktinos" meaning ray.'],
+  [90,4,10,'Th','Thorium','actinide','232.04',1829,'Berzelius','Potentially a safer nuclear fuel than uranium — produces less long-lived radioactive waste.'],
+  [91,5,10,'Pa','Protactinium','actinide','231.04',1913,'Fajans','One of the rarest and most expensive naturally occurring elements. Highly toxic and radioactive.'],
+  [93,7,10,'Np','Neptunium','actinide','237',1940,'McMillan','First transuranium element ever synthesized. Named after Neptune, next planet after Uranus.'],
+  [95,9,10,'Am','Americium','actinide','243',1944,'Seaborg','Found in household smoke detectors — its radioactive decay ionizes air to detect smoke.'],
+];
+
+const PT_CAT_COLORS = {
+  'nonmetal':'#1a3a20','noble':'#1a1a38','alkali':'#3a1a1a','alkaline':'#2a1e0e','metalloid':'#1e2810',
+  'halogen':'#1a2e2a','transition':'#0e1e2e','post-trans':'#1a1a1a','lanthanide':'#1a0e2e','actinide':'#2e1a0e',
+};
+const PT_CAT_TEXT = {
+  'nonmetal':'#2a7040','noble':'#3a3aaa','alkali':'#aa3a3a','alkaline':'#8a6020','metalloid':'#6a7820',
+  'halogen':'#2a8080','transition':'#2a5090','post-trans':'#6a6a6a','lanthanide':'#8a3aaa','actinide':'#aa5020',
+};
+
+let ptMode = 'symbol';
+let ptCorrect=0, ptWrong=0, ptStreak=0;
+let ptCurrent = null;
+let ptAnswered = false;
+let ptQueue = [];
+let ptFactTimeout = null;
+
+function ptBuildTable() {
+  const tbl = document.getElementById('pt-table');
+  if (!tbl) return;
+  // Build a 18-col x 10-row grid (rows 8,9 = lanthanides/actinides with gap)
+  const cells = {};
+  PT_DATA.forEach(e => { cells[e[1]+','+e[2]] = e; });
+  
+  let html = '';
+  for (let row=1; row<=10; row++) {
+    // Add visual gap between row 7 and row 9 (lanthanides)
+    for (let col=1; col<=18; col++) {
+      const key = col+','+row;
+      const e = cells[key];
+      if (row===8) { html += `<div class="pt-cell empty"></div>`; continue; }
+      if (!e) { html += `<div class="pt-cell empty" data-col="${col}" data-row="${row}"></div>`; continue; }
+      const bg = PT_CAT_COLORS[e[5]] || '#0c1410';
+      const tc = PT_CAT_TEXT[e[5]] || '#3a6050';
+      html += `<div class="pt-cell" id="ptcell-${e[0]}" data-sym="${e[3]}" data-name="${e[4]}" data-num="${e[0]}" style="background:${bg}" title="${e[4]}">
+        <span class="pt-c-num">${e[0]}</span>
+        <span class="pt-c-sym" style="color:${tc}">${e[3]}</span>
+        <span class="pt-c-name">${e[4].length>9?e[4].substring(0,8)+'…':e[4]}</span>
+      </div>`;
+    }
+  }
+  tbl.innerHTML = html;
+}
+
+function ptBuildQueue() {
+  ptQueue = [...PT_DATA].sort(() => Math.random()-0.5);
+}
+
+function ptGetPrompt(e) {
+  if (ptMode==='symbol') return { label:'What is the symbol for…', main:e[4], sub:'Atomic #'+e[0], answer:e[3].toLowerCase() };
+  if (ptMode==='name')   return { label:'What element has this symbol?', main:e[3], sub:'Atomic #'+e[0]+' · '+e[6], answer:e[4].toLowerCase() };
+  return { label:'What is the atomic number of…', main:e[4], sub:'Symbol: '+e[3], answer:String(e[0]) };
+}
+
+function ptNext() {
+  ptAnswered = false;
+  if (ptQueue.length===0) ptBuildQueue();
+  ptCurrent = ptQueue.pop();
+  
+  // Highlight cell
+  document.querySelectorAll('.pt-cell.active').forEach(c=>c.classList.remove('active'));
+  const cell = document.getElementById('ptcell-'+ptCurrent[0]);
+  if (cell) {
+    cell.classList.add('active');
+    cell.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
+  }
+  
+  // Update hint
+  const p = ptGetPrompt(ptCurrent);
+  const hint = document.getElementById('pt-hint-text');
+  if (hint) hint.innerHTML = `<span style="color:#3a6050;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px">${p.label}</span>&nbsp;&nbsp;<b style="color:#e8f0ed;font-size:15px;font-weight:800">${p.main}</b>&nbsp;&nbsp;<span style="color:#3a6050">${p.sub}</span>`;
+  
+  // Clear input
+  const inp = document.getElementById('pt-answer-input');
+  if (inp) { inp.value=''; inp.className=''; inp.focus(); }
+  
+  // Hide fact popup
+  ptHideFactPopup();
+}
+
+function ptCheckKey(e) {
+  if (e.key==='Enter') ptSubmit();
+}
+
+function ptSubmit() {
+  if (ptAnswered || !ptCurrent) return;
+  const inp = document.getElementById('pt-answer-input');
+  if (!inp) return;
+  const val = inp.value.trim().toLowerCase();
+  if (!val) return;
+  const p = ptGetPrompt(ptCurrent);
+  if (val===p.answer) {
+    ptAnswered=true;
+    ptCorrect++;
+    ptStreak++;
+    ptFlashCell(ptCurrent[0], 'correct');
+    ptUpdateScore();
+    ptShowFactPopup(ptCurrent, true);
+    setTimeout(()=>ptNext(), 2200);
+  } else {
+    // Wrong
+    ptWrong++;
+    ptStreak=0;
+    ptUpdateScore();
+    if (inp) { inp.classList.add('shake'); setTimeout(()=>inp.classList.remove('shake'),350); inp.value=''; }
+    ptFlashCell(ptCurrent[0], 'wrong');
+  }
+}
+
+function ptSkip() {
+  if (!ptCurrent) return;
+  ptWrong++;
+  ptStreak=0;
+  ptUpdateScore();
+  ptFlashCell(ptCurrent[0], 'wrong');
+  ptShowFactPopup(ptCurrent, false);
+  ptAnswered=true;
+  setTimeout(()=>ptNext(), 2200);
+}
+
+function ptFlashCell(num, type) {
+  const cell = document.getElementById('ptcell-'+num);
+  if (!cell) return;
+  cell.classList.remove('active');
+  cell.classList.add(type+'-flash');
+  setTimeout(()=>{ cell.classList.remove(type+'-flash'); cell.classList.add('answered'); }, 600);
+}
+
+function ptShowFactPopup(e, correct) {
+  const popup = document.getElementById('pt-fact-popup');
+  if (!popup) return;
+  const icon = correct ? '✅' : '❌';
+  const correctAns = ptMode==='symbol'?e[3]:ptMode==='name'?e[4]:String(e[0]);
+  popup.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <div style="width:42px;height:42px;border-radius:8px;background:#0a1c14;border:1.5px solid #1f3a28;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+      <div style="font-size:8px;color:#3a6050">${e[0]}</div>
+      <div style="font-size:18px;font-weight:900;color:#00d18c;font-family:monospace;line-height:1">${e[3]}</div>
+      <div style="font-size:7px;color:#3a6050">${e[6]}</div>
+    </div>
+    <div>
+      <div style="font-size:13px;font-weight:800;color:#e8f0ed">${icon} ${e[4]}</div>
+      <div style="font-size:11px;color:#3a8060;font-weight:600">${e[5].charAt(0).toUpperCase()+e[5].slice(1)}</div>
+      <div style="font-size:10px;color:#3a6050">${typeof e[7]==='number'?'Discovered '+e[7]+' · '+e[8]:'Known since antiquity'}</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:#5a7a6a;line-height:1.5;border-top:1px solid #1a3022;padding-top:7px">${e[9]}</div>`;
+  popup.style.display='block';
+  if (ptFactTimeout) clearTimeout(ptFactTimeout);
+  ptFactTimeout = setTimeout(ptHideFactPopup, 2000);
+}
+
+function ptHideFactPopup() {
+  const popup = document.getElementById('pt-fact-popup');
+  if (popup) popup.style.display='none';
+}
+
+function ptSetMode(m) {
+  ptMode=m;
+  ['symbol','name','number'].forEach(k=>{
+    const b=document.getElementById('ptm-'+k);
+    if(b) b.classList.toggle('active', k===m);
+  });
+  ptNext();
+}
+
+function ptUpdateScore() {
+  document.getElementById('pts-correct').textContent=ptCorrect;
+  document.getElementById('pts-wrong').textContent=ptWrong;
+  document.getElementById('pts-streak').textContent=ptStreak;
+  const total=ptCorrect+ptWrong;
+  document.getElementById('pts-pct').textContent=total?Math.round(ptCorrect/total*100)+'%':'--%';
+}
+
+function ptInit() {
+  ptCorrect=0; ptWrong=0; ptStreak=0;
+  ptUpdateScore();
+  ptBuildTable();
+  ptBuildQueue();
+  ptNext();
+}
+
 </script>
 
 <!-- Daily Goal Edit Modal -->
@@ -13193,5 +13535,40 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
   </div>
 </div>
+
+    <!-- ══ PERIODIC TABLE QUIZ ══ -->
+    <div id="page-bg-periodic" class="page" style="flex-direction:column;background:#090e0c">
+      <div class="pt-topbar">
+        <button class="btn btn-ghost" onclick="setPage('braingames')" style="flex-shrink:0;font-size:12px;padding:5px 10px">← Back</button>
+        <span style="font-size:13px;font-weight:800;color:#e8f0ed">⚗️ Periodic Table Quiz</span>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          <button class="pt-mode-pill active" id="ptm-symbol" onclick="ptSetMode('symbol')">Name</button>
+          <button class="pt-mode-pill" id="ptm-name"   onclick="ptSetMode('name')">Symbol</button>
+          <button class="pt-mode-pill" id="ptm-number" onclick="ptSetMode('number')">Number</button>
+        </div>
+      </div>
+
+      <div class="pt-scorebar">
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-correct" style="color:#00d18c">0</div><div class="pt-sl">Correct</div></div>
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-wrong" style="color:#f87171">0</div><div class="pt-sl">Wrong</div></div>
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-streak" style="color:#fbbf24">0</div><div class="pt-sl">Streak</div></div>
+        <div class="pt-scorebar-item"><div class="pt-sv" id="pts-pct" style="color:#c0d8cc">--%</div><div class="pt-sl">Accuracy</div></div>
+      </div>
+
+      <div class="pt-table-wrap">
+        <div class="pt-table" id="pt-table"></div>
+      </div>
+
+      <div class="pt-hint-bubble" id="pt-hint" style="margin:0 12px 0;flex:0 0 auto;display:flex">
+        <span id="pt-hint-text" style="flex:1">Loading…</span>
+      </div>
+
+      <div class="pt-input-row" style="position:relative">
+        <div id="pt-fact-popup" class="pt-fact-popup" style="display:none"></div>
+        <input id="pt-answer-input" type="text" placeholder="Type your answer and press Enter…" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="ptCheckKey(event)" />
+        <button onclick="ptSkip()" style="background:#111a15;border:1px solid #1f3028;color:#3a6050;border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap">Skip</button>
+      </div>
+    </div>
+
 </body>
 </html>
